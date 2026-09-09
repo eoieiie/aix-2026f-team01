@@ -1,5 +1,7 @@
 # AI 협업 기록 / AI Collaboration Log
 
+간단하게 로그와 이슈를 관리
+
 작성 원칙: 프롬프트 나열이 아니라 **판단 근거**를 남긴다.
 Principle: record your **reasoning**, not just prompts.
 
