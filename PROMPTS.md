@@ -1,28 +1,23 @@
-# AI 협업 기록 / AI Collaboration Log
+## 2026-09-09 · 메모 검색 기능 (2주차 활동)
 
-간단하게 로그와 이슈를 관리
+**무엇을 시켰나**
+"메모 검색 기능을 추가하라. 제목과 본문에서 키워드로 찾을 수 있어야 한다."
+같은 지시를 두 조가 서로 다른 입력으로 넣었다. 원문은 docs/week-02.md에 있다.
 
-작성 원칙: 프롬프트 나열이 아니라 **판단 근거**를 남긴다.
-Principle: record your **reasoning**, not just prompts.
+**무엇을 줬나**
+- A조 — 지시 한 줄만. 파일은 주지 않았다.
+- B조 — 지시 + CONVENTIONS.md 전문 + schema.sql, service.js, routes.js 전문 + 종료조건 4개.
 
----
+**결과 판단**
+- 폐기 — A조 결과. 파이썬으로 나왔고 DB 대신 배열에 하드코딩했다. 컬럼명을 content로
+  지어냈고(실제는 body) user_id 조건이 없다. 부분 수정이 아니라 재작성이 필요해 폐기했다.
+- 채택 — B조 결과. 실제 컬럼명(body, user_id)을 쓰고 계층 분리와 응답 형식을 지켰으며
+  빈 검색어에 400을 반환한다. 수정 없이 채택했다.
 
-## [이슈 #__] 제목 / Title
+**어떻게 확인했나**
+코드를 읽어 확인했다. schema.sql과 컬럼명 대조, CONVENTIONS.md 5개 항목
+대조, 생성된 SQL에 user_id 조건이 있는지 확인.
 
-**목표(스펙) / Spec**
-- 입력 Input:
-- 처리 Processing:
-- 출력 Output:
-- 실패 조건 Failure:
-
-**요청한 프롬프트 요지 / Prompt (summary)**
-
-**결과에 대한 판단 / Decisions**
-- 채택한 부분과 이유 / Accepted, because:
-- 수정한 부분과 이유 / Changed, because:
-- 폐기한 부분과 이유 / Rejected, because:
-
-**검증 방법 / How it was verified**
-
----
-(이슈 단위로 반복 / repeat per issue)
+**남긴 판단**
+컨텍스트를 주지 않으면 모델은 빈칸을 가정으로 채운다. 같은 모델이 A조에서는 지어낸 것이
+3개, B조에서는 0개였다. 결과를 가른 것은 모델이 아니라 입력이었다.
