@@ -7,7 +7,8 @@
 | AI에게 일을 시킬 때 | `team/AGENTS.md` 전체를 새 대화 맨 앞에 붙여넣는다 |
 | 무엇을 만드는지 볼 때 | `docs/spec.md` (제품 명세) |
 | 지금까지 정한 것을 볼 때 | `docs/decisions.md` (중요도 상·중만) |
-| AI 결과를 쓰거나 버렸을 때 | `PROMPTS.md`에 기록 |
+| AI와 한 흐름이 끝났을 때 (결정, 폐기, 배운 것) | AI에게 "기록해" → `PROMPTS.md` 표에 한 줄 + PR (`team/AGENTS.md` 8절) |
+| 내 담당과 완료 조건 | `docs/spec.md` 10절 (회의 뒤엔 이슈) |
 | 작업을 시작하고 올릴 때 | `team/WORKFLOW.md` (이슈 → 브랜치 → 커밋 → PR) |
 | PR을 열 때 | 자동으로 뜨는 템플릿의 체크박스를 채운다 |
 
