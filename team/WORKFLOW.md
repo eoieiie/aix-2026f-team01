@@ -99,6 +99,7 @@ git switch main && git pull
 | 팀원 정보 | `docs/members.md` |
 | 협업 방식 · AI 공통 컨텍스트 | `team/` |
 | AI 판단 기록 | `PROMPTS.md` (저장소 루트) |
+| 팀 결정 기록 | `docs/decisions.md` (줄 추가만) |
 | 팀 단위 윤리 판단 | `ETHICS.md` (저장소 루트) |
 
 외부 문서 도구(Notion 등)를 쓰지 않는다. 도구를 늘리면 우리가 한 일의 증거가 흩어진다.
