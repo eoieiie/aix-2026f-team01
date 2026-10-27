@@ -1,1 +1,37 @@
 .DS_Store
+
+# dependencies
+node_modules/
+
+# Expo
+.expo/
+dist/
+web-build/
+expo-env.d.ts
+
+# 환경변수: 키가 들어 있으므로 커밋하지 않는다. 이름은 .env.example에만 둔다
+.env
+.env*.local
+
+# Native
+.kotlin/
+*.orig.*
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+*.pem
+
+# Metro
+.metro-health-check*
+
+# debug
+npm-debug.*
+
+# typescript
+*.tsbuildinfo
+
+# generated native folders
+/ios
+/android
