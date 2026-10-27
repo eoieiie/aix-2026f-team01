@@ -1,0 +1,48 @@
+# main에 합쳐지면 웹 주소를 갱신한다 (spec.md 10절 A, 8절 배포는 EAS Hosting)
+# 저장소에 필요한 것 (관리자가 Settings > Secrets and variables > Actions 에서 한 번 넣는다)
+#   변수 SUPABASE_URL, SUPABASE_ANON_KEY, WEB_BASE
+#   비밀 EXPO_TOKEN (EAS 계정의 액세스 토큰)
+name: Deploy web
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-web
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    env:
+      EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+      EXPO_PUBLIC_SUPABASE_URL: ${{ vars.SUPABASE_URL }}
+      EXPO_PUBLIC_SUPABASE_ANON_KEY: ${{ vars.SUPABASE_ANON_KEY }}
+      EXPO_PUBLIC_WEB_BASE: ${{ vars.WEB_BASE }}
+    steps:
+      - name: 배포 준비 확인
+        id: ready
+        run: |
+          if [ -z "$EXPO_TOKEN" ]; then
+            echo "::warning::EXPO_TOKEN 비밀이 없어 배포를 건너뛴다"
+            echo "ok=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "ok=true" >> "$GITHUB_OUTPUT"
+          fi
+      - uses: actions/checkout@v4
+        if: steps.ready.outputs.ok == 'true'
+      - uses: actions/setup-node@v4
+        if: steps.ready.outputs.ok == 'true'
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - if: steps.ready.outputs.ok == 'true'
+        run: npm ci
+      - name: 웹 빌드
+        if: steps.ready.outputs.ok == 'true'
+        run: npm run build:web
+      - name: EAS Hosting에 배포
+        if: steps.ready.outputs.ok == 'true'
+        run: npx eas-cli@latest deploy --prod --non-interactive
