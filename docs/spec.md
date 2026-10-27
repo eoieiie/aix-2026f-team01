@@ -291,10 +291,15 @@
 - `EXPO_PUBLIC_SUPABASE_ANON_KEY` (publishable 키. 서비스 키는 앱에 절대 넣지 않는다)
 - `EXPO_PUBLIC_WEB_BASE` (초대 링크용 웹 주소)
 
-GitHub Actions 저장소 변수: `SUPABASE_URL`, `SUPABASE_ANON_KEY`
+GitHub Actions 저장소 변수: `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `WEB_BASE`. 비밀: `EXPO_TOKEN` (Expo 조직의 robot 토큰)
+
+계정과 소유:
+- Supabase와 Expo는 개인 계정이 아니라 각각 조직(Organization) 안에 프로젝트를 둔다. 세팅은 Aninnom, eoieiie도 두 조직의 Owner다
+- GitHub 시크릿과 변수는 저장소 관리자(eoieiie)가 넣는다. 토큰은 채팅으로 주고받지 않고, 만든 사람이 바로 저장소에 넣는다
+- Apple Developer 계정은 eoieiie 것을 3단계에서 Expo 조직에 연결한다
 
 Supabase 준비:
-1. 프로젝트 생성 (서울 리전)
+1. Supabase 조직 안에 프로젝트 생성 (서울 리전)
 2. `supabase/migrations/`를 번호 순서대로 SQL Editor에서 실행, 그다음 `supabase/seed/`
 3. Authentication에서 Anonymous sign-ins 켜기 (안 켜면 첫 화면에서 멈춘다)
 4. Realtime 켜져 있는지 확인
@@ -311,7 +316,7 @@ CI:
 - PR마다: 타입 검사, 린트, 테스트, 웹 번들 빌드
 - 매일 09:00(KST): Supabase에 요청 한 번 (무료 요금제가 1주일 안 쓰면 멈춤)
 
-배포 (3단계): EAS 프로젝트, iOS 번들 ID, App Store Connect 앱은 황병주의 Apple Developer·Expo 계정에 둔다.
+배포: 1단계부터 웹은 EAS Hosting으로 배포한다. iOS 빌드, TestFlight, App Store 제출(3단계)은 Expo 조직의 EAS 프로젝트에 eoieiie의 Apple Developer 계정을 연결해서 한다.
 
 ---
 
@@ -332,7 +337,7 @@ CI:
 | 묶음 | 담당 | 명세 | 선행 | 목표 |
 |---|---|---|---|---|
 | A. 뼈대, 공통 환경, 익명 로그인 | Aninnom | 2, 3, 4-1, 8 | 없음 | 9주차 (11/1까지) |
-| B. 데이터베이스와 서버 규칙 | Aninnom (Supabase 준비는 eoieiie) | 5, 6 | 없음 | 9주차 (11/1까지) |
+| B. 데이터베이스와 서버 규칙 | Aninnom | 5, 6 | 없음 | 9주차 (11/1까지) |
 | C. 홈, 모임 만들기, 모임 화면 | GONI1130 | 4-2, 4-3, 4-4, 4-6 | 화면은 A, 연결은 B | 10주차 (11/8까지) |
 | D. 초대 링크 참여, 못 먹는 것 | Ruty041 | 4-5, 4-7 | C | 10주차 (11/8까지) |
 | E. 세션, 후보, 투표 | Aninnom | 4-8, 4-9, 4-10, 4-11 | C | 10주차 (11/8까지) |
@@ -348,7 +353,7 @@ CI:
 
 ### A. 뼈대, 공통 환경, 익명 로그인 (Aninnom)
 만드는 것: 네 명이 같은 앱을 같은 방법으로 열 수 있는 바탕. 폴더 구조, 설정, 자동 검사, 웹 배포, 그리고 앱을 열면 가입 없이 로그인되는 것.
-시작 전에 필요한 것: Supabase 주소와 공개 키 (eoieiie가 디스코드 DM으로 전달. 저장소에 올리지 않는다).
+시작 전에 필요한 것: Expo 조직을 만들고 eoieiie를 Owner로 초대한다. `eas init`은 A 브랜치에서 직접 한다. `EXPO_TOKEN`과 GitHub 변수는 eoieiie가 넣는다 (8절).
 - [ ] 각자 노트북에서 `npm install`, `cp .env.example .env`, `npx expo start --web` 세 줄로 같은 홈 화면이 뜬다. Node 버전은 `.nvmrc`로 고정한다
 - [ ] `main`에 합쳐지면 웹 주소가 갱신되고, 누구나 설치 없이 그 링크로 앱을 연다
 - [ ] 처음 열면 가입 화면 없이 익명 계정이 생긴다. 확인 중에는 로딩, 실패하면 "연결할 수 없어요"와 다시 시도 버튼 (4-1)
@@ -360,7 +365,7 @@ CI:
 
 ### B. 데이터베이스와 서버 규칙 (Aninnom)
 만드는 것: 데이터를 저장하는 표, 누가 무엇을 볼 수 있는지 정하는 권한, 거부권·투표·룰렛 규칙을 실행하는 서버 함수.
-시작 전에 필요한 것: eoieiie가 새 Supabase 프로젝트(서울 리전)를 만들고 익명 로그인을 켠 뒤, Aninnom을 Supabase 조직 멤버로 초대한다.
+시작 전에 필요한 것: Supabase 조직과 프로젝트(서울 리전)를 만들고 익명 로그인을 켠 뒤, eoieiie를 Owner로 초대한다. 주소와 공개 키는 팀원에게 DM으로 전달하고 저장소에 올리지 않는다.
 - [ ] 5절의 표와 권한이 `supabase/migrations/`에 번호 순서대로 있고, 새 프로젝트에 순서대로 실행하면 오류 없이 끝난다. 기본 음식 40개가 들어간다
 - [ ] 상태를 바꾸는 일(참여, 후보, 투표, 룰렛, 못 먹는 것 저장)은 5절 서버 함수로만 된다. 테이블에 직접 쓰면 거절된다
 - [ ] 다른 사람의 표를 조회하면 0행이 나온다
