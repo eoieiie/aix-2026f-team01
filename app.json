@@ -2,6 +2,7 @@
   "expo": {
     "name": "밥비티아이",
     "slug": "babti",
+    "owner": "babti",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
@@ -36,6 +37,12 @@
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "e112570e-916d-4ee5-8ca5-a27121d1f25b"
+      }
     }
   }
 }
