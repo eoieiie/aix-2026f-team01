@@ -16,9 +16,16 @@ Closes #
 
 1.
 
+## 기록
+
+<!-- PROMPTS.md, docs/decisions.md는 고치지 않는다. 여기 적은 줄을 매주 활동지 PR에서 옮긴다 (team/AGENTS.md 8절) -->
+
+PROMPTS:
+
+decisions (팀 결정일 때만):
+
 ## 확인
 
 - [ ] 이슈의 완료 조건을 모두 충족했다
-- [ ] 정해진 결정(중요도 상·중)이 있으면 `docs/decisions.md`에 한 줄 넣었다
-- [ ] AI 결과를 썼으면 `PROMPTS.md`에 기록했다
+- [ ] AI를 썼으면 위 기록 칸에 PROMPTS 한 줄, 팀 결정이면 decisions 한 줄을 적었다
 - [ ] 개인정보, 키, `.env`가 들어 있지 않다
