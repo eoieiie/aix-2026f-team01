@@ -314,7 +314,7 @@ npx expo start
 
 CI:
 - PR마다: 타입 검사, 린트, 테스트, 웹 번들 빌드
-- PR마다: 웹 미리보기 배포. PR 댓글에 `https://babti--pr-<PR번호>.expo.app`이 달리고, 커밋을 올리면 같은 주소가 갱신된다. 초대 링크도 그 주소를 쓴다. main 주소는 바뀌지 않는다 (이슈 #11)
+- PR마다: 웹 미리보기 배포. PR 댓글에 미리보기 주소가 달리고, 커밋을 올리면 그 댓글이 새 주소로 바뀐다. 초대 링크는 main 주소를 쓴다. main 주소는 바뀌지 않는다 (이슈 #11, #23)
 - 매일 09:00(KST): Supabase에 요청 한 번 (무료 요금제가 1주일 안 쓰면 멈춤)
 
 배포: 1단계부터 웹은 EAS Hosting으로 배포한다. iOS 빌드, TestFlight, App Store 제출(3단계)은 Expo 조직의 EAS 프로젝트에 eoieiie의 Apple Developer 계정을 연결해서 한다.
