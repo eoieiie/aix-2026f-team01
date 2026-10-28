@@ -30,6 +30,7 @@
     "eslint-config-expo": "~57.0.2",
     "jest": "~29.7.0",
     "jest-expo": "~57.0.6",
+    "supabase": "^2.122.0",
     "tailwindcss": "^3.4.17",
     "typescript": "~6.0.3"
   },
@@ -41,6 +42,7 @@
     "typecheck": "tsc --noEmit",
     "lint": "expo lint",
     "test": "jest",
+    "test:db": "supabase test db",
     "build:web": "expo export --platform web"
   },
   "private": true,

@@ -24,3 +24,18 @@ jobs:
         run: npm test -- --ci
       - name: 웹 빌드
         run: npm run build:web
+
+  # 서버 규칙 테스트 (spec.md 6절). 빈 로컬 DB에 migration과 seed를 순서대로 넣고 pgTAP을 돌린다
+  db:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - name: 로컬 Supabase 시작
+        run: npx supabase start -x studio,imgproxy,storage-api,edge-runtime,logflare,vector,supavisor,mailpit,postgres-meta
+      - name: 서버 규칙 테스트
+        run: npm run test:db
