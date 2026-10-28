@@ -95,7 +95,7 @@ begin
     return v_name;
   end if;
 
-  v_name := public.clean_name(p_display_name, 20);
+  v_name := public.clean_name(p_display_name, public.app_limit('DISPLAY_NAME_MAX'));
   insert into public.profiles (user_id, display_name)
   values (p_uid, v_name)
   on conflict (user_id) do nothing;
@@ -173,7 +173,7 @@ language plpgsql security definer set search_path = ''
 as $$
 declare
   v_uid uuid := public.require_uid();
-  v_name text := public.clean_name(p_name, 40);
+  v_name text := public.clean_name(p_name, public.app_limit('GROUP_NAME_MAX'));
   v_display_name text := public.resolve_display_name(v_uid, p_display_name);
   v_alphabet text := 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
   v_code text;
@@ -182,7 +182,7 @@ begin
   loop
     select string_agg(substr(v_alphabet, 1 + floor(random() * 32)::int, 1), '')
       into v_code
-      from generate_series(1, 6);
+      from generate_series(1, public.app_limit('INVITE_CODE_LENGTH'));
     begin
       insert into public.groups (name, invite_code, created_by)
       values (v_name, v_code, v_uid)
@@ -354,7 +354,7 @@ begin
   if v_session.status <> 'open' then
     raise exception 'voting_started';
   end if;
-  if char_length(v_pitch) > 60 then
+  if char_length(v_pitch) > public.app_limit('PITCH_MAX') then
     raise exception 'pitch_too_long';
   end if;
   update public.candidates set pitch = v_pitch
@@ -440,7 +440,8 @@ begin
   if found then
     v_now_voted := false;
   else
-    if (select count(*) from public.votes where session_id = p_session_id and user_id = v_uid) >= 2 then
+    if (select count(*) from public.votes where session_id = p_session_id and user_id = v_uid)
+        >= public.app_limit('MAX_VOTES_PER_PERSON') then
       raise exception 'vote_limit';
     end if;
     insert into public.votes (session_id, user_id, food_id) values (p_session_id, v_uid, p_food_id);
@@ -568,11 +569,18 @@ begin
     raise exception 'invalid_items';
   end if;
 
-  delete from public.restrictions where user_id = v_uid;
+  -- 하나라도 잘못되면 지운 것까지 되돌려 예전 값을 그대로 둔다
+  begin
+    delete from public.restrictions where user_id = v_uid;
 
-  insert into public.restrictions (user_id, tag, food_id, kind)
-  select v_uid, item ->> 'tag', (item ->> 'food_id')::bigint, item ->> 'kind'
-  from jsonb_array_elements(coalesce(p_items, '[]'::jsonb)) as item;
+    insert into public.restrictions (user_id, tag, food_id, kind)
+    select v_uid, item ->> 'tag', (item ->> 'food_id')::bigint, item ->> 'kind'
+    from jsonb_array_elements(coalesce(p_items, '[]'::jsonb)) as item;
+  exception
+    when check_violation or unique_violation or foreign_key_violation
+      or not_null_violation or invalid_text_representation or numeric_value_out_of_range then
+      raise exception 'invalid_items';
+  end;
 
   for v_session_id in
     select s.id from public.sessions s
@@ -591,6 +599,8 @@ $$;
 revoke execute on all functions in schema public from public, anon, authenticated;
 
 grant execute on function
+  public.app_limits(),
+  public.app_limit(text),
   public.is_group_member(uuid),
   public.is_session_member(uuid),
   public.create_group(text, text),

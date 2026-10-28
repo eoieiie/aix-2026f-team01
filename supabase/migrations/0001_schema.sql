@@ -1,4 +1,16 @@
--- 명세 5절 데이터 모델. 숫자 제한은 src/constants/index.ts와 같다.
+-- 명세 5절 데이터 모델.
+
+-- 규칙 숫자. src/constants/index.ts와 같아야 한다 (3절 4번).
+-- src/constants/server-limits.test.ts가 아래 JSON을 읽어 앱 상수와 비교한다
+create function public.app_limits() returns jsonb
+language sql immutable set search_path = ''
+as $$
+  select '{"GROUP_NAME_MAX": 40, "DISPLAY_NAME_MAX": 20, "INVITE_CODE_LENGTH": 6, "PITCH_MAX": 60, "MAX_VOTES_PER_PERSON": 2}'::jsonb
+$$;
+
+create function public.app_limit(p_key text) returns int
+language sql immutable set search_path = ''
+as $$ select (public.app_limits() ->> p_key)::int $$;
 
 -- 태그 이름. 재료 8개와 식단 3개(4-7), 음식에 붙는 식단 짝 표시(4-9)
 create function public.ingredient_tags() returns text[]
@@ -16,7 +28,8 @@ as $$ select array['halal_ok','veg_ok','vegan_ok'] $$;
 -- 사람 하나당 하나 (3절 3번)
 create table public.profiles (
   user_id uuid primary key references auth.users (id) on delete cascade,
-  display_name text not null check (char_length(display_name) between 1 and 20),
+  display_name text not null
+    check (char_length(display_name) between 1 and public.app_limit('DISPLAY_NAME_MAX')),
   handle text unique check (char_length(handle) between 3 and 16),
   quiz_answers jsonb,
   axes jsonb,
@@ -46,9 +59,10 @@ create table public.restrictions (
 
 create table public.groups (
   id uuid primary key default gen_random_uuid(),
-  name text not null check (char_length(name) between 1 and 40),
+  name text not null check (char_length(name) between 1 and public.app_limit('GROUP_NAME_MAX')),
   -- 영어 대문자와 숫자, 0 O 1 I 제외
-  invite_code text not null unique check (invite_code ~ '^[A-HJ-NP-Z2-9]{6}$'),
+  invite_code text not null unique
+    check (invite_code ~ '^[A-HJ-NP-Z2-9]+$' and char_length(invite_code) = public.app_limit('INVITE_CODE_LENGTH')),
   created_by uuid not null references auth.users (id) on delete cascade,
   created_at timestamptz not null default now()
 );
@@ -56,7 +70,8 @@ create table public.groups (
 create table public.memberships (
   group_id uuid not null references public.groups (id) on delete cascade,
   user_id uuid not null references auth.users (id) on delete cascade,
-  display_name text not null check (char_length(display_name) between 1 and 20),
+  display_name text not null
+    check (char_length(display_name) between 1 and public.app_limit('DISPLAY_NAME_MAX')),
   joined_at timestamptz not null default now(),
   primary key (group_id, user_id),
   unique (group_id, display_name)
@@ -91,7 +106,7 @@ create table public.candidates (
   session_id uuid not null references public.sessions (id) on delete cascade,
   food_id bigint not null references public.foods (id),
   proposed_by uuid not null references auth.users (id) on delete cascade,
-  pitch text check (char_length(pitch) <= 60),
+  pitch text check (char_length(pitch) <= public.app_limit('PITCH_MAX')),
   vetoed boolean not null default false,
   created_at timestamptz not null default now(),
   primary key (session_id, food_id)
