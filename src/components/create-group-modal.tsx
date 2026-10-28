@@ -73,9 +73,8 @@ export function CreateGroupModal({ visible, onClose }: CreateGroupModalProps) {
                 모임 이름 ({trimmedGroupName.length}/{GROUP_NAME_MAX})
               </Text>
               <TextInput
-                className="h-12 rounded-xl bg-surface px-4 text-base text-text"
+                className="h-12 rounded-xl bg-surface px-4 text-base text-text placeholder:text-muted"
                 placeholder="예: 점심 팟"
-                placeholderTextColor="#6B6B76"
                 value={groupName}
                 onChangeText={(text) => {
                   setGroupName(text);
@@ -91,9 +90,8 @@ export function CreateGroupModal({ visible, onClose }: CreateGroupModalProps) {
                 내 이름 ({trimmedDisplayName.length}/{DISPLAY_NAME_MAX})
               </Text>
               <TextInput
-                className="h-12 rounded-xl bg-surface px-4 text-base text-text"
+                className="h-12 rounded-xl bg-surface px-4 text-base text-text placeholder:text-muted"
                 placeholder="예: 홍길동"
-                placeholderTextColor="#6B6B76"
                 value={displayName}
                 onChangeText={(text) => {
                   setDisplayName(text);
