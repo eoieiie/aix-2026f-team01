@@ -1,0 +1,80 @@
+# PR을 열면 그 브랜치 화면을 임시 주소로 배포하고 PR 댓글에 주소를 남긴다 (이슈 #11, spec.md 10절 공통 완료 조건)
+# 주소는 PR마다 고정이다: https://<프로젝트>--pr-<PR번호>.expo.app. 커밋을 올리면 같은 주소가 갱신된다
+# main 주소(--prod)는 건드리지 않는다. 필요한 시크릿·변수는 deploy-web.yml과 같다
+name: Preview web
+
+on:
+  pull_request:
+
+concurrency:
+  group: preview-web-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  preview:
+    runs-on: ubuntu-latest
+    env:
+      EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+      EXPO_PUBLIC_SUPABASE_URL: ${{ vars.SUPABASE_URL }}
+      EXPO_PUBLIC_SUPABASE_ANON_KEY: ${{ vars.SUPABASE_ANON_KEY }}
+      PR_NUMBER: ${{ github.event.pull_request.number }}
+    steps:
+      - name: 배포 준비 확인
+        id: ready
+        run: |
+          if [ -z "$EXPO_TOKEN" ]; then
+            echo "::warning::EXPO_TOKEN 비밀이 없어 미리보기를 건너뛴다"
+            echo "ok=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "ok=true" >> "$GITHUB_OUTPUT"
+          fi
+      - name: 미리보기 주소 정하기
+        if: steps.ready.outputs.ok == 'true'
+        env:
+          WEB_BASE: ${{ vars.WEB_BASE }}
+        run: |
+          # 초대 링크가 미리보기 안에서 열리도록 WEB_BASE도 미리보기 주소로 바꾼다
+          # https://babti.expo.app → https://babti--pr-12.expo.app
+          base=$(echo "$WEB_BASE" | sed -E "s#^https://([^.]+)\.expo\.app/?\$#https://\1--pr-${PR_NUMBER}.expo.app#")
+          echo "EXPO_PUBLIC_WEB_BASE=$base" >> "$GITHUB_ENV"
+      - uses: actions/checkout@v4
+        if: steps.ready.outputs.ok == 'true'
+      - uses: actions/setup-node@v4
+        if: steps.ready.outputs.ok == 'true'
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - if: steps.ready.outputs.ok == 'true'
+        run: npm ci
+      - name: 웹 빌드
+        if: steps.ready.outputs.ok == 'true'
+        run: npm run build:web
+      - name: EAS Hosting에 미리보기 배포
+        id: deploy
+        if: steps.ready.outputs.ok == 'true'
+        run: |
+          set -o pipefail
+          npx eas-cli@latest deploy --alias "pr-${PR_NUMBER}" --non-interactive | tee deploy.log
+          url=$(grep -oE "https://[a-z0-9-]+--pr-${PR_NUMBER}\.expo\.app" deploy.log | head -1 || true)
+          echo "url=${url:-$EXPO_PUBLIC_WEB_BASE}" >> "$GITHUB_OUTPUT"
+      - name: PR 댓글에 주소 남기기
+        if: steps.ready.outputs.ok == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          URL: ${{ steps.deploy.outputs.url }}
+          SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          # 커밋마다 새 댓글을 달지 않고, 표시가 붙은 댓글 하나를 고친다
+          marker='<!-- preview-web -->'
+          body=$(printf '%s\n웹 미리보기: %s\n\n마지막 커밋 %s 기준. 커밋을 올리면 같은 주소가 갱신된다.' "$marker" "$URL" "${SHA:0:7}")
+          id=$(gh api "repos/$GITHUB_REPOSITORY/issues/$PR_NUMBER/comments" --paginate \
+            --jq ".[] | select(.body | startswith(\"$marker\")) | .id" | head -1)
+          if [ -n "$id" ]; then
+            gh api -X PATCH "repos/$GITHUB_REPOSITORY/issues/comments/$id" -f body="$body" > /dev/null
+          else
+            gh api "repos/$GITHUB_REPOSITORY/issues/$PR_NUMBER/comments" -f body="$body" > /dev/null
+          fi
