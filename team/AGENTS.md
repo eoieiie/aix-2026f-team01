@@ -48,12 +48,20 @@
 
 ```
 aix-2026f-team01/
-├── docs/           주차 활동지(week-NN.md), 팀 규칙, 팀원 정보
-├── team/           협업 방식(WORKFLOW.md), 이 문서(AGENTS.md)
+├── src/            앱 코드
+│   ├── app/          화면. 파일 경로가 주소다 (expo-router). 주소는 docs/spec.md 7절
+│   ├── components/   화면 조각과 공통 부품 (Button, Card, TextField, FoodDot)
+│   ├── hooks/        화면이 부르는 데이터 훅. 가짜 데이터도 여기에 둔다
+│   ├── api/          Supabase 호출
+│   └── constants/    규칙에 쓰는 숫자
+├── supabase/       표·권한·서버 함수(migrations), 기본 음식(seed), 서버 규칙 테스트(tests)
+├── .github/        CI, 웹 배포, PR 미리보기, PR 양식
+├── docs/           제품 명세(spec.md), 팀 결정(decisions.md), 팀 규칙, 주차 활동지(week-NN.md)
+├── team/           팀원 안내(README.md), 작업 규칙(WORKFLOW.md), 이 문서(AGENTS.md)
 ├── memo-seed/      2주차 실습 재료 (건드리지 않는다)
 ├── PROMPTS.md      AI 판단 기록
 ├── ETHICS.md       팀 단위 윤리 판단
-└── README.md
+└── README.md       실행 방법
 ```
 
 작업물을 새로 만들 때 **위 위치 규칙을 따른다.** 새 최상위 폴더를 임의로 만들지 마라.
@@ -64,6 +72,9 @@ aix-2026f-team01/
   - 브랜치 `종류/이슈번호-영문요약`, 커밋 `종류: 내용`(한국어)
   - 종류는 `feat` `fix` `docs` `refactor` `test` `chore` 여섯 개뿐
   - `main`에 직접 push 금지, PR로만 반영, 승인 1개로 머지
+  - 작업을 시작하면 사람의 노트북에 웹 미리보기(`npx expo start --web`)를 띄우고, 첫 커밋 뒤 draft PR을 연다.
+    완료 조건 하나를 끝낼 때마다 커밋하고 push한다. 사람은 화면을 보면서 확인한다 (`team/WORKFLOW.md` 3·4절)
+  - PR 본문에 동작 원리와 미리보기에서 눌러 볼 순서를 쓴다. 사람은 그걸 보고 승인한다
 - 문서를 만들 때는 **한국어, 평서문, 과한 굵은 글씨 금지.** 표는 필요할 때만.
 - 코드 규약이 별도로 정해지면 그 파일을 함께 붙여넣는다. (없으면 기존 파일의 스타일을 따른다)
 
@@ -138,7 +149,7 @@ aix-2026f-team01/
   리뷰어는 `team/WORKFLOW.md` 4장 순번의 다음 사람.
 - 커밋 전에 `git pull --rebase origin main`. 커밋 메시지는 `docs: <내용> 기록`.
 - 커밋에 AI 공동저자 줄을 넣지 않는다. 커밋은 그 사람 계정으로 찍힌다.
-- PR을 열면 바로 `gh pr merge <PR번호> --auto --merge`로 자동 머지를 건다. `main`은 승인 1개가 있어야 합쳐지도록 보호되어 있어서, 리뷰어가 승인하는 순간 GitHub가 머지한다. 커밋을 하나로 합치지 않는 `--merge` 방식을 써서 각자의 커밋 기록이 남게 한다.
+- PR을 리뷰 상태로 열면(draft였으면 `gh pr ready` 뒤) 바로 `gh pr merge <PR번호> --auto --merge`로 자동 머지를 건다. `main`은 승인 1개가 있어야 합쳐지도록 보호되어 있어서, 리뷰어가 승인하는 순간 GitHub가 머지한다. 커밋을 하나로 합치지 않는 `--merge` 방식을 써서 각자의 커밋 기록이 남게 한다.
 
 **충돌이 나면:** 두 파일은 `.gitattributes`에서 `merge=union`이라 로컬에서 합칠 때 양쪽 줄이 모두 남는다.
 그래도 충돌 표시가 남으면 **양쪽 줄을 모두 살리고** 날짜순으로 놓는다. 어느 줄도 지우지 않는다.
@@ -154,7 +165,7 @@ GitHub PR이 충돌로 표시되면 자기 브랜치에서 `git pull --rebase or
 
 ## 10. 지금 맡은 일
 
-- 1단계 담당과 완료 조건은 `docs/spec.md` 10절에 있다. 이슈가 만들어지면 이슈가 기준이다.
+- 1단계 담당과 완료 조건은 GitHub 이슈가 기준이다. 이슈 번호는 `docs/spec.md` 10절 표에 있다.
 - 작업을 시작할 때 그 절의 완료 조건을 사람에게 먼저 다시 설명하고, 확인받은 뒤 코드를 쓴다.
 
 ---

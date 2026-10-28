@@ -1,105 +1,61 @@
 # 협업 방식 / Workflow
 
-> **잠정본이다.** 6주차 활동지(`docs/week-06.md`)에서 브랜치 이름·커밋 메시지·브랜치 보호를
-> 정식으로 정한다. 그때까지 이 문서로 굴리고, 6주차에 확정한 뒤 이 문서를 갱신한다.
-
-관련 문서 — 팀 규칙 요약은 [`docs/team-rules.md`](../docs/team-rules.md),
-AI에게 주는 공통 컨텍스트는 [`team/AGENTS.md`](AGENTS.md).
-
----
+AI가 지키는 작업 규칙이다. 사람이 따라 할 순서와 AI에게 넣을 말은 [`team/README.md`](README.md), 팀 규칙은 [`docs/team-rules.md`](../docs/team-rules.md), AI 공통 규약은 [`team/AGENTS.md`](AGENTS.md).
 
 ## 1. 일의 단위
 
-- 모든 작업은 **Issue 1개**에서 시작한다.
-- Issue에는 **무엇을 만들지(명세)**와 **끝났다고 인정할 조건(완료 조건)**이 있어야 한다.
-- **완료 조건이 없는 PR은 리뷰하지 않는다.**
+- 모든 작업은 GitHub 이슈 하나에서 시작한다. 이슈에는 만들 것과 완료 조건이 있다.
+- 1단계 담당은 이슈에 있다 (`docs/spec.md` 10절 표에 번호).
 
-## 2. 브랜치
+## 2. 브랜치와 커밋
 
-```
-종류/이슈번호-영문요약
-```
+- 브랜치: `종류/이슈번호-영문요약`. 예: `feat/13-home-screen`, `fix/23-preview-alias-limit`
+- 커밋: `종류: 내용`, 내용은 한국어. 한 커밋에 한 가지만 바꾼다.
+- 종류는 `feat` 새 기능, `fix` 버그, `docs` 문서, `refactor` 동작은 그대로 구조만, `test` 테스트, `chore` 설정. 이 여섯 개만 쓴다.
+- `main`에는 직접 push할 수 없다 (GitHub 보호 규칙). 머지된 브랜치는 지운다.
+- 커밋과 PR에 AI 공동저자 줄이나 "Generated with" 줄을 넣지 않는다. 커밋은 그 사람 계정으로 찍힌다.
 
-예 — `feat/12-memo-search`, `docs/7-week-03`, `fix/21-search-empty-query`
+## 3. PR과 리뷰
 
-- `main`에 **직접 push하지 않는다.**
-- 브랜치는 **일이 끝나면 지운다.** 개인 브랜치를 상시로 두지 않는다 — 오래 살아 있을수록 `main`과 벌어져 나중에 충돌이 커진다.
+- 첫 커밋을 올리면 바로 draft PR을 연다 (`gh pr create --draft`). 일찍 열어야 팀이 중간 화면을 미리보기로 본다.
+- 완료 조건을 다 채우면 PR 본문을 `.github/pull_request_template.md` 양식대로 채운다. `Closes #이슈번호`, 동작 원리, 미리보기에서 눌러 볼 순서가 들어간다.
+- 그다음 `gh pr ready`, 리뷰어 지정, `gh pr merge <번호> --auto --merge`. 승인 1개가 붙으면 GitHub가 합친다.
+- 리뷰어는 작성자의 다음 순번이다. 황병주 → 이혁준 → 이학준 → 이재곤 → 황병주. 자리에 없으면 그다음.
+- 자기 PR은 자기가 승인하지 않는다. 쌓인 리뷰가 있으면 새 작업보다 리뷰를 먼저 한다.
+- 리뷰어는 미리보기에서 완료 조건을 눌러 보고 동작 원리를 읽는다. 이해가 안 되면 댓글로 묻고 반려한다.
+- PR은 작게 나눈다. 화면 하나나 완료 조건 한두 개씩.
 
-## 3. 커밋 메시지
+## 4. 화면을 자주 본다
 
-```
-종류: 내용
-```
+사람은 코드가 아니라 화면으로 확인한다. 그래서 바뀐 화면이 바로 보여야 한다.
 
-내용은 한국어로 쓴다. 예 — `docs: 2주차 활동지 작성`
+| 누가 | 어디서 | 언제 바뀌나 |
+| :-- | :-- | :-- |
+| 작업하는 사람 | 노트북의 웹 미리보기 (`npx expo start --web`) | AI가 파일을 고치는 즉시 |
+| 팀 전체, 리뷰어 | PR 댓글의 미리보기 주소 | push하고 몇 분 뒤. 댓글이 새 주소로 바뀐다. draft일 때도 돈다 |
+| 누구나 | https://babti.expo.app | PR이 머지되고 1분쯤 뒤 |
 
-| 종류 | 언제 |
+- 작업을 시작하면 AI가 노트북 웹 미리보기를 띄운다. `.env`에 Supabase 주소와 공개 키가 있어야 로그인된다.
+- 완료 조건 하나를 끝낼 때마다 커밋하고 push한다. 몰아서 올리면 팀이 중간 화면을 못 본다.
+- PR 미리보기가 실패하면 노트북에서 본다. AI에게 "PR #번호를 내 노트북에서 띄워줘"라고 하면 `gh pr checkout <번호>`, `npm install`, `npx expo start --web` 순서로 연다. 다 보면 원래 브랜치로 돌아간다.
+- PR 미리보기 안의 초대 링크는 https://babti.expo.app 으로 간다.
+
+## 5. 막혔을 때
+
+| 증상 | 할 일 |
 | :-- | :-- |
-| `feat` | 새 기능 |
-| `fix` | 버그 수정 |
-| `docs` | 문서만 변경 |
-| `refactor` | 동작은 그대로, 구조만 정리 |
-| `test` | 테스트 추가·수정 |
-| `chore` | 설정·부수 작업 |
+| PR이 충돌로 표시됨 | AI에게 "충돌 풀어". 자기 브랜치에서 `git pull --rebase origin main` 뒤 `git push --force-with-lease`. `PROMPTS.md`, `docs/decisions.md`는 양쪽 줄을 다 살린다. GitHub 화면에서는 이 두 파일을 자동으로 못 합쳐서 자주 생긴다 |
+| 미리보기 댓글이 안 달림 | Actions 탭의 Preview web 실패 로그를 AI에게 붙여넣는다 |
+| 내 노트북이 낡음 | AI에게 "main 최신으로 받아줘" |
 
-- 여섯 개를 넘기지 않는다. 종류가 많을수록 "이건 뭘로 쓰지"에서 멈춘다.
-- **한 커밋 = 한 가지 변경.** 여러 개를 섞으면 나중에 되돌릴 수 없다.
-- 이슈와 엮을 때는 제목 끝에 `(#12)`, PR 본문에 `Closes #12`를 쓴다. 머지되면 이슈가 자동으로 닫힌다.
-
-## 4. 리뷰
-
-- **처음 리뷰는 작성자의 다음 순번 사람**이 맡는다. 자리에 없으면 그다음 순번으로 넘어간다.
-- 순번 — 1 황병주 → 2 이혁준 → 3 이학준 → 4 이재곤 → 1
-- **팀장이라고 기본으로 리뷰하지 않는다.**
-- 승인 **1개**를 받으면 머지한다. **자기 PR을 자기가 승인해서 머지하지 않는다.**
-- 리뷰하다가 **작동 원리가 이해되지 않는 부분이 있으면 반려**한다. 올린 사람이 설명하지 못하면 승인하지 않는다.
-- 검토 중인 PR이 쌓여 있으면, 새 작업을 시작하기 전에 리뷰부터 비운다.
-
-## 5. 작업 순서
-
-작업을 시작할 때:
-
-```bash
-git switch main && git pull && git switch -c 종류/이슈번호-요약
-```
-
-올릴 때:
-
-```bash
-git add <파일> && git commit -m "종류: 내용"
-```
-
-```bash
-git push -u origin 브랜치이름
-```
-
-push하면 저장소 상단에 `Compare & pull request` 버튼이 뜬다. PR을 열고 리뷰를 받는다.
-
-머지된 뒤에는 **반드시**:
-
-```bash
-git switch main && git pull
-```
-
-## 6. 자주 막히는 곳
-
-| 증상 | 해결 |
-| :-- | :-- |
-| `git push`에서 비밀번호를 물음 | 계정 비밀번호가 아니라 **Personal Access Token**. GitHub → Settings → Developer settings → Personal access tokens → Tokens(classic) → `repo` 체크 후 발급 |
-| 브랜치를 안 만들고 `main`에서 작업함 | `git stash && git switch -c 종류/이슈번호-요약 && git stash pop` |
-| `not a git repository` | 저장소 폴더 밖이다. `cd`로 저장소 안으로 들어간다 |
-| 내 로컬이 낡음 | `git switch main && git pull` |
-
-## 7. 문서를 어디에 두는가
+## 6. 어디에 무엇이
 
 | 무엇 | 어디 |
 | :-- | :-- |
+| 무엇을 만드는지 | `docs/spec.md` |
+| 할 일과 담당 | GitHub 이슈 |
+| 팀 결정 | `docs/decisions.md` (줄 추가만) |
+| AI 판단 기록 | `PROMPTS.md` (줄 추가만) |
+| 팀 단위 윤리 판단 | `ETHICS.md` |
 | 주차 활동지 | `docs/week-NN.md` |
-| 팀 규칙 요약 | `docs/team-rules.md` |
-| 팀원 정보 | `docs/members.md` |
-| 협업 방식 · AI 공통 컨텍스트 | `team/` |
-| AI 판단 기록 | `PROMPTS.md` (저장소 루트) |
-| 팀 결정 기록 | `docs/decisions.md` (줄 추가만) |
-| 팀 단위 윤리 판단 | `ETHICS.md` (저장소 루트) |
-
-외부 문서 도구(Notion 등)를 쓰지 않는다. 도구를 늘리면 우리가 한 일의 증거가 흩어진다.
+| 팀 규칙 | `docs/team-rules.md` |
