@@ -3,12 +3,18 @@ import { Pressable, ScrollView, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { InviteCard } from '@/components/invite-card';
-import { Member, RecentMeal, useGroupDetail } from '@/hooks/use-groups';
+import {
+  Member,
+  RecentMeal,
+  useGroupDetail,
+  useStartSession,
+} from '@/hooks/use-groups';
 
 export default function GroupScreen() {
   const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
   const { group, isLoading, isError, error, refetch } = useGroupDetail(id || '');
+  const { startSession, isPending: isStartingSession } = useStartSession(id || '');
 
   // 로딩 상태
   if (isLoading) {
@@ -59,13 +65,16 @@ export default function GroupScreen() {
 
   const hasOpenSession = !!group.open_session_id;
 
-  const handleStartOrJoinSession = () => {
-    // E 담당자 연결 자리 (spec.md 10절 C: "오늘 뭐 먹지" 버튼 자리(E가 연결))
-    if (hasOpenSession) {
-      router.push(`/sessions/${group.open_session_id}` as any);
-    } else {
-      // 진행 중인 세션이 없을 때 시작 (E에서 세션 생성 및 이동 로직 연결)
-      router.push(`/sessions/new?groupId=${group.id}` as any);
+  const handleStartOrJoinSession = async () => {
+    if (isStartingSession) return;
+    try {
+      // 진행 중인 판이 있으면 그 판 id, 없으면 새로 만든 판 id를 서버가 돌려준다 (spec.md 4-6, 4-8)
+      const sessionId = await startSession();
+      router.push(`/sessions/${sessionId}` as any);
+    } catch {
+      if (group.open_session_id) {
+        router.push(`/sessions/${group.open_session_id}` as any);
+      }
     }
   };
 
@@ -148,12 +157,13 @@ export default function GroupScreen() {
       {/* 하단 고정 버튼 영역 */}
       <View className="absolute bottom-0 left-0 right-0 bg-background/95 px-5 pb-8 pt-3">
         <Pressable
-          className="w-full items-center justify-center rounded-2xl bg-primary py-4 active:opacity-90"
+          className="w-full items-center justify-center rounded-2xl bg-primary py-4 active:opacity-90 disabled:opacity-50"
           onPress={handleStartOrJoinSession}
+          disabled={isStartingSession}
         >
           {/* 진행 중인 판 유무에 따른 버튼 문구 분기 (spec.md 4-6) */}
           <Text className="text-base font-bold text-on-primary">
-            {hasOpenSession ? '진행 중인 판으로' : '오늘 뭐 먹지'}
+            {isStartingSession ? '판 여는 중...' : hasOpenSession ? '진행 중인 판으로' : '오늘 뭐 먹지'}
           </Text>
         </Pressable>
       </View>
