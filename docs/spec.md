@@ -263,7 +263,7 @@
 | `get_my_restrictions` | 없음 | `{tag, food_id, kind}` 여러 행 | |
 | `set_my_restrictions` | `p_items` 예: `[{"tag":"seafood","kind":"allergy"},{"food_id":3,"kind":"dislike"}]`. 빈 배열이면 전부 해제 | 없음 | `invalid_items` (없는 태그, 중복, 없는 음식, 숫자 아닌 food_id, kind 빠짐, 태그와 음식을 같이 줌). 실패하면 예전 값이 그대로 남는다 |
 
-공통 실패 코드: `not_signed_in`, 소속이 아닌 판은 `not_member`.
+공통 실패 코드: `not_signed_in`. 판 id를 받는 함수(`join_session`부터 `spin_roulette`까지)는 없는 판이면 `session_not_found`, 소속이 아닌 판이면 `not_member`.
 
 읽기는 표를 직접 조회한다: `foods`(전체), `groups`·`memberships`·`sessions`·`session_participants`·`candidates`·`meals`·`meal_participants`(내 모임 것만), `votes`·`restrictions`(내 것만), `profiles`(로그인하면 전체).
 
