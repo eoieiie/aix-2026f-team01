@@ -1,4 +1,4 @@
-import { ActivityIndicator, Pressable, Text } from 'react-native';
+import { ActivityIndicator, Platform, Pressable, Text } from 'react-native';
 
 type ButtonProps = {
   label: string;
@@ -33,8 +33,12 @@ export function Button({
         primary ? 'bg-primary' : 'bg-surface'
       }`}>
       {loading ? (
-        // 색은 text- 토큰으로 준다. NativeWind가 text 색을 ActivityIndicator의 color로 넘긴다
-        <ActivityIndicator className={primary ? 'text-on-primary' : 'text-text'} />
+        // 색은 text- 토큰으로 준다. 앱에서는 NativeWind가 글자색을 color로 넘기고,
+        // 웹에서는 그 변환이 없어서 currentColor로 같은 class의 글자색을 따라가게 한다
+        <ActivityIndicator
+          className={primary ? 'text-on-primary' : 'text-text'}
+          color={Platform.OS === 'web' ? 'currentColor' : undefined}
+        />
       ) : (
         <Text className={`text-base font-semibold ${primary ? 'text-on-primary' : 'text-text'}`}>
           {label}
