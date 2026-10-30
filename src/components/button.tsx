@@ -33,7 +33,8 @@ export function Button({
         primary ? 'bg-primary' : 'bg-surface'
       }`}>
       {loading ? (
-        <ActivityIndicator />
+        // 색은 text- 토큰으로 준다. NativeWind가 text 색을 ActivityIndicator의 color로 넘긴다
+        <ActivityIndicator className={primary ? 'text-on-primary' : 'text-text'} />
       ) : (
         <Text className={`text-base font-semibold ${primary ? 'text-on-primary' : 'text-text'}`}>
           {label}
