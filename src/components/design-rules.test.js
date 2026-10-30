@@ -25,7 +25,8 @@ const files = SCREEN_DIRS.flatMap(screenFiles).map((file) => ({
 
 describe('디자인 규칙', () => {
   it('화면 파일에 색 코드를 직접 쓰지 않는다. tailwind.config.js의 색 이름만 쓴다', () => {
-    const hex = /['"`]#(?:[0-9a-f]{3}|[0-9a-f]{6}|[0-9a-f]{8})['"`]/i;
+    // '#fff'처럼 따옴표로 감싼 값과 bg-[#fff]처럼 className 안에 대괄호로 넣은 값을 모두 잡는다
+    const hex = /(?:['"`]#(?:[0-9a-f]{3}|[0-9a-f]{6}|[0-9a-f]{8})['"`])|(?:-\[#(?:[0-9a-f]{3}|[0-9a-f]{6}|[0-9a-f]{8})\])/i;
     const found = files.filter(({ text }) => hex.test(text)).map(({ file }) => file);
     expect(found).toEqual([]);
   });
