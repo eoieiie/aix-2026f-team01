@@ -34,11 +34,20 @@ export default function HomeScreen() {
             <Text className="text-2xl font-bold text-text">밥비티아이</Text>
             <Text className="mt-0.5 text-xs text-muted">오늘 뭐 먹을지 함께 정해요</Text>
           </View>
+          {/* 모임이 없을 때는 가운데 "첫 모임 만들기"가 강조 버튼이라 위쪽은 회색으로 둔다 (spec.md 7절 강조 신호 하나) */}
           <Pressable
-            className="rounded-xl bg-primary px-4 py-2.5 active:opacity-90"
+            accessibilityRole="button"
+            accessibilityLabel="모임 만들기"
+            className={`rounded-xl px-4 py-2.5 active:opacity-90 ${
+              groups.length > 0 ? 'bg-primary' : 'bg-surface'
+            }`}
             onPress={() => setModalVisible(true)}
           >
-            <Text className="text-xs font-bold text-on-primary">모임 만들기</Text>
+            <Text
+              className={`text-xs font-bold ${groups.length > 0 ? 'text-on-primary' : 'text-text'}`}
+            >
+              모임 만들기
+            </Text>
           </Pressable>
         </View>
 
