@@ -19,8 +19,14 @@ jobs:
             echo "::warning::SUPABASE_URL, SUPABASE_ANON_KEY 변수가 없어 건너뛴다"
             exit 0
           fi
-          # foods는 spec.md 5절의 표. 권한 때문에 0행이어도 DB 조회는 일어난다
-          curl --fail-with-body -sS \
+          # foods는 spec.md 5절의 표. 로그인하지 않은 요청이라 권한 없음(401, 42501)이 오는데,
+          # 그 답은 DB가 권한을 확인하고 돌려준 것이라 DB는 깨어난다. 그래서 그 경우도 성공으로 본다.
+          # 표가 없거나(404) 프로젝트가 멈춰 있으면(5xx) 실패한다
+          code=$(curl -sS -o body.json -w '%{http_code}' \
             -H "apikey: $SUPABASE_ANON_KEY" \
             -H "Authorization: Bearer $SUPABASE_ANON_KEY" \
-            "$SUPABASE_URL/rest/v1/foods?select=id&limit=1"
+            "$SUPABASE_URL/rest/v1/foods?select=id&limit=1")
+          echo "HTTP $code"; cat body.json; echo
+          if [ "$code" = "200" ]; then exit 0; fi
+          if [ "$code" = "401" ] && grep -q '"42501"' body.json; then exit 0; fi
+          exit 1
