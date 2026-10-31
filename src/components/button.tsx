@@ -31,14 +31,14 @@ export function Button({
       accessibilityState={{ disabled: off, busy: loading }}
       disabled={off}
       onPress={onPress}
-      className={`h-12 items-center justify-center rounded-xl px-6 active:opacity-80 disabled:opacity-50 ${
+      className={`h-14 items-center justify-center rounded-full px-6 active:opacity-80 disabled:opacity-40 ${
         primary ? 'bg-primary' : 'bg-surface'
       }`}>
       {loading ? (
         // 로딩 표시는 className을 받지 못해서 토큰 값을 colors.json에서 꺼내 준다
         <ActivityIndicator color={primary ? colors['on-primary'] : colors.text} />
       ) : (
-        <Text className={`text-base font-semibold ${primary ? 'text-on-primary' : 'text-text'}`}>
+        <Text className={`text-lg font-bold ${primary ? 'text-on-primary' : 'text-text'}`}>
           {label}
         </Text>
       )}
