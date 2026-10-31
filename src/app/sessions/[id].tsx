@@ -1,7 +1,7 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { type ReactNode, useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, Text, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Button } from '@/components/button';
 import { CandidateCard } from '@/components/candidate-card';
@@ -88,6 +88,7 @@ function Header({ session, onBack }: { session: SessionView; onBack: () => void 
       <View className="flex-row items-center justify-between">
         <Pressable
           accessibilityRole="button"
+          accessibilityLabel="모임으로"
           onPress={onBack}
           className="rounded-full bg-surface px-4 py-2 active:opacity-70">
           <Text className="text-sm font-semibold text-text">모임으로</Text>
@@ -168,6 +169,7 @@ function CandidateStage({
           </View>
           <Pressable
             accessibilityRole="button"
+            accessibilityLabel="못 먹는 것"
             onPress={onRestrictions}
             className="rounded-full bg-surface px-4 py-2 active:opacity-70">
             <Text className="text-sm font-semibold text-text">못 먹는 것</Text>
@@ -351,12 +353,14 @@ function ResultStage({
   );
 }
 
+// 화면 아래 고정 버튼 자리. SafeAreaView는 className의 여백을 덮어써서, 아래 여백만 기기 값에 더한다
 function BottomBar({ children }: { children: ReactNode }) {
+  const insets = useSafeAreaInsets();
   return (
-    <SafeAreaView
-      edges={['bottom']}
-      className="absolute bottom-0 left-0 right-0 gap-2 bg-background px-5 pb-4 pt-3">
+    <View
+      className="absolute bottom-0 left-0 right-0 gap-2 bg-background px-5 pt-3"
+      style={{ paddingBottom: insets.bottom + 16 }}>
       {children}
-    </SafeAreaView>
+    </View>
   );
 }

@@ -76,6 +76,7 @@ export function CandidateCard({
           {dirty ? (
             <Pressable
               accessibilityRole="button"
+              accessibilityLabel={`${candidate.foodName} 어필 저장`}
               disabled={busy}
               onPress={() => onSavePitch(pitch)}
               className="rounded-lg bg-text px-3 py-2 active:opacity-80 disabled:opacity-50">
