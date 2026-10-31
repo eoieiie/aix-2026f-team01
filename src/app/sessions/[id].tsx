@@ -83,6 +83,7 @@ const STEPS = [
 ] as const;
 
 function Header({ session, onBack }: { session: SessionView; onBack: () => void }) {
+  const current = STEPS.findIndex((step) => step.status === session.status);
   return (
     <View className="gap-4 px-5 pb-2 pt-3">
       <View className="flex-row items-center justify-between">
@@ -93,22 +94,29 @@ function Header({ session, onBack }: { session: SessionView; onBack: () => void 
           className="rounded-full bg-surface px-4 py-2 active:opacity-70">
           <Text className="text-sm font-semibold text-text">모임으로</Text>
         </Pressable>
-        <Text className="flex-1 px-3 text-right text-base font-bold text-text" numberOfLines={1}>
+        <Text className="flex-1 px-3 text-right text-sm font-semibold text-muted" numberOfLines={1}>
           {session.groupName}
         </Text>
       </View>
-      <View className="flex-row items-center gap-2">
-        {STEPS.map((step, i) => (
-          <View key={step.status} className="flex-row items-center gap-2">
-            {i > 0 ? <View className="h-px w-4 bg-surface-strong" /> : null}
+      {/* 한 판의 세 단계. 지나온 단계와 지금 단계까지 검게 칠한다 */}
+      <View className="gap-2">
+        <View className="flex-row gap-1.5">
+          {STEPS.map((step, i) => (
+            <View
+              key={step.status}
+              className={`h-1.5 flex-1 rounded-full ${i <= current ? 'bg-text' : 'bg-surface-strong'}`}
+            />
+          ))}
+        </View>
+        <View className="flex-row">
+          {STEPS.map((step, i) => (
             <Text
-              className={`text-sm ${
-                session.status === step.status ? 'font-bold text-text' : 'text-muted'
-              }`}>
+              key={step.status}
+              className={`flex-1 text-sm ${i === current ? 'font-bold text-text' : 'text-muted'}`}>
               {step.label}
             </Text>
-          </View>
-        ))}
+          ))}
+        </View>
       </View>
       <Participants participants={session.participants} showVoted={session.status === 'voting'} />
     </View>
@@ -164,7 +172,7 @@ function CandidateStage({
       <ScrollView contentContainerClassName="gap-5 px-5 pb-40 pt-2">
         <View className="flex-row items-end justify-between">
           <View className="flex-1 gap-1">
-            <Text className="text-2xl font-bold text-text">뭐 먹고 싶어요?</Text>
+            <Text className="text-3xl font-extrabold tracking-tight text-text">뭐 먹고 싶어요?</Text>
             <Text className="text-sm text-muted">먹고 싶은 음식을 올리고 한 줄 어필을 붙여요</Text>
           </View>
           <Pressable
@@ -238,7 +246,7 @@ function VotingStage({ session }: { session: SessionView }) {
     <View className="flex-1">
       <ScrollView contentContainerClassName="gap-5 px-5 pb-40 pt-2">
         <View className="gap-1">
-          <Text className="text-2xl font-bold text-text">골라 주세요</Text>
+          <Text className="text-3xl font-extrabold tracking-tight text-text">골라 주세요</Text>
           <Text className="text-sm text-muted">
             최대 {MAX_VOTES_PER_PERSON}개까지. 누가 뭘 골랐는지는 아무도 몰라요
           </Text>
@@ -341,7 +349,7 @@ function ResultStage({
 
         <View className="items-center gap-2" style={{ opacity: revealed ? 1 : 0 }}>
           <Text className="text-base text-muted">오늘은</Text>
-          <Text className="text-center text-4xl font-bold text-primary">{winner}</Text>
+          <Text className="text-center text-5xl font-extrabold tracking-tight text-primary">{winner}</Text>
           <Text className="text-sm text-muted">모임 식사 기록에 남겼어요</Text>
         </View>
       </ScrollView>
