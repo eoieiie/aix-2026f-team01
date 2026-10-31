@@ -49,45 +49,35 @@ export function InviteCard({ inviteCode }: InviteCardProps) {
     }
   };
 
+  // 검은 카드. 화면의 주황은 아래 시작 버튼 하나라서, 초대 카드는 색 대신 명암으로 눈에 띄게 한다 (spec.md 7절)
   return (
     <Pressable
-      className="w-full rounded-2xl bg-surface p-5 active:opacity-90"
+      accessibilityRole="button"
+      accessibilityLabel="초대 링크 복사"
+      className="w-full gap-4 rounded-3xl bg-text p-5 active:opacity-90"
       onPress={handleCopy}
     >
-      <View className="flex-row items-center justify-between">
-        <View className="flex-1">
-          <Text className="text-xs font-semibold uppercase tracking-wider text-muted">
-            초대 코드
-          </Text>
-          <Text className="mt-1 font-mono text-2xl font-bold tracking-widest text-text">
+      <View className="flex-row items-start justify-between">
+        <View className="gap-1">
+          <Text className="text-sm font-semibold text-on-primary/60">초대 코드</Text>
+          <Text className="text-3xl font-extrabold tracking-widest text-on-primary">
             {inviteCode}
           </Text>
         </View>
-
-        <View
-          className={`rounded-xl px-4 py-2 ${
-            copied ? 'bg-primary' : 'bg-background'
-          }`}
-        >
-          <Text
-            className={`text-xs font-bold ${
-              copied ? 'text-on-primary' : 'text-primary'
-            }`}
-          >
-            {copied ? '복사했어요' : '링크 복사'}
-          </Text>
+        <View className="rounded-full bg-background px-4 py-2">
+          <Text className="text-sm font-bold text-text">{copied ? '복사했어요' : '링크 복사'}</Text>
         </View>
       </View>
 
-      <Text className="mt-2 text-xs text-muted">
-        카드를 누르면 친구를 초대할 수 있는 웹 링크가 복사돼요.
+      <Text className="text-sm text-on-primary/60">
+        누르면 초대 링크가 복사돼요. 친구는 앱 없이 웹에서 이름만 적고 들어와요
       </Text>
 
-      {/* 복사 실패 시 또는 링크 직접 복사용 텍스트 표시 */}
+      {/* 복사가 안 되면 링크 글자를 보여줘서 직접 복사하게 한다 (spec.md 4-4) */}
       {copyFailed ? (
-        <View className="mt-3 rounded-lg bg-background p-2.5">
-          <Text className="text-xs text-muted">아래 링크를 길게 눌러 직접 복사해주세요:</Text>
-          <Text className="mt-1 select-all font-mono text-xs font-medium text-primary">
+        <View className="gap-1 rounded-2xl bg-on-primary/10 p-3">
+          <Text className="text-xs text-on-primary/60">아래 링크를 길게 눌러 복사해 주세요</Text>
+          <Text selectable className="select-all text-sm font-semibold text-on-primary">
             {inviteUrl}
           </Text>
         </View>
