@@ -1,0 +1,19 @@
+{
+  "background": "#FFFFFF",
+  "surface": "#F4F4F5",
+  "surface-strong": "#E4E4E7",
+  "text": "#111111",
+  "muted": "#6B6B6B",
+  "primary": "#F05A00",
+  "primary-soft": "#FFEDE0",
+  "on-primary": "#FFFFFF",
+  "danger": "#C2410C",
+  "food-1": "#F05A00",
+  "food-2": "#3F3F46",
+  "food-3": "#FFB27A",
+  "food-4": "#A1A1AA",
+  "food-5": "#C2410C",
+  "food-6": "#D4D4D8",
+  "food-7": "#FF8A3D",
+  "food-8": "#18181B"
+}

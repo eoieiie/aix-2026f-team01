@@ -1,4 +1,8 @@
 // 색은 여기 이름으로만 쓴다. 화면 파일에 색 코드를 직접 쓰지 않는다 (spec.md 3절 5번)
+// 값은 src/constants/colors.json 한곳에 있다. SVG처럼 className을 못 받는 곳은 그 파일에서 같은 이름으로 꺼낸다
+// 주황 하나를 강조색으로 쓰고 나머지는 검정, 흰색, 회색만 쓴다 (spec.md 7절)
+const colors = require('./src/constants/colors.json');
+
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   content: ['./src/**/*.{js,jsx,ts,tsx}'],
@@ -7,24 +11,7 @@ module.exports = {
   darkMode: 'class',
   theme: {
     extend: {
-      colors: {
-        background: '#FFFFFF',
-        surface: '#F2F2F5',
-        text: '#111114',
-        muted: '#6B6B76',
-        primary: '#208AEF',
-        'on-primary': '#FFFFFF',
-        danger: '#D93636',
-        // 음식 색 동그라미 (spec.md 7절). 음식 id로 고른다: src/components/food-dot.tsx
-        'food-1': '#EF6F5E',
-        'food-2': '#F4A13A',
-        'food-3': '#F2CF4A',
-        'food-4': '#6FBF73',
-        'food-5': '#45B5AA',
-        'food-6': '#9A7FD1',
-        'food-7': '#E57BA8',
-        'food-8': '#B9845A',
-      },
+      colors,
     },
   },
   plugins: [],
