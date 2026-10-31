@@ -80,7 +80,7 @@
 2. **화면은 DB를 직접 부르지 않는다.** Supabase 호출은 데이터 접근 폴더(`src/api/` 또는 `src/hooks/`) 한곳에만 둔다. 화면 파일에서 `supabase`를 import하지 않는다. 이유: 디자인을 고치는 사람이 데이터 코드를 건드리지 않게 하고, 저장 방식이 바뀌어도 고칠 곳을 한곳으로 모은다.
 3. **사람과 모임 소속을 나눈다.** 사람(프로필)은 계정당 하나다. 못 먹는 것과 네 글자는 사람에 붙는다. 모임에는 소속만 있다. 한 사람이 여러 모임에 있어도 못 먹는 것을 다시 적지 않는다.
 4. **상수는 한곳에.** 1인당 표 수, 글자 수 제한, 회전 시간처럼 규칙에 쓰는 숫자는 상수 파일 하나에 모은다. 서버에도 같은 값이 있으면 둘이 같은지 테스트한다.
-5. **색은 토큰으로.** 화면 파일에 색 코드를 직접 쓰지 않는다. Tailwind 설정의 색 이름만 쓴다.
+5. **색은 토큰으로.** 화면 파일에 색 코드를 직접 쓰지 않는다. Tailwind 설정의 색 이름만 쓴다. 값은 `src/constants/colors.json` 한곳에 있고 `tailwind.config.js`가 그 파일을 읽는다. SVG 원판처럼 className을 받지 못하는 곳은 같은 파일에서 같은 이름으로 꺼낸다.
 
 ---
 
@@ -244,9 +244,43 @@
 - 상태를 바꾸는 일(참여, 후보, 투표, 룰렛, 못 먹는 것 저장, 계정 삭제)은 RPC로만 한다. 테이블에 직접 쓰지 않는다
 - profiles는 로그인한 사람이 읽을 수 있고 본인만 쓴다
 
-서버 함수(RPC): create_group, get_group_by_code, join_group, start_session, join_session, add_candidate, set_pitch, remove_candidate, open_voting, cast_vote, spin_roulette, session_vote_counts(끝난 판에서만 음식별 표 수), get_my_restrictions, set_my_restrictions, save_my_profile, delete_my_account.
+서버 함수(RPC): 1단계 함수는 아래 표와 같다 (B, 이슈 #7). 모두 로그인한 사용자만 부를 수 있고, 실패하면 `error.message`에 영어 코드가 온다. 함수를 바꾸는 PR은 이 표도 같이 고친다. 2단계 이후 함수(`save_my_profile`, `delete_my_account`)와 집계 뷰는 그 단계에서 더한다.
 
-실시간 구독: sessions, session_participants, candidates, votes(본인 것만 오지만 변경 신호로 쓴다). 변경이 오면 그 판을 통째로 다시 읽는다.
+| 함수 | 받는 값 | 돌려주는 값 | 실패 코드 |
+|---|---|---|---|
+| `create_group` | `p_name` (1~40), `p_display_name` (1~20, 프로필에 이름이 있으면 생략) | `{group_id, invite_code}` 1행 | `name_empty`, `name_too_long`, `display_name_required` |
+| `get_group_by_code` | `p_code` | `{group_id, name, is_member}` 1행 | `group_not_found` |
+| `join_group` | `p_code`, `p_display_name` (이미 소속이거나 프로필 이름이 있으면 생략) | `{group_id, open_session_id}` 1행. 진행 중인 판이 없으면 `open_session_id`는 null | `group_not_found`, `name_taken`, `name_empty`, `name_too_long`, `display_name_required` |
+| `start_session` | `p_group_id` | 판 id. 진행 중인 판이 있으면 그 id | `not_member` |
+| `join_session` | `p_session_id` | 판 상태 `open` / `voting` / `done`. done이면 참여자로 넣지 않음 | `session_not_found`, `not_member` |
+| `add_candidate` | `p_session_id`, `p_food_id` | 빠졌는지(boolean) | `not_participant`, `voting_started`, `food_not_found`, `already_candidate` |
+| `set_pitch` | `p_session_id`, `p_food_id`, `p_pitch` (≤60, 빈 글은 지움) | 없음 | `voting_started`, `pitch_too_long`, `not_my_candidate` |
+| `remove_candidate` | `p_session_id`, `p_food_id` | 없음 | `voting_started`, `not_my_candidate` |
+| `open_voting` | `p_session_id` | 없음 | `not_host`, `not_open`, `no_candidates` |
+| `cast_vote` | `p_session_id`, `p_food_id` | 누른 뒤 찍혀 있는지(boolean). 같은 후보를 다시 누르면 취소 | `not_voting`, `not_participant`, `candidate_not_found`, `candidate_vetoed`, `vote_limit` |
+| `spin_roulette` | `p_session_id` | `{food_id, meal_id}` 1행. 판이 끝나고 식사 기록이 생김 | `not_host`, `not_voting`, `no_candidates` |
+| `session_vote_counts` | `p_session_id` | `{food_id, vote_count, vetoed}` 후보마다. 끝난 판에서만 | `session_not_found`, `not_done` |
+| `get_my_restrictions` | 없음 | `{tag, food_id, kind}` 여러 행 | |
+| `set_my_restrictions` | `p_items` 예: `[{"tag":"seafood","kind":"allergy"},{"food_id":3,"kind":"dislike"}]`. 빈 배열이면 전부 해제 | 없음 | `invalid_items` (없는 태그, 중복, 없는 음식, 숫자 아닌 food_id, kind 빠짐, 태그와 음식을 같이 줌). 실패하면 예전 값이 그대로 남는다 |
+
+공통 실패 코드: `not_signed_in`. 판 id를 받는 함수(`join_session`부터 `spin_roulette`까지)는 없는 판이면 `session_not_found`, 소속이 아닌 판이면 `not_member`.
+
+읽기는 표를 직접 조회한다: `foods`(전체), `groups`·`memberships`·`sessions`·`session_participants`·`candidates`·`meals`·`meal_participants`(내 모임 것만), `votes`·`restrictions`(내 것만), `profiles`(로그인하면 전체).
+
+태그 코드: 재료 `spicy seafood pork beef chicken wheat dairy nuts`, 식단 `halal vegetarian vegan`, 음식 쪽 짝 표시 `halal_ok veg_ok vegan_ok`.
+
+실패 코드를 화면에 보일 때는 4절 문구를 쓴다. 4절에 문구가 정해진 코드:
+
+| 코드 | 화면 문구 | 기능 |
+|---|---|---|
+| `group_not_found` | 모임을 찾을 수 없어요 | 4-5 |
+| `name_taken` | 이미 있는 이름이에요 | 4-5 |
+| `not_member` | 이 모임 멤버가 아니에요 | 4-6 |
+| `voting_started` | 이미 투표가 시작됐어요 | 4-9 |
+| `no_candidates` | 후보를 하나 이상 올려주세요 | 4-10 |
+| `vote_limit` | 최대 2개까지 고를 수 있어요 | 4-11 |
+
+실시간 구독: sessions, session_participants, candidates. 변경이 오면 그 판을 통째로 다시 읽는다. votes는 구독에 넣지 않는다. Realtime은 지운 줄(DELETE) 신호에 RLS를 적용하지 못하고 기본 키를 보내는데, votes의 기본 키가 (판, 사람, 음식)이라 표를 취소하면 누가 무엇을 취소했는지가 다른 사람에게 갈 수 있다. 투표했는지는 session_participants.voted가 바뀌면서 신호가 온다 (`0005_realtime_no_votes.sql`, 이슈 #18).
 
 ---
 
@@ -265,22 +299,39 @@
 
 ## 7. 화면 목록
 
-| 화면 | 단계 | 하는 일 |
+| 화면 | 단계 | 주소 | 파일 | 담당 | 하는 일 |
+|---|---|---|---|---|---|
+| 홈 | 1 | `/` | `src/app/index.tsx` | C | 내 모임 목록, 모임 만들기 (모임 만들기는 홈 위에 뜨는 창이라 주소가 없다) |
+| 초대 | 1 | `/g/{초대코드}` | `src/app/g/[code].tsx` | D | 링크로 들어와 이름 적고 참여 |
+| 모임 | 1 | `/groups/{모임 id}` | `src/app/groups/[id].tsx` | C | 초대 링크, 멤버, 최근 식사, 판 시작 |
+| 세션 | 1 | `/sessions/{판 id}` | `src/app/sessions/[id].tsx` | E, 룰렛은 F | 후보 → 투표 → 룰렛 결과 (상태에 따라 바뀜). 룰렛은 이 화면 안의 부품 `src/components/roulette.tsx` |
+| 못 먹는 것 | 1 | `/restrictions` | `src/app/restrictions.tsx` | D | 태그, 음식, 이유 등록 |
+| 온보딩 | 2 | 2단계에서 정한다 | | | 이름, 8문항, 네 글자, 아이디 |
+| 프로필 (탭) | 2 | 2단계에서 정한다 | | | 내 네 글자, 기록, 공유 |
+| 결과 카드 | 2 | 2단계에서 정한다 | | | 이번 끼니 카드, 공유 |
+| 설정 (탭) | 3 | 3단계에서 정한다 | | | 아이디, 약관, 계정 삭제, 버전 |
+| 개인정보처리방침, 이용약관 | 3 | 3단계에서 정한다 | | | 법적 문서 |
+
+화면 사이 이동 (1단계). 각 화면은 아래 주소로만 넘긴다:
+
+| 어디서 | 무엇을 하면 | 어디로 |
 |---|---|---|
-| 홈 | 1 | 내 모임 목록, 모임 만들기 |
-| 초대 `/g/{코드}` | 1 | 링크로 들어와 이름 적고 참여 |
-| 모임 | 1 | 초대 링크, 멤버, 최근 식사, 판 시작 |
-| 세션 | 1 | 후보 → 투표 → 룰렛 결과 (상태에 따라 바뀜) |
-| 못 먹는 것 | 1 | 태그, 음식, 이유 등록 |
-| 온보딩 | 2 | 이름, 8문항, 네 글자, 아이디 |
-| 프로필 (탭) | 2 | 내 네 글자, 기록, 공유 |
-| 결과 카드 | 2 | 이번 끼니 카드, 공유 |
-| 설정 (탭) | 3 | 아이디, 약관, 계정 삭제, 버전 |
-| 개인정보처리방침, 이용약관 | 3 | 법적 문서 |
+| 홈 | 모임을 누른다 | `/groups/{모임 id}` |
+| 홈 | 모임 만들기 창에서 만든다 (`create_group`) | `/groups/{group_id}` |
+| 모임 | "오늘 뭐 먹지" 또는 "진행 중인 판으로" (`start_session`) | `/sessions/{판 id}` |
+| 모임 | 소속이 아니어서 "홈으로" | `/` |
+| 초대 | 들어간다 (`join_group`) | `open_session_id`가 있으면 `/sessions/{open_session_id}`, 없으면 `/groups/{group_id}` |
+| 세션 | 위쪽 "못 먹는 것" 버튼 | `/restrictions`, 저장하면 세션으로 돌아온다 |
+
+2단계에서 하단 탭을 넣을 때 화면 파일을 `src/app/(tabs)/` 아래로 옮겨도 주소는 그대로다. 위 주소를 바꾸려면 이 표부터 고친다 (이슈 #9).
 
 하단 탭: 홈, 프로필, 설정. 떠 있는 알약 모양, 아이콘만.
 
 디자인 규칙: 테두리만 있는 박스를 쓰지 않는다(배경색 카드). 요소 하나에 강조 신호 하나. 앱 화면에 이모지를 쓰지 않는다. 음식은 사진 대신 음식마다 고정된 색 동그라미.
+
+색: 강조색은 주황 하나(`primary`)이고 나머지는 검정, 흰색, 회색만 쓴다. 주황은 화면에서 가장 중요한 버튼과 고른 상태에만 쓴다. 음식 동그라미 8색도 주황과 회색 계열에서 고른다. 다른 색이 토큰에 들어오면 `src/components/design-rules.test.js`가 실패한다.
+
+공통 부품: 버튼, 카드, 입력칸, 음식 색 동그라미는 `src/components/`의 `Button`, `Card`, `TextField`, `FoodDot`을 쓴다. 화면마다 새로 만들지 않는다. 화면 파일(`src/app`, `src/components`)에 색 코드나 이모지가 있으면 테스트(`src/components/design-rules.test.js`)가 실패한다. 부품이 어떻게 보이는지는 개발용 화면 `/dev/parts`에서 본다 (이슈 #10).
 
 ---
 
@@ -332,17 +383,17 @@ CI:
 
 ## 10. 1단계 담당과 완료 조건
 
-2026-10-26 회의에서 정한다. 확정되면 묶음마다 GitHub 이슈로 옮기고, 그때부터는 이슈가 기준이다.
+묶음마다 GitHub 이슈로 옮겼다 (아래 표의 이슈 칸). 지금부터는 이슈가 기준이고, 이 절과 이슈가 다르면 이슈를 따른다.
 목표는 11주차 마일스톤 "MVP 완료" (1절 1단계 완료 기준 전부).
 
-| 묶음 | 담당 | 명세 | 선행 | 목표 |
-|---|---|---|---|---|
-| A. 뼈대, 공통 환경, 익명 로그인 | Aninnom | 2, 3, 4-1, 8 | 없음 | 9주차 (11/1까지) |
-| B. 데이터베이스와 서버 규칙 | Aninnom | 5, 6 | 없음 | 9주차 (11/1까지) |
-| C. 홈, 모임 만들기, 모임 화면 | GONI1130 | 4-2, 4-3, 4-4, 4-6 | 화면은 A, 연결은 B | 10주차 (11/8까지) |
-| D. 초대 링크 참여, 못 먹는 것 | Ruty041 | 4-5, 4-7 | C | 10주차 (11/8까지) |
-| E. 세션, 후보, 투표 | Aninnom | 4-8, 4-9, 4-10, 4-11 | C | 10주차 (11/8까지) |
-| F. 룰렛, 식사 기록, 3대 확인 | eoieiie | 4-12, 4-13, 1절 | E | 11주차 (11/15까지) |
+| 묶음 | 이슈 | 담당 | 명세 | 선행 | 목표 |
+|---|---|---|---|---|---|
+| A. 뼈대, 공통 환경, 익명 로그인 | #5 | Aninnom | 2, 3, 4-1, 8 | 없음 | 9주차 (11/1까지) |
+| B. 데이터베이스와 서버 규칙 | #7 | Aninnom | 5, 6 | 없음 | 9주차 (11/1까지) |
+| C. 홈, 모임 만들기, 모임 화면 | #13 | GONI1130 | 4-2, 4-3, 4-4, 4-6 | 화면은 A, 연결은 B | 10주차 (11/8까지) |
+| D. 초대 링크 참여, 못 먹는 것 | #14 | Ruty041 | 4-5, 4-7 | C | 10주차 (11/8까지) |
+| E. 세션, 후보, 투표 | #18 | eoieiie (10/31 Aninnom에서 넘겨받음) | 4-8, 4-9, 4-10, 4-11 | C | 10주차 (11/8까지) |
+| F. 룰렛, 식사 기록, 3대 확인 | #12 | eoieiie | 4-12, 4-13, 1절 | E | 11주차 (11/15까지) |
 
 순서: A, B 동시 → C → D, E 동시 → F. 선행이 안 끝났으면 가짜 데이터로 화면부터 만들고, 선행이 끝나면 연결한다.
 
@@ -397,7 +448,7 @@ CI:
 - 확인하는 법: 시크릿 창으로 링크 열기, 없는 코드 주소 열기, 같은 이름으로 두 번 들어가기, 해산물을 막은 뒤 후보에서 빠지는지 보기
 - 넘기는 것: 세션 화면 위쪽에 둘 "못 먹는 것" 버튼(E가 자리를 만든다)
 
-### E. 세션, 후보, 투표 (Aninnom)
+### E. 세션, 후보, 투표 (eoieiie, 10/31 Aninnom에서 넘겨받음)
 만드는 것: 한 판의 화면. 후보를 올리고 투표하기까지. 모든 기기가 실시간으로 같은 상태를 본다.
 시작 전에 필요한 것: C의 모임 화면, B의 세션·후보·투표 서버 함수.
 - [ ] 모임에서 시작하면 진행 중인 판이 있으면 그 판, 없으면 새 판이 열리고 연 사람이 방장이다. 화면에 들어오면 자동으로 참여자가 된다. 끝난 판에 들어오면 결과를 보여준다 (4-8)

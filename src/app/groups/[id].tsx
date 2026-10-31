@@ -2,6 +2,8 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Pressable, ScrollView, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { Button } from '@/components/button';
+import { FoodDot } from '@/components/food-dot';
 import { InviteCard } from '@/components/invite-card';
 import {
   Member,
@@ -80,68 +82,60 @@ export default function GroupScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-background">
-      {/* 상단 네비게이션 */}
-      <View className="flex-row items-center justify-between px-5 py-3">
+      <View className="flex-row items-center px-5 py-3">
         <Pressable
-          className="rounded-xl bg-surface px-3.5 py-2 active:opacity-80"
-          onPress={() => router.back()}
+          accessibilityRole="button"
+          accessibilityLabel="홈으로"
+          className="rounded-full bg-surface px-4 py-2 active:opacity-80"
+          onPress={() => router.replace('/')}
         >
-          <Text className="text-xs font-semibold text-text">뒤로</Text>
+          <Text className="text-sm font-semibold text-text">홈</Text>
         </Pressable>
-        <Text className="text-base font-bold text-text">{group.name}</Text>
-        <View className="w-12" />
       </View>
 
       <ScrollView
-        className="flex-1 px-5"
+        className="flex-1"
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingBottom: 100 }}
+        contentContainerClassName="gap-8 px-5 pb-36 pt-2"
       >
-        {/* 초대 카드 (spec.md 4-4) */}
-        <View className="mt-3">
-          <InviteCard inviteCode={group.invite_code} />
-        </View>
-
-        {/* 멤버 목록 (spec.md 4-6: 멤버 이름 동그라미) */}
-        <View className="mt-6">
-          <Text className="mb-3 text-xs font-semibold uppercase tracking-wider text-muted">
-            참여 멤버 ({group.members.length}명)
+        {/* 모임 이름과 멤버 이름 동그라미 (spec.md 4-6) */}
+        <View className="gap-4">
+          <Text className="text-4xl font-extrabold leading-tight tracking-tight text-text">
+            {group.name}
           </Text>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} className="flex-row">
-            {group.members.map((member: Member) => {
-              const initial = member.display_name.charAt(0) || '?';
-              return (
-                <View key={member.user_id} className="mr-3 items-center">
-                  <View className="h-12 w-12 items-center justify-center rounded-full bg-surface">
-                    <Text className="text-base font-bold text-text">{initial}</Text>
-                  </View>
-                  <Text className="mt-1 text-xs text-text" numberOfLines={1}>
-                    {member.display_name}
+          <View className="flex-row flex-wrap items-center gap-3">
+            {group.members.map((member: Member) => (
+              <View key={member.user_id} className="items-center gap-1">
+                <View className="h-12 w-12 items-center justify-center rounded-full bg-surface-strong">
+                  <Text className="text-base font-bold text-text">
+                    {Array.from(member.display_name)[0] ?? ''}
                   </Text>
                 </View>
-              );
-            })}
-          </ScrollView>
+                <Text className="max-w-14 text-xs text-muted" numberOfLines={1}>
+                  {member.display_name}
+                </Text>
+              </View>
+            ))}
+          </View>
         </View>
 
+        {/* 초대 카드 (spec.md 4-4) */}
+        <InviteCard inviteCode={group.invite_code} />
+
         {/* 최근 식사 5개 (spec.md 4-6) */}
-        <View className="mt-6">
-          <Text className="mb-3 text-xs font-semibold uppercase tracking-wider text-muted">
-            최근 식사
-          </Text>
+        <View className="gap-3">
+          <Text className="text-xl font-bold text-text">최근에 먹은 것</Text>
           {group.recent_meals.length === 0 ? (
-            <View className="rounded-2xl bg-surface p-5">
-              <Text className="text-center text-xs text-muted">아직 함께한 식사 기록이 없어요.</Text>
-            </View>
+            <Text className="text-sm text-muted">
+              아직 기록이 없어요. 한 판을 끝내면 여기에 쌓여요
+            </Text>
           ) : (
-            <View className="gap-2">
+            <View className="gap-4 rounded-3xl bg-surface p-5">
               {group.recent_meals.map((meal: RecentMeal) => (
-                <View
-                  key={meal.id}
-                  className="flex-row items-center justify-between rounded-xl bg-surface p-4"
-                >
-                  <Text className="text-sm font-semibold text-text">{meal.food_name}</Text>
-                  <Text className="text-xs text-muted">
+                <View key={meal.id} className="flex-row items-center gap-3">
+                  <FoodDot foodId={meal.food_id} size="sm" name={meal.food_name} />
+                  <Text className="flex-1 text-base font-semibold text-text">{meal.food_name}</Text>
+                  <Text className="text-sm text-muted">
                     {new Date(meal.eaten_at).toLocaleDateString('ko-KR', {
                       month: 'long',
                       day: 'numeric',
@@ -154,18 +148,13 @@ export default function GroupScreen() {
         </View>
       </ScrollView>
 
-      {/* 하단 고정 버튼 영역 */}
-      <View className="absolute bottom-0 left-0 right-0 bg-background/95 px-5 pb-8 pt-3">
-        <Pressable
-          className="w-full items-center justify-center rounded-2xl bg-primary py-4 active:opacity-90 disabled:opacity-50"
+      {/* 하단 고정 버튼. 진행 중인 판이 있으면 "진행 중인 판으로" (spec.md 4-6) */}
+      <View className="absolute bottom-0 left-0 right-0 bg-background px-5 pb-8 pt-3">
+        <Button
+          label={hasOpenSession ? '진행 중인 판으로' : '오늘 뭐 먹지'}
           onPress={handleStartOrJoinSession}
-          disabled={isStartingSession}
-        >
-          {/* 진행 중인 판 유무에 따른 버튼 문구 분기 (spec.md 4-6) */}
-          <Text className="text-base font-bold text-on-primary">
-            {isStartingSession ? '판 여는 중...' : hasOpenSession ? '진행 중인 판으로' : '오늘 뭐 먹지'}
-          </Text>
-        </Pressable>
+          loading={isStartingSession}
+        />
       </View>
     </SafeAreaView>
   );
