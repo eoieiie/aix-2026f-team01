@@ -1,6 +1,6 @@
 import * as Haptics from 'expo-haptics';
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { Animated, Easing, Platform, View } from 'react-native';
+import { Animated, Easing, Platform, useWindowDimensions, View } from 'react-native';
 import Svg, { Circle, G, Path, Text as SvgText } from 'react-native-svg';
 
 import { foodColorValues } from '@/components/food-dot';
@@ -48,20 +48,19 @@ export function sliceAt(arcs: Arc[], rotation: number): number {
   return i === -1 ? arcs.length - 1 : i;
 }
 
-const SIZE = 280;
-const R = SIZE / 2 - 4;
-const C = SIZE / 2;
+// 원판 지름. 좁은 화면에서는 양옆 여백 20씩을 남기고 줄인다
+const MAX_SIZE = 280;
 
-function point(angle: number, radius: number) {
+function point(c: number, angle: number, radius: number) {
   const rad = (angle * Math.PI) / 180;
-  return { x: C + radius * Math.sin(rad), y: C - radius * Math.cos(rad) };
+  return { x: c + radius * Math.sin(rad), y: c - radius * Math.cos(rad) };
 }
 
-function slicePath(start: number, end: number) {
-  const p0 = point(start, R);
-  const p1 = point(end, R);
+function slicePath(c: number, r: number, start: number, end: number) {
+  const p0 = point(c, start, r);
+  const p1 = point(c, end, r);
   const large = end - start > 180 ? 1 : 0;
-  return `M ${C} ${C} L ${p0.x} ${p0.y} A ${R} ${R} 0 ${large} 1 ${p1.x} ${p1.y} Z`;
+  return `M ${c} ${c} L ${p0.x} ${p0.y} A ${r} ${r} 0 ${large} 1 ${p1.x} ${p1.y} Z`;
 }
 
 function haptic(kind: 'tick' | 'done') {
@@ -87,6 +86,10 @@ export function Roulette({ slices, resultFoodId, spin, onDone }: RouletteProps) 
   const sliceKey = slices.map((s) => `${s.foodId}:${s.weight}:${s.name}`).join('|');
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const arcs = useMemo(() => sliceArcs(slices), [sliceKey]);
+  const { width } = useWindowDimensions();
+  const SIZE = Math.min(MAX_SIZE, width - 40);
+  const C = SIZE / 2;
+  const R = C - 4;
   const target = useMemo(() => finalRotation(arcs, resultFoodId), [arcs, resultFoodId]);
   const [rotation] = useState(() => new Animated.Value(spin ? 0 : target));
   const doneRef = useRef(false);
@@ -160,7 +163,7 @@ export function Roulette({ slices, resultFoodId, spin, onDone }: RouletteProps) 
             arcs.map((a) => (
               <Path
                 key={a.foodId}
-                d={slicePath(a.start, a.end)}
+                d={slicePath(C, R, a.start, a.end)}
                 fill={foodColorValues(a.foodId).fill}
                 stroke={colors.background}
                 strokeWidth={2}
@@ -171,7 +174,7 @@ export function Roulette({ slices, resultFoodId, spin, onDone }: RouletteProps) 
             // 너무 얇은 조각에는 이름을 쓰지 않는다
             if (a.end - a.start < 14) return null;
             const mid = (a.start + a.end) / 2;
-            const p = point(mid, R * 0.62);
+            const p = point(C, mid, R * 0.62);
             return (
               <G key={`label-${a.foodId}`} rotation={mid} origin={`${p.x}, ${p.y}`}>
                 <SvgText
