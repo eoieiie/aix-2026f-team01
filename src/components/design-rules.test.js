@@ -37,6 +37,21 @@ describe('디자인 규칙', () => {
     expect(found).toEqual([]);
   });
 
+  it('색은 주황 하나와 검정, 흰색, 회색만 쓴다', () => {
+    // 회색 계열(채도 0.1 미만)이거나 주황 계열(색상 15~35도)이어야 한다
+    const offPalette = Object.entries(tailwindColors).filter(([, hex]) => {
+      const [r, g, b] = [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16) / 255);
+      const max = Math.max(r, g, b);
+      const min = Math.min(r, g, b);
+      const light = (max + min) / 2;
+      const sat = max === min ? 0 : (max - min) / (1 - Math.abs(2 * light - 1));
+      if (sat < 0.1) return false;
+      const hue = max === r ? (60 * (g - b)) / (max - min) : max === g ? 120 : 240;
+      return !(hue >= 15 && hue <= 35);
+    });
+    expect(offPalette).toEqual([]);
+  });
+
   it('음식 색 동그라미가 쓰는 색은 모두 tailwind.config.js 토큰에 있다', () => {
     for (const cls of FOOD_COLOR_CLASSES) {
       expect(tailwindColors).toHaveProperty(cls.replace(/^bg-/, ''));
