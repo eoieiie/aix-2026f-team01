@@ -1,4 +1,6 @@
-import { ActivityIndicator, Platform, Pressable, Text } from 'react-native';
+import { ActivityIndicator, Pressable, Text } from 'react-native';
+
+import colors from '@/constants/colors.json';
 
 type ButtonProps = {
   label: string;
@@ -33,12 +35,8 @@ export function Button({
         primary ? 'bg-primary' : 'bg-surface'
       }`}>
       {loading ? (
-        // 색은 text- 토큰으로 준다. 앱에서는 NativeWind가 글자색을 color로 넘기고,
-        // 웹에서는 그 변환이 없어서 currentColor로 같은 class의 글자색을 따라가게 한다
-        <ActivityIndicator
-          className={primary ? 'text-on-primary' : 'text-text'}
-          color={Platform.OS === 'web' ? 'currentColor' : undefined}
-        />
+        // 로딩 표시는 className을 받지 못해서 토큰 값을 colors.json에서 꺼내 준다
+        <ActivityIndicator color={primary ? colors['on-primary'] : colors.text} />
       ) : (
         <Text className={`text-base font-semibold ${primary ? 'text-on-primary' : 'text-text'}`}>
           {label}
