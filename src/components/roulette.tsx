@@ -83,7 +83,10 @@ type RouletteProps = {
 
 // 원판 (4-12). 결과는 서버가 이미 정했고, 원판은 모든 기기에서 그 조각에 멈추도록 돈다
 export function Roulette({ slices, resultFoodId, spin, onDone }: RouletteProps) {
-  const arcs = useMemo(() => sliceArcs(slices), [slices]);
+  // 화면이 실시간 변경으로 다시 그려질 때마다 배열이 새로 와도, 조각이 같으면 원판을 다시 돌리지 않는다
+  const sliceKey = slices.map((s) => `${s.foodId}:${s.weight}:${s.name}`).join('|');
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const arcs = useMemo(() => sliceArcs(slices), [sliceKey]);
   const target = useMemo(() => finalRotation(arcs, resultFoodId), [arcs, resultFoodId]);
   const [rotation] = useState(() => new Animated.Value(spin ? 0 : target));
   const doneRef = useRef(false);
@@ -122,7 +125,10 @@ export function Roulette({ slices, resultFoodId, spin, onDone }: RouletteProps) 
       easing: Easing.out(Easing.cubic),
       useNativeDriver: Platform.OS !== 'web',
     });
-    anim.start(() => finish());
+    // 끝까지 돌았을 때만 결과를 보인다. 중간에 멈춘 것(화면을 떠남)은 결과가 아니다
+    anim.start(({ finished }) => {
+      if (finished) finish();
+    });
     // 화면이 뒤로 가서 애니메이션이 멈춰도 4초 뒤에는 결과를 보여준다
     const fallback = setTimeout(() => {
       rotation.setValue(target);
