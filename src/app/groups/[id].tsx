@@ -2,6 +2,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Pressable, ScrollView, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { FoodDot } from '@/components/food-dot';
 import { InviteCard } from '@/components/invite-card';
 import {
   Member,
@@ -140,7 +141,10 @@ export default function GroupScreen() {
                   key={meal.id}
                   className="flex-row items-center justify-between rounded-xl bg-surface p-4"
                 >
-                  <Text className="text-sm font-semibold text-text">{meal.food_name}</Text>
+                  <View className="flex-row items-center gap-3">
+                    <FoodDot foodId={meal.food_id} size="sm" name={meal.food_name} />
+                    <Text className="text-sm font-semibold text-text">{meal.food_name}</Text>
+                  </View>
                   <Text className="text-xs text-muted">
                     {new Date(meal.eaten_at).toLocaleDateString('ko-KR', {
                       month: 'long',
