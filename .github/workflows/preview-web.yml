@@ -4,8 +4,12 @@
 # 초대 링크(WEB_BASE)는 main 주소를 그대로 쓴다. main 주소(--prod)는 건드리지 않는다
 name: Preview web
 
+# 문서(.md, docs/)만 바꾸면 화면이 그대로라 돌리지 않는다
 on:
   pull_request:
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
 
 concurrency:
   group: preview-web-${{ github.event.pull_request.number }}
