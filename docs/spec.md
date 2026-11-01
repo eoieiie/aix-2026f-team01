@@ -130,10 +130,10 @@
 
 ### 4-7. 못 먹는 것 등록 (1단계)
 - 한 줄 설명: 못 먹는 재료와 음식을 한 번 적으면 모든 모임에 적용된다
-- 흐름: 세션 화면 위쪽(1단계) 또는 프로필 탭(2단계)의 "못 먹는 것" → 태그 고르기, 음식 검색해서 추가, 이유 고르기 → 저장 → 진행 중인 세션의 후보가 다시 판정된다
+- 흐름: 세션 화면 위쪽(1단계) 또는 프로필 탭(2단계)의 "못 먹는 것" → 태그 고르기, 음식 검색해서 추가 → 저장 → 진행 중인 세션의 후보가 다시 판정된다
 - 실패할 때: 저장 오류는 한국어 문구로 표시하고 화면에 남는다. 아무것도 안 고르고 저장하면 전부 해제된다
 - 태그: 재료 8개(맵기, 해산물, 돼지고기, 소고기, 닭고기, 밀가루, 유제품, 견과류), 식단 3개(할랄, 채식, 비건)
-- 이유: 알레르기 / 안 먹어요 / 신념. 판정에는 쓰지 않고 2단계 모임 프로필 집계에만 쓴다
+- 이유(알레르기, 안 먹어요, 신념)는 받지 않는다 (2026-11-02). 판정에도 모임 프로필(4-16)에도 쓰지 않는데, 알레르기는 건강 정보이고 신념은 종교와 맞닿은 정보다. 이미 저장된 이유는 지운다
 - 숫자: 음식 검색 결과 최대 6개
 - 관련 테이블: restrictions(사람 단위), foods
 
@@ -225,7 +225,7 @@
 | 테이블 | 주요 칸 | 용도 |
 |---|---|---|
 | profiles | user_id(PK), display_name(1~20), handle(유일, 3~16), quiz_answers(jsonb), axes(jsonb), created_at | 사람 하나당 하나 |
-| restrictions | user_id, tag 또는 food_id 중 하나, kind(allergy/dislike/belief) | 못 먹는 것. 사람에 붙는다 |
+| restrictions | user_id, tag 또는 food_id 중 하나 | 못 먹는 것. 사람에 붙는다. 이유는 저장하지 않는다(4-7) |
 | foods | id, name, name_en, tags[], cuisine | 음식 목록. 기본 40개 |
 | groups | id, name(1~40), invite_code(6, 유일), created_by | 모임 |
 | memberships | group_id, user_id, display_name(1~20), joined_at, (group_id, display_name) 유일 | 모임 소속. 모임 안에서 부르는 이름 |
@@ -260,8 +260,8 @@
 | `cast_vote` | `p_session_id`, `p_food_id` | 누른 뒤 찍혀 있는지(boolean). 같은 후보를 다시 누르면 취소 | `not_voting`, `not_participant`, `candidate_not_found`, `candidate_vetoed`, `vote_limit` |
 | `spin_roulette` | `p_session_id` | `{food_id, meal_id}` 1행. 판이 끝나고 식사 기록이 생김 | `not_host`, `not_voting`, `no_candidates` |
 | `session_vote_counts` | `p_session_id` | `{food_id, vote_count, vetoed}` 후보마다. 끝난 판에서만 | `session_not_found`, `not_done` |
-| `get_my_restrictions` | 없음 | `{tag, food_id, kind}` 여러 행 | |
-| `set_my_restrictions` | `p_items` 예: `[{"tag":"seafood","kind":"allergy"},{"food_id":3,"kind":"dislike"}]`. 빈 배열이면 전부 해제 | 없음 | `invalid_items` (없는 태그, 중복, 없는 음식, 숫자 아닌 food_id, kind 빠짐, 태그와 음식을 같이 줌). 실패하면 예전 값이 그대로 남는다 |
+| `get_my_restrictions` | 없음 | `{tag, food_id}` 여러 행 | |
+| `set_my_restrictions` | `p_items` 예: `[{"tag":"seafood"},{"food_id":3}]`. 빈 배열이면 전부 해제. `kind`가 들어 있으면 무시한다(예전 앱 호환) | 없음 | `invalid_items` (없는 태그, 중복, 없는 음식, 숫자 아닌 food_id, 태그와 음식을 같이 줌). 실패하면 예전 값이 그대로 남는다 |
 
 공통 실패 코드: `not_signed_in`. 판 id를 받는 함수(`join_session`부터 `spin_roulette`까지)는 없는 판이면 `session_not_found`, 소속이 아닌 판이면 `not_member`.
 
@@ -305,7 +305,7 @@
 | 초대 | 1 | `/g/{초대코드}` | `src/app/g/[code].tsx` | D | 링크로 들어와 이름 적고 참여 |
 | 모임 | 1 | `/groups/{모임 id}` | `src/app/groups/[id].tsx` | C | 초대 링크, 멤버, 최근 식사, 판 시작 |
 | 세션 | 1 | `/sessions/{판 id}` | `src/app/sessions/[id].tsx` | E, 룰렛은 F | 후보 → 투표 → 룰렛 결과 (상태에 따라 바뀜). 룰렛은 이 화면 안의 부품 `src/components/roulette.tsx` |
-| 못 먹는 것 | 1 | `/restrictions` | `src/app/restrictions.tsx` | D | 태그, 음식, 이유 등록 |
+| 못 먹는 것 | 1 | `/restrictions` | `src/app/restrictions.tsx` | D | 태그, 음식 등록 |
 | 온보딩 | 2 | 2단계에서 정한다 | | | 이름, 8문항, 네 글자, 아이디 |
 | 프로필 (탭) | 2 | 2단계에서 정한다 | | | 내 네 글자, 기록, 공유 |
 | 결과 카드 | 2 | 2단계에서 정한다 | | | 이번 끼니 카드, 공유 |
