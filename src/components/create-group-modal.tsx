@@ -63,8 +63,8 @@ export function CreateGroupModal({ visible, onClose }: CreateGroupModalProps) {
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={handleClose}>
       <View className="flex-1 items-center justify-center bg-black/40 px-6">
-        <View className="w-full max-w-sm rounded-2xl bg-background p-6 shadow-lg">
-          <Text className="text-xl font-bold text-text">새 모임 만들기</Text>
+        <View className="w-full max-w-sm rounded-3xl bg-background p-6">
+          <Text className="text-2xl font-extrabold text-text">새 모임 만들기</Text>
           <Text className="mt-1 text-sm text-muted">모임 이름과 내 이름을 입력해주세요.</Text>
 
           <View className="mt-5 gap-4">
@@ -111,7 +111,7 @@ export function CreateGroupModal({ visible, onClose }: CreateGroupModalProps) {
 
           <View className="mt-6 flex-row gap-2">
             <Pressable
-              className="flex-1 items-center justify-center rounded-xl bg-surface py-3"
+              className="flex-1 items-center justify-center rounded-full bg-surface py-4"
               onPress={handleClose}
               disabled={isPending}
             >
@@ -119,7 +119,7 @@ export function CreateGroupModal({ visible, onClose }: CreateGroupModalProps) {
             </Pressable>
 
             <Pressable
-              className={`flex-1 items-center justify-center rounded-xl py-3 ${
+              className={`flex-1 items-center justify-center rounded-full py-4 ${
                 isFormValid && !isPending ? 'bg-primary' : 'bg-surface opacity-50'
               }`}
               onPress={handleSubmit}
