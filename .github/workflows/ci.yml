@@ -1,10 +1,17 @@
 # PR마다 타입 검사, 린트, 테스트, 웹 빌드 (spec.md 8절 CI)
 name: CI
 
+# 문서(.md, docs/)만 바꾸면 돌리지 않는다
 on:
   pull_request:
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
   push:
     branches: [main]
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
 
 jobs:
   check:

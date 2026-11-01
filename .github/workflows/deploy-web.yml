@@ -4,9 +4,13 @@
 #   비밀 EXPO_TOKEN (EAS 계정의 액세스 토큰)
 name: Deploy web
 
+# 문서(.md, docs/)만 바뀐 머지는 화면이 그대로라 배포하지 않는다
 on:
   push:
     branches: [main]
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
   workflow_dispatch:
 
 concurrency:
