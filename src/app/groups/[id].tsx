@@ -15,7 +15,7 @@ import {
 export default function GroupScreen() {
   const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
-  const { group, isLoading, isError, error, refetch } = useGroupDetail(id || '');
+  const { group, isLoading, isError, refetch } = useGroupDetail(id || '');
   const { startSession, isPending: isStartingSession } = useStartSession(id || '');
 
   // 로딩 상태
@@ -33,7 +33,8 @@ export default function GroupScreen() {
       <SafeAreaView className="flex-1 items-center justify-center bg-background px-6">
         <Text className="text-base font-bold text-text">모임 정보를 불러올 수 없어요</Text>
         <Text className="mt-1 text-xs text-muted">
-          {error?.message || '네트워크 상태를 확인해주세요.'}
+          {/* 오류 원문(영어)은 보이지 않고 한국어 문구만 (spec.md 4절 실패할 때) */}
+          인터넷 연결을 확인하고 다시 시도해 주세요
         </Text>
         <Pressable
           className="mt-4 rounded-xl bg-surface px-5 py-2.5 active:opacity-80"

@@ -9,7 +9,7 @@ import { Group, useMyGroups } from '@/hooks/use-groups';
 
 export default function HomeScreen() {
   const router = useRouter();
-  const { groups, isLoading, isError, error, refetch } = useMyGroups();
+  const { groups, isLoading, isError, refetch } = useMyGroups();
   const [modalVisible, setModalVisible] = useState(false);
   const hasGroups = groups.length > 0;
 
@@ -69,7 +69,8 @@ export default function HomeScreen() {
           <View className="gap-3">
             <Text className="text-base font-bold text-text">모임을 불러올 수 없어요</Text>
             <Text className="text-sm text-muted">
-              {error?.message || '인터넷 연결을 확인하고 다시 시도해 주세요'}
+              {/* 오류 원문(영어)은 보이지 않고 한국어 문구만 (spec.md 4절 실패할 때) */}
+              인터넷 연결을 확인하고 다시 시도해 주세요
             </Text>
             <Button label="다시 시도" variant="secondary" onPress={() => refetch()} />
           </View>
