@@ -1,10 +1,7 @@
-import type { SupabaseClient } from '@supabase/supabase-js';
-
+import type { Client } from './groups';
 import { getSupabase } from './supabase';
 
 // 초대 링크로 참여 (spec.md 4-5). 서버 함수 get_group_by_code, join_group을 부른다
-
-type Client = Pick<SupabaseClient, 'auth' | 'from' | 'rpc'>;
 
 export interface InviteInfo {
   groupId: string;

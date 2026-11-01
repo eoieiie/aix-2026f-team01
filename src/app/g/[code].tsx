@@ -1,8 +1,12 @@
 import { type Href, useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, Pressable, Text, TextInput, View } from 'react-native';
+import { ActivityIndicator, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { Button } from '@/components/button';
+import { Card } from '@/components/card';
+import { TextField } from '@/components/text-field';
+import colors from '@/constants/colors.json';
 import { DISPLAY_NAME_MAX } from '@/constants';
 import { inviteErrorCode, useInvite, useJoinGroup, withRo } from '@/hooks/use-invite';
 
@@ -43,7 +47,7 @@ export default function InviteScreen() {
   if (isLoading) {
     return (
       <SafeAreaView className="flex-1 items-center justify-center bg-background">
-        <ActivityIndicator accessibilityLabel="모임을 찾는 중" />
+        <ActivityIndicator color={colors.primary} accessibilityLabel="모임을 찾는 중" />
       </SafeAreaView>
     );
   }
@@ -51,21 +55,16 @@ export default function InviteScreen() {
   if (error || !invite) {
     const notFound = inviteErrorCode(error) === 'group_not_found';
     return (
-      <SafeAreaView className="flex-1 items-center justify-center bg-background px-6">
-        <View className="w-full max-w-xs items-center rounded-2xl bg-surface p-8">
-          <Text className="text-base font-bold text-text">
-            {notFound ? '모임을 찾을 수 없어요' : '연결할 수 없어요'}
-          </Text>
-          <Pressable
-            accessibilityRole="button"
-            className="mt-5 w-full items-center rounded-xl bg-primary py-3 active:opacity-90 disabled:opacity-50"
-            disabled={retrying}
-            onPress={() => (notFound ? router.replace('/') : refetch())}
-          >
-            <Text className="text-sm font-bold text-on-primary">
-              {notFound ? '홈으로' : retrying ? '다시 연결하는 중' : '다시 시도'}
-            </Text>
-          </Pressable>
+      <SafeAreaView className="flex-1 items-center justify-center gap-4 bg-background px-6">
+        <Text className="text-lg font-bold text-text">
+          {notFound ? '모임을 찾을 수 없어요' : '연결할 수 없어요'}
+        </Text>
+        <View className="w-full max-w-xs">
+          {notFound ? (
+            <Button label="홈으로" onPress={() => router.replace('/')} />
+          ) : (
+            <Button label="다시 시도" variant="secondary" onPress={() => refetch()} loading={retrying} />
+          )}
         </View>
       </SafeAreaView>
     );
@@ -73,90 +72,79 @@ export default function InviteScreen() {
 
   const joinErrorCode = inviteErrorCode(joinError);
   // 문구가 정해진 오류는 그 문구, 아니면 네트워크 오류로 보고 버튼을 "다시 시도"로 바꾼다
-  const joinErrorMessage = joinError
-    ? joinErrorCode
-      ? joinError.message
-      : '연결할 수 없어요'
-    : null;
+  const joinErrorMessage = joinError ? (joinErrorCode ? joinError.message : '연결할 수 없어요') : null;
   const failedOnNetwork = !!joinError && !joinErrorCode;
 
   if (invite.isMember) {
     return (
-      <SafeAreaView className="flex-1 items-center justify-center bg-background px-6">
+      <SafeAreaView className="flex-1 items-center justify-center gap-4 bg-background px-6">
         {joinErrorMessage ? (
-          <View className="w-full max-w-xs items-center rounded-2xl bg-surface p-8">
-            <Text className="text-base font-bold text-text">{joinErrorMessage}</Text>
-            <Pressable
-              accessibilityRole="button"
-              className="mt-5 w-full items-center rounded-xl bg-primary py-3 active:opacity-90 disabled:opacity-50"
-              disabled={isPending}
-              onPress={() => enter(null)}
-            >
-              <Text className="text-sm font-bold text-on-primary">다시 시도</Text>
-            </Pressable>
-          </View>
+          <>
+            <Text className="text-lg font-bold text-text">{joinErrorMessage}</Text>
+            <View className="w-full max-w-xs">
+              <Button label="다시 시도" variant="secondary" onPress={() => enter(null)} loading={isPending} />
+            </View>
+          </>
         ) : (
-          <ActivityIndicator accessibilityLabel="모임으로 가는 중" />
+          <ActivityIndicator color={colors.primary} accessibilityLabel="모임으로 가는 중" />
         )}
       </SafeAreaView>
     );
   }
 
-  const useProfileName = !!invite.profileName && !askName;
+  const profileName = askName ? null : invite.profileName;
   const trimmedName = name.trim();
   // 이름이 비면 버튼이 꺼진다
-  const canSubmit = (useProfileName || trimmedName.length >= 1) && !isPending;
-
-  const buttonLabel = isPending
-    ? '들어가는 중'
-    : failedOnNetwork
-      ? '다시 시도'
-      : useProfileName
-        ? `${withRo(invite.profileName!)} 들어갈게요`
-        : '들어가기';
+  const canSubmit = profileName !== null || trimmedName.length >= 1;
+  const submit = () => {
+    if (canSubmit && !isPending) enter(profileName !== null ? null : trimmedName);
+  };
 
   return (
-    <SafeAreaView className="flex-1 items-center justify-center bg-background px-6">
-      <View className="w-full max-w-sm rounded-2xl bg-surface p-6">
-        <Text className="text-xs font-medium text-muted">초대받은 모임</Text>
-        <Text className="mt-1 text-xl font-bold text-text">{invite.groupName}</Text>
+    <SafeAreaView className="flex-1 bg-background">
+      <View className="flex-1 justify-center gap-8 px-5">
+        <View className="gap-2">
+          <Text className="text-base text-muted">초대받은 모임</Text>
+          <Text className="text-4xl font-extrabold leading-tight tracking-tight text-text">
+            {invite.groupName}
+          </Text>
+          <Text className="text-sm text-muted">가입 없이 이름만 적으면 들어가요</Text>
+        </View>
 
-        {useProfileName ? null : (
-          <View className="mt-5">
-            <Text className="mb-1 text-xs font-medium text-muted">
-              모임에서 쓸 이름 ({trimmedName.length}/{DISPLAY_NAME_MAX})
-            </Text>
-            <TextInput
-              className="h-12 rounded-xl bg-background px-4 text-base text-text placeholder:text-muted"
-              placeholder="예: 홍길동"
-              value={name}
-              onChangeText={(text) => {
-                setName(text);
-                reset();
-              }}
-              maxLength={DISPLAY_NAME_MAX}
-              autoFocus
-              onSubmitEditing={() => canSubmit && enter(trimmedName)}
-            />
-          </View>
+        {profileName !== null ? (
+          <Card>
+            <Text className="text-sm text-muted">이 이름으로 들어가요</Text>
+            <Text className="text-xl font-bold text-text">{profileName}</Text>
+            {joinErrorMessage ? <Text className="text-sm text-danger">{joinErrorMessage}</Text> : null}
+          </Card>
+        ) : (
+          <TextField
+            value={name}
+            onChangeText={(text) => {
+              setName(text);
+              reset();
+            }}
+            maxLength={DISPLAY_NAME_MAX}
+            label="모임에서 쓸 이름"
+            placeholder="예: 홍길동"
+            error={joinErrorMessage}
+            autoFocus
+            onSubmitEditing={submit}
+          />
         )}
 
-        {joinErrorMessage ? (
-          <Text className="mt-3 text-center text-xs text-danger">{joinErrorMessage}</Text>
-        ) : null}
-
-        <Pressable
-          accessibilityRole="button"
-          className={`mt-5 w-full items-center rounded-xl py-3 ${
-            canSubmit ? 'bg-primary active:opacity-90' : 'bg-background opacity-50'
-          }`}
+        <Button
+          label={
+            failedOnNetwork
+              ? '다시 시도'
+              : profileName !== null
+                ? `${withRo(profileName)} 들어갈게요`
+                : '들어가기'
+          }
+          onPress={submit}
           disabled={!canSubmit}
-          onPress={() => enter(useProfileName ? null : trimmedName)}
-        >
-          <Text className={`text-sm font-bold ${canSubmit ? 'text-on-primary' : 'text-muted'}`}>
-            {buttonLabel}
-          </Text>
-        </Pressable>
+          loading={isPending}
+        />
       </View>
     </SafeAreaView>
   );
