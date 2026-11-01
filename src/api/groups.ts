@@ -87,6 +87,22 @@ export async function getGroupVisitTime(groupId: string): Promise<string | null>
   }
 }
 
+// 내 프로필 이름. 있으면 모임을 만들 때 이름을 다시 묻지 않는다 (4-2)
+export async function getMyProfileName(client: Client = getSupabase()): Promise<string | null> {
+  const session = await client.auth.getSession();
+  if (session.error) throw session.error;
+  const userId = session.data.session?.user?.id;
+  if (!userId) return null;
+
+  const { data, error } = await client
+    .from('profiles')
+    .select('display_name')
+    .eq('user_id', userId)
+    .maybeSingle();
+  if (error) throwServerError(error);
+  return data?.display_name ?? null;
+}
+
 // 4-2. 모임 만들기 (RPC create_group)
 export async function createGroup(
   input: CreateGroupInput,

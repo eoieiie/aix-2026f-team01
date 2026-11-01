@@ -6,6 +6,7 @@ import {
   type CreateGroupResult,
   getGroupDetail,
   getMyGroups,
+  getMyProfileName,
   type Group,
   type GroupDetail,
   type Member,
@@ -56,6 +57,12 @@ export function generateInviteCode(): string {
   return result;
 }
 
+// 4-2. 내 프로필 이름. 없으면 null이고, 모임을 만들거나 초대로 들어가면 생긴다
+export function useMyProfileName() {
+  const query = useQuery({ queryKey: ['profile', 'name'], queryFn: () => getMyProfileName() });
+  return { profileName: query.data ?? null, isLoading: query.isPending };
+}
+
 // 4-3. 내 모임 목록 조회 훅 (최근에 들어간 순 정렬 반영)
 export function useMyGroups() {
   const query = useQuery({
@@ -90,6 +97,8 @@ export function useCreateGroup() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['groups'] });
+      // 처음 만든 사람은 이때 프로필 이름이 생긴다
+      queryClient.invalidateQueries({ queryKey: ['profile', 'name'] });
     },
   });
 
