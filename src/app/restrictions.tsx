@@ -113,6 +113,7 @@ export default function RestrictionsScreen() {
             foods={foods}
             excludeIds={draft.flatMap((i) => (i.foodId !== null ? [i.foodId] : []))}
             onPick={(food) => update(toggleItem(draft, { foodId: food.id }))}
+            pickLabel="못 먹는 것에 추가"
           />
         </View>
 

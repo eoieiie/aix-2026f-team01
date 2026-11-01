@@ -11,12 +11,21 @@ type FoodSearchProps = {
   // 이미 후보에 올라간 음식. 검색 목록에서 빠진다 (4-9)
   excludeIds: number[];
   onPick: (food: Food) => void;
+  // 누를 때 읽어 주는 동작 이름. 못 먹는 것 화면(4-7)은 "못 먹는 것에 추가"
+  pickLabel?: string;
   disabled?: boolean;
   error?: string | null;
 };
 
-// 음식 이름 일부를 치면 최대 6개를 보여주고, 누르면 후보로 올린다 (4-9)
-export function FoodSearch({ foods, excludeIds, onPick, disabled, error }: FoodSearchProps) {
+// 음식 이름 일부를 치면 최대 6개를 보여주고, 누르면 후보로 올린다 (4-9). 못 먹는 것 화면에서도 쓴다 (4-7)
+export function FoodSearch({
+  foods,
+  excludeIds,
+  onPick,
+  pickLabel = '후보로 올리기',
+  disabled,
+  error,
+}: FoodSearchProps) {
   const [query, setQuery] = useState('');
   const results = searchFoods(foods, query, excludeIds, FOOD_SEARCH_LIMIT);
 
@@ -35,7 +44,7 @@ export function FoodSearch({ foods, excludeIds, onPick, disabled, error }: FoodS
           <Pressable
             key={food.id}
             accessibilityRole="button"
-            accessibilityLabel={`${food.name} 후보로 올리기`}
+            accessibilityLabel={`${food.name} ${pickLabel}`}
             disabled={disabled}
             onPress={() => {
               onPick(food);
