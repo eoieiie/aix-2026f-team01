@@ -237,15 +237,15 @@
 | meals | id, group_id, session_id, food_id, eaten_at | 식사 기록 |
 | meal_participants | meal_id, user_id | 같이 먹은 사람 |
 
-집계(뷰): 두 사람이 같이 먹은 횟수, 사람별 음식별 횟수, 모임별 음식별 횟수, 사람별 총 끼니.
+집계: 두 사람이 같이 먹은 횟수, 사람별 음식별 횟수, 모임별 음식별 횟수, 사람별 총 끼니. 뷰 대신 2단계 서버 함수(아래 두 번째 표)로 한다. 소속 확인과 "인원수만 내보낸다"는 규칙을 함수 안에 둘 수 있어서다.
 
 권한(RLS):
 - 모임 데이터는 그 모임 소속만 읽는다
 - votes는 본인 행만 읽는다
-- 상태를 바꾸는 일(참여, 후보, 투표, 룰렛, 못 먹는 것 저장, 계정 삭제)은 RPC로만 한다. 테이블에 직접 쓰지 않는다
-- profiles는 로그인한 사람이 읽을 수 있고 본인만 쓴다
+- 상태를 바꾸는 일(참여, 후보, 투표, 룰렛, 못 먹는 것 저장, 프로필 저장, 계정 삭제)은 RPC로만 한다. 테이블에 직접 쓰지 않는다
+- profiles는 로그인한 사람이 읽을 수 있고 본인만 쓴다. 2단계부터는 `save_my_profile`로만 쓴다(1단계에 열어 둔 직접 쓰기 권한은 G에서 거둔다)
 
-서버 함수(RPC): 1단계 함수는 아래 표와 같다 (B, 이슈 #7). 모두 로그인한 사용자만 부를 수 있고, 실패하면 `error.message`에 영어 코드가 온다. 함수를 바꾸는 PR은 이 표도 같이 고친다. 2단계 이후 함수(`save_my_profile`, `delete_my_account`)와 집계 뷰는 그 단계에서 더한다.
+서버 함수(RPC): 1단계 함수는 아래 표와 같다 (B, 이슈 #7). 모두 로그인한 사용자만 부를 수 있고, 실패하면 `error.message`에 영어 코드가 온다. 함수를 바꾸는 PR은 이 표도 같이 고친다. 2단계 함수는 그 아래 두 번째 표다(G, 2026-11-02에 정함). `delete_my_account`는 3단계에서 더한다.
 
 | 함수 | 받는 값 | 돌려주는 값 | 실패 코드 |
 |---|---|---|---|
@@ -266,6 +266,22 @@
 
 공통 실패 코드: `not_signed_in`. 판 id를 받는 함수(`join_session`부터 `spin_roulette`까지)는 없는 판이면 `session_not_found`, 소속이 아닌 판이면 `not_member`.
 
+2단계 서버 함수 (G). 1단계와 같이 로그인한 사용자만 부를 수 있고, 실패하면 `error.message`에 영어 코드가 온다. 화면은 이 표의 이름과 모양대로 가짜 데이터를 만들어 먼저 그려도 된다.
+
+| 함수 | 받는 값 | 돌려주는 값 | 실패 코드 |
+|---|---|---|---|
+| `save_my_profile` | `p_display_name` (1~20), `p_handle` (영어 소문자·숫자·밑줄 3~16), `p_quiz_answers` (`"A"` 또는 `"B"` 8개 배열). 셋 다 생략할 수 있고, 생략한 칸은 그대로 둔다. 프로필이 없으면 만든다 | `{display_name, handle, axes}` 1행 | `display_name_required` (프로필이 없는데 이름을 안 줌), `name_empty`, `name_too_long`, `handle_invalid`, `handle_taken`, `quiz_invalid` |
+| `my_food_counts` | 없음 | `{food_id, meal_count}` 내가 먹은 음식마다. 많은 순, 같으면 food_id 순 | |
+| `my_companions` | 없음 | `{user_id, display_name, meal_count}` 나와 같이 먹은 사람마다(나는 빼고). 많은 순, 같으면 이름 순. 이름은 프로필 이름 | |
+| `group_profile_card` | `p_group_id` | jsonb `{member_count, tag_counts, food_block_count, tested_count, axes}` | `not_member` (없는 모임도 같은 코드) |
+| `meal_card` | `p_meal_id` | jsonb `{group_name, eaten_at, food_id, group_food_nth, my_food_nth, people}` | `meal_not_found`, `not_member` |
+
+- 축 점수 (`save_my_profile`, 4-14): 문항 1·2번은 탐험(A)↔반복(B), 3·4번은 매운맛↔순한맛, 5·6번은 한식↔외국음식, 7·8번은 주도↔수용. A는 +1, B는 -1, 축마다 두 문항의 평균이라 값은 -1, 0, 1 중 하나다. 서버가 계산해서 `axes`에 `{"explore": 1, "spicy": 0, "korean": -1, "lead": 1}` 모양으로 저장한다. 네 글자는 앱이 `axes`로 만든다. 0 이상이면 앞 글자(탐, 매, 한, 주), 음수면 뒤 글자(반, 순, 외, 수)
+- `group_profile_card` (4-16): `member_count`는 소속 수. `tag_counts`는 `[{tag, count}]`로, 태그마다 그 태그를 등록한 소속 수다. 0명인 태그는 빼고 많은 순, 같으면 태그 코드 순. `food_block_count`는 음식을 하나 이상 직접 지정한 소속 수. `tested_count`는 문항 답이 있는 소속 수이고, `axes`는 그 사람들의 축별 평균(소수 둘째 자리)이다. 아무도 없으면 `axes`는 null. 누가 무엇을 못 먹는지, 누가 어느 성향인지는 돌려주지 않는다
+- `meal_card` (4-17): 그 모임 소속이면 그 식사에 없었어도 볼 수 있다. `people`은 `[{user_id, display_name, together_nth}]`로, 그 식사를 같이 먹은 사람 전원이다. 이름은 그 모임 안에서 부르는 이름. `together_nth`는 나와 그 사람이 같이 먹은 식사 수(이 식사까지, 모든 모임을 합쳐서)이고 나 자신은 null. `group_food_nth`는 이 모임에서 이 음식을 먹은 몇 번째인지(이 식사까지). `my_food_nth`는 내가 이 음식을 먹은 몇 번째인지(이 식사까지, 모든 모임)이고 내가 그 식사에 없었으면 null. "이 식사까지"는 `eaten_at`이 이 식사보다 늦지 않은 것
+- 규칙 숫자(아이디 3~16자, 문항 8개)는 `app_limits()`와 `src/constants/index.ts`에 같이 더한다 (3절 4번)
+- migration은 `0006_profile_and_stats.sql` 하나에 둔다. 서버 규칙 테스트는 `supabase/tests/`에 더한다 (6절)
+
 읽기는 표를 직접 조회한다: `foods`(전체), `groups`·`memberships`·`sessions`·`session_participants`·`candidates`·`meals`·`meal_participants`(내 모임 것만), `votes`·`restrictions`(내 것만), `profiles`(로그인하면 전체).
 
 태그 코드: 재료 `spicy seafood pork beef chicken wheat dairy nuts egg`, 식단 `halal vegetarian vegan`, 음식 쪽 짝 표시 `halal_ok veg_ok vegan_ok`.
@@ -280,6 +296,9 @@
 | `voting_started` | 이미 투표가 시작됐어요 | 4-9 |
 | `no_candidates` | 후보를 하나 이상 올려주세요 | 4-10 |
 | `vote_limit` | 최대 2개까지 고를 수 있어요 | 4-11 |
+| `handle_invalid` | 영어 소문자, 숫자, 밑줄로 3~16자 | 4-14 |
+| `handle_taken` | 이미 쓰는 아이디예요 | 4-14 |
+| `meal_not_found` | 기록을 찾을 수 없어요 | 4-17 |
 
 실시간 구독: sessions, session_participants, candidates. 변경이 오면 그 판을 통째로 다시 읽는다. votes는 구독에 넣지 않는다. Realtime은 지운 줄(DELETE) 신호에 RLS를 적용하지 못하고 기본 키를 보내는데, votes의 기본 키가 (판, 사람, 음식)이라 표를 취소하면 누가 무엇을 취소했는지가 다른 사람에게 갈 수 있다. 투표했는지는 session_participants.voted가 바뀌면서 신호가 온다 (`0005_realtime_no_votes.sql`, 이슈 #18).
 
