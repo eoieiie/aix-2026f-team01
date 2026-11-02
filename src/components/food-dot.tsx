@@ -15,6 +15,7 @@ export const FOOD_COLOR_CLASSES = [
 ] as const;
 
 const SIZE_CLASSES = {
+  xs: 'h-3 w-3',
   sm: 'h-6 w-6',
   md: 'h-10 w-10',
   lg: 'h-14 w-14',

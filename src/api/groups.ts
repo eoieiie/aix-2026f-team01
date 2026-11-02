@@ -1,7 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import type { SupabaseClient } from '@supabase/supabase-js';
 
-import { RECENT_MEALS_LIMIT } from '@/constants';
+import { HOME_RECENT_FOODS, RECENT_MEALS_LIMIT } from '@/constants';
 
 import { getSupabase } from './supabase';
 
@@ -13,6 +13,10 @@ export interface Group {
   invite_code: string;
   created_at: string;
   last_visited_at: string;
+  // 홈 모임 카드에 보이는 것 (docs/design.md 1절). 멤버 이름은 들어온 순서
+  members: string[];
+  recent_foods: { food_id: number; food_name: string }[];
+  has_open_session: boolean;
 }
 
 export interface Member {
@@ -121,7 +125,14 @@ export async function createGroup(
   return result;
 }
 
-// 4-3. 내 모임 목록 (memberships JOIN groups)
+// 4-3. 내 모임 목록 (memberships JOIN groups). 카드에 보일 멤버 이름, 최근 먹은 것, 진행 중인 판도 같이 읽는다
+// sessions는 meals를 거쳐서도 groups와 이어져서, 어느 관계로 붙일지 외래 키 이름을 적는다
+const MY_GROUPS_SELECT =
+  'group_id, joined_at, groups ( id, name, invite_code, created_at, ' +
+  'members:memberships ( display_name, joined_at ), ' +
+  'sessions!sessions_group_id_fkey ( status ), ' +
+  'meals ( food_id, eaten_at, foods ( name ) ) )';
+
 export async function getMyGroups(client: Client = getSupabase()): Promise<Group[]> {
   const session = await client.auth.getSession();
   if (session.error) throw session.error;
@@ -130,7 +141,7 @@ export async function getMyGroups(client: Client = getSupabase()): Promise<Group
 
   const { data, error } = await client
     .from('memberships')
-    .select('group_id, joined_at, groups ( id, name, invite_code, created_at )')
+    .select(MY_GROUPS_SELECT)
     .eq('user_id', userId);
 
   if (error) throwServerError(error);
@@ -141,12 +152,24 @@ export async function getMyGroups(client: Client = getSupabase()): Promise<Group
       const g = row.groups;
       if (!g) return null;
       const visitedAt = (await getGroupVisitTime(g.id)) || row.joined_at || g.created_at;
+      const members = [...(g.members ?? [])].sort((a: any, b: any) =>
+        String(a.joined_at).localeCompare(String(b.joined_at))
+      );
+      const meals = [...(g.meals ?? [])].sort((a: any, b: any) =>
+        String(b.eaten_at).localeCompare(String(a.eaten_at))
+      );
       return {
         id: g.id,
         name: g.name,
         invite_code: g.invite_code,
         created_at: g.created_at,
         last_visited_at: visitedAt,
+        members: members.map((m: any) => m.display_name),
+        recent_foods: meals.slice(0, HOME_RECENT_FOODS).map((m: any) => ({
+          food_id: m.food_id,
+          food_name: m.foods?.name ?? '식사',
+        })),
+        has_open_session: (g.sessions ?? []).some((s: any) => s.status !== 'done'),
       } as Group;
     })
   );
@@ -260,7 +283,9 @@ export async function startSession(
   groupId: string,
   client: Client = getSupabase()
 ): Promise<string> {
-  const { data, error } = await client.rpc('start_session', { p_group_id: groupId });
+  const { data, error } = await client.rpc('start_session', {
+    p_group_id: groupId,
+  });
   if (error) throwServerError(error);
   if (!data) throw new Error('start_session 응답이 비어 있다');
   return data;

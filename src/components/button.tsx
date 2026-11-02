@@ -6,7 +6,8 @@ type ButtonProps = {
   label: string;
   onPress: () => void;
   // primary는 화면에서 가장 중요한 버튼 하나에만 쓴다 (spec.md 7절 "요소 하나에 강조 신호 하나")
-  variant?: 'primary' | 'secondary';
+  // inverse는 주황 바탕 위의 흰 버튼이다. 주황 위에 주황 버튼을 두지 않는다 (docs/design.md 순간 1)
+  variant?: 'primary' | 'secondary' | 'inverse';
   // 꺼진 버튼은 눌리지 않고 흐리게 보인다. 예: 이름이 비면 버튼이 꺼진다 (4-2, 4-5)
   disabled?: boolean;
   // 서버 응답을 기다리는 동안. 두 번 눌리지 않게 꺼진 것으로 다룬다
@@ -32,7 +33,7 @@ export function Button({
       disabled={off}
       onPress={onPress}
       className={`h-14 items-center justify-center rounded-full px-6 active:opacity-80 disabled:opacity-40 ${
-        primary ? 'bg-primary' : 'bg-surface'
+        primary ? 'bg-primary' : variant === 'inverse' ? 'bg-on-primary' : 'bg-surface'
       }`}>
       {loading ? (
         // 로딩 표시는 className을 받지 못해서 토큰 값을 colors.json에서 꺼내 준다

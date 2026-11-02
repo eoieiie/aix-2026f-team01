@@ -7,6 +7,8 @@
   "primary": "#F05A00",
   "primary-soft": "#FFEDE0",
   "on-primary": "#FFFFFF",
+  "ink": "#000000",
+  "on-ink": "#FFFFFF",
   "danger": "#C2410C",
   "food-1": "#F05A00",
   "food-2": "#3F3F46",

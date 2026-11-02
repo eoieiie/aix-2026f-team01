@@ -24,3 +24,12 @@ export const ROULETTE_SPIN_MS = 3600;
 export const ROULETTE_TURNS = 5;
 export const ROULETTE_RESULT_FALLBACK_MS = 4000;
 export const ROULETTE_LABEL_MAX = 7;
+
+// 홈 모임 카드 (docs/design.md 1절)
+export const HOME_RECENT_FOODS = 3;
+export const PERSON_DOTS_MAX = 3;
+
+// 룰렛 결과 순간 (docs/design.md 순간 1). 원판이 멈추고 쉬는 시간, 주황이 번지는 시간, 글자가 나타나는 시간
+export const RESULT_MOMENT_PAUSE_MS = 300;
+export const RESULT_MOMENT_FLOOD_MS = 450;
+export const RESULT_MOMENT_TEXT_MS = 200;

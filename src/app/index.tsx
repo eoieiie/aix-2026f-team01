@@ -5,6 +5,8 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Button } from '@/components/button';
 import { CreateGroupModal } from '@/components/create-group-modal';
+import { FoodDot } from '@/components/food-dot';
+import { PersonDots } from '@/components/person-dots';
 import { Group, useMyGroups } from '@/hooks/use-groups';
 
 export default function HomeScreen() {
@@ -13,24 +15,38 @@ export default function HomeScreen() {
   const [modalVisible, setModalVisible] = useState(false);
   const hasGroups = groups.length > 0;
 
-  // 모임 한 줄. 사진이 없으니 모임 이름 첫 글자를 검은 사각형에 크게 쓴다
+  // 모임 카드: 사람 동그라미, 모임 이름, 최근 먹은 것. 진행 중인 판이 있으면 주황 알약 하나 (docs/design.md 1절)
   const renderGroupItem = ({ item }: { item: Group }) => (
     <Pressable
       accessibilityRole="button"
       accessibilityLabel={`${item.name} 모임 열기`}
-      className="flex-row items-center gap-4 rounded-3xl bg-surface p-4 active:opacity-80"
+      className="gap-5 rounded-3xl bg-surface p-5 active:opacity-80"
       onPress={() => router.push(`/groups/${item.id}`)}
     >
-      <View className="h-14 w-14 items-center justify-center rounded-2xl bg-text">
-        <Text className="text-2xl font-extrabold text-on-primary">
-          {Array.from(item.name)[0] ?? ''}
-        </Text>
+      <View className="flex-row items-center justify-between">
+        <PersonDots names={item.members} />
+        {item.has_open_session ? (
+          <View className="rounded-full bg-primary px-4 py-2">
+            <Text className="text-sm font-bold text-on-primary">판 진행 중</Text>
+          </View>
+        ) : null}
       </View>
-      <View className="flex-1 gap-0.5">
-        <Text className="text-lg font-bold text-text" numberOfLines={1}>
+      <View className="gap-2">
+        <Text className="text-2xl font-extrabold tracking-tight text-text" numberOfLines={1}>
           {item.name}
         </Text>
-        <Text className="text-sm text-muted">초대 코드 {item.invite_code}</Text>
+        {item.recent_foods.length > 0 ? (
+          <View className="flex-row flex-wrap items-center gap-x-4 gap-y-1">
+            {item.recent_foods.map((food, i) => (
+              <View key={`${i}-${food.food_id}`} className="flex-row items-center gap-1.5">
+                <FoodDot foodId={food.food_id} size="xs" />
+                <Text className="text-sm font-semibold text-text">{food.food_name}</Text>
+              </View>
+            ))}
+          </View>
+        ) : (
+          <Text className="text-sm text-muted">아직 같이 먹은 기록이 없어요</Text>
+        )}
       </View>
     </Pressable>
   );
@@ -40,18 +56,14 @@ export default function HomeScreen() {
       <View className="flex-1 px-5 pt-4">
         <View className="flex-row items-center justify-between">
           <Text className="text-base font-extrabold text-text">밥비티아이</Text>
-          {/* 모임이 없을 때는 아래 "첫 모임 만들기"가 강조 버튼이라 위쪽은 회색으로 둔다 (spec.md 7절 강조 신호 하나) */}
+          {/* 주황은 모임 카드의 "판 진행 중"과 "첫 모임 만들기"에 남겨 두고, 위쪽은 늘 회색 (docs/design.md 1절) */}
           <Pressable
             accessibilityRole="button"
             accessibilityLabel="모임 만들기"
-            className={`rounded-full px-4 py-2.5 active:opacity-80 ${
-              hasGroups ? 'bg-primary' : 'bg-surface'
-            }`}
+            className="rounded-full bg-surface px-4 py-2.5 active:opacity-80"
             onPress={() => setModalVisible(true)}
           >
-            <Text className={`text-sm font-bold ${hasGroups ? 'text-on-primary' : 'text-text'}`}>
-              모임 만들기
-            </Text>
+            <Text className="text-sm font-bold text-text">모임 만들기</Text>
           </Pressable>
         </View>
 
