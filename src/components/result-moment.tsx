@@ -12,6 +12,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Button } from '@/components/button';
 import { Roulette } from '@/components/roulette';
+import colors from '@/constants/colors.json';
 import { RESULT_MOMENT_FLOOD_MS, RESULT_MOMENT_PAUSE_MS, RESULT_MOMENT_TEXT_MS } from '@/constants';
 import { rouletteSlices, type SessionView, useVoteCounts } from '@/hooks/use-session';
 import { useReduceMotion } from '@/hooks/use-reduce-motion';
@@ -103,9 +104,12 @@ export function ResultMoment({ session, from, onGroup }: ResultMomentProps) {
 
   return (
     <View className="absolute inset-0 overflow-hidden">
+      {/* Animated.View는 className을 받지 않아서 style로 준다. 색은 colors.json의 토큰 값 */}
       <Animated.View
-        className="absolute rounded-full bg-primary"
         style={{
+          position: 'absolute',
+          borderRadius: radius,
+          backgroundColor: colors.primary,
           left: origin.x - radius,
           top: origin.y - radius,
           width: radius * 2,
@@ -114,8 +118,8 @@ export function ResultMoment({ session, from, onGroup }: ResultMomentProps) {
         }}
       />
       <Animated.View
-        className="flex-1"
         style={{
+          flex: 1,
           opacity: text,
           transform: [
             {
