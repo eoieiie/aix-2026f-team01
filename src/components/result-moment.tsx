@@ -155,6 +155,7 @@ export function ResultMoment({ session, from, onGroup }: ResultMomentProps) {
                   spin={false}
                   tone="onPrimary"
                   showVotes={anyVotes}
+                  maxSize={340}
                 />
               </View>
             ) : null}

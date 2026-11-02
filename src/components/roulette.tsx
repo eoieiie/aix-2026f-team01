@@ -82,6 +82,8 @@ type RouletteProps = {
   tone?: 'food' | 'onPrimary';
   // 조각마다 이름 아래 "N표". 아무도 안 찍어 조각이 같은 크기면 끈다
   showVotes?: boolean;
+  // 원판 지름의 최대값. 결과 순간에서는 화면을 채우게 크게 준다
+  maxSize?: number;
 };
 
 // 주황 바탕 위에서는 뽑힌 조각만 흰색, 나머지는 흰색을 번갈아 옅게
@@ -116,13 +118,14 @@ export function Roulette({
   onDone,
   tone = 'food',
   showVotes = false,
+  maxSize = MAX_SIZE,
 }: RouletteProps) {
   // 화면이 실시간 변경으로 다시 그려질 때마다 배열이 새로 와도, 조각이 같으면 원판을 다시 돌리지 않는다
   const sliceKey = slices.map((s) => `${s.foodId}:${s.weight}:${s.name}`).join('|');
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const arcs = useMemo(() => sliceArcs(slices), [sliceKey]);
   const { width } = useWindowDimensions();
-  const SIZE = Math.min(MAX_SIZE, width - 40);
+  const SIZE = Math.min(maxSize, width - 40);
   const C = SIZE / 2;
   const R = C - 4;
   const target = useMemo(() => finalRotation(arcs, resultFoodId), [arcs, resultFoodId]);
@@ -223,7 +226,11 @@ export function Roulette({
             const p = point(C, mid, R * 0.62);
             const s = sliceStyle(tone, a, i, resultFoodId);
             return (
-              <G key={`label-${a.foodId}`} rotation={mid} origin={`${p.x}, ${p.y}`}>
+              // 멈춘 채로 보이는 결과 순간에서는 글자를 똑바로 세운다(원판이 돌아간 만큼 되돌림)
+              <G
+                key={`label-${a.foodId}`}
+                rotation={tone === 'onPrimary' ? -target : mid}
+                origin={`${p.x}, ${p.y}`}>
                 <SvgText
                   x={p.x}
                   y={showVotes ? p.y - 2 : p.y + 5}
