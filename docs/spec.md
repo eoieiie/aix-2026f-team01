@@ -211,6 +211,7 @@
 - 내용: 태그별로 못 먹는 사람 수(많은 순), 음식을 직접 막은 사람 수, 네 축별 기울기(테스트한 사람만 센다, "테스트한 N명 기준")
 - 자리: 모임 화면의 최근 식사 아래. 숫자는 `group_profile_card` 하나로 받는다 (5절 2단계 표)
 - 규칙: 누가 무엇을 못 먹는지는 보여주지 않는다. 인원수만 보여준다
+- 인원이 적으면 숫자만으로 누구인지 드러난다(2명 모임의 "할랄 1명", 1명만 테스트한 모임의 축 평균). 그래서 소속이 3명 미만이면 못 먹는 것 칸 대신 "세 명 이상 모이면 보여요", 네 글자를 만든 사람이 3명 미만이면 네 축 칸 대신 "세 명 이상 네 글자를 만들면 보여요"를 보인다. 3명 이상이어도 완전히 막지는 못한다(나 말고 두 명이 모두 해당하면 알 수 있다). 숫자를 아예 없애면 카드가 쓸모없어져서 이 정도는 받아들인다
 
 ### 4-17. 결과 카드 (2단계)
 - 내용: 모임 이름, 날짜, 음식, 같이 먹은 사람과 "OO랑 n번째 밥", 모임에서 이 음식 n번째, 나의 n번째
@@ -247,7 +248,7 @@
 - 모임 데이터는 그 모임 소속만 읽는다
 - votes는 본인 행만 읽는다
 - 상태를 바꾸는 일(참여, 후보, 투표, 룰렛, 못 먹는 것 저장, 프로필 저장, 계정 삭제)은 RPC로만 한다. 테이블에 직접 쓰지 않는다
-- profiles는 로그인한 사람이 읽을 수 있고 본인만 쓴다. 2단계부터는 `save_my_profile`로만 쓴다(1단계에 열어 둔 직접 쓰기 권한은 G에서 거둔다)
+- profiles는 본인 행만 읽고 쓴다. 다른 사람의 이름은 모임 소속 이름(memberships)과 서버 함수로만 보인다. 1단계에 열어 둔 "로그인하면 전체 읽기"와 직접 쓰기 권한은 G에서 거두고, 2단계부터 쓰기는 `save_my_profile`로만 한다. 이유: 2단계부터 이 표에 온보딩 답과 네 글자 축이 들어간다 (PR #37 리뷰)
 
 서버 함수(RPC): 1단계 함수는 아래 표와 같다 (B, 이슈 #7). 모두 로그인한 사용자만 부를 수 있고, 실패하면 `error.message`에 영어 코드가 온다. 함수를 바꾸는 PR은 이 표도 같이 고친다. 2단계 함수는 그 아래 두 번째 표다(G, 2026-11-02에 정함). `delete_my_account`는 3단계에서 더한다.
 
@@ -281,12 +282,12 @@
 | `meal_card` | `p_meal_id` | jsonb `{group_name, eaten_at, food_id, group_food_nth, my_food_nth, people}` | `meal_not_found`, `not_member` |
 
 - 축 점수 (`save_my_profile`, 4-14): 문항 1·2번은 탐험(A)↔반복(B), 3·4번은 매운맛↔순한맛, 5·6번은 한식↔외국음식, 7·8번은 주도↔수용. A는 +1, B는 -1, 축마다 두 문항의 평균이라 값은 -1, 0, 1 중 하나다. 서버가 계산해서 `axes`에 `{"explore": 1, "spicy": 0, "korean": -1, "lead": 1}` 모양으로 저장한다. 네 글자는 앱이 `axes`로 만든다. 0 이상이면 앞 글자(탐, 매, 한, 주), 음수면 뒤 글자(반, 순, 외, 수)
-- `group_profile_card` (4-16): `member_count`는 소속 수. `tag_counts`는 `[{tag, count}]`로, 태그마다 그 태그를 등록한 소속 수다. 0명인 태그는 빼고 많은 순, 같으면 태그 코드 순. `food_block_count`는 음식을 하나 이상 직접 지정한 소속 수. `tested_count`는 문항 답이 있는 소속 수이고, `axes`는 그 사람들의 축별 평균(소수 둘째 자리)이다. 아무도 없으면 `axes`는 null. 누가 무엇을 못 먹는지, 누가 어느 성향인지는 돌려주지 않는다
+- `group_profile_card` (4-16): `member_count`는 소속 수. `tag_counts`는 `[{tag, count}]`로, 태그마다 그 태그를 등록한 소속 수다. 0명인 태그는 빼고 많은 순, 같으면 태그 코드 순. `food_block_count`는 음식을 하나 이상 직접 지정한 소속 수. `tested_count`는 문항 답이 있는 소속 수이고, `axes`는 그 사람들의 축별 평균(소수 둘째 자리)이다. `member_count`가 3 미만이면 `tag_counts`와 `food_block_count`는 null이고, `tested_count`가 3 미만이면 `axes`는 null이다 (4-16). 누가 무엇을 못 먹는지, 누가 어느 성향인지는 돌려주지 않는다
 - `meal_card` (4-17): 그 모임 소속이면 그 식사에 없었어도 볼 수 있다. `people`은 `[{user_id, display_name, together_nth}]`로, 그 식사를 같이 먹은 사람 전원이다. 이름은 그 모임 안에서 부르는 이름. `together_nth`는 나와 그 사람이 같이 먹은 식사 수(이 식사까지, 모든 모임을 합쳐서)이고 나 자신은 null. `group_food_nth`는 이 모임에서 이 음식을 먹은 몇 번째인지(이 식사까지). `my_food_nth`는 내가 이 음식을 먹은 몇 번째인지(이 식사까지, 모든 모임)이고 내가 그 식사에 없었으면 null. "이 식사까지"는 `eaten_at`이 이 식사보다 늦지 않은 것
 - 규칙 숫자(아이디 3~16자, 문항 8개)는 `app_limits()`와 `src/constants/index.ts`에 같이 더한다 (3절 4번)
 - migration은 `0006_profile_and_stats.sql` 하나에 둔다. 서버 규칙 테스트는 `supabase/tests/`에 더한다 (6절)
 
-읽기는 표를 직접 조회한다: `foods`(전체), `groups`·`memberships`·`sessions`·`session_participants`·`candidates`·`meals`·`meal_participants`(내 모임 것만), `votes`·`restrictions`(내 것만), `profiles`(로그인하면 전체).
+읽기는 표를 직접 조회한다: `foods`(전체), `groups`·`memberships`·`sessions`·`session_participants`·`candidates`·`meals`·`meal_participants`(내 모임 것만), `votes`·`restrictions`(내 것만), `profiles`(내 것만).
 
 태그 코드: 재료 `spicy seafood pork beef chicken wheat dairy nuts egg`, 식단 `halal vegetarian vegan`, 음식 쪽 짝 표시 `halal_ok veg_ok vegan_ok`.
 
@@ -520,14 +521,14 @@ CI:
 | J. 하단 탭과 내 프로필 | #41 | GONI1130 | 4-15, 7절 | 서버 연결은 G | 11/18 |
 | K. 모임 프로필 카드 | #42 | GONI1130 | 4-16 | 서버 연결은 G | 11/18 |
 | L. 결과 카드와 공유 | #43 | eoieiie | 4-17, 4-15 공유 | 서버 연결은 G, 프로필 공유는 J | 11/18 |
-| 사용자 인터뷰 3명 (사람이 직접) | #44 | Aninnom, Ruty041, GONI1130 | `docs/interviews.md`, README 2절 | 없음 | 11/11 |
+| 사용자 인터뷰 3명 (사람이 직접) | #44 | Aninnom, Ruty041, GONI1130 | `docs/interviews.md`, README 2절 | 없음 | 11/9 |
 
 순서: G와 H를 먼저 올린다. I, J, K, L은 동시에 시작하고, G가 서버에 들어가기 전에는 가짜 데이터로 화면부터 만든다.
 
 ### 모든 묶음 공통 (2단계)
 - [ ] 1단계 공통 네 가지(10절)를 그대로 지킨다
 - [ ] 서버 함수가 아직 없으면 `src/hooks/`에 5절 2단계 표와 같은 이름과 모양의 가짜 데이터를 두고 화면부터 만든다. 서버에 들어가면 `src/api/`로 연결하고 가짜 데이터는 지운다
-- [ ] migration이 들어간 PR이 머지되면 Aninnom이 `supabase db push`로 서버에 넣고 그 이슈에 댓글을 단다. 미리보기도 같은 서버를 쓰므로 그 전에는 미리보기에서 새 함수가 동작하지 않는다
+- [ ] migration이 들어간 PR이 머지되면 Aninnom이 `supabase db push`로 서버에 넣고 그 이슈에 댓글을 단다. 0001~0005는 SQL Editor로 들어가서 적용 기록이 비어 있을 수 있다. 처음 넣기 전에 `supabase migration list`로 보고, 비어 있으면 `supabase migration repair --status applied`로 0001~0005를 적용된 것으로 표시한 뒤 넣는다. 미리보기도 같은 서버를 쓰므로 그 전에는 미리보기에서 새 함수가 동작하지 않는다
 - [ ] migration 번호는 미리 나눴다. 0006은 G, 0007은 H. 다른 묶음은 migration을 만들지 않는다. 필요하면 먼저 묻는다
 - [ ] 새 라이브러리는 2절에 있는 것만 넣는다 (react-native-view-shot, expo-sharing은 L). 아이콘은 react-native-svg로 그린다
 - [ ] 여러 묶음이 같은 파일을 고칠 때: `src/constants/index.ts`는 줄 추가만, 온보딩으로 보내는 곳은 I만, `src/app/(tabs)/` 폴더와 홈 파일 이동은 J만, 모임 화면은 K가 카드 자리를 L이 최근 식사 줄을 고친다
