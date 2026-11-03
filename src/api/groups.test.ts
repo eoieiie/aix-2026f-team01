@@ -4,6 +4,7 @@ import {
   createGroup,
   getGroupDetail,
   getMyGroups,
+  getMyProfileName,
   GroupError,
   startSession,
 } from './groups';
@@ -190,6 +191,22 @@ describe('src/api/groups.ts 테스트', () => {
     it('멤버가 아니면 GroupError(not_member)를 던진다', async () => {
       const { client } = fakeClient({ rpcError: { message: 'not_member' } });
       await expect(startSession('g1', client)).rejects.toThrow('이 모임 멤버가 아니에요');
+    });
+  });
+  describe('getMyProfileName (4-2 프로필 이름이 있으면 묻지 않음)', () => {
+    it('프로필 이름이 있으면 그 이름을 돌려준다', async () => {
+      const { client } = fakeClient({ fromData: { profiles: { maybeSingle: { display_name: '병주' } } } });
+      await expect(getMyProfileName(client)).resolves.toBe('병주');
+    });
+
+    it('프로필이 없으면 null이라 창에서 이름을 묻는다', async () => {
+      const { client } = fakeClient({ fromData: { profiles: { maybeSingle: null } } });
+      await expect(getMyProfileName(client)).resolves.toBeNull();
+    });
+
+    it('로그인 전이면 null', async () => {
+      const { client } = fakeClient({ userId: null });
+      await expect(getMyProfileName(client)).resolves.toBeNull();
     });
   });
 });
