@@ -87,6 +87,17 @@ begin
 end;
 $$;
 
+-- profiles 권한 (5절). 온보딩 답과 축이 들어가므로 본인 행만 읽는다.
+-- 쓰기는 save_my_profile과 resolve_display_name만 한다 ----------------------
+
+revoke insert, update on public.profiles from authenticated;
+
+drop policy profiles_insert on public.profiles;
+drop policy profiles_update on public.profiles;
+drop policy profiles_select on public.profiles;
+create policy profiles_select on public.profiles
+  for select to authenticated using (user_id = (select auth.uid()));
+
 -- 권한: 새 함수는 기본으로 열려 있어서 거둔 뒤 로그인한 사람에게만 연다 -----
 
 revoke execute on function

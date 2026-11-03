@@ -1,11 +1,12 @@
--- 프로필 저장(4-14)의 실패 코드와 축 점수.
+-- 프로필 저장(4-14)의 실패 코드와 축 점수, profiles 권한(5절).
 begin;
 create extension if not exists pgtap with schema extensions;
-select plan(27);
+select plan(34);
 
 insert into auth.users (id) values
   ('00000000-0000-0000-0000-000000000001'),
-  ('00000000-0000-0000-0000-000000000002');
+  ('00000000-0000-0000-0000-000000000002'),
+  ('00000000-0000-0000-0000-000000000003');  -- 프로필 없음
 insert into public.profiles (user_id, display_name, handle) values
   ('00000000-0000-0000-0000-000000000002', '둘', 'dul_02');
 
@@ -68,7 +69,29 @@ select is(
 select is(
   (select display_name from public.save_my_profile()),
   '하나둘', '프로필이 있으면 모두 생략해도 그대로 돌려준다');
+
+-- 권한 (5절) --------------------------------------------------------------
+select is((select count(*)::int from public.profiles), 1, '내 행만 보인다');
+select is(
+  (select count(*)::int from public.profiles where user_id = '00000000-0000-0000-0000-000000000002'),
+  0, '다른 사람의 행은 조회해도 0행');
+select throws_ok(
+  $$ update public.profiles set display_name = '바꿈' where user_id = '00000000-0000-0000-0000-000000000001' $$,
+  '42501', null, '내 행도 직접 고칠 수 없다');
+select throws_ok(
+  $$ update public.profiles set handle = 'direct_01' $$,
+  '42501', null, '아이디도 직접 고칠 수 없다');
+
+select set_config('request.jwt.claims', '{"sub":"00000000-0000-0000-0000-000000000003","role":"authenticated"}', true);
+select throws_ok(
+  $$ insert into public.profiles (user_id, display_name) values ('00000000-0000-0000-0000-000000000003', '셋') $$,
+  '42501', null, '직접 만들 수 없다');
+select is((select display_name from public.save_my_profile('셋')), '셋', '서버 함수로는 만들 수 있다');
 reset role;
+
+select ok(
+  not has_function_privilege('anon', 'public.save_my_profile(text, text, jsonb)', 'execute'),
+  '로그인하지 않으면 부를 수 없다');
 
 select * from finish();
 rollback;
