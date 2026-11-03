@@ -115,6 +115,75 @@ as $$
 $$;
 
 
+-- 모임 프로필 카드 (4-16) --------------------------------------------------
+
+-- 인원수만 돌려준다. 사람이 적으면 숫자만으로 누구인지 드러나므로 3명 미만은 null이다
+create function public.group_profile_card(p_group_id uuid) returns jsonb
+language plpgsql stable security definer set search_path = ''
+as $$
+declare
+  v_min_people constant int := 3;
+  v_member_count int;
+  v_tag_counts jsonb;
+  v_food_block_count int;
+  v_tested_count int;
+  v_axes jsonb;
+begin
+  perform public.require_uid();
+  if not public.is_group_member(p_group_id) then
+    raise exception 'not_member';
+  end if;
+
+  select count(*)::int into v_member_count
+  from public.memberships m
+  where m.group_id = p_group_id;
+
+  if v_member_count >= v_min_people then
+    select coalesce(jsonb_agg(jsonb_build_object('tag', t.tag, 'count', t.people) order by t.people desc, t.tag), '[]'::jsonb)
+    into v_tag_counts
+    from (
+      select r.tag, count(*)::int as people
+      from public.restrictions r
+      join public.memberships m on m.user_id = r.user_id and m.group_id = p_group_id
+      where r.tag is not null
+      group by r.tag
+    ) t;
+
+    select count(distinct r.user_id)::int into v_food_block_count
+    from public.restrictions r
+    join public.memberships m on m.user_id = r.user_id and m.group_id = p_group_id
+    where r.food_id is not null;
+  end if;
+
+  select count(*)::int into v_tested_count
+  from public.memberships m
+  join public.profiles p on p.user_id = m.user_id
+  where m.group_id = p_group_id and p.quiz_answers is not null;
+
+  if v_tested_count >= v_min_people then
+    select jsonb_build_object(
+      'explore', round(avg((p.axes ->> 'explore')::numeric), 2),
+      'spicy', round(avg((p.axes ->> 'spicy')::numeric), 2),
+      'korean', round(avg((p.axes ->> 'korean')::numeric), 2),
+      'lead', round(avg((p.axes ->> 'lead')::numeric), 2)
+    )
+    into v_axes
+    from public.memberships m
+    join public.profiles p on p.user_id = m.user_id
+    where m.group_id = p_group_id and p.quiz_answers is not null;
+  end if;
+
+  return jsonb_build_object(
+    'member_count', v_member_count,
+    'tag_counts', v_tag_counts,
+    'food_block_count', v_food_block_count,
+    'tested_count', v_tested_count,
+    'axes', v_axes
+  );
+end;
+$$;
+
+
 -- profiles 권한 (5절). 온보딩 답과 축이 들어가므로 본인 행만 읽는다.
 -- 쓰기는 save_my_profile과 resolve_display_name만 한다 ----------------------
 
@@ -131,11 +200,13 @@ create policy profiles_select on public.profiles
 revoke execute on function
   public.save_my_profile(text, text, jsonb),
   public.my_food_counts(),
-  public.my_companions()
+  public.my_companions(),
+  public.group_profile_card(uuid)
   from public, anon;
 
 grant execute on function
   public.save_my_profile(text, text, jsonb),
   public.my_food_counts(),
-  public.my_companions()
+  public.my_companions(),
+  public.group_profile_card(uuid)
   to authenticated;
