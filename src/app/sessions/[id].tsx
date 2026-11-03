@@ -1,11 +1,12 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { type ReactNode, useState } from 'react';
+import { type ReactNode, useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, Text, View } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Button } from '@/components/button';
 import { CandidateCard } from '@/components/candidate-card';
 import { FoodSearch } from '@/components/food-search';
+import { type Point, ResultMoment } from '@/components/result-moment';
 import { Roulette } from '@/components/roulette';
 import colors from '@/constants/colors.json';
 import { MAX_VOTES_PER_PERSON, ROULETTE_RESULT_FALLBACK_MS } from '@/constants';
@@ -31,6 +32,8 @@ export default function SessionScreen() {
   // 이 화면에서 투표 단계를 본 적이 있으면, 결과가 오는 순간 원판을 돌린다
   const [sawVoting, setSawVoting] = useState(false);
   if (session?.status === 'voting' && !sawVoting) setSawVoting(true);
+  // 원판이 멈추면 결과 순간을 화면 전체에 덮는다. from이 null이면 움직임 없이 (docs/design.md 순간 1)
+  const [moment, setMoment] = useState<{ from: Point | null } | null>(null);
 
   if (isLoading) {
     return (
@@ -58,21 +61,29 @@ export default function SessionScreen() {
     );
   }
 
+  const toGroup = () => router.replace(`/groups/${session.groupId}` as any);
+
   return (
-    <SafeAreaView className="flex-1 bg-background" edges={['top']}>
-      <Header session={session} onBack={() => router.replace(`/groups/${session.groupId}` as any)} />
-      {session.status === 'open' ? (
-        <CandidateStage session={session} onRestrictions={() => router.push('/restrictions' as any)} />
-      ) : session.status === 'voting' ? (
-        <VotingStage session={session} />
-      ) : (
-        <ResultStage
-          session={session}
-          spin={sawVoting}
-          onGroup={() => router.replace(`/groups/${session.groupId}` as any)}
-        />
-      )}
-    </SafeAreaView>
+    <View className="flex-1 bg-background">
+      <SafeAreaView className="flex-1 bg-background" edges={['top']}>
+        <Header session={session} onBack={toGroup} />
+        {session.status === 'open' ? (
+          <CandidateStage session={session} onRestrictions={() => router.push('/restrictions' as any)} />
+        ) : session.status === 'voting' ? (
+          <VotingStage session={session} />
+        ) : (
+          <ResultStage
+            session={session}
+            spin={sawVoting}
+            onGroup={toGroup}
+            onReveal={(from) => setMoment({ from })}
+          />
+        )}
+      </SafeAreaView>
+      {session.status === 'done' && moment ? (
+        <ResultMoment session={session} from={moment.from} onGroup={toGroup} />
+      ) : null}
+    </View>
   );
 }
 
@@ -305,15 +316,18 @@ function VotingStage({ session }: { session: SessionView }) {
   );
 }
 
-// 4-12 룰렛, 4-13 식사 기록. 결과는 서버가 정했고, 이 화면은 같은 조각에 멈추는 원판을 그린다
+// 4-12 룰렛, 4-13 식사 기록. 결과는 서버가 정했고, 이 화면은 같은 조각에 멈추는 원판을 그린다.
+// 멈추면 onReveal로 원판 가운데 위치를 넘기고, 화면은 그 자리에서 결과 순간을 띄운다
 function ResultStage({
   session,
   spin,
   onGroup,
+  onReveal,
 }: {
   session: SessionView;
   spin: boolean;
   onGroup: () => void;
+  onReveal: (from: Point | null) => void;
 }) {
   const { counts, error } = useVoteCounts(session.id, true);
   // 방금 끝난 판이면(이 화면에서 투표를 봤거나, 결과가 몇 초 전에 나왔으면) 원판을 돌린다
@@ -323,10 +337,21 @@ function ResultStage({
       (session.decidedAt !== null &&
         Date.now() - Date.parse(session.decidedAt) < ROULETTE_RESULT_FALLBACK_MS)
   );
-  const [revealed, setRevealed] = useState(!animate);
+  const wheelRef = useRef<View>(null);
+
+  // 이미 끝난 판을 다시 열면 원판을 돌리지 않고 결과 순간을 바로 보인다
+  useEffect(() => {
+    if (!animate) onReveal(null);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const reveal = () => {
+    const node = wheelRef.current;
+    if (!node) return onReveal(null);
+    node.measureInWindow((x, y, w, h) => onReveal({ x: x + w / 2, y: y + h / 2 }));
+  };
 
   const names = new Map(session.candidates.map((c) => [c.foodId, c.foodName]));
-  const winner = session.decidedFoodId === null ? '' : (names.get(session.decidedFoodId) ?? '');
   const slices = counts
     ? rouletteSlices(counts).map((s) => ({ ...s, name: names.get(s.foodId) ?? '' }))
     : [];
@@ -337,21 +362,18 @@ function ResultStage({
         {error ? (
           <Text className="text-sm text-danger">{sessionErrorMessage(error)}</Text>
         ) : slices.length > 0 && session.decidedFoodId !== null ? (
-          <Roulette
-            slices={slices}
-            resultFoodId={session.decidedFoodId}
-            spin={animate}
-            onDone={() => setRevealed(true)}
-          />
+          <View ref={wheelRef} collapsable={false}>
+            <Roulette
+              slices={slices}
+              resultFoodId={session.decidedFoodId}
+              spin={animate}
+              onDone={reveal}
+            />
+          </View>
         ) : (
           <ActivityIndicator color={colors.primary} accessibilityLabel="결과를 불러오는 중" />
         )}
 
-        <View className="items-center gap-2" style={{ opacity: revealed ? 1 : 0 }}>
-          <Text className="text-base text-muted">오늘은</Text>
-          <Text className="text-center text-5xl font-extrabold tracking-tight text-primary">{winner}</Text>
-          <Text className="text-sm text-muted">모임 식사 기록에 남겼어요</Text>
-        </View>
       </ScrollView>
 
       <BottomBar>

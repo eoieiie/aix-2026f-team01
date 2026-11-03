@@ -59,6 +59,9 @@ describe('C 묶음 규칙 테스트 (spec.md 4-2, 4-3, 4-4, 4-6)', () => {
           invite_code: 'AAA222',
           created_at: '2026-10-01T00:00:00Z',
           last_visited_at: '2026-10-01T00:00:00Z',
+          members: [],
+          recent_foods: [],
+          has_open_session: false,
         },
         {
           id: '2',
@@ -66,6 +69,9 @@ describe('C 묶음 규칙 테스트 (spec.md 4-2, 4-3, 4-4, 4-6)', () => {
           invite_code: 'BBB333',
           created_at: '2026-10-01T00:00:00Z',
           last_visited_at: '2026-10-28T00:00:00Z',
+          members: [],
+          recent_foods: [],
+          has_open_session: false,
         },
       ];
 

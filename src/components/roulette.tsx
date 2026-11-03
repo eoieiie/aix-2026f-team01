@@ -78,16 +78,54 @@ type RouletteProps = {
   // true면 돌고 나서 멈춘다. false면 결과 자리에 멈춘 채로 그린다 (이미 끝난 판을 다시 열 때)
   spin: boolean;
   onDone?: () => void;
+  // food는 음식 색으로 칠한 원판, onPrimary는 결과 순간의 주황 바탕 위 흰 원판 (docs/design.md 순간 1)
+  tone?: 'food' | 'onPrimary';
+  // 조각마다 이름 아래 "N표". 아무도 안 찍어 조각이 같은 크기면 끈다
+  showVotes?: boolean;
+  // 원판 지름의 최대값. 결과 순간에서는 화면을 채우게 크게 준다
+  maxSize?: number;
 };
 
+// 주황 바탕 위에서는 뽑힌 조각만 흰색, 나머지는 흰색을 번갈아 옅게
+const ON_PRIMARY_OPACITY = [0.28, 0.5];
+
+function sliceStyle(tone: 'food' | 'onPrimary', a: Arc, index: number, resultFoodId: number) {
+  if (tone === 'food') {
+    const c = foodColorValues(a.foodId);
+    return {
+      fill: c.fill,
+      opacity: 1,
+      label: c.label,
+      stroke: colors.background,
+      strokeWidth: 2,
+    };
+  }
+  const winner = a.foodId === resultFoodId;
+  return {
+    fill: colors['on-primary'],
+    opacity: winner ? 1 : ON_PRIMARY_OPACITY[index % ON_PRIMARY_OPACITY.length],
+    label: winner ? colors.primary : colors['on-primary'],
+    stroke: colors.primary,
+    strokeWidth: 4,
+  };
+}
+
 // 원판 (4-12). 결과는 서버가 이미 정했고, 원판은 모든 기기에서 그 조각에 멈추도록 돈다
-export function Roulette({ slices, resultFoodId, spin, onDone }: RouletteProps) {
+export function Roulette({
+  slices,
+  resultFoodId,
+  spin,
+  onDone,
+  tone = 'food',
+  showVotes = false,
+  maxSize = MAX_SIZE,
+}: RouletteProps) {
   // 화면이 실시간 변경으로 다시 그려질 때마다 배열이 새로 와도, 조각이 같으면 원판을 다시 돌리지 않는다
   const sliceKey = slices.map((s) => `${s.foodId}:${s.weight}:${s.name}`).join('|');
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const arcs = useMemo(() => sliceArcs(slices), [sliceKey]);
   const { width } = useWindowDimensions();
-  const SIZE = Math.min(MAX_SIZE, width - 40);
+  const SIZE = Math.min(maxSize, width - 40);
   const C = SIZE / 2;
   const R = C - 4;
   const target = useMemo(() => finalRotation(arcs, resultFoodId), [arcs, resultFoodId]);
@@ -158,38 +196,72 @@ export function Roulette({ slices, resultFoodId, spin, onDone }: RouletteProps) 
       <Animated.View style={{ width: SIZE, height: SIZE, transform: [{ rotate }] }}>
         <Svg width={SIZE} height={SIZE}>
           {arcs.length === 1 ? (
-            <Circle cx={C} cy={C} r={R} fill={foodColorValues(arcs[0].foodId).fill} />
+            <Circle
+              cx={C}
+              cy={C}
+              r={R}
+              fill={sliceStyle(tone, arcs[0], 0, resultFoodId).fill}
+              fillOpacity={sliceStyle(tone, arcs[0], 0, resultFoodId).opacity}
+            />
           ) : (
-            arcs.map((a) => (
-              <Path
-                key={a.foodId}
-                d={slicePath(C, R, a.start, a.end)}
-                fill={foodColorValues(a.foodId).fill}
-                stroke={colors.background}
-                strokeWidth={2}
-              />
-            ))
+            arcs.map((a, i) => {
+              const s = sliceStyle(tone, a, i, resultFoodId);
+              return (
+                <Path
+                  key={a.foodId}
+                  d={slicePath(C, R, a.start, a.end)}
+                  fill={s.fill}
+                  fillOpacity={s.opacity}
+                  stroke={s.stroke}
+                  strokeWidth={s.strokeWidth}
+                  strokeLinejoin="round"
+                />
+              );
+            })
           )}
-          {arcs.map((a) => {
+          {arcs.map((a, i) => {
             // 너무 얇은 조각에는 이름을 쓰지 않는다
             if (a.end - a.start < 14) return null;
             const mid = (a.start + a.end) / 2;
             const p = point(C, mid, R * 0.62);
+            const s = sliceStyle(tone, a, i, resultFoodId);
             return (
-              <G key={`label-${a.foodId}`} rotation={mid} origin={`${p.x}, ${p.y}`}>
+              // 멈춘 채로 보이는 결과 순간에서는 글자를 똑바로 세운다(원판이 돌아간 만큼 되돌림)
+              <G
+                key={`label-${a.foodId}`}
+                rotation={tone === 'onPrimary' ? -target : mid}
+                origin={`${p.x}, ${p.y}`}>
                 <SvgText
                   x={p.x}
-                  y={p.y + 5}
-                  fill={foodColorValues(a.foodId).label}
-                  fontSize={14}
+                  y={showVotes ? p.y - 2 : p.y + 5}
+                  fill={s.label}
+                  fontSize={tone === 'onPrimary' ? 16 : 14}
                   fontWeight="bold"
                   textAnchor="middle">
                   {rouletteLabel(a.name)}
                 </SvgText>
+                {showVotes ? (
+                  <SvgText
+                    x={p.x}
+                    y={p.y + 16}
+                    fill={s.label}
+                    fontSize={13}
+                    fontWeight="bold"
+                    textAnchor="middle">
+                    {`${a.weight}표`}
+                  </SvgText>
+                ) : null}
               </G>
             );
           })}
-          <Circle cx={C} cy={C} r={18} fill={colors.background} />
+          {tone === 'onPrimary' ? (
+            <>
+              <Circle cx={C} cy={C} r={22} fill={colors.ink} />
+              <Circle cx={C} cy={C} r={6} fill={colors['on-ink']} />
+            </>
+          ) : (
+            <Circle cx={C} cy={C} r={18} fill={colors.background} />
+          )}
         </Svg>
       </Animated.View>
     </View>

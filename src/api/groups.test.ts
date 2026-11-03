@@ -49,7 +49,9 @@ function fakeClient(opts: {
   });
 
   const getSession = jest.fn(async () => ({
-    data: { session: opts.userId === null ? null : { user: { id: opts.userId ?? 'user-me' } } },
+    data: {
+      session: opts.userId === null ? null : { user: { id: opts.userId ?? 'user-me' } },
+    },
     error: null,
   }));
 
@@ -122,6 +124,63 @@ describe('src/api/groups.ts 테스트', () => {
       const res = await getMyGroups(client);
       expect(res).toHaveLength(1);
       expect(res[0].name).toBe('점심 팟');
+      expect(res[0].members).toEqual([]);
+      expect(res[0].recent_foods).toEqual([]);
+      expect(res[0].has_open_session).toBe(false);
+    });
+
+    it('카드에 쓸 멤버 이름(들어온 순), 최근 먹은 것 세 개(최근 순), 진행 중인 판을 같이 준다', async () => {
+      const { client } = fakeClient({
+        userId: 'user-me',
+        fromData: {
+          memberships: {
+            list: [
+              {
+                group_id: 'g1',
+                joined_at: '2026-10-01T00:00:00Z',
+                groups: {
+                  id: 'g1',
+                  name: '점심 팟',
+                  invite_code: 'AB3K9P',
+                  created_at: '2026-10-01T00:00:00Z',
+                  members: [
+                    { display_name: '준호', joined_at: '2026-10-02T00:00:00Z' },
+                    { display_name: '민지', joined_at: '2026-10-01T00:00:00Z' },
+                  ],
+                  sessions: [{ status: 'done' }, { status: 'voting' }],
+                  meals: [
+                    {
+                      food_id: 1,
+                      eaten_at: '2026-10-03T00:00:00Z',
+                      foods: { name: '김치찌개' },
+                    },
+                    {
+                      food_id: 2,
+                      eaten_at: '2026-10-06T00:00:00Z',
+                      foods: { name: '비빔밥' },
+                    },
+                    {
+                      food_id: 3,
+                      eaten_at: '2026-10-05T00:00:00Z',
+                      foods: { name: '쌀국수' },
+                    },
+                    {
+                      food_id: 4,
+                      eaten_at: '2026-10-04T00:00:00Z',
+                      foods: { name: '불고기' },
+                    },
+                  ],
+                },
+              },
+            ],
+          },
+        },
+      });
+
+      const [group] = await getMyGroups(client);
+      expect(group.members).toEqual(['민지', '준호']);
+      expect(group.recent_foods.map((f) => f.food_name)).toEqual(['비빔밥', '쌀국수', '불고기']);
+      expect(group.has_open_session).toBe(true);
     });
   });
 
@@ -152,7 +211,13 @@ describe('src/api/groups.ts 테스트', () => {
             },
           },
           memberships: {
-            list: [{ user_id: 'user-me', display_name: '재곤', joined_at: '2026-10-01T00:00:00Z' }],
+            list: [
+              {
+                user_id: 'user-me',
+                display_name: '재곤',
+                joined_at: '2026-10-01T00:00:00Z',
+              },
+            ],
           },
           sessions: {
             openSession: { id: 's1' },
@@ -200,7 +265,9 @@ describe('src/api/groups.ts 테스트', () => {
     });
 
     it('프로필이 없으면 null이라 창에서 이름을 묻는다', async () => {
-      const { client } = fakeClient({ fromData: { profiles: { maybeSingle: null } } });
+      const { client } = fakeClient({
+        fromData: { profiles: { maybeSingle: null } },
+      });
       await expect(getMyProfileName(client)).resolves.toBeNull();
     });
 

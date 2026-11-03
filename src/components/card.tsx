@@ -8,7 +8,7 @@ type CardProps = {
   accessibilityLabel?: string;
 };
 
-const CARD = 'gap-2 rounded-2xl bg-surface p-4';
+const CARD = 'gap-2 rounded-3xl bg-surface p-4';
 
 // 화면 공통 카드 (이슈 #10). 테두리 대신 배경색으로 구분한다 (spec.md 7절)
 export function Card({ children, onPress, accessibilityLabel }: CardProps) {

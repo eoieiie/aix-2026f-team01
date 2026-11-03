@@ -5,6 +5,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Button } from '@/components/button';
 import { Card } from '@/components/card';
 import { FoodDot } from '@/components/food-dot';
+import { PersonDots } from '@/components/person-dots';
 import { TextField } from '@/components/text-field';
 import { DISPLAY_NAME_MAX, GROUP_NAME_MAX } from '@/constants';
 
@@ -25,6 +26,15 @@ export default function PartsScreen() {
           <Button label="보조 버튼" variant="secondary" onPress={() => setPressed((n) => n + 1)} />
           <Button label="이름을 적으면 켜져요" disabled={groupName.trim() === ''} onPress={() => {}} />
           <Button label="기다리는 중" loading onPress={() => {}} />
+          <View className="gap-3 rounded-3xl bg-primary p-4">
+            <Button label="주황 위 흰 버튼" variant="inverse" onPress={() => setPressed((n) => n + 1)} />
+          </View>
+        </View>
+
+        <View className="gap-3">
+          <Text className="text-base font-semibold text-muted">PersonDots</Text>
+          <PersonDots names={['민지']} ringClass="border-background" />
+          <PersonDots names={['민지', '준호', '서연', '하늘', '윤']} ringClass="border-background" />
         </View>
 
         <View className="gap-3">
@@ -65,6 +75,7 @@ export default function PartsScreen() {
             ))}
           </View>
           <View className="flex-row items-center gap-3">
+            <FoodDot foodId={3} size="xs" />
             <FoodDot foodId={3} size="sm" />
             <FoodDot foodId={3} size="md" />
             <FoodDot foodId={3} size="lg" />
