@@ -87,6 +87,34 @@ begin
 end;
 $$;
 
+-- 내 기록 (4-15) ----------------------------------------------------------
+
+create function public.my_food_counts()
+returns table (food_id bigint, meal_count int)
+language sql stable security definer set search_path = ''
+as $$
+  select ml.food_id, count(*)::int
+  from public.meal_participants mp
+  join public.meals ml on ml.id = mp.meal_id
+  where mp.user_id = public.require_uid()
+  group by ml.food_id
+  order by 2 desc, 1
+$$;
+
+create function public.my_companions()
+returns table (user_id uuid, display_name text, meal_count int)
+language sql stable security definer set search_path = ''
+as $$
+  select other.user_id, p.display_name, count(*)::int
+  from public.meal_participants me
+  join public.meal_participants other on other.meal_id = me.meal_id and other.user_id <> me.user_id
+  join public.profiles p on p.user_id = other.user_id
+  where me.user_id = public.require_uid()
+  group by other.user_id, p.display_name
+  order by 3 desc, 2, 1
+$$;
+
+
 -- profiles 권한 (5절). 온보딩 답과 축이 들어가므로 본인 행만 읽는다.
 -- 쓰기는 save_my_profile과 resolve_display_name만 한다 ----------------------
 
@@ -101,9 +129,13 @@ create policy profiles_select on public.profiles
 -- 권한: 새 함수는 기본으로 열려 있어서 거둔 뒤 로그인한 사람에게만 연다 -----
 
 revoke execute on function
-  public.save_my_profile(text, text, jsonb)
+  public.save_my_profile(text, text, jsonb),
+  public.my_food_counts(),
+  public.my_companions()
   from public, anon;
 
 grant execute on function
-  public.save_my_profile(text, text, jsonb)
+  public.save_my_profile(text, text, jsonb),
+  public.my_food_counts(),
+  public.my_companions()
   to authenticated;
