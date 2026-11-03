@@ -184,6 +184,81 @@ end;
 $$;
 
 
+-- 결과 카드 (4-17) ---------------------------------------------------------
+
+-- 그 모임 소속이면 그 식사에 없었어도 볼 수 있다. 몇 번째는 모두 이 식사까지만 센다
+create function public.meal_card(p_meal_id uuid) returns jsonb
+language plpgsql stable security definer set search_path = ''
+as $$
+declare
+  v_uid uuid := public.require_uid();
+  v_meal public.meals;
+  v_group_name text;
+  v_group_food_nth int;
+  v_my_food_nth int;
+  v_people jsonb;
+begin
+  select * into v_meal from public.meals ml where ml.id = p_meal_id;
+  if not found then
+    raise exception 'meal_not_found';
+  end if;
+  if not public.is_group_member(v_meal.group_id) then
+    raise exception 'not_member';
+  end if;
+
+  select g.name into v_group_name from public.groups g where g.id = v_meal.group_id;
+
+  select count(*)::int into v_group_food_nth
+  from public.meals ml
+  where ml.group_id = v_meal.group_id
+    and ml.food_id = v_meal.food_id
+    and ml.eaten_at <= v_meal.eaten_at;
+
+  if exists (
+    select 1 from public.meal_participants mp
+    where mp.meal_id = p_meal_id and mp.user_id = v_uid
+  ) then
+    select count(*)::int into v_my_food_nth
+    from public.meal_participants mp
+    join public.meals ml on ml.id = mp.meal_id
+    where mp.user_id = v_uid
+      and ml.food_id = v_meal.food_id
+      and ml.eaten_at <= v_meal.eaten_at;
+  end if;
+
+  select jsonb_agg(
+    jsonb_build_object(
+      'user_id', mp.user_id,
+      'display_name', m.display_name,
+      'together_nth', case when mp.user_id = v_uid then null else (
+        select count(*)::int
+        from public.meal_participants me
+        join public.meal_participants other on other.meal_id = me.meal_id
+        join public.meals ml on ml.id = me.meal_id
+        where me.user_id = v_uid
+          and other.user_id = mp.user_id
+          and ml.eaten_at <= v_meal.eaten_at
+      ) end
+    )
+    order by m.display_name, mp.user_id
+  )
+  into v_people
+  from public.meal_participants mp
+  join public.memberships m on m.group_id = v_meal.group_id and m.user_id = mp.user_id
+  where mp.meal_id = p_meal_id;
+
+  return jsonb_build_object(
+    'group_name', v_group_name,
+    'eaten_at', v_meal.eaten_at,
+    'food_id', v_meal.food_id,
+    'group_food_nth', v_group_food_nth,
+    'my_food_nth', v_my_food_nth,
+    'people', coalesce(v_people, '[]'::jsonb)
+  );
+end;
+$$;
+
+
 -- profiles 권한 (5절). 온보딩 답과 축이 들어가므로 본인 행만 읽는다.
 -- 쓰기는 save_my_profile과 resolve_display_name만 한다 ----------------------
 
@@ -201,12 +276,14 @@ revoke execute on function
   public.save_my_profile(text, text, jsonb),
   public.my_food_counts(),
   public.my_companions(),
-  public.group_profile_card(uuid)
+  public.group_profile_card(uuid),
+  public.meal_card(uuid)
   from public, anon;
 
 grant execute on function
   public.save_my_profile(text, text, jsonb),
   public.my_food_counts(),
   public.my_companions(),
-  public.group_profile_card(uuid)
+  public.group_profile_card(uuid),
+  public.meal_card(uuid)
   to authenticated;
