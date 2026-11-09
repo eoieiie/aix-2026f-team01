@@ -19,6 +19,11 @@ export const PITCH_MAX = 60;
 // 4-11
 export const MAX_VOTES_PER_PERSON = 2;
 
+// 4-14
+export const HANDLE_MIN = 3;
+export const HANDLE_MAX = 16;
+export const QUIZ_LENGTH = 8;
+
 // 4-12
 export const ROULETTE_SPIN_MS = 3600;
 export const ROULETTE_TURNS = 5;
