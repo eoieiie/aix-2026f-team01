@@ -6,6 +6,7 @@ import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
 import { Button } from '@/components/button';
 import { CandidateCard } from '@/components/candidate-card';
 import { FoodSearch } from '@/components/food-search';
+import { IconButton } from '@/components/icon';
 import { type Point, ResultMoment } from '@/components/result-moment';
 import { Roulette } from '@/components/roulette';
 import colors from '@/constants/colors.json';
@@ -34,6 +35,13 @@ export default function SessionScreen() {
   if (session?.status === 'voting' && !sawVoting) setSawVoting(true);
   // 원판이 멈추면 결과 순간을 화면 전체에 덮는다. from이 null이면 움직임 없이 (docs/design.md 순간 1)
   const [moment, setMoment] = useState<{ from: Point | null } | null>(null);
+  // 결과 순간은 이 화면 안에 덮인다. 노트북에서는 화면이 가운데 폭 480 안에 있어서, 원판 위치(창 기준)를 이 화면 기준으로 바꿔 준다
+  const rootRef = useRef<View>(null);
+  const showMoment = (from: Point | null) => {
+    const root = rootRef.current;
+    if (!from || !root) return setMoment({ from });
+    root.measureInWindow((rx, ry) => setMoment({ from: { x: from.x - rx, y: from.y - ry } }));
+  };
 
   if (isLoading) {
     return (
@@ -64,7 +72,7 @@ export default function SessionScreen() {
   const toGroup = () => router.replace(`/groups/${session.groupId}` as any);
 
   return (
-    <View className="flex-1 bg-background">
+    <View ref={rootRef} collapsable={false} className="flex-1 bg-background">
       <SafeAreaView className="flex-1 bg-background" edges={['top']}>
         <Header session={session} onBack={toGroup} />
         {session.status === 'open' ? (
@@ -76,7 +84,7 @@ export default function SessionScreen() {
             session={session}
             spin={sawVoting}
             onGroup={toGroup}
-            onReveal={(from) => setMoment({ from })}
+            onReveal={showMoment}
           />
         )}
       </SafeAreaView>
@@ -97,37 +105,28 @@ function Header({ session, onBack }: { session: SessionView; onBack: () => void 
   const current = STEPS.findIndex((step) => step.status === session.status);
   return (
     <View className="gap-4 px-5 pb-2 pt-3">
-      <View className="flex-row items-center justify-between">
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel="모임으로"
-          onPress={onBack}
-          className="rounded-full bg-surface px-4 py-2 active:opacity-70">
-          <Text className="text-sm font-semibold text-text">모임으로</Text>
-        </Pressable>
-        <Text className="flex-1 px-3 text-right text-sm font-semibold text-muted" numberOfLines={1}>
+      <View className="flex-row items-center gap-3">
+        <IconButton name="back" label="모임으로" onPress={onBack} />
+        <Text className="flex-1 text-lg font-extrabold text-text" numberOfLines={1}>
           {session.groupName}
         </Text>
       </View>
-      {/* 한 판의 세 단계. 지나온 단계와 지금 단계까지 검게 칠한다 */}
-      <View className="gap-2">
-        <View className="flex-row gap-1.5">
-          {STEPS.map((step, i) => (
-            <View
-              key={step.status}
-              className={`h-1.5 flex-1 rounded-full ${i <= current ? 'bg-text' : 'bg-surface-strong'}`}
-            />
-          ))}
-        </View>
-        <View className="flex-row">
-          {STEPS.map((step, i) => (
+      {/* 한 판의 세 단계. 같은 크기의 칸 셋이고 지금 단계만 검정으로 채운다. 지나온 단계는 진한 회색 */}
+      <View className="flex-row gap-2">
+        {STEPS.map((step, i) => (
+          <View
+            key={step.status}
+            className={`h-10 flex-1 items-center justify-center rounded-full ${
+              i === current ? 'bg-ink' : i < current ? 'bg-surface-strong' : 'bg-surface'
+            }`}>
             <Text
-              key={step.status}
-              className={`flex-1 text-sm ${i === current ? 'font-bold text-text' : 'text-muted'}`}>
+              className={`text-sm font-bold ${
+                i === current ? 'text-on-ink' : i < current ? 'text-text' : 'text-muted'
+              }`}>
               {step.label}
             </Text>
-          ))}
-        </View>
+          </View>
+        ))}
       </View>
       <Participants participants={session.participants} showVoted={session.status === 'voting'} />
     </View>
@@ -202,10 +201,7 @@ function CandidateStage({
 
         <View className="gap-3">
           <Text className="text-xl font-extrabold text-text">후보 {session.candidates.length}개</Text>
-          {session.candidates.length === 0 ? (
-            <Text className="text-sm text-muted">아직 올라온 후보가 없어요</Text>
-          ) : (
-            session.candidates.map((c) => (
+          {session.candidates.map((c) => (
               <CandidateCard
                 key={c.foodId}
                 candidate={c}
@@ -213,8 +209,7 @@ function CandidateStage({
                 onSavePitch={c.isMine ? (text) => pitch.mutate({ foodId: c.foodId, text }) : undefined}
                 onRemove={c.isMine ? () => remove.mutate(c.foodId) : undefined}
               />
-            ))
-          )}
+            ))}
         </View>
       </ScrollView>
 
@@ -255,9 +250,8 @@ function VotingStage({ session }: { session: SessionView }) {
       <ScrollView contentContainerClassName="gap-5 px-5 pb-40 pt-2">
         <View className="gap-1">
           <Text className="text-3xl font-extrabold tracking-tight text-text">골라 주세요</Text>
-          <Text className="text-sm text-muted">
-            {MAX_VOTES_PER_PERSON}개까지. 누가 뭘 골랐는지는 아무도 몰라요
-          </Text>
+          {/* 몇 개까지인지는 아래 "내 표 0/2"가 보인다 */}
+          <Text className="text-base text-muted">누가 뭘 골랐는지는 아무도 몰라요</Text>
         </View>
 
         <View className="gap-2 rounded-2xl bg-surface p-4">
@@ -269,8 +263,8 @@ function VotingStage({ session }: { session: SessionView }) {
               내 표 {session.myVotes.length}/{MAX_VOTES_PER_PERSON}
             </Text>
           </View>
-          <View className="h-2 overflow-hidden rounded-full bg-surface-strong">
-            <View className="h-2 rounded-full bg-text" style={{ width: `${ratio * 100}%` }} />
+          <View className="h-3 overflow-hidden rounded-full bg-surface-strong">
+            <View className="h-3 rounded-full bg-text" style={{ width: `${ratio * 100}%` }} />
           </View>
         </View>
 
@@ -297,11 +291,7 @@ function VotingStage({ session }: { session: SessionView }) {
             <Button label="돌리기" onPress={() => spin.mutate()} loading={spin.isPending} />
             {spin.error ? (
               <Text className="text-center text-sm text-danger">{sessionErrorMessage(spin.error)}</Text>
-            ) : (
-              <Text className="text-center text-sm text-muted">
-                표가 많을수록 원판 조각이 커져요
-              </Text>
-            )}
+            ) : null}
           </>
         ) : (
           <Text className="text-center text-base font-semibold text-muted">

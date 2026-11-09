@@ -1,6 +1,9 @@
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
-import { Modal, Pressable, Text, TextInput, View } from 'react-native';
+import { Modal, Text, View } from 'react-native';
+
+import { Button } from '@/components/button';
+import { TextField } from '@/components/text-field';
 
 import { DISPLAY_NAME_MAX, GROUP_NAME_MAX } from '@/constants';
 import { useCreateGroup, useMyProfileName } from '@/hooks/use-groups';
@@ -63,85 +66,61 @@ export function CreateGroupModal({ visible, onClose }: CreateGroupModalProps) {
 
   const displayErrorMessage = localError || (error ? (error as Error).message : null);
 
+  // 입력칸과 버튼은 다른 화면과 같은 공통 부품을 쓴다 (spec.md 7절 공통 부품). 이름 칸의 라벨이 할 일을 말하므로 따로 설명 줄을 두지 않는다
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={handleClose}>
-      <View className="flex-1 items-center justify-center bg-black/40 px-6">
-        <View className="w-full max-w-sm rounded-3xl bg-background p-6">
-          <Text className="text-2xl font-extrabold text-text">새 모임 만들기</Text>
-          <Text className="mt-1 text-sm text-muted">
-            {profileName !== null
-              ? `${withRo(profileName)} 들어가요. 모임 이름만 적어 주세요.`
-              : '모임 이름과 내 이름을 입력해주세요.'}
-          </Text>
-
-          <View className="mt-5 gap-4">
-            <View>
-              <Text className="mb-1 text-xs font-medium text-muted">
-                모임 이름 ({trimmedGroupName.length}/{GROUP_NAME_MAX})
-              </Text>
-              <TextInput
-                className="h-12 rounded-xl bg-surface px-4 text-base text-text placeholder:text-muted"
-                placeholder="예: 점심 팟"
-                value={groupName}
-                onChangeText={(text) => {
-                  setGroupName(text);
-                  setLocalError(null);
-                }}
-                maxLength={GROUP_NAME_MAX}
-                autoFocus
-              />
-            </View>
-
-            {profileName === null ? (
-              <View>
-                <Text className="mb-1 text-xs font-medium text-muted">
-                  내 이름 ({trimmedDisplayName.length}/{DISPLAY_NAME_MAX})
-                </Text>
-                <TextInput
-                  className="h-12 rounded-xl bg-surface px-4 text-base text-text placeholder:text-muted"
-                  placeholder="예: 홍길동"
-                  value={displayName}
-                  onChangeText={(text) => {
-                    setDisplayName(text);
-                    setLocalError(null);
-                  }}
-                  maxLength={DISPLAY_NAME_MAX}
-                />
-              </View>
+      <View className="flex-1 items-center justify-center bg-black/40 px-5">
+        <View className="w-full max-w-sm gap-6 rounded-3xl bg-background p-6">
+          <View className="gap-1">
+            <Text className="text-3xl font-extrabold tracking-tight text-text">새 모임</Text>
+            {profileName !== null ? (
+              <Text className="text-base text-muted">{withRo(profileName)} 들어가요</Text>
             ) : null}
           </View>
 
-          {/* 오류 문구 표시 (창을 닫지 않음) */}
-          {displayErrorMessage ? (
-            <View className="mt-3 rounded-lg bg-surface p-2">
-              <Text className="text-center text-xs text-danger">{displayErrorMessage}</Text>
+          <View className="gap-4">
+            <TextField
+              label="모임 이름"
+              placeholder="예: 점심 팟"
+              value={groupName}
+              onChangeText={(text) => {
+                setGroupName(text);
+                setLocalError(null);
+              }}
+              maxLength={GROUP_NAME_MAX}
+              autoFocus
+            />
+            {profileName === null ? (
+              <TextField
+                label="내 이름"
+                placeholder="예: 홍길동"
+                value={displayName}
+                onChangeText={(text) => {
+                  setDisplayName(text);
+                  setLocalError(null);
+                }}
+                maxLength={DISPLAY_NAME_MAX}
+                onSubmitEditing={handleSubmit}
+              />
+            ) : null}
+            {/* 서버 오류는 창 안에 보이고 창을 닫지 않는다 (spec.md 4-2) */}
+            {displayErrorMessage ? (
+              <Text className="text-sm font-semibold text-danger">{displayErrorMessage}</Text>
+            ) : null}
+          </View>
+
+          <View className="flex-row gap-2">
+            <View className="flex-1">
+              <Button label="취소" variant="secondary" onPress={handleClose} disabled={isPending} />
             </View>
-          ) : null}
-
-          <View className="mt-6 flex-row gap-2">
-            <Pressable
-              className="flex-1 items-center justify-center rounded-full bg-surface py-4"
-              onPress={handleClose}
-              disabled={isPending}
-            >
-              <Text className="text-sm font-semibold text-text">취소</Text>
-            </Pressable>
-
-            <Pressable
-              className={`flex-1 items-center justify-center rounded-full py-4 ${
-                isFormValid && !isPending ? 'bg-primary' : 'bg-surface opacity-50'
-              }`}
-              onPress={handleSubmit}
-              disabled={!isFormValid || isPending}
-            >
-              <Text
-                className={`text-sm font-semibold ${
-                  isFormValid && !isPending ? 'text-on-primary' : 'text-muted'
-                }`}
-              >
-                {isPending ? '만드는 중...' : '만들기'}
-              </Text>
-            </Pressable>
+            <View className="flex-1">
+              <Button
+                label="만들기"
+                onPress={handleSubmit}
+                disabled={!isFormValid}
+                loading={isPending}
+              />
+            </View>
           </View>
         </View>
       </View>

@@ -4,6 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Button } from '@/components/button';
 import { FoodDot } from '@/components/food-dot';
+import { IconButton } from '@/components/icon';
 import { InviteCard } from '@/components/invite-card';
 import {
   Member,
@@ -91,14 +92,7 @@ export default function GroupScreen() {
   return (
     <SafeAreaView className="flex-1 bg-background">
       <View className="flex-row items-center px-5 py-3">
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel="홈으로"
-          className="rounded-full bg-surface px-4 py-2 active:opacity-80"
-          onPress={() => router.replace('/')}
-        >
-          <Text className="text-sm font-semibold text-text">홈</Text>
-        </Pressable>
+        <IconButton name="back" label="홈으로" onPress={() => router.replace('/')} />
       </View>
 
       <ScrollView
@@ -138,9 +132,8 @@ export default function GroupScreen() {
         <View className="gap-3">
           <Text className="text-2xl font-extrabold tracking-tight text-text">최근에 먹은 것</Text>
           {group.recent_meals.length === 0 ? (
-            <View className="gap-1 rounded-3xl bg-surface p-6">
-              <Text className="text-lg font-extrabold text-text">아직 기록이 없어요</Text>
-              <Text className="text-sm text-muted">한 판을 끝내면 여기에 쌓여요</Text>
+            <View className="rounded-3xl bg-surface p-6">
+              <Text className="text-lg font-extrabold text-muted">아직 기록이 없어요</Text>
             </View>
           ) : (
             <View className="gap-4 rounded-3xl bg-surface p-5">

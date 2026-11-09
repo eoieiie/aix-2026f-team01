@@ -57,7 +57,8 @@ export function InviteCard({ inviteCode }: InviteCardProps) {
       className="w-full gap-4 rounded-3xl bg-text p-5 active:opacity-90"
       onPress={handleCopy}
     >
-      <View className="flex-row items-start justify-between">
+      {/* 설명 줄 없이 코드와 "링크 복사" 버튼만. 받는 사람에게 할 말은 초대 화면이 한다 (docs/design.md 4절) */}
+      <View className="flex-row items-center justify-between">
         <View className="gap-1">
           <Text className="text-sm font-semibold text-on-primary/60">초대 코드</Text>
           <Text className="text-3xl font-extrabold tracking-widest text-on-primary">
@@ -68,10 +69,6 @@ export function InviteCard({ inviteCode }: InviteCardProps) {
           <Text className="text-sm font-bold text-text">{copied ? '복사했어요' : '링크 복사'}</Text>
         </View>
       </View>
-
-      <Text className="text-sm text-on-primary/60">
-        누르면 초대 링크가 복사돼요. 친구는 앱 없이 웹에서 이름만 적고 들어와요
-      </Text>
 
       {/* 복사가 안 되면 링크 글자를 보여줘서 직접 복사하게 한다 (spec.md 4-4) */}
       {copyFailed ? (

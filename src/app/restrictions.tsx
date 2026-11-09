@@ -7,6 +7,7 @@ import { Button } from '@/components/button';
 import { Card } from '@/components/card';
 import { FoodDot } from '@/components/food-dot';
 import { FoodSearch } from '@/components/food-search';
+import { IconButton } from '@/components/icon';
 import colors from '@/constants/colors.json';
 import { DIET_TAGS, INGREDIENT_TAGS, RESTRICTION_KINDS } from '@/constants/restrictions';
 import {
@@ -77,13 +78,7 @@ export default function RestrictionsScreen() {
   return (
     <SafeAreaView className="flex-1 bg-background" edges={['top']}>
       <View className="flex-row px-5 pb-2 pt-3">
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel="뒤로"
-          onPress={close}
-          className="rounded-full bg-surface px-4 py-2 active:opacity-70">
-          <Text className="text-sm font-semibold text-text">뒤로</Text>
-        </Pressable>
+        <IconButton name="back" label="뒤로" onPress={close} />
       </View>
 
       <ScrollView contentContainerClassName="gap-8 px-5 pb-48 pt-2">

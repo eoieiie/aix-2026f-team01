@@ -8,7 +8,7 @@ type ButtonProps = {
   // primary는 화면에서 가장 중요한 버튼 하나에만 쓴다 (spec.md 7절 "요소 하나에 강조 신호 하나")
   // inverse는 주황 바탕 위의 흰 버튼이다. 주황 위에 주황 버튼을 두지 않는다 (docs/design.md 순간 1)
   variant?: 'primary' | 'secondary' | 'inverse';
-  // 꺼진 버튼은 눌리지 않고 흐리게 보인다. 예: 이름이 비면 버튼이 꺼진다 (4-2, 4-5)
+  // 꺼진 버튼은 눌리지 않고 회색 덩어리로 보인다. 흐린 주황은 힘없어 보여서 쓰지 않는다. 예: 이름이 비면 버튼이 꺼진다 (4-2, 4-5)
   disabled?: boolean;
   // 서버 응답을 기다리는 동안. 두 번 눌리지 않게 꺼진 것으로 다룬다
   loading?: boolean;
@@ -24,6 +24,16 @@ export function Button({
 }: ButtonProps) {
   const off = disabled || loading;
   const primary = variant === 'primary';
+  // 기다리는 중(loading)은 원래 색을 두고, 꺼진 것(disabled)만 회색
+  const grey = disabled && !loading;
+  const bg = grey
+    ? 'bg-surface-strong'
+    : primary
+      ? 'bg-primary'
+      : variant === 'inverse'
+        ? 'bg-on-primary'
+        : 'bg-surface';
+  const fg = grey ? 'text-muted' : primary ? 'text-on-primary' : 'text-text';
 
   return (
     <Pressable
@@ -32,14 +42,12 @@ export function Button({
       accessibilityState={{ disabled: off, busy: loading }}
       disabled={off}
       onPress={onPress}
-      className={`h-14 items-center justify-center rounded-full px-6 active:opacity-80 disabled:opacity-40 ${
-        primary ? 'bg-primary' : variant === 'inverse' ? 'bg-on-primary' : 'bg-surface'
-      }`}>
+      className={`h-14 items-center justify-center rounded-full px-6 active:opacity-80 ${bg}`}>
       {loading ? (
         // 로딩 표시는 className을 받지 못해서 토큰 값을 colors.json에서 꺼내 준다
         <ActivityIndicator color={primary ? colors['on-primary'] : colors.text} />
       ) : (
-        <Text className={`text-lg font-bold ${primary ? 'text-on-primary' : 'text-text'}`}>
+        <Text className={`text-lg font-bold ${fg}`}>
           {label}
         </Text>
       )}

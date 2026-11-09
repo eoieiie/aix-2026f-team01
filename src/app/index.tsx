@@ -6,6 +6,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Button } from '@/components/button';
 import { CreateGroupModal } from '@/components/create-group-modal';
 import { FoodDot } from '@/components/food-dot';
+import { IconButton } from '@/components/icon';
 import { PersonDots } from '@/components/person-dots';
 import { Group, useMyGroups } from '@/hooks/use-groups';
 
@@ -54,25 +55,17 @@ export default function HomeScreen() {
   return (
     <SafeAreaView className="flex-1 bg-background">
       <View className="flex-1 px-5 pt-4">
-        <View className="flex-row items-center justify-between">
+        <View className="h-12 flex-row items-center justify-between">
           <Text className="text-base font-extrabold text-text">밥비티아이</Text>
-          {/* 주황은 모임 카드의 "판 진행 중"과 "첫 모임 만들기"에 남겨 두고, 위쪽은 늘 회색 (docs/design.md 1절) */}
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel="모임 만들기"
-            className="rounded-full bg-surface px-4 py-2.5 active:opacity-80"
-            onPress={() => setModalVisible(true)}
-          >
-            <Text className="text-sm font-bold text-text">모임 만들기</Text>
-          </Pressable>
+          {/* 모임이 없을 때는 아래 덩어리의 "첫 모임 만들기" 하나만 둔다. 같은 버튼을 두 번 보이지 않는다 (docs/design.md 4절) */}
+          {hasGroups ? (
+            <IconButton name="plus" label="모임 만들기" onPress={() => setModalVisible(true)} />
+          ) : null}
         </View>
 
-        <View className="mb-6 mt-8 gap-2">
-          <Text className="text-4xl font-extrabold leading-tight tracking-tight text-text">
-            {'오늘은\n누구랑 먹어요?'}
-          </Text>
-          <Text className="text-base text-muted">모임을 고르면 같이 메뉴를 정할 수 있어요</Text>
-        </View>
+        <Text className="mb-6 mt-6 text-4xl font-extrabold leading-tight tracking-tight text-text">
+          {'오늘은\n누구랑 먹어요?'}
+        </Text>
 
         {isLoading ? (
           <Text className="text-sm text-muted">모임을 불러오는 중</Text>

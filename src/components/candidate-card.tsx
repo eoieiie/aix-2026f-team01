@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Pressable, Text, TextInput, View } from 'react-native';
 
 import { FoodDot } from '@/components/food-dot';
+import { Icon } from '@/components/icon';
 import { PITCH_MAX } from '@/constants';
 import type { Candidate } from '@/hooks/use-session';
 
@@ -51,11 +52,9 @@ export function CandidateCard({
           ) : null}
         </View>
         {onVote && !vetoed ? (
-          // 고른 카드는 주황으로 꽉 채우고 흰 알약, 안 고른 카드는 흰 알약 (docs/design.md 1절 "고른 상태")
-          <View className="rounded-full bg-background px-4 py-2">
-            <Text className={`text-sm font-extrabold ${voted ? 'text-primary' : 'text-text'}`}>
-              {voted ? '골랐어요' : '고르기'}
-            </Text>
+          // 고른 카드는 주황으로 꽉 채우고 흰 동그라미에 체크, 안 고른 카드는 빈 흰 동그라미. 글 대신 면과 표시로 (docs/design.md 1절 "고른 상태", 4절)
+          <View className="h-11 w-11 items-center justify-center rounded-full bg-background">
+            {voted ? <Icon name="check" color="primary" /> : null}
           </View>
         ) : null}
         {onRemove ? (
@@ -64,8 +63,8 @@ export function CandidateCard({
             accessibilityLabel={`${candidate.foodName} 빼기`}
             disabled={busy}
             onPress={onRemove}
-            className="rounded-full bg-background px-3 py-1.5 active:opacity-70 disabled:opacity-50">
-            <Text className="text-sm font-semibold text-text">빼기</Text>
+            className="h-11 w-11 items-center justify-center rounded-full bg-background active:opacity-70 disabled:opacity-50">
+            <Icon name="close" size={18} />
           </Pressable>
         ) : null}
       </View>
@@ -78,7 +77,7 @@ export function CandidateCard({
             onChangeText={(t) => setPitch(Array.from(t).slice(0, PITCH_MAX).join(''))}
             onSubmitEditing={() => dirty && onSavePitch(pitch)}
             placeholder="한 줄 어필 (60자)"
-            className="h-12 flex-1 rounded-2xl bg-background px-4 text-base text-text"
+            className="h-12 flex-1 rounded-2xl bg-background px-4 text-base text-text placeholder:text-muted"
           />
           {dirty ? (
             <Pressable
@@ -86,8 +85,8 @@ export function CandidateCard({
               accessibilityLabel={`${candidate.foodName} 어필 저장`}
               disabled={busy}
               onPress={() => onSavePitch(pitch)}
-              className="rounded-lg bg-text px-3 py-2 active:opacity-80 disabled:opacity-50">
-              <Text className="text-sm font-semibold text-on-primary">저장</Text>
+              className="h-12 items-center justify-center rounded-full bg-ink px-5 active:opacity-80 disabled:opacity-50">
+              <Text className="text-base font-bold text-on-ink">저장</Text>
             </Pressable>
           ) : null}
         </View>
