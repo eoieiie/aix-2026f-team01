@@ -87,14 +87,11 @@ export default function HomeScreen() {
             <Button label="다시 시도" variant="secondary" onPress={() => refetch()} />
           </View>
         ) : !hasGroups ? (
-          // 모임이 없을 때: "아직 모임이 없어요"와 만들기 버튼 (spec.md 4-3)
-          <View className="gap-4 rounded-3xl bg-surface p-6">
-            <View className="gap-1">
-              <Text className="text-lg font-bold text-text">아직 모임이 없어요</Text>
-              <Text className="text-sm text-muted">
-                모임을 만들고 초대 링크를 보내면 친구가 바로 들어와요
-              </Text>
-            </View>
+          // 모임이 없을 때: "아직 모임이 없어요"와 만들기 버튼 (spec.md 4-3). 덩어리 하나로 보인다 (docs/design.md 1절)
+          <View className="gap-6 rounded-3xl bg-ink p-6">
+            <Text className="text-3xl font-extrabold leading-tight tracking-tight text-on-ink">
+              {'아직 모임이\n없어요'}
+            </Text>
             <Button label="첫 모임 만들기" onPress={() => setModalVisible(true)} />
           </View>
         ) : (

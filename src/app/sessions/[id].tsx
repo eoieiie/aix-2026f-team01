@@ -182,10 +182,7 @@ function CandidateStage({
     <View className="flex-1">
       <ScrollView contentContainerClassName="gap-5 px-5 pb-40 pt-2">
         <View className="flex-row items-end justify-between">
-          <View className="flex-1 gap-1">
-            <Text className="text-3xl font-extrabold tracking-tight text-text">뭐 먹고 싶어요?</Text>
-            <Text className="text-sm text-muted">먹고 싶은 음식을 올리고 한 줄 어필을 붙여요</Text>
-          </View>
+          <Text className="flex-1 text-3xl font-extrabold tracking-tight text-text">뭐 먹고 싶어요?</Text>
           <Pressable
             accessibilityRole="button"
             accessibilityLabel="못 먹는 것"
@@ -204,7 +201,7 @@ function CandidateStage({
         />
 
         <View className="gap-3">
-          <Text className="text-base font-bold text-text">후보 {session.candidates.length}개</Text>
+          <Text className="text-xl font-extrabold text-text">후보 {session.candidates.length}개</Text>
           {session.candidates.length === 0 ? (
             <Text className="text-sm text-muted">아직 올라온 후보가 없어요</Text>
           ) : (
@@ -259,7 +256,7 @@ function VotingStage({ session }: { session: SessionView }) {
         <View className="gap-1">
           <Text className="text-3xl font-extrabold tracking-tight text-text">골라 주세요</Text>
           <Text className="text-sm text-muted">
-            최대 {MAX_VOTES_PER_PERSON}개까지. 누가 뭘 골랐는지는 아무도 몰라요
+            {MAX_VOTES_PER_PERSON}개까지. 누가 뭘 골랐는지는 아무도 몰라요
           </Text>
         </View>
 

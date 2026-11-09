@@ -34,22 +34,29 @@ export function CandidateCard({
   const body = (
     <>
       <View className="flex-row items-center gap-3">
-        <FoodDot foodId={candidate.foodId} size="md" name={candidate.foodName} />
+        <FoodDot foodId={candidate.foodId} size="lg" name={candidate.foodName} />
         <View className="flex-1 gap-0.5">
           <Text
-            className={`text-base font-bold ${vetoed ? 'text-muted line-through' : 'text-text'}`}>
+            className={`text-xl font-extrabold tracking-tight ${
+              vetoed ? 'text-muted line-through' : voted ? 'text-on-primary' : 'text-text'
+            }`}>
             {candidate.foodName}
           </Text>
           {vetoed ? (
             <Text className="text-sm text-muted">{VETOED_TEXT}</Text>
           ) : candidate.pitch && !onSavePitch ? (
-            <Text className="text-sm text-muted">{candidate.pitch}</Text>
+            <Text className={`text-sm ${voted ? 'text-on-primary opacity-80' : 'text-muted'}`}>
+              {candidate.pitch}
+            </Text>
           ) : null}
         </View>
         {onVote && !vetoed ? (
-          <Text className={`text-sm font-bold ${voted ? 'text-primary' : 'text-muted'}`}>
-            {voted ? '골랐어요' : '고르기'}
-          </Text>
+          // 고른 카드는 주황으로 꽉 채우고 흰 알약, 안 고른 카드는 흰 알약 (docs/design.md 1절 "고른 상태")
+          <View className="rounded-full bg-background px-4 py-2">
+            <Text className={`text-sm font-extrabold ${voted ? 'text-primary' : 'text-text'}`}>
+              {voted ? '골랐어요' : '고르기'}
+            </Text>
+          </View>
         ) : null}
         {onRemove ? (
           <Pressable
@@ -71,7 +78,7 @@ export function CandidateCard({
             onChangeText={(t) => setPitch(Array.from(t).slice(0, PITCH_MAX).join(''))}
             onSubmitEditing={() => dirty && onSavePitch(pitch)}
             placeholder="한 줄 어필 (60자)"
-            className="h-10 flex-1 rounded-lg bg-background px-3 text-sm text-text"
+            className="h-12 flex-1 rounded-2xl bg-background px-4 text-base text-text"
           />
           {dirty ? (
             <Pressable
@@ -92,7 +99,7 @@ export function CandidateCard({
     </>
   );
 
-  const box = `gap-3 rounded-2xl p-4 ${voted ? 'bg-primary-soft' : 'bg-surface'}`;
+  const box = `gap-3 rounded-3xl p-5 ${voted ? 'bg-primary' : 'bg-surface'}`;
 
   if (onVote) {
     return (

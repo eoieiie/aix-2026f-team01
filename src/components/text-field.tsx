@@ -11,6 +11,8 @@ type TextFieldProps = {
   error?: string | null;
   autoFocus?: boolean;
   onSubmitEditing?: () => void;
+  // 글자 수 표시. 검색칸처럼 길이가 중요하지 않으면 끈다
+  showCount?: boolean;
 };
 
 // 글자 수는 서버(Postgres char_length)와 같은 방식으로 센다. 한글 한 자도, 이모지 한 개도 1자
@@ -28,6 +30,7 @@ export function TextField({
   error,
   autoFocus,
   onSubmitEditing,
+  showCount = true,
 }: TextFieldProps) {
   return (
     <View className="gap-1">
@@ -39,14 +42,18 @@ export function TextField({
         placeholder={placeholder}
         autoFocus={autoFocus}
         onSubmitEditing={onSubmitEditing}
-        className="h-12 rounded-xl bg-surface px-4 text-base text-text"
+        className="h-14 rounded-2xl bg-surface px-5 text-lg text-text"
       />
-      <View className="flex-row justify-between gap-2">
-        <Text className="flex-1 text-sm text-danger">{error ?? ''}</Text>
-        <Text className="text-sm text-muted">
-          {countChars(value)}/{maxLength}
-        </Text>
-      </View>
+      {showCount || error ? (
+        <View className="flex-row justify-between gap-2">
+          <Text className="flex-1 text-sm text-danger">{error ?? ''}</Text>
+          {showCount ? (
+            <Text className="text-sm text-muted">
+              {countChars(value)}/{maxLength}
+            </Text>
+          ) : null}
+        </View>
+      ) : null}
     </View>
   );
 }
