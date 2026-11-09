@@ -12,6 +12,13 @@ import {
   useStartSession,
 } from '@/hooks/use-groups';
 
+// 멤버 동그라미 색. 홈 모임 카드의 사람 동그라미와 같은 순서 (docs/design.md 1절)
+const MEMBER_COLORS = [
+  { bg: 'bg-food-8', text: 'text-on-ink' },
+  { bg: 'bg-food-2', text: 'text-on-ink' },
+  { bg: 'bg-food-4', text: 'text-text' },
+] as const;
+
 export default function GroupScreen() {
   const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -105,18 +112,22 @@ export default function GroupScreen() {
             {group.name}
           </Text>
           <View className="flex-row flex-wrap items-center gap-3">
-            {group.members.map((member: Member) => (
-              <View key={member.user_id} className="items-center gap-1">
-                <View className="h-12 w-12 items-center justify-center rounded-full bg-surface-strong">
-                  <Text className="text-base font-bold text-text">
-                    {Array.from(member.display_name)[0] ?? ''}
+            {group.members.map((member: Member, i: number) => {
+              const color = MEMBER_COLORS[i % MEMBER_COLORS.length];
+              return (
+                <View key={member.user_id} className="items-center gap-1.5">
+                  <View
+                    className={`h-14 w-14 items-center justify-center rounded-full ${color.bg}`}>
+                    <Text className={`text-lg font-extrabold ${color.text}`}>
+                      {Array.from(member.display_name)[0] ?? ''}
+                    </Text>
+                  </View>
+                  <Text className="max-w-16 text-sm font-semibold text-text" numberOfLines={1}>
+                    {member.display_name}
                   </Text>
                 </View>
-                <Text className="max-w-14 text-xs text-muted" numberOfLines={1}>
-                  {member.display_name}
-                </Text>
-              </View>
-            ))}
+              );
+            })}
           </View>
         </View>
 
@@ -125,17 +136,18 @@ export default function GroupScreen() {
 
         {/* 최근 식사 5개 (spec.md 4-6) */}
         <View className="gap-3">
-          <Text className="text-xl font-bold text-text">최근에 먹은 것</Text>
+          <Text className="text-2xl font-extrabold tracking-tight text-text">최근에 먹은 것</Text>
           {group.recent_meals.length === 0 ? (
-            <Text className="text-sm text-muted">
-              아직 기록이 없어요. 한 판을 끝내면 여기에 쌓여요
-            </Text>
+            <View className="gap-1 rounded-3xl bg-surface p-6">
+              <Text className="text-lg font-extrabold text-text">아직 기록이 없어요</Text>
+              <Text className="text-sm text-muted">한 판을 끝내면 여기에 쌓여요</Text>
+            </View>
           ) : (
             <View className="gap-4 rounded-3xl bg-surface p-5">
               {group.recent_meals.map((meal: RecentMeal) => (
                 <View key={meal.id} className="flex-row items-center gap-3">
-                  <FoodDot foodId={meal.food_id} size="sm" name={meal.food_name} />
-                  <Text className="flex-1 text-base font-semibold text-text">{meal.food_name}</Text>
+                  <FoodDot foodId={meal.food_id} size="md" name={meal.food_name} />
+                  <Text className="flex-1 text-lg font-extrabold text-text">{meal.food_name}</Text>
                   <Text className="text-sm text-muted">
                     {new Date(meal.eaten_at).toLocaleDateString('ko-KR', {
                       month: 'long',
