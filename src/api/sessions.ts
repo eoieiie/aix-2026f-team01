@@ -22,6 +22,8 @@ export interface Candidate {
   isMine: boolean;
   pitch: string | null;
   vetoed: boolean;
+  // 목록에 없어서 이름을 직접 적어 올린 메뉴 (4-9). 재료는 이름으로 짐작했다
+  custom: boolean;
 }
 
 export interface SessionView {
@@ -63,6 +65,8 @@ export const SESSION_ERROR_MESSAGES: Record<string, string> = {
   candidate_vetoed: '못 먹는 사람이 있어서 빠졌어요',
   vote_limit: '최대 2개까지 고를 수 있어요',
   not_done: '아직 결과가 나오지 않았어요',
+  name_empty: '메뉴 이름을 적어 주세요',
+  name_too_long: '메뉴 이름은 20자까지예요',
 };
 
 export class SessionError extends Error {
@@ -91,9 +95,11 @@ async function myUserId(client: Client): Promise<string | null> {
 
 // 음식 목록 (기본 40개). 검색은 화면에서 이 목록으로 한다 (4-9)
 export async function listFoods(client: Client = getSupabase()): Promise<Food[]> {
-  const { data, error } = await client.from('foods').select('id, name').order('id');
+  // 직접 적은 메뉴(custom)는 그 판에서만 쓰니 고르기 목록에 넣지 않는다.
+  // 칸 이름을 적지 않고 *로 읽어서, 서버에 0008이 들어가기 전에도 목록이 나온다
+  const { data, error } = await client.from('foods').select('*').order('id');
   if (error) throwSessionError(error);
-  return (data ?? []).map((f: any) => ({ id: f.id, name: f.name }));
+  return (data ?? []).filter((f: any) => f.custom !== true).map((f: any) => ({ id: f.id, name: f.name }));
 }
 
 // 이름 일부로 찾는다. 이미 올라간 음식은 빼고 최대 limit개 (4-9)
@@ -139,7 +145,7 @@ export async function getSession(
     client.from('memberships').select('user_id, display_name').eq('group_id', session.group_id),
     client
       .from('candidates')
-      .select('food_id, proposed_by, pitch, vetoed, created_at, foods ( name )')
+      .select('food_id, proposed_by, pitch, vetoed, created_at, foods ( * )')
       .eq('session_id', sessionId),
     client.from('votes').select('food_id').eq('session_id', sessionId),
   ]);
@@ -167,6 +173,7 @@ export async function getSession(
     .map((c: any) => ({
       foodId: c.food_id,
       foodName: c.foods?.name ?? '',
+      custom: c.foods?.custom === true,
       isMine: c.proposed_by === userId,
       pitch: c.pitch,
       vetoed: c.vetoed,
@@ -198,6 +205,21 @@ export async function addCandidate(
   });
   if (error) throwSessionError(error);
   return Boolean(data);
+}
+
+// 목록에 없는 메뉴를 이름으로 올린다. 같은 이름이 목록에 있으면 서버가 그 음식으로 올린다.
+// 돌려주는 값은 못 먹는 사람이 있어 빠졌는지 (4-9)
+export async function addCustomCandidate(
+  sessionId: string,
+  name: string,
+  client: Client = getSupabase()
+): Promise<boolean> {
+  const { data, error } = await client.rpc('add_custom_candidate', {
+    p_session_id: sessionId,
+    p_name: name,
+  });
+  if (error) throwSessionError(error);
+  return Boolean((data as { vetoed?: boolean } | null)?.vetoed);
 }
 
 // 내가 올린 후보의 어필. 빈 글이면 지운다 (4-9)

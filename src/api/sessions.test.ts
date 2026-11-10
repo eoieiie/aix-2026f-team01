@@ -1,5 +1,6 @@
 import {
   addCandidate,
+  addCustomCandidate,
   castVote,
   getSession,
   getVoteCounts,
@@ -167,5 +168,20 @@ describe('searchFoods: 음식 검색 (4-9)', () => {
 
   it('최대 개수까지만', () => {
     expect(searchFoods(foods, '', [], 2)).toHaveLength(2);
+  });
+});
+
+describe('직접 적은 메뉴 올리기 (spec.md 4-9)', () => {
+  it('이름을 그대로 서버에 넘기고, 빠졌는지를 돌려준다', async () => {
+    const { client, rpc } = fakeClient({ rpc: { add_custom_candidate: { data: { food_id: 99, vetoed: true } } } });
+    await expect(addCustomCandidate('s1', '평양냉면', client)).resolves.toBe(true);
+    expect(rpc).toHaveBeenCalledWith('add_custom_candidate', { p_session_id: 's1', p_name: '평양냉면' });
+  });
+
+  it('이름이 비거나 길면 한국어 문구', async () => {
+    const empty = fakeClient({ rpc: { add_custom_candidate: { error: { message: 'name_empty' } } } });
+    await expect(addCustomCandidate('s1', ' ', empty.client)).rejects.toThrow('메뉴 이름을 적어 주세요');
+    const long = fakeClient({ rpc: { add_custom_candidate: { error: { message: 'name_too_long' } } } });
+    await expect(addCustomCandidate('s1', '가'.repeat(21), long.client)).rejects.toThrow('메뉴 이름은 20자까지예요');
   });
 });

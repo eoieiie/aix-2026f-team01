@@ -2,8 +2,9 @@ import { useState } from 'react';
 import { Pressable, Text, View } from 'react-native';
 
 import { FoodDot } from '@/components/food-dot';
+import { Icon } from '@/components/icon';
 import { TextField } from '@/components/text-field';
-import { FOOD_SEARCH_LIMIT } from '@/constants';
+import { FOOD_NAME_MAX, FOOD_SEARCH_LIMIT } from '@/constants';
 import { type Food, searchFoods } from '@/hooks/use-session';
 
 type FoodSearchProps = {
@@ -15,6 +16,8 @@ type FoodSearchProps = {
   pickLabel?: string;
   disabled?: boolean;
   error?: string | null;
+  // 있으면 목록에 없는 이름을 그대로 올리는 줄이 생긴다 (4-9 직접 적기). 못 먹는 것 화면은 없다
+  onCustom?: (name: string) => void;
 };
 
 // 음식 이름 일부를 치면 최대 6개를 보여주고, 누르면 후보로 올린다 (4-9). 못 먹는 것 화면에서도 쓴다 (4-7)
@@ -25,16 +28,20 @@ export function FoodSearch({
   pickLabel = '후보로 올리기',
   disabled,
   error,
+  onCustom,
 }: FoodSearchProps) {
   const [query, setQuery] = useState('');
   const results = searchFoods(foods, query, excludeIds, FOOD_SEARCH_LIMIT);
+  const typed = query.trim();
+  // 적은 이름과 똑같은 음식이 목록에 없을 때만 "올리기" 줄을 보인다
+  const canCustom = !!onCustom && typed.length > 0 && !foods.some((f) => f.name === typed);
 
   return (
     <View className="gap-2">
       <TextField
         value={query}
         onChangeText={setQuery}
-        maxLength={20}
+        maxLength={FOOD_NAME_MAX}
         placeholder="음식 찾기 (예: 찌개, 국수)"
         error={error}
         showCount={false}
@@ -58,7 +65,24 @@ export function FoodSearch({
             </Text>
           </Pressable>
         ))}
-        {results.length === 0 ? (
+        {canCustom ? (
+          // 목록에 없는 메뉴: 적은 이름 그대로 올린다. 고르기 칸과 같은 높이, 한 줄을 다 쓴다
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={`${typed} 직접 올리기`}
+            disabled={disabled}
+            onPress={() => {
+              onCustom?.(typed);
+              setQuery('');
+            }}
+            className="h-14 w-full flex-row items-center gap-2 rounded-full bg-ink pl-4 pr-5 active:opacity-80 disabled:opacity-50">
+            <Icon name="plus" size={20} color="on-ink" />
+            <Text className="flex-1 text-base font-bold text-on-ink" numberOfLines={1}>
+              {typed}
+            </Text>
+            <Text className="text-sm font-semibold text-on-ink opacity-60">올리기</Text>
+          </Pressable>
+        ) : results.length === 0 ? (
           <Text className="text-sm text-muted">찾는 음식이 없어요</Text>
         ) : null}
       </View>

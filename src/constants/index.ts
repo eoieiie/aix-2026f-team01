@@ -14,6 +14,8 @@ export const RECENT_MEALS_LIMIT = 5;
 
 // 4-7, 4-9
 export const FOOD_SEARCH_LIMIT = 6;
+// 목록에 없는 메뉴를 직접 적을 때 이름 길이 (4-9)
+export const FOOD_NAME_MAX = 20;
 export const PITCH_MAX = 60;
 
 // 4-11

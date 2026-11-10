@@ -172,10 +172,10 @@ function CandidateStage({
   onRestrictions: () => void;
 }) {
   const { foods } = useFoods();
-  const { add, pitch, remove, open } = useSessionActions(session.id);
+  const { add, addCustom, pitch, remove, open } = useSessionActions(session.id);
   const alive = session.candidates.filter((c) => !c.vetoed).length;
-  const busy = add.isPending || pitch.isPending || remove.isPending;
-  const actionError = add.error ?? pitch.error ?? remove.error;
+  const busy = add.isPending || addCustom.isPending || pitch.isPending || remove.isPending;
+  const actionError = add.error ?? addCustom.error ?? pitch.error ?? remove.error;
 
   return (
     <View className="flex-1">
@@ -195,6 +195,7 @@ function CandidateStage({
           foods={foods}
           excludeIds={session.candidates.map((c) => c.foodId)}
           onPick={(food) => add.mutate(food.id)}
+          onCustom={(name) => addCustom.mutate(name)}
           disabled={busy}
           error={actionError ? sessionErrorMessage(actionError) : null}
         />

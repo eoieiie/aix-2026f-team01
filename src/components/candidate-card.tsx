@@ -37,12 +37,20 @@ export function CandidateCard({
       <View className="flex-row items-center gap-3">
         <FoodDot foodId={candidate.foodId} size="lg" name={candidate.foodName} />
         <View className="flex-1 gap-0.5">
-          <Text
-            className={`text-xl font-extrabold tracking-tight ${
-              vetoed ? 'text-muted line-through' : voted ? 'text-on-primary' : 'text-text'
-            }`}>
-            {candidate.foodName}
-          </Text>
+          <View className="flex-row items-center gap-2">
+            <Text
+              className={`shrink text-xl font-extrabold tracking-tight ${
+                vetoed ? 'text-muted line-through' : voted ? 'text-on-primary' : 'text-text'
+              }`}>
+              {candidate.foodName}
+            </Text>
+            {/* 직접 적은 메뉴는 연필 표시. 재료를 이름으로 짐작했다는 뜻 (4-9) */}
+            {candidate.custom ? (
+              <View accessibilityLabel="직접 적은 메뉴">
+                <Icon name="pencil" size={16} color={voted ? 'on-primary' : 'muted'} />
+              </View>
+            ) : null}
+          </View>
           {vetoed ? (
             <Text className="text-sm text-muted">{VETOED_TEXT}</Text>
           ) : candidate.pitch && !onSavePitch ? (
