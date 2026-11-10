@@ -4,6 +4,7 @@ import { FlatList, Image, Pressable, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Button } from '@/components/button';
+import { AccountSheet } from '@/components/account-sheet';
 import { CreateGroupModal } from '@/components/create-group-modal';
 import { FoodDot } from '@/components/food-dot';
 import { IconButton } from '@/components/icon';
@@ -17,6 +18,7 @@ export default function HomeScreen() {
   const router = useRouter();
   const { groups, isLoading, isError, refetch } = useMyGroups();
   const [modalVisible, setModalVisible] = useState(false);
+  const [accountVisible, setAccountVisible] = useState(false);
   const hasGroups = groups.length > 0;
 
   // 모임 카드: 사람 동그라미, 모임 이름, 최근 먹은 것. 진행 중인 판이 있으면 주황 알약 하나 (docs/design.md 1절)
@@ -61,10 +63,14 @@ export default function HomeScreen() {
         {/* 로고와 + 버튼은 높이 48 한 줄에서 세로 가운데. 로고 왼쪽 선은 아래 제목과 같다 */}
         <View className="h-12 flex-row items-center justify-between">
           <Logo />
-          {/* 모임이 없을 때는 아래 카드의 "첫 모임 만들기" 하나만 둔다. 같은 버튼을 두 번 보이지 않는다 (docs/design.md 4절) */}
-          {hasGroups ? (
-            <IconButton name="plus" label="모임 만들기" onPress={() => setModalVisible(true)} />
-          ) : null}
+          {/* 오른쪽은 같은 크기의 둥근 아이콘 버튼. 계정(4-19)은 늘, 모임 만들기는 모임이 있을 때만.
+              모임이 없을 때는 아래 카드의 "첫 모임 만들기" 하나만 둔다 (docs/design.md 4절) */}
+          <View className="flex-row gap-2">
+            <IconButton name="person" label="계정" onPress={() => setAccountVisible(true)} />
+            {hasGroups ? (
+              <IconButton name="plus" label="모임 만들기" onPress={() => setModalVisible(true)} />
+            ) : null}
+          </View>
         </View>
 
         {/* 위쪽 줄과 제목 사이 24, 제목과 목록 사이 24 (docs/design.md 4절). 아래 설명 줄은 두지 않는다 */}
@@ -114,6 +120,7 @@ export default function HomeScreen() {
       </View>
 
       <CreateGroupModal visible={modalVisible} onClose={() => setModalVisible(false)} />
+      <AccountSheet visible={accountVisible} onClose={() => setAccountVisible(false)} />
     </SafeAreaView>
   );
 }

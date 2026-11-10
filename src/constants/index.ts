@@ -21,6 +21,11 @@ export const PITCH_MAX = 60;
 // 4-11
 export const MAX_VOTES_PER_PERSON = 2;
 
+// 4-19 아이디로 이어 쓰기. 아이디 모양은 4-14 아이디와 같다(영어 소문자, 숫자, 밑줄 3~16자)
+// 이메일을 받지 않으려고 서버에는 "아이디@babti.invalid"로 저장한다. .invalid는 어디로도 메일이 가지 않는 예약 주소다
+export const LOGIN_EMAIL_DOMAIN = 'babti.invalid';
+export const PASSWORD_MIN = 6;
+
 // 4-14
 export const HANDLE_MIN = 3;
 export const HANDLE_MAX = 16;

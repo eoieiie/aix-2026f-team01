@@ -14,6 +14,10 @@ type TextFieldProps = {
   onSubmitEditing?: () => void;
   // 글자 수 표시. 검색칸처럼 길이가 중요하지 않으면 끈다. 켜도 상한의 80%를 넘을 때만 보인다
   showCount?: boolean;
+  // 비밀번호 칸이면 글자를 가린다
+  secure?: boolean;
+  // 아이디처럼 대문자가 들어가면 안 되는 칸
+  autoCapitalize?: 'none' | 'sentences';
 };
 
 // 글자 수는 서버(Postgres char_length)와 같은 방식으로 센다. 한글 한 자도, 이모지 한 개도 1자
@@ -37,6 +41,8 @@ export function TextField({
   autoFocus,
   onSubmitEditing,
   showCount = true,
+  secure = false,
+  autoCapitalize,
 }: TextFieldProps) {
   const [focused, setFocused] = useState(false);
   const count = showCount && nearLimit(value, maxLength);
@@ -51,6 +57,9 @@ export function TextField({
         placeholder={placeholder}
         autoFocus={autoFocus}
         onSubmitEditing={onSubmitEditing}
+        secureTextEntry={secure}
+        autoCapitalize={autoCapitalize}
+        autoCorrect={autoCapitalize === 'none' ? false : undefined}
         onFocus={() => setFocused(true)}
         onBlur={() => setFocused(false)}
         // 쓰는 중인 칸은 검정 선 하나로 보인다. 평소 선은 바탕과 같은 색이라 보이지 않는다
