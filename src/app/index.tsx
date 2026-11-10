@@ -24,7 +24,7 @@ export default function HomeScreen() {
     <Pressable
       accessibilityRole="button"
       accessibilityLabel={`${item.name} 모임 열기`}
-      className="gap-5 rounded-3xl bg-surface p-5 active:opacity-80"
+      className="gap-4 rounded-3xl bg-surface p-5 active:opacity-80"
       onPress={() => router.push(`/groups/${item.id}`)}
     >
       <View className="flex-row items-center justify-between">
@@ -42,7 +42,7 @@ export default function HomeScreen() {
         {item.recent_foods.length > 0 ? (
           <View className="flex-row flex-wrap items-center gap-x-4 gap-y-1">
             {item.recent_foods.map((food, i) => (
-              <View key={`${i}-${food.food_id}`} className="flex-row items-center gap-1.5">
+              <View key={`${i}-${food.food_id}`} className="flex-row items-center gap-2">
                 <FoodDot foodId={food.food_id} size="xs" />
                 <Text className="text-sm font-semibold text-text">{food.food_name}</Text>
               </View>
@@ -57,7 +57,7 @@ export default function HomeScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-background">
-      <View className="flex-1 px-5 pt-4">
+      <View className="flex-1 px-5 pt-3">
         {/* 로고와 + 버튼은 높이 48 한 줄에서 세로 가운데. 로고 왼쪽 선은 아래 제목과 같다 */}
         <View className="h-12 flex-row items-center justify-between">
           <Logo />
@@ -67,8 +67,8 @@ export default function HomeScreen() {
           ) : null}
         </View>
 
-        {/* 로고와 균형을 맞춰 한 줄로 (PR #52). 아래 설명 줄은 두지 않는다 (docs/design.md 4절) */}
-        <Text className="mb-6 mt-5 text-3xl font-extrabold tracking-tight text-text">
+        {/* 위쪽 줄과 제목 사이 24, 제목과 목록 사이 24 (docs/design.md 4절). 아래 설명 줄은 두지 않는다 */}
+        <Text className="mb-6 mt-6 text-3xl font-extrabold tracking-tight text-text">
           오늘은 누구랑 먹어요?
         </Text>
 
@@ -86,14 +86,14 @@ export default function HomeScreen() {
           </View>
         ) : !hasGroups ? (
           // 모임이 없을 때: 마스코트, "아직 모임이 없어요"(spec.md 4-3), 글 길이에 맞춘 가운데 버튼 (PR #52)
-          <View className="items-center gap-5 rounded-3xl bg-surface p-6">
+          <View className="items-center gap-4 rounded-3xl bg-surface p-6">
             <Image
               source={mascotSource}
-              style={{ width: 140, height: 108 }}
+              style={{ width: 88, height: 68 }}
               resizeMode="contain"
               accessibilityLabel="밥BTI 마스코트"
             />
-            <Text className="text-2xl font-extrabold tracking-tight text-text">아직 모임이 없어요</Text>
+            <Text className="text-xl font-extrabold tracking-tight text-text">아직 모임이 없어요</Text>
             <Button
               label="첫 모임 만들기"
               className="self-center px-8"

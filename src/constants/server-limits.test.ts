@@ -4,6 +4,7 @@ import { join } from 'path';
 
 import {
   DISPLAY_NAME_MAX,
+  FOOD_NAME_MAX,
   GROUP_NAME_MAX,
   HANDLE_MAX,
   HANDLE_MIN,
@@ -15,6 +16,7 @@ import {
 
 const app: Record<string, number> = {
   DISPLAY_NAME_MAX,
+  FOOD_NAME_MAX,
   GROUP_NAME_MAX,
   HANDLE_MAX,
   HANDLE_MIN,

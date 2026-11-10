@@ -3,6 +3,7 @@ import { useEffect } from 'react';
 
 import {
   addCandidate,
+  addCustomCandidate,
   castVote,
   getSession,
   getVoteCounts,
@@ -90,6 +91,10 @@ export function useSessionActions(sessionId: string) {
     mutationFn: (foodId: number) => addCandidate(sessionId, foodId),
     onSettled: refresh,
   });
+  const addCustom = useMutation({
+    mutationFn: (name: string) => addCustomCandidate(sessionId, name),
+    onSettled: refresh,
+  });
   const pitch = useMutation({
     mutationFn: ({ foodId, text }: { foodId: number; text: string }) =>
       setPitch(sessionId, foodId, text),
@@ -106,5 +111,5 @@ export function useSessionActions(sessionId: string) {
   });
   const spin = useMutation({ mutationFn: () => spinRoulette(sessionId), onSettled: refresh });
 
-  return { add, pitch, remove, open, vote, spin };
+  return { add, addCustom, pitch, remove, open, vote, spin };
 }

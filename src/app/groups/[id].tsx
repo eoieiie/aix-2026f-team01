@@ -1,11 +1,12 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { Pressable, ScrollView, Text, View } from 'react-native';
+import { ActivityIndicator, ScrollView, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Button } from '@/components/button';
 import { FoodDot } from '@/components/food-dot';
 import { IconButton } from '@/components/icon';
 import { InviteCard } from '@/components/invite-card';
+import colors from '@/constants/colors.json';
 import {
   Member,
   RecentMeal,
@@ -30,26 +31,19 @@ export default function GroupScreen() {
   if (isLoading) {
     return (
       <SafeAreaView className="flex-1 items-center justify-center bg-background">
-        <Text className="text-sm text-muted">모임 정보를 불러오는 중...</Text>
+        <ActivityIndicator color={colors.primary} accessibilityLabel="모임을 불러오는 중" />
       </SafeAreaView>
     );
   }
 
-  // 오류 상태
+  // 오류 상태: 한국어 문구와 다시 시도. 판 화면의 오류 상태와 같은 모양 (spec.md 4절 실패할 때)
   if (isError) {
     return (
-      <SafeAreaView className="flex-1 items-center justify-center bg-background px-6">
-        <Text className="text-base font-bold text-text">모임 정보를 불러올 수 없어요</Text>
-        <Text className="mt-1 text-xs text-muted">
-          {/* 오류 원문(영어)은 보이지 않고 한국어 문구만 (spec.md 4절 실패할 때) */}
-          인터넷 연결을 확인하고 다시 시도해 주세요
-        </Text>
-        <Pressable
-          className="mt-4 rounded-xl bg-surface px-5 py-2.5 active:opacity-80"
-          onPress={() => refetch()}
-        >
-          <Text className="text-xs font-bold text-text">다시 시도</Text>
-        </Pressable>
+      <SafeAreaView className="flex-1 items-center justify-center gap-4 bg-background px-6">
+        <Text className="text-lg font-bold text-text">모임 정보를 불러올 수 없어요</Text>
+        <View className="w-full max-w-xs">
+          <Button label="다시 시도" variant="secondary" onPress={() => refetch()} />
+        </View>
       </SafeAreaView>
     );
   }
@@ -57,18 +51,10 @@ export default function GroupScreen() {
   // 소속이 아닌 경우: "이 모임 멤버가 아니에요"와 홈으로 버튼 (spec.md 4-6)
   if (!group || !group.is_member) {
     return (
-      <SafeAreaView className="flex-1 items-center justify-center bg-background px-6">
-        <View className="w-full max-w-xs items-center rounded-2xl bg-surface p-8">
-          <Text className="text-base font-bold text-text">이 모임 멤버가 아니에요</Text>
-          <Text className="mt-1 text-center text-xs text-muted">
-            초대 링크를 통해 참여하거나 홈으로 돌아가세요.
-          </Text>
-          <Pressable
-            className="mt-5 w-full items-center rounded-xl bg-primary py-3 active:opacity-90"
-            onPress={() => router.replace('/')}
-          >
-            <Text className="text-sm font-bold text-on-primary">홈으로</Text>
-          </Pressable>
+      <SafeAreaView className="flex-1 items-center justify-center gap-4 bg-background px-6">
+        <Text className="text-lg font-bold text-text">이 모임 멤버가 아니에요</Text>
+        <View className="w-full max-w-xs">
+          <Button label="홈으로" onPress={() => router.replace('/')} />
         </View>
       </SafeAreaView>
     );
@@ -109,7 +95,7 @@ export default function GroupScreen() {
             {group.members.map((member: Member, i: number) => {
               const color = MEMBER_COLORS[i % MEMBER_COLORS.length];
               return (
-                <View key={member.user_id} className="items-center gap-1.5">
+                <View key={member.user_id} className="items-center gap-2">
                   <View
                     className={`h-14 w-14 items-center justify-center rounded-full ${color.bg}`}>
                     <Text className={`text-lg font-extrabold ${color.text}`}>
@@ -126,7 +112,7 @@ export default function GroupScreen() {
         </View>
 
         {/* 초대 카드 (spec.md 4-4) */}
-        <InviteCard inviteCode={group.invite_code} />
+        <InviteCard inviteCode={group.invite_code} groupName={group.name} />
 
         {/* 최근 식사 5개 (spec.md 4-6) */}
         <View className="gap-3">
