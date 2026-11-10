@@ -44,7 +44,10 @@ type ResultMomentProps = {
 
 // 룰렛이 멈춘 순간 (docs/design.md 순간 1). 화면 전체가 주황이 되고 음식 이름이 크게 나온다
 export function ResultMoment({ session, from, onGroup }: ResultMomentProps) {
-  const { width, height } = useWindowDimensions();
+  // 덮는 원의 크기는 창이 아니라 이 화면 크기로 잰다. 노트북에서는 화면이 가운데 폭 480 안에 있다
+  const windowSize = useWindowDimensions();
+  const [box, setBox] = useState({ width: windowSize.width, height: windowSize.height });
+  const { width, height } = box;
   const reduceMotion = useReduceMotion();
   const { counts } = useVoteCounts(session.id, true);
   const animateIn = from !== null;
@@ -103,7 +106,11 @@ export function ResultMoment({ session, from, onGroup }: ResultMomentProps) {
   const anyVotes = (counts ?? []).some((c) => c.voteCount > 0);
 
   return (
-    <View className="absolute inset-0 overflow-hidden">
+    <View
+      className="absolute inset-0 overflow-hidden"
+      onLayout={(e) =>
+        setBox({ width: e.nativeEvent.layout.width, height: e.nativeEvent.layout.height })
+      }>
       {/* Animated.View는 className을 받지 않아서 style로 준다. 색은 colors.json의 토큰 값 */}
       <Animated.View
         style={{
@@ -160,10 +167,7 @@ export function ResultMoment({ session, from, onGroup }: ResultMomentProps) {
               </View>
             ) : null}
           </ScrollView>
-          <View className="gap-3 px-7 pb-4">
-            <Text className="text-center text-sm font-semibold text-on-primary opacity-80">
-              모임 식사 기록에 남겼어요
-            </Text>
+          <View className="px-7 pb-4">
             <Button label="모임으로" variant="inverse" onPress={onGroup} />
           </View>
         </SafeAreaView>

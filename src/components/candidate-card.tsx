@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Pressable, Text, TextInput, View } from 'react-native';
 
 import { FoodDot } from '@/components/food-dot';
+import { Icon } from '@/components/icon';
 import { PITCH_MAX } from '@/constants';
 import type { Candidate } from '@/hooks/use-session';
 
@@ -34,22 +35,27 @@ export function CandidateCard({
   const body = (
     <>
       <View className="flex-row items-center gap-3">
-        <FoodDot foodId={candidate.foodId} size="md" name={candidate.foodName} />
+        <FoodDot foodId={candidate.foodId} size="lg" name={candidate.foodName} />
         <View className="flex-1 gap-0.5">
           <Text
-            className={`text-base font-bold ${vetoed ? 'text-muted line-through' : 'text-text'}`}>
+            className={`text-xl font-extrabold tracking-tight ${
+              vetoed ? 'text-muted line-through' : voted ? 'text-on-primary' : 'text-text'
+            }`}>
             {candidate.foodName}
           </Text>
           {vetoed ? (
             <Text className="text-sm text-muted">{VETOED_TEXT}</Text>
           ) : candidate.pitch && !onSavePitch ? (
-            <Text className="text-sm text-muted">{candidate.pitch}</Text>
+            <Text className={`text-sm ${voted ? 'text-on-primary opacity-80' : 'text-muted'}`}>
+              {candidate.pitch}
+            </Text>
           ) : null}
         </View>
         {onVote && !vetoed ? (
-          <Text className={`text-sm font-bold ${voted ? 'text-primary' : 'text-muted'}`}>
-            {voted ? '골랐어요' : '고르기'}
-          </Text>
+          // 고른 카드는 주황으로 꽉 채우고 흰 동그라미에 체크, 안 고른 카드는 빈 흰 동그라미. 글 대신 면과 표시로 (docs/design.md 1절 "고른 상태", 4절)
+          <View className="h-11 w-11 items-center justify-center rounded-full bg-background">
+            {voted ? <Icon name="check" color="primary" /> : null}
+          </View>
         ) : null}
         {onRemove ? (
           <Pressable
@@ -57,8 +63,8 @@ export function CandidateCard({
             accessibilityLabel={`${candidate.foodName} 빼기`}
             disabled={busy}
             onPress={onRemove}
-            className="rounded-full bg-background px-3 py-1.5 active:opacity-70 disabled:opacity-50">
-            <Text className="text-sm font-semibold text-text">빼기</Text>
+            className="h-11 w-11 items-center justify-center rounded-full bg-background active:opacity-70 disabled:opacity-50">
+            <Icon name="close" size={18} />
           </Pressable>
         ) : null}
       </View>
@@ -71,7 +77,7 @@ export function CandidateCard({
             onChangeText={(t) => setPitch(Array.from(t).slice(0, PITCH_MAX).join(''))}
             onSubmitEditing={() => dirty && onSavePitch(pitch)}
             placeholder="한 줄 어필 (60자)"
-            className="h-10 flex-1 rounded-lg bg-background px-3 text-sm text-text"
+            className="h-12 flex-1 rounded-2xl bg-background px-4 text-base text-text placeholder:text-muted"
           />
           {dirty ? (
             <Pressable
@@ -79,8 +85,8 @@ export function CandidateCard({
               accessibilityLabel={`${candidate.foodName} 어필 저장`}
               disabled={busy}
               onPress={() => onSavePitch(pitch)}
-              className="rounded-lg bg-text px-3 py-2 active:opacity-80 disabled:opacity-50">
-              <Text className="text-sm font-semibold text-on-primary">저장</Text>
+              className="h-12 items-center justify-center rounded-full bg-ink px-5 active:opacity-80 disabled:opacity-50">
+              <Text className="text-base font-bold text-on-ink">저장</Text>
             </Pressable>
           ) : null}
         </View>
@@ -92,7 +98,7 @@ export function CandidateCard({
     </>
   );
 
-  const box = `gap-3 rounded-2xl p-4 ${voted ? 'bg-primary-soft' : 'bg-surface'}`;
+  const box = `gap-3 rounded-3xl p-5 ${voted ? 'bg-primary' : 'bg-surface'}`;
 
   if (onVote) {
     return (

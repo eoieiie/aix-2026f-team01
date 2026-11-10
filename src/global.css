@@ -1,3 +1,14 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* 웹 전용. 한글이 낱자로 끊기지 않게 단어 단위로 줄을 바꾸고, 입력칸의 브라우저 기본 파란 테두리를 끈다 (포커스는 TextField가 검정 선으로 보인다) */
+@layer base {
+  * {
+    word-break: keep-all;
+  }
+  input:focus,
+  textarea:focus {
+    outline: none;
+  }
+}

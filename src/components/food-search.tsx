@@ -35,11 +35,12 @@ export function FoodSearch({
         value={query}
         onChangeText={setQuery}
         maxLength={20}
-        label="음식 찾기"
-        placeholder="예: 찌개, 국수"
+        placeholder="음식 찾기 (예: 찌개, 국수)"
         error={error}
+        showCount={false}
       />
-      <View className="flex-row flex-wrap gap-2">
+      {/* 고르기 칸은 글 길이와 상관없이 같은 크기로 두 칸씩 (docs/design.md 4절 "같은 역할은 같은 크기") */}
+      <View className="flex-row flex-wrap justify-between gap-y-2">
         {results.map((food) => (
           <Pressable
             key={food.id}
@@ -50,9 +51,11 @@ export function FoodSearch({
               onPick(food);
               setQuery('');
             }}
-            className="flex-row items-center gap-2 rounded-full bg-surface py-2 pl-2 pr-4 active:opacity-70 disabled:opacity-50">
+            className="h-14 w-[49%] flex-row items-center gap-2 rounded-full bg-surface pl-3 pr-4 active:opacity-70 disabled:opacity-50">
             <FoodDot foodId={food.id} size="sm" />
-            <Text className="text-sm font-semibold text-text">{food.name}</Text>
+            <Text className="flex-1 text-base font-bold text-text" numberOfLines={1}>
+              {food.name}
+            </Text>
           </Pressable>
         ))}
         {results.length === 0 ? (

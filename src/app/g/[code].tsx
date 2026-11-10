@@ -103,12 +103,15 @@ export default function InviteScreen() {
   return (
     <SafeAreaView className="flex-1 bg-background">
       <View className="flex-1 justify-center gap-8 px-5">
-        <View className="gap-2">
-          <Text className="text-base text-muted">초대받은 모임</Text>
-          <Text className="text-4xl font-extrabold leading-tight tracking-tight text-text">
+        {/* 초대 카드와 같은 검정 덩어리. 링크로 처음 들어온 사람이 모임 이름부터 크게 본다 (docs/design.md 1절) */}
+        <View className="gap-3 rounded-3xl bg-ink p-6">
+          <Text className="text-base font-bold text-on-ink opacity-60">초대받은 모임</Text>
+          <Text className="text-5xl font-extrabold leading-tight tracking-tight text-on-ink">
             {invite.groupName}
           </Text>
-          <Text className="text-sm text-muted">가입 없이 이름만 적으면 들어가요</Text>
+          <Text className="text-base font-semibold text-on-ink opacity-80">
+            가입 없이 이름만 적으면 들어가요
+          </Text>
         </View>
 
         {profileName !== null ? (
