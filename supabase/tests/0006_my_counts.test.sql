@@ -47,7 +47,7 @@ from (values (1,1),(1,2),(1,3), (2,1),(2,2), (3,1),(3,2), (4,2),(4,3), (5,1),(5,
 select set_config('request.jwt.claims', '{"sub":"00000000-0000-0000-0000-000000000001","role":"authenticated"}', true);
 set local role authenticated;
 select results_eq(
-  $$ select f.name, c.meal_count from public.my_food_counts() c join public.foods f on f.id = c.food_id $$,
+  $$ select f.name, c.meal_count from public.my_food_counts() with ordinality c join public.foods f on f.id = c.food_id order by c.ordinality $$,
   $$ values ('t_a'::text, 2), ('t_b'::text, 2) $$,
   '내가 있던 식사만 음식별로 센다. 같으면 food_id 순');
 select results_eq(
@@ -66,7 +66,7 @@ reset role;
 select set_config('request.jwt.claims', '{"sub":"00000000-0000-0000-0000-000000000004","role":"authenticated"}', true);
 set local role authenticated;
 select results_eq(
-  $$ select f.name, c.meal_count from public.my_food_counts() c join public.foods f on f.id = c.food_id $$,
+  $$ select f.name, c.meal_count from public.my_food_counts() with ordinality c join public.foods f on f.id = c.food_id order by c.ordinality $$,
   $$ values ('t_b'::text, 1) $$,
   '먹은 음식만 나온다');
 reset role;
@@ -75,7 +75,7 @@ select set_config('request.jwt.claims', '{"sub":"00000000-0000-0000-0000-0000000
 insert into public.meal_participants (meal_id, user_id) values ('30000000-0000-0000-0000-000000000005', '00000000-0000-0000-0000-000000000002');
 set local role authenticated;
 select results_eq(
-  $$ select f.name, c.meal_count from public.my_food_counts() c join public.foods f on f.id = c.food_id $$,
+  $$ select f.name, c.meal_count from public.my_food_counts() with ordinality c join public.foods f on f.id = c.food_id order by c.ordinality $$,
   $$ values ('t_b'::text, 3), ('t_a'::text, 2) $$,
   '음식은 많은 순');
 reset role;
