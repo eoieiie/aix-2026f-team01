@@ -8,7 +8,13 @@
     "icon": "./assets/images/icon.png",
     "scheme": "babti",
     "userInterfaceStyle": "light",
-    "ios": {},
+    "ios": {
+      "bundleIdentifier": "com.bapbti.app",
+      "supportsTablet": false,
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
+    },
     "android": {
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
