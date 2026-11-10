@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="375" height="812" viewBox="0 0 375 812" font-family="-apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Noto Sans KR', 'Malgun Gothic', sans-serif">
+  <defs>
+    <clipPath id="s"><rect width="375" height="812" rx="44"/></clipPath>
+    <clipPath id="c"><rect x="20" y="136" width="335" height="430" rx="28"/></clipPath>
+  </defs>
+  <g clip-path="url(#s)">
+    <rect width="375" height="812" fill="#FFFFFF"/>
+    <path d="M29 56 L21 64 L29 72" stroke="#000000" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+    <text x="38" y="70" font-size="16" font-weight="700" fill="#000000">모임으로</text>
+    <text x="20" y="116" font-size="28" font-weight="800" fill="#000000">이번 끼니</text>
+
+    <rect x="20" y="136" width="335" height="430" rx="28" fill="#F05A00"/>
+    <g clip-path="url(#c)">
+      <circle cx="330" cy="545" r="130" fill="#FFFFFF" fill-opacity="0.14"/>
+      <circle cx="330" cy="545" r="70" fill="#FFFFFF" fill-opacity="0.14"/>
+    </g>
+    <text x="44" y="184" font-size="15" font-weight="800" fill="#FFFFFF">공대 점심팟</text>
+    <text x="331" y="184" font-size="15" font-weight="600" fill="#FFFFFF" fill-opacity="0.85" text-anchor="end">11월 3일</text>
+    <text x="40" y="262" font-size="64" font-weight="800" fill="#FFFFFF" letter-spacing="-2">비빔밥</text>
+    <text x="44" y="298" font-size="16" font-weight="700" fill="#FFFFFF">우리 모임 3번째 비빔밥</text>
+    <g font-size="14" font-weight="700" text-anchor="middle">
+      <circle cx="64" cy="370" r="21" fill="#000000" stroke="#F05A00" stroke-width="3"/><text x="64" y="375" fill="#FFFFFF">민</text>
+      <circle cx="96" cy="370" r="21" fill="#3F3F46" stroke="#F05A00" stroke-width="3"/><text x="96" y="375" fill="#FFFFFF">준</text>
+      <circle cx="128" cy="370" r="21" fill="#FFFFFF" stroke="#F05A00" stroke-width="3"/><text x="128" y="375" fill="#000000">서</text>
+    </g>
+    <text x="44" y="428" font-size="15" font-weight="600" fill="#FFFFFF">민지랑 5번째 밥</text>
+    <text x="44" y="452" font-size="15" font-weight="600" fill="#FFFFFF">준호랑 2번째, 서연이랑은 처음</text>
+    <text x="44" y="536" font-size="16" font-weight="800" fill="#FFFFFF">밥비티아이</text>
+    <text x="331" y="536" font-size="13" font-weight="700" fill="#FFFFFF" text-anchor="end">나의 2번째 비빔밥</text>
+
+    <rect x="20" y="590" width="335" height="56" rx="28" fill="#000000"/>
+    <text x="187.5" y="624" font-size="17" font-weight="800" fill="#FFFFFF" text-anchor="middle">이미지로 공유</text>
+    <text x="187.5" y="680" font-size="13" fill="#6B6B6B" text-anchor="middle">못 먹는 것은 카드에 나오지 않아요</text>
+  </g>
+</svg>
