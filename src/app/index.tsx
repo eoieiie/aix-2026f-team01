@@ -7,10 +7,10 @@ import { Button } from '@/components/button';
 import { CreateGroupModal } from '@/components/create-group-modal';
 import { FoodDot } from '@/components/food-dot';
 import { IconButton } from '@/components/icon';
+import { Logo } from '@/components/logo';
 import { PersonDots } from '@/components/person-dots';
 import { Group, useMyGroups } from '@/hooks/use-groups';
 
-const logoSource = require('../../assets/images/logo.png');
 const mascotSource = require('../../assets/images/mascot.png');
 
 export default function HomeScreen() {
@@ -58,13 +58,9 @@ export default function HomeScreen() {
   return (
     <SafeAreaView className="flex-1 bg-background">
       <View className="flex-1 px-5 pt-4">
-        <View className="flex-row items-center justify-between">
-          <Image
-            source={logoSource}
-            style={{ width: 138, height: 80 }}
-            resizeMode="contain"
-            accessibilityLabel="밥BTI 로고"
-          />
+        {/* 로고와 + 버튼은 높이 48 한 줄에서 세로 가운데. 로고 왼쪽 선은 아래 제목과 같다 */}
+        <View className="h-12 flex-row items-center justify-between">
+          <Logo />
           {/* 모임이 없을 때는 아래 카드의 "첫 모임 만들기" 하나만 둔다. 같은 버튼을 두 번 보이지 않는다 (docs/design.md 4절) */}
           {hasGroups ? (
             <IconButton name="plus" label="모임 만들기" onPress={() => setModalVisible(true)} />
