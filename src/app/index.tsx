@@ -1,6 +1,6 @@
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
-import { FlatList, Pressable, Text, View } from 'react-native';
+import { FlatList, Image, Pressable, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Button } from '@/components/button';
@@ -9,6 +9,9 @@ import { FoodDot } from '@/components/food-dot';
 import { IconButton } from '@/components/icon';
 import { PersonDots } from '@/components/person-dots';
 import { Group, useMyGroups } from '@/hooks/use-groups';
+
+const logoSource = require('../../assets/images/logo.png');
+const mascotSource = require('../../assets/images/mascot.png');
 
 export default function HomeScreen() {
   const router = useRouter();
@@ -55,16 +58,22 @@ export default function HomeScreen() {
   return (
     <SafeAreaView className="flex-1 bg-background">
       <View className="flex-1 px-5 pt-4">
-        <View className="h-12 flex-row items-center justify-between">
-          <Text className="text-base font-extrabold text-text">밥비티아이</Text>
-          {/* 모임이 없을 때는 아래 덩어리의 "첫 모임 만들기" 하나만 둔다. 같은 버튼을 두 번 보이지 않는다 (docs/design.md 4절) */}
+        <View className="flex-row items-center justify-between">
+          <Image
+            source={logoSource}
+            style={{ width: 138, height: 80 }}
+            resizeMode="contain"
+            accessibilityLabel="밥BTI 로고"
+          />
+          {/* 모임이 없을 때는 아래 카드의 "첫 모임 만들기" 하나만 둔다. 같은 버튼을 두 번 보이지 않는다 (docs/design.md 4절) */}
           {hasGroups ? (
             <IconButton name="plus" label="모임 만들기" onPress={() => setModalVisible(true)} />
           ) : null}
         </View>
 
-        <Text className="mb-6 mt-6 text-4xl font-extrabold leading-tight tracking-tight text-text">
-          {'오늘은\n누구랑 먹어요?'}
+        {/* 로고와 균형을 맞춰 한 줄로 (PR #52). 아래 설명 줄은 두지 않는다 (docs/design.md 4절) */}
+        <Text className="mb-6 mt-5 text-3xl font-extrabold tracking-tight text-text">
+          오늘은 누구랑 먹어요?
         </Text>
 
         {isLoading ? (
@@ -80,12 +89,20 @@ export default function HomeScreen() {
             <Button label="다시 시도" variant="secondary" onPress={() => refetch()} />
           </View>
         ) : !hasGroups ? (
-          // 모임이 없을 때: "아직 모임이 없어요"와 만들기 버튼 (spec.md 4-3). 덩어리 하나로 보인다 (docs/design.md 1절)
-          <View className="gap-6 rounded-3xl bg-ink p-6">
-            <Text className="text-3xl font-extrabold leading-tight tracking-tight text-on-ink">
-              {'아직 모임이\n없어요'}
-            </Text>
-            <Button label="첫 모임 만들기" onPress={() => setModalVisible(true)} />
+          // 모임이 없을 때: 마스코트, "아직 모임이 없어요"(spec.md 4-3), 글 길이에 맞춘 가운데 버튼 (PR #52)
+          <View className="items-center gap-5 rounded-3xl bg-surface p-6">
+            <Image
+              source={mascotSource}
+              style={{ width: 140, height: 108 }}
+              resizeMode="contain"
+              accessibilityLabel="밥BTI 마스코트"
+            />
+            <Text className="text-2xl font-extrabold tracking-tight text-text">아직 모임이 없어요</Text>
+            <Button
+              label="첫 모임 만들기"
+              className="self-center px-8"
+              onPress={() => setModalVisible(true)}
+            />
           </View>
         ) : (
           // 최근에 들어간 순으로 보이는 모임 목록 (spec.md 4-3)

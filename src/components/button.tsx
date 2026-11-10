@@ -12,6 +12,8 @@ type ButtonProps = {
   disabled?: boolean;
   // 서버 응답을 기다리는 동안. 두 번 눌리지 않게 꺼진 것으로 다룬다
   loading?: boolean;
+  // 화면에 맞춰 폭이나 정렬만 더할 때 쓴다. 색과 높이는 위 variant로 정한다. 예: 빈 홈의 "첫 모임 만들기"는 글 길이에 맞춰 가운데 (PR #52)
+  className?: string;
 };
 
 // 화면 공통 버튼 (이슈 #10)
@@ -21,6 +23,7 @@ export function Button({
   variant = 'primary',
   disabled = false,
   loading = false,
+  className = '',
 }: ButtonProps) {
   const off = disabled || loading;
   const primary = variant === 'primary';
@@ -42,7 +45,7 @@ export function Button({
       accessibilityState={{ disabled: off, busy: loading }}
       disabled={off}
       onPress={onPress}
-      className={`h-14 items-center justify-center rounded-full px-6 active:opacity-80 ${bg}`}>
+      className={`h-14 items-center justify-center rounded-full px-6 active:opacity-80 ${bg} ${className}`}>
       {loading ? (
         // 로딩 표시는 className을 받지 못해서 토큰 값을 colors.json에서 꺼내 준다
         <ActivityIndicator color={primary ? colors['on-primary'] : colors.text} />

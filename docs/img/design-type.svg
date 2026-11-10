@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="375" height="812" viewBox="0 0 375 812" font-family="-apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Noto Sans KR', 'Malgun Gothic', sans-serif">
+  <defs><clipPath id="s"><rect width="375" height="812" rx="44"/></clipPath></defs>
+  <g clip-path="url(#s)">
+    <rect width="375" height="812" fill="#000000"/>
+    <text x="20" y="96" font-size="15" font-weight="700" fill="#FFFFFF" fill-opacity="0.6">8문항 끝</text>
+    <text x="20" y="146" font-size="28" font-weight="800" fill="#FFFFFF">내 밥 타입은</text>
+    <rect x="20" y="176" width="163" height="166" rx="24" fill="#18181B"/>
+    <text x="101.5" y="282" font-size="88" font-weight="800" fill="#FFFFFF" text-anchor="middle">탐</text>
+    <text x="101.5" y="320" font-size="14" font-weight="600" fill="#FFFFFF" fill-opacity="0.65" text-anchor="middle">새 메뉴 먼저</text>
+    <rect x="192" y="176" width="163" height="166" rx="24" fill="#18181B"/>
+    <text x="273.5" y="282" font-size="88" font-weight="800" fill="#FFFFFF" text-anchor="middle">매</text>
+    <text x="273.5" y="320" font-size="14" font-weight="600" fill="#FFFFFF" fill-opacity="0.65" text-anchor="middle">매운 게 좋아</text>
+    <rect x="20" y="354" width="163" height="166" rx="24" fill="#18181B"/>
+    <text x="101.5" y="460" font-size="88" font-weight="800" fill="#FFFFFF" text-anchor="middle">한</text>
+    <text x="101.5" y="498" font-size="14" font-weight="600" fill="#FFFFFF" fill-opacity="0.65" text-anchor="middle">한식 위주</text>
+    <rect x="192" y="354" width="163" height="166" rx="24" fill="#18181B"/>
+    <text x="273.5" y="460" font-size="88" font-weight="800" fill="#FFFFFF" text-anchor="middle">주</text>
+    <text x="273.5" y="498" font-size="14" font-weight="600" fill="#FFFFFF" fill-opacity="0.65" text-anchor="middle">내가 정해</text>
+    <text x="20" y="574" font-size="16" font-weight="500" fill="#FFFFFF" fill-opacity="0.75">처음 보는 메뉴도 먼저 시켜 보고,</text>
+    <text x="20" y="598" font-size="16" font-weight="500" fill="#FFFFFF" fill-opacity="0.75">고를 때는 내가 먼저 말하는 편이에요</text>
+    <rect x="20" y="676" width="335" height="56" rx="28" fill="#F05A00"/>
+    <text x="187.5" y="710" font-size="17" font-weight="800" fill="#FFFFFF" text-anchor="middle">아이디 정하고 시작하기</text>
+    <text x="187.5" y="768" font-size="16" font-weight="700" fill="#FFFFFF" fill-opacity="0.6" text-anchor="middle">다시 하기</text>
+  </g>
+</svg>
