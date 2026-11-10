@@ -7,6 +7,13 @@
     "production": {
       "environment": "production",
       "autoIncrement": true
+    },
+    "preview": {
+      "environment": "production",
+      "distribution": "internal",
+      "android": {
+        "buildType": "apk"
+      }
     }
   },
   "submit": {
