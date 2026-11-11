@@ -6,14 +6,16 @@
   "build": {
     "production": {
       "environment": "production",
-      "autoIncrement": true
+      "autoIncrement": true,
+      "channel": "production"
     },
     "preview": {
       "environment": "production",
       "distribution": "internal",
       "android": {
         "buildType": "apk"
-      }
+      },
+      "channel": "production"
     }
   },
   "submit": {
