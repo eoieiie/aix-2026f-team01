@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Modal, Text, View } from 'react-native';
 
 import { Button } from '@/components/button';
@@ -20,10 +20,8 @@ export function HeadcountModal({
   onClose: () => void;
   onStart: (count: number) => void;
 }) {
+  // 창을 열 때마다 새로 그려서(부르는 쪽이 열 때만 넣는다) 처음 값으로 돌아간다
   const [count, setCount] = useState(initial);
-  useEffect(() => {
-    if (visible) setCount(initial);
-  }, [visible, initial]);
 
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>

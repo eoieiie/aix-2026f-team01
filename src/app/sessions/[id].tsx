@@ -13,7 +13,6 @@ import { Roulette } from '@/components/roulette';
 import colors from '@/constants/colors.json';
 import { MAX_VOTES_PER_PERSON, ROULETTE_RESULT_FALLBACK_MS } from '@/constants';
 import {
-  type Participant,
   rouletteSlices,
   SessionError,
   sessionErrorMessage,

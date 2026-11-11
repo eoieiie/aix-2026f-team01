@@ -164,14 +164,16 @@ export default function GroupScreen() {
         />
       </View>
 
-      <HeadcountModal
-        visible={askHeadcount}
-        initial={Math.min(HEADCOUNT_MAX, Math.max(2, group.members.length))}
-        loading={isStartingSession}
-        error={startError}
-        onClose={() => setAskHeadcount(false)}
-        onStart={(count) => handleStartOrJoinSession(count)}
-      />
+      {askHeadcount ? (
+        <HeadcountModal
+          visible
+          initial={Math.min(HEADCOUNT_MAX, Math.max(2, group.members.length))}
+          loading={isStartingSession}
+          error={startError}
+          onClose={() => setAskHeadcount(false)}
+          onStart={(count) => handleStartOrJoinSession(count)}
+        />
+      ) : null}
     </SafeAreaView>
   );
 }
