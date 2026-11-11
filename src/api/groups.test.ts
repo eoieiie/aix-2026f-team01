@@ -248,14 +248,14 @@ describe('src/api/groups.ts 테스트', () => {
   describe('startSession (spec.md 4-6, 4-8)', () => {
     it('RPC start_session을 호출해 세션 ID를 돌려준다', async () => {
       const { client, rpc } = fakeClient({ rpcData: 'sess-999' });
-      const res = await startSession('g1', client);
+      const res = await startSession('g1', undefined, client);
       expect(res).toBe('sess-999');
       expect(rpc).toHaveBeenCalledWith('start_session', { p_group_id: 'g1' });
     });
 
     it('멤버가 아니면 GroupError(not_member)를 던진다', async () => {
       const { client } = fakeClient({ rpcError: { message: 'not_member' } });
-      await expect(startSession('g1', client)).rejects.toThrow('이 모임 멤버가 아니에요');
+      await expect(startSession('g1', undefined, client)).rejects.toThrow('이 모임 멤버가 아니에요');
     });
   });
   describe('getMyProfileName (4-2 프로필 이름이 있으면 묻지 않음)', () => {

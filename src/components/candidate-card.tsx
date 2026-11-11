@@ -6,7 +6,8 @@ import { Icon } from '@/components/icon';
 import { PITCH_MAX } from '@/constants';
 import type { Candidate } from '@/hooks/use-session';
 
-const VETOED_TEXT = '못 먹는 사람이 있어서 빠졌어요';
+// 0010부터 빠지지 않고 표시만 한다. 찍을 수 있다
+const VETOED_TEXT = '못 먹는 사람이 있어요';
 
 type CandidateCardProps = {
   candidate: Candidate;
@@ -19,7 +20,7 @@ type CandidateCardProps = {
   busy?: boolean;
 };
 
-// 후보 한 줄. 빠진 후보는 줄을 긋고 이유만 보인다. 누가 원인인지는 데이터에도 없다 (4-9 익명)
+// 후보 한 줄. 못 먹는 사람이 있는 후보는 이름 아래 한 줄로 알린다. 누가 원인인지는 데이터에도 없다 (4-9 익명)
 export function CandidateCard({
   candidate,
   onSavePitch,
@@ -40,7 +41,7 @@ export function CandidateCard({
           <View className="flex-row items-center gap-2">
             <Text
               className={`shrink text-xl font-extrabold tracking-tight ${
-                vetoed ? 'text-muted line-through' : voted ? 'text-on-primary' : 'text-text'
+                voted ? 'text-on-primary' : 'text-text'
               }`}>
               {candidate.foodName}
             </Text>
@@ -52,14 +53,17 @@ export function CandidateCard({
             ) : null}
           </View>
           {vetoed ? (
-            <Text className="text-sm text-muted">{VETOED_TEXT}</Text>
-          ) : candidate.pitch && !onSavePitch ? (
+            <Text className={`text-sm font-semibold ${voted ? 'text-on-primary' : 'text-danger'}`}>
+              {VETOED_TEXT}
+            </Text>
+          ) : null}
+          {candidate.pitch && !onSavePitch ? (
             <Text className={`text-sm ${voted ? 'text-on-primary opacity-80' : 'text-muted'}`}>
               {candidate.pitch}
             </Text>
           ) : null}
         </View>
-        {onVote && !vetoed ? (
+        {onVote ? (
           // 고른 카드는 주황으로 꽉 채우고 흰 동그라미에 체크, 안 고른 카드는 빈 흰 동그라미. 글 대신 면과 표시로 (docs/design.md 1절 "고른 상태", 4절)
           <View className="h-11 w-11 items-center justify-center rounded-full bg-background">
             {voted ? <Icon name="check" color="primary" /> : null}
@@ -77,7 +81,7 @@ export function CandidateCard({
         ) : null}
       </View>
 
-      {onSavePitch && !vetoed ? (
+      {onSavePitch ? (
         <View className="flex-row items-center gap-2">
           <TextInput
             accessibilityLabel={`${candidate.foodName} 어필`}
@@ -100,7 +104,7 @@ export function CandidateCard({
         </View>
       ) : null}
 
-      {!onSavePitch && candidate.isMine && !vetoed && !onVote ? (
+      {!onSavePitch && candidate.isMine && !onVote ? (
         <Text className="text-xs text-muted">내가 올린 후보</Text>
       ) : null}
     </>
@@ -112,9 +116,9 @@ export function CandidateCard({
     return (
       <Pressable
         accessibilityRole="button"
-        accessibilityState={{ selected: voted, disabled: vetoed || busy }}
+        accessibilityState={{ selected: voted, disabled: busy }}
         accessibilityLabel={`${candidate.foodName} ${voted ? '고른 것 취소' : '고르기'}`}
-        disabled={vetoed || busy}
+        disabled={busy}
         onPress={onVote}
         className={`${box} active:opacity-80`}>
         {body}

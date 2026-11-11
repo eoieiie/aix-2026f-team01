@@ -132,8 +132,8 @@ export function useStartSession(groupId: string) {
   const queryClient = useQueryClient();
 
   const mutation = useMutation({
-    mutationFn: async (): Promise<string> => {
-      return await startSession(groupId);
+    mutationFn: async (expectedCount?: number): Promise<string> => {
+      return await startSession(groupId, expectedCount);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['groups', 'detail', groupId] });

@@ -278,14 +278,18 @@ export async function getGroupDetail(
   };
 }
 
-// 판 시작 (RPC start_session)
+// 판 시작 (RPC start_session). 새 판이면 먹을 인원수를 함께 보낸다. 진행 중인 판이 있으면 서버가 그 판을 돌려주고 인원수는 무시한다
 export async function startSession(
   groupId: string,
+  expectedCount?: number,
   client: Client = getSupabase()
 ): Promise<string> {
-  const { data, error } = await client.rpc('start_session', {
-    p_group_id: groupId,
-  });
+  const { data, error } = await client.rpc(
+    'start_session',
+    expectedCount === undefined
+      ? { p_group_id: groupId }
+      : { p_group_id: groupId, p_expected_count: expectedCount }
+  );
   if (error) throwServerError(error);
   if (!data) throw new Error('start_session 응답이 비어 있다');
   return data;

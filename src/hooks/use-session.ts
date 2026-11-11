@@ -11,12 +11,15 @@ import {
   listFoods,
   openVoting,
   removeCandidate,
+  setAnyOk,
+  setExpectedCount,
   setPitch,
   spinRoulette,
   subscribeSession,
 } from '@/api/sessions';
 
 export type {
+  CantEat,
   Candidate,
   Food,
   Participant,
@@ -24,7 +27,13 @@ export type {
   SessionView,
   VoteCount,
 } from '@/api/sessions';
-export { rouletteSlices, searchFoods, sessionErrorMessage, SessionError } from '@/api/sessions';
+export {
+  rouletteSlices,
+  searchFoods,
+  sessionErrorMessage,
+  SessionError,
+  votingReady,
+} from '@/api/sessions';
 
 const sessionKey = (id: string) => ['session', id] as const;
 
@@ -110,6 +119,11 @@ export function useSessionActions(sessionId: string) {
     onSettled: refresh,
   });
   const spin = useMutation({ mutationFn: () => spinRoulette(sessionId), onSettled: refresh });
+  const anyOk = useMutation({ mutationFn: () => setAnyOk(sessionId), onSettled: refresh });
+  const headcount = useMutation({
+    mutationFn: (count: number) => setExpectedCount(sessionId, count),
+    onSettled: refresh,
+  });
 
-  return { add, addCustom, pitch, remove, open, vote, spin };
+  return { add, addCustom, pitch, remove, open, vote, spin, headcount, anyOk };
 }

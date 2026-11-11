@@ -1,12 +1,15 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useState } from 'react';
 import { ActivityIndicator, ScrollView, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Button } from '@/components/button';
 import { FoodDot } from '@/components/food-dot';
+import { HeadcountModal } from '@/components/headcount-modal';
 import { IconButton } from '@/components/icon';
 import { InviteCard } from '@/components/invite-card';
 import colors from '@/constants/colors.json';
+import { HEADCOUNT_MAX } from '@/constants';
 import {
   Member,
   RecentMeal,
@@ -26,6 +29,8 @@ export default function GroupScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { group, isLoading, isError, refetch } = useGroupDetail(id || '');
   const { startSession, isPending: isStartingSession } = useStartSession(id || '');
+  const [askHeadcount, setAskHeadcount] = useState(false);
+  const [startError, setStartError] = useState<string | null>(null);
 
   // 로딩 상태
   if (isLoading) {
@@ -62,15 +67,25 @@ export default function GroupScreen() {
 
   const hasOpenSession = !!group.open_session_id;
 
-  const handleStartOrJoinSession = async () => {
+  // 진행 중인 판이 있으면 그 판으로, 없으면 먼저 몇 명이서 먹는지 묻는다 (4-6)
+  const handleStartOrJoinSession = async (expectedCount?: number) => {
     if (isStartingSession) return;
+    if (!hasOpenSession && expectedCount === undefined) {
+      setStartError(null);
+      setAskHeadcount(true);
+      return;
+    }
     try {
       // 진행 중인 판이 있으면 그 판 id, 없으면 새로 만든 판 id를 서버가 돌려준다 (spec.md 4-6, 4-8)
-      const sessionId = await startSession();
+      const sessionId = await startSession(expectedCount);
+      setAskHeadcount(false);
       router.push(`/sessions/${sessionId}` as any);
-    } catch {
+    } catch (err: unknown) {
       if (group.open_session_id) {
+        setAskHeadcount(false);
         router.push(`/sessions/${group.open_session_id}` as any);
+      } else {
+        setStartError(err instanceof Error ? err.message : '판을 열지 못했어요');
       }
     }
   };
@@ -144,10 +159,21 @@ export default function GroupScreen() {
       <View className="absolute bottom-0 left-0 right-0 bg-background px-5 pb-8 pt-3">
         <Button
           label={hasOpenSession ? '진행 중인 판으로' : '오늘 뭐 먹지'}
-          onPress={handleStartOrJoinSession}
-          loading={isStartingSession}
+          onPress={() => handleStartOrJoinSession()}
+          loading={isStartingSession && !askHeadcount}
         />
       </View>
+
+      {askHeadcount ? (
+        <HeadcountModal
+          visible
+          initial={Math.min(HEADCOUNT_MAX, Math.max(2, group.members.length))}
+          loading={isStartingSession}
+          error={startError}
+          onClose={() => setAskHeadcount(false)}
+          onStart={(count) => handleStartOrJoinSession(count)}
+        />
+      ) : null}
     </SafeAreaView>
   );
 }
