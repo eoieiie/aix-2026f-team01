@@ -123,9 +123,12 @@ select is(public.cast_vote('20000000-0000-0000-0000-000000000001', (select id fr
   false, '같은 후보를 다시 누르면 취소된다');
 select is(public.cast_vote('20000000-0000-0000-0000-000000000001', (select id from public.foods where name = 't_veg3')),
   true, '취소한 뒤에는 다른 후보를 찍을 수 있다');
-select throws_ok(
-  $$ select public.cast_vote('20000000-0000-0000-0000-000000000001', (select id from public.foods where name = 't_spicy')) $$,
-  'P0001', 'candidate_vetoed', '빠진 후보는 찍을 수 없다');
+-- 0010부터 못 먹는 사람이 있는 후보도 찍을 수 있다. 잠깐 바꿔 찍고 원래대로 돌린다
+select public.cast_vote('20000000-0000-0000-0000-000000000001', (select id from public.foods where name = 't_veg3'));
+select is(public.cast_vote('20000000-0000-0000-0000-000000000001', (select id from public.foods where name = 't_spicy')),
+  true, '못 먹는 사람이 있는 후보도 찍을 수 있다 (0010)');
+select public.cast_vote('20000000-0000-0000-0000-000000000001', (select id from public.foods where name = 't_spicy'));
+select public.cast_vote('20000000-0000-0000-0000-000000000001', (select id from public.foods where name = 't_veg3'));
 select is(
   (select voted from public.session_participants
    where session_id = '20000000-0000-0000-0000-000000000001' and user_id = '00000000-0000-0000-0000-000000000002'),
@@ -161,7 +164,7 @@ select is(
   1, '끝난 판에서는 음식별 표 수를 받는다');
 reset role;
 
--- 룰렛: 아무도 안 찍으면 빠지지 않은 후보 전체, 빠진 후보는 제외 ----------
+-- 룰렛: 아무도 안 찍으면 못 먹는 사람이 없는 후보 전체 ----------
 insert into public.sessions (id, group_id, host_user_id) values
   ('20000000-0000-0000-0000-000000000002', '10000000-0000-0000-0000-000000000001', '00000000-0000-0000-0000-000000000001');
 
@@ -183,7 +186,7 @@ select public.open_voting('20000000-0000-0000-0000-000000000002');
 select ok(
   (select f.name from public.spin_roulette('20000000-0000-0000-0000-000000000002') r
    join public.foods f on f.id = r.food_id) in ('t_veg', 't_veg2'),
-  '아무도 안 찍으면 빠지지 않은 후보 중에서 뽑고, 빠진 t_pork는 나오지 않는다');
+  '아무도 안 찍으면 못 먹는 사람이 없는 후보 중에서 뽑고, t_pork는 나오지 않는다');
 reset role;
 
 -- 확률: 표 수에 비례 ----------------------------------------------------

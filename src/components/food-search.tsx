@@ -45,6 +45,16 @@ export function FoodSearch({
         placeholder="음식 찾기 (예: 찌개, 국수)"
         error={error}
         showCount={false}
+        // 엔터를 누르면 이름이 같은 음식, 하나뿐인 결과, 아니면 직접 적기 순으로 올린다. 검색칸에 이름만 적고 끝내는 사람이 있었다 (#44 인터뷰 3)
+        onSubmitEditing={() => {
+          if (disabled || typed.length === 0) return;
+          const exact = results.find((f) => f.name === typed);
+          const pick = exact ?? (results.length === 1 ? results[0] : undefined);
+          if (pick) onPick(pick);
+          else if (canCustom) onCustom?.(typed);
+          else return;
+          setQuery('');
+        }}
       />
       {/* 고르기 칸은 글 길이와 상관없이 같은 크기로 두 칸씩 (docs/design.md 4절 "같은 역할은 같은 크기") */}
       <View className="flex-row flex-wrap justify-between gap-y-2">

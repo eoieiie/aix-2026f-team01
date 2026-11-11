@@ -7,10 +7,11 @@ import { Button } from '@/components/button';
 import { CandidateCard } from '@/components/candidate-card';
 import { FoodSearch } from '@/components/food-search';
 import { HeadcountStepper } from '@/components/headcount-stepper';
-import { IconButton } from '@/components/icon';
+import { Icon, IconButton } from '@/components/icon';
 import { type Point, ResultMoment } from '@/components/result-moment';
 import { Roulette } from '@/components/roulette';
 import colors from '@/constants/colors.json';
+import { cantEatNotice } from '@/constants/restrictions';
 import { MAX_VOTES_PER_PERSON, ROULETTE_RESULT_FALLBACK_MS } from '@/constants';
 import {
   rouletteSlices,
@@ -190,7 +191,8 @@ function CandidateStage({
 }) {
   const { foods } = useFoods();
   const { add, addCustom, pitch, remove, open } = useSessionActions(session.id);
-  const alive = session.candidates.filter((c) => !c.vetoed).length;
+  // 0010부터 못 먹는 사람이 있는 후보도 남는다. 후보가 하나라도 있으면 투표를 연다
+  const alive = session.candidates.length;
   const busy = add.isPending || addCustom.isPending || pitch.isPending || remove.isPending;
   const actionError = add.error ?? addCustom.error ?? pitch.error ?? remove.error;
 
@@ -258,7 +260,8 @@ function CandidateStage({
 
 // 4-11 익명 투표. 투표 중에는 음식별 표 수를 보여주지 않는다
 function VotingStage({ session }: { session: SessionView }) {
-  const { vote, spin } = useSessionActions(session.id);
+  const { vote, spin, anyOk } = useSessionActions(session.id);
+  const notice = cantEatNotice(session.cantEat.tags, session.cantEat.foods);
   const votedCount = session.participants.filter((p) => p.voted).length;
   // 몇 명이서 먹는지 정한 판은 그 수가 기준이다. 예전 판은 들어온 사람 수
   const total = session.expectedCount ?? session.participants.length;
@@ -289,8 +292,21 @@ function VotingStage({ session }: { session: SessionView }) {
           </View>
         </View>
 
-        {vote.error ? (
-          <Text className="text-sm font-semibold text-danger">{sessionErrorMessage(vote.error)}</Text>
+        {/* 이 판 후보에 걸리는 못 먹는 것. 빼지 않고 알린다. 누가 적었는지는 없다 (0010) */}
+        {notice.length > 0 ? (
+          <View accessibilityRole="alert" className="gap-1 rounded-3xl bg-ink p-5">
+            {notice.map((line) => (
+              <Text key={line} className="text-lg font-extrabold text-on-ink">
+                {line}
+              </Text>
+            ))}
+          </View>
+        ) : null}
+
+        {vote.error ?? anyOk.error ? (
+          <Text className="text-sm font-semibold text-danger">
+            {sessionErrorMessage(vote.error ?? anyOk.error)}
+          </Text>
         ) : null}
 
         <View className="gap-3">
@@ -303,6 +319,21 @@ function VotingStage({ session }: { session: SessionView }) {
               onVote={() => vote.mutate(c.foodId)}
             />
           ))}
+          {/* 아무거나 먹어도 되는 사람은 고르지 않고 투표를 마친다 (#44 인터뷰 2) */}
+          <Pressable
+            accessibilityRole="button"
+            accessibilityState={{ selected: session.myAnyOk, disabled: anyOk.isPending }}
+            accessibilityLabel={session.myAnyOk ? '아무거나 괜찮아요 취소' : '아무거나 괜찮아요'}
+            disabled={anyOk.isPending}
+            onPress={() => anyOk.mutate()}
+            className={`h-14 flex-row items-center justify-center gap-2 rounded-full active:opacity-80 ${
+              session.myAnyOk ? 'bg-ink' : 'bg-surface'
+            }`}>
+            {session.myAnyOk ? <Icon name="check" color="on-ink" /> : null}
+            <Text className={`text-lg font-bold ${session.myAnyOk ? 'text-on-ink' : 'text-text'}`}>
+              아무거나 괜찮아요
+            </Text>
+          </Pressable>
         </View>
       </ScrollView>
 

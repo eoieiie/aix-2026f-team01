@@ -132,7 +132,7 @@ describe('rouletteSlices: 원판 조각은 서버 추첨 대상과 같다 (4-12)
     ]);
   });
 
-  it('아무도 안 찍었으면 빠지지 않은 후보 전체를 똑같이', () => {
+  it('아무도 안 찍었으면 못 먹는 사람이 없는 후보 전체를 똑같이', () => {
     expect(
       rouletteSlices([
         { foodId: 2, voteCount: 0, vetoed: false },
@@ -145,13 +145,28 @@ describe('rouletteSlices: 원판 조각은 서버 추첨 대상과 같다 (4-12)
     ]);
   });
 
-  it('빠진 후보는 표가 있어도 조각이 없다', () => {
+  it('표를 받았으면 못 먹는 사람이 있는 후보도 조각이 있다 (0010)', () => {
     expect(
       rouletteSlices([
         { foodId: 1, voteCount: 2, vetoed: true },
         { foodId: 2, voteCount: 1, vetoed: false },
       ])
-    ).toEqual([{ foodId: 2, weight: 1 }]);
+    ).toEqual([
+      { foodId: 1, weight: 2 },
+      { foodId: 2, weight: 1 },
+    ]);
+  });
+
+  it('아무도 안 찍었고 모든 후보에 못 먹는 사람이 있으면 전체를 똑같이 (0010)', () => {
+    expect(
+      rouletteSlices([
+        { foodId: 2, voteCount: 0, vetoed: true },
+        { foodId: 1, voteCount: 0, vetoed: true },
+      ])
+    ).toEqual([
+      { foodId: 1, weight: 1 },
+      { foodId: 2, weight: 1 },
+    ]);
   });
 });
 

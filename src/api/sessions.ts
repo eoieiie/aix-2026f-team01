@@ -22,6 +22,7 @@ export interface Candidate {
   isMine: boolean;
   pitch: string | null;
   vetoed: boolean;
+  // vetoed: 이 판에 못 먹는 사람이 있다. 0010부터 빠지지 않고 표시만 한다
   // 목록에 없어서 이름을 직접 적어 올린 메뉴 (4-9). 재료는 이름으로 짐작했다
   custom: boolean;
 }
@@ -42,6 +43,17 @@ export interface SessionView {
   candidates: Candidate[];
   // 내가 찍은 후보. 다른 사람 표는 서버 권한 때문에 읽을 수 없다 (4-11)
   myVotes: number[];
+  // 내가 "아무거나 괜찮아요"를 눌렀는지. 표 없이 투표한 것으로 친다 (0010)
+  myAnyOk: boolean;
+  // 이 판 후보에 걸리는 못 먹는 것. 누가 적었는지는 없다 (0010)
+  cantEat: CantEat;
+}
+
+export interface CantEat {
+  // 재료, 식단 태그 코드 (constants/restrictions.ts)
+  tags: string[];
+  // 음식을 직접 지정한 경우 그 이름
+  foods: string[];
 }
 
 export interface VoteCount {
@@ -155,6 +167,12 @@ export async function getSession(
       .eq('session_id', sessionId),
     client.from('votes').select('food_id').eq('session_id', sessionId),
   ]);
+  // 못 먹는 것 안내는 없어도 판은 보인다. 실패하면 빈 안내
+  const cantRes: any = await Promise.resolve(
+    client.rpc('session_cant_eat', { p_session_id: sessionId })
+  ).catch(() => null);
+  const cantRows: { tag: string | null; food_name: string | null }[] =
+    cantRes && !cantRes.error && Array.isArray(cantRes.data) ? cantRes.data : [];
   for (const res of [participantsRes, membersRes, candidatesRes, votesRes]) {
     if (res.error) throwSessionError(res.error);
   }
@@ -198,6 +216,13 @@ export async function getSession(
     participants,
     candidates,
     myVotes: (votesRes.data ?? []).map((v: any) => v.food_id),
+    myAnyOk:
+      (votesRes.data ?? []).length === 0 &&
+      participants.some((p) => p.userId === userId && p.voted),
+    cantEat: {
+      tags: [...new Set(cantRows.map((r) => r.tag).filter((t): t is string => !!t))],
+      foods: [...new Set(cantRows.map((r) => r.food_name).filter((t): t is string => !!t))],
+    },
   };
 }
 
@@ -263,6 +288,13 @@ export async function openVoting(sessionId: string, client: Client = getSupabase
   if (error) throwSessionError(error);
 }
 
+// 아무거나 괜찮아요. 내 표를 지우고 투표한 것으로 친다. 다시 누르면 취소 (0010, 인터뷰 2)
+export async function setAnyOk(sessionId: string, client: Client = getSupabase()): Promise<boolean> {
+  const { data, error } = await client.rpc('set_any_ok', { p_session_id: sessionId });
+  if (error) throwSessionError(error);
+  return Boolean(data);
+}
+
 // 방장만. 몇 명이서 먹는지 바꾼다. 오지 않는 사람이 있으면 줄인다 (4-12)
 export async function setExpectedCount(
   sessionId: string,
@@ -319,13 +351,15 @@ export async function getVoteCounts(
   }));
 }
 
-// 원판 조각. 서버 추첨 대상과 같은 규칙: 빠지지 않았고 1표 이상인 후보를 표 수만큼,
-// 아무도 안 찍었으면 빠지지 않은 후보 전체를 1씩. 순서는 음식 id 순이라 모든 기기가 같다 (4-12)
+// 원판 조각. 서버 추첨 대상과 같은 규칙: 1표 이상인 후보를 표 수만큼(못 먹는 사람이 있어도).
+// 아무도 안 찍었으면 못 먹는 사람이 없는 후보를 1씩, 그런 후보가 없으면 전체를 1씩.
+// 순서는 음식 id 순이라 모든 기기가 같다 (4-12, 0010)
 export function rouletteSlices(counts: VoteCount[]): { foodId: number; weight: number }[] {
-  const alive = counts.filter((c) => !c.vetoed).sort((a, b) => a.foodId - b.foodId);
-  const voted = alive.filter((c) => c.voteCount > 0);
+  const all = counts.slice().sort((a, b) => a.foodId - b.foodId);
+  const voted = all.filter((c) => c.voteCount > 0);
   if (voted.length > 0) return voted.map((c) => ({ foodId: c.foodId, weight: c.voteCount }));
-  return alive.map((c) => ({ foodId: c.foodId, weight: 1 }));
+  const safe = all.filter((c) => !c.vetoed);
+  return (safe.length > 0 ? safe : all).map((c) => ({ foodId: c.foodId, weight: 1 }));
 }
 
 // 판 하나의 변경을 구독한다. 무엇이 바뀌었든 onChange를 부르고, 화면은 판을 통째로 다시 읽는다.
