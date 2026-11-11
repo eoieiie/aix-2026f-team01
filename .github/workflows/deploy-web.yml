@@ -50,3 +50,9 @@ jobs:
       - name: EAS Hosting에 배포
         if: steps.ready.outputs.ok == 'true'
         run: npx eas-cli@latest deploy --prod --non-interactive
+
+      # 설치한 앱(테스트플라이트, 안드로이드 설치 파일)도 같은 코드로 바꾼다. 다음에 앱을 열면 받는다 (expo-updates)
+      - name: 앱 업데이트 보내기
+        if: steps.ready.outputs.ok == 'true'
+        continue-on-error: true
+        run: npx eas-cli@latest update --channel production --message "${{ github.sha }}" --non-interactive
