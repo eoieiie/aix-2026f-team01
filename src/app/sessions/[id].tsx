@@ -6,6 +6,7 @@ import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
 import { Button } from '@/components/button';
 import { CandidateCard } from '@/components/candidate-card';
 import { FoodSearch } from '@/components/food-search';
+import { HeadcountStepper } from '@/components/headcount-stepper';
 import { IconButton } from '@/components/icon';
 import { type Point, ResultMoment } from '@/components/result-moment';
 import { Roulette } from '@/components/roulette';
@@ -21,6 +22,7 @@ import {
   useSession,
   useSessionActions,
   useVoteCounts,
+  votingReady,
 } from '@/hooks/use-session';
 
 // 판 화면 (spec.md 4-8 ~ 4-13, 7절 /sessions/{판 id}). 판 상태에 따라 후보 → 투표 → 룰렛 결과로 바뀐다
@@ -128,37 +130,51 @@ function Header({ session, onBack }: { session: SessionView; onBack: () => void 
           </View>
         ))}
       </View>
-      <Participants participants={session.participants} showVoted={session.status === 'voting'} />
+      <Participants session={session} />
     </View>
   );
 }
 
-// 참여자 이름 첫 글자 동그라미. 투표 중에는 투표한 사람만 검게 칠한다 (무엇을 찍었는지는 없다)
-function Participants({
-  participants,
-  showVoted,
-}: {
-  participants: Participant[];
-  showVoted: boolean;
-}) {
+// 참여자 이름 첫 글자 동그라미. 투표 중에는 투표한 사람만 검게 칠한다 (무엇을 찍었는지는 없다).
+// 오른쪽은 몇 명이서 먹는지. 방장은 여기서 바로 바꾼다 (4-6, 4-12)
+function Participants({ session }: { session: SessionView }) {
+  const { headcount } = useSessionActions(session.id);
+  const showVoted = session.status === 'voting';
+  const participants = session.participants;
+  const expected = session.expectedCount;
   return (
-    <View className="flex-row flex-wrap items-center gap-2">
-      {participants.map((p) => {
-        const on = showVoted && p.voted;
-        return (
-          <View
-            key={p.userId}
-            accessibilityLabel={`${p.displayName}${on ? ' 투표함' : ''}`}
-            className={`h-9 w-9 items-center justify-center rounded-full ${
-              on ? 'bg-text' : 'bg-surface-strong'
-            }`}>
-            <Text className={`text-sm font-bold ${on ? 'text-on-primary' : 'text-text'}`}>
-              {Array.from(p.displayName)[0] ?? ''}
-            </Text>
-          </View>
-        );
-      })}
-      <Text className="text-sm text-muted">{participants.length}명 참여</Text>
+    <View className="flex-row items-center gap-3">
+      <View className="flex-1 flex-row flex-wrap items-center gap-2">
+        {participants.map((p) => {
+          const on = showVoted && p.voted;
+          return (
+            <View
+              key={p.userId}
+              accessibilityLabel={`${p.displayName}${on ? ' 투표함' : ''}`}
+              className={`h-9 w-9 items-center justify-center rounded-full ${
+                on ? 'bg-text' : 'bg-surface-strong'
+              }`}>
+              <Text className={`text-sm font-bold ${on ? 'text-on-primary' : 'text-text'}`}>
+                {Array.from(p.displayName)[0] ?? ''}
+              </Text>
+            </View>
+          );
+        })}
+        {expected === null || !session.isHost ? (
+          <Text className="text-sm text-muted">
+            {expected === null ? `${participants.length}명 참여` : `${expected}명이서 먹어요`}
+          </Text>
+        ) : null}
+      </View>
+      {expected !== null && session.isHost ? (
+        <View className="rounded-full bg-surface p-1">
+          <HeadcountStepper
+            value={expected}
+            onChange={(n) => headcount.mutate(n)}
+            disabled={headcount.isPending}
+          />
+        </View>
+      ) : null}
     </View>
   );
 }
@@ -231,7 +247,7 @@ function CandidateStage({
           </>
         ) : (
           <Text className="text-center text-base font-semibold text-muted">
-            방장이 투표를 열면 시작돼요
+            {session.hostName ? `방장 ${session.hostName} 님이 투표를 열면 시작돼요` : '방장이 투표를 열면 시작돼요'}
           </Text>
         )}
       </BottomBar>
@@ -243,8 +259,11 @@ function CandidateStage({
 function VotingStage({ session }: { session: SessionView }) {
   const { vote, spin } = useSessionActions(session.id);
   const votedCount = session.participants.filter((p) => p.voted).length;
-  const total = session.participants.length;
-  const ratio = total === 0 ? 0 : votedCount / total;
+  // 몇 명이서 먹는지 정한 판은 그 수가 기준이다. 예전 판은 들어온 사람 수
+  const total = session.expectedCount ?? session.participants.length;
+  const ratio = total === 0 ? 0 : Math.min(1, votedCount / total);
+  const ready = votingReady(session);
+  const left = Math.max(0, total - votedCount);
 
   return (
     <View className="flex-1">
@@ -258,7 +277,7 @@ function VotingStage({ session }: { session: SessionView }) {
         <View className="gap-2 rounded-2xl bg-surface p-4">
           <View className="flex-row justify-between">
             <Text className="text-sm font-semibold text-text">
-              {votedCount}/{total}명 투표했어요
+              {votedCount}/{total}명 골랐어요
             </Text>
             <Text className="text-sm text-muted">
               내 표 {session.myVotes.length}/{MAX_VOTES_PER_PERSON}
@@ -289,14 +308,22 @@ function VotingStage({ session }: { session: SessionView }) {
       <BottomBar>
         {session.isHost ? (
           <>
-            <Button label="돌리기" onPress={() => spin.mutate()} loading={spin.isPending} />
-            {spin.error ? (
+            {/* 몇 명이서 먹는지 정했으면 그 수만큼 골라야 눌린다 (4-12) */}
+            <Button
+              label="돌리기"
+              onPress={() => spin.mutate()}
+              disabled={!ready}
+              loading={spin.isPending}
+            />
+            {!ready ? (
+              <Text className="text-center text-sm text-muted">{left}명 더 고르면 돌릴 수 있어요</Text>
+            ) : spin.error ? (
               <Text className="text-center text-sm text-danger">{sessionErrorMessage(spin.error)}</Text>
             ) : null}
           </>
         ) : (
           <Text className="text-center text-base font-semibold text-muted">
-            방장이 돌리면 결과가 나와요
+            {session.hostName ? `방장 ${session.hostName} 님이 돌리면 결과가 나와요` : '방장이 돌리면 결과가 나와요'}
           </Text>
         )}
       </BottomBar>

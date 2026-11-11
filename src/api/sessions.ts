@@ -32,6 +32,10 @@ export interface SessionView {
   groupName: string;
   status: SessionStatus;
   isHost: boolean;
+  // 방장 이름. 방장이 아닌 사람에게 누가 돌리는지 보여 준다
+  hostName: string;
+  // 몇 명이서 먹는지 (4-6). 이 수만큼 골라야 돌릴 수 있다. 0009 전에 연 판은 null
+  expectedCount: number | null;
   decidedFoodId: number | null;
   decidedAt: string | null;
   participants: Participant[];
@@ -67,6 +71,8 @@ export const SESSION_ERROR_MESSAGES: Record<string, string> = {
   not_done: '아직 결과가 나오지 않았어요',
   name_empty: '메뉴 이름을 적어 주세요',
   name_too_long: '메뉴 이름은 20자까지예요',
+  not_all_voted: '아직 고르지 않은 사람이 있어요',
+  bad_headcount: '인원은 1명부터 20명까지예요',
 };
 
 export class SessionError extends Error {
@@ -133,7 +139,7 @@ export async function getSession(
 
   const { data: session, error: sessionError } = await client
     .from('sessions')
-    .select('id, group_id, host_user_id, status, decided_food_id, decided_at, groups ( name )')
+    .select('*, groups ( name )')
     .eq('id', sessionId)
     .maybeSingle();
   if (sessionError) throwSessionError(sessionError);
@@ -185,6 +191,8 @@ export async function getSession(
     groupName: (session as any).groups?.name ?? '',
     status: session.status,
     isHost: session.host_user_id === userId,
+    hostName: names.get(session.host_user_id) ?? '',
+    expectedCount: (session as any).expected_count ?? null,
     decidedFoodId: session.decided_food_id,
     decidedAt: session.decided_at,
     participants,
@@ -253,6 +261,22 @@ export async function removeCandidate(
 export async function openVoting(sessionId: string, client: Client = getSupabase()): Promise<void> {
   const { error } = await client.rpc('open_voting', { p_session_id: sessionId });
   if (error) throwSessionError(error);
+}
+
+// 방장만. 몇 명이서 먹는지 바꾼다. 오지 않는 사람이 있으면 줄인다 (4-12)
+export async function setExpectedCount(
+  sessionId: string,
+  count: number,
+  client: Client = getSupabase()
+): Promise<void> {
+  const { error } = await client.rpc('set_expected_count', { p_session_id: sessionId, p_count: count });
+  if (error) throwSessionError(error);
+}
+
+// 다 골랐는지. 인원수가 있으면 그 수만큼 골라야 하고, 없으면(예전 판) 언제든 된다 (4-12)
+export function votingReady(session: Pick<SessionView, 'expectedCount' | 'participants'>): boolean {
+  if (session.expectedCount === null) return true;
+  return session.participants.filter((p) => p.voted).length >= session.expectedCount;
 }
 
 // 누르면 찍힘과 취소가 바뀐다. 돌려주는 값은 누른 뒤 찍혀 있는지 (4-11)
