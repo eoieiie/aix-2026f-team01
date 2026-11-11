@@ -141,6 +141,8 @@ function Participants({ session }: { session: SessionView }) {
   const showVoted = session.status === 'voting';
   const participants = session.participants;
   const expected = session.expectedCount;
+  // 결과가 나온 판은 인원수를 바꿀 수 없으니 숫자 고르기를 보이지 않는다
+  const canEdit = session.isHost && session.status !== 'done';
   return (
     <View className="flex-row items-center gap-3">
       <View className="flex-1 flex-row flex-wrap items-center gap-2">
@@ -159,13 +161,13 @@ function Participants({ session }: { session: SessionView }) {
             </View>
           );
         })}
-        {expected === null || !session.isHost ? (
+        {expected === null || !canEdit ? (
           <Text className="text-sm text-muted">
             {expected === null ? `${participants.length}명 참여` : `${expected}명이서 먹어요`}
           </Text>
         ) : null}
       </View>
-      {expected !== null && session.isHost ? (
+      {expected !== null && canEdit ? (
         <View className="rounded-full bg-surface p-1">
           <HeadcountStepper
             value={expected}
