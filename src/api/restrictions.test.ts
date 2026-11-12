@@ -27,12 +27,15 @@ describe('고르기 (spec.md 4-7)', () => {
     expect(items.map(itemKey)).toEqual(['tag:pork', 'food:3']);
   });
 
-  it('서버 p_items 형식으로 바꾼다. 이유는 보내지 않는다', () => {
+  it('서버 p_items 형식으로 바꾼다. kind는 0007 전 서버를 위한 같은 값 하나뿐이다', () => {
     const items: RestrictionItem[] = [
       { tag: 'egg', foodId: null },
       { tag: null, foodId: 3 },
     ];
-    expect(toPayload(items)).toEqual([{ tag: 'egg' }, { food_id: 3 }]);
+    expect(toPayload(items)).toEqual([
+      { tag: 'egg', kind: 'dislike' },
+      { food_id: 3, kind: 'dislike' },
+    ]);
   });
 });
 

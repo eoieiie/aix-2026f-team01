@@ -37,9 +37,15 @@ export function toggleItem(
     : [...items, next];
 }
 
-// 서버 p_items 형식. 예: [{"tag":"seafood"},{"food_id":3}]
+// 0007이 들어가기 전의 서버는 kind가 꼭 있어야 저장된다. 이 앱이 서버보다 먼저 배포돼도 저장이 되게 같은 값을 붙인다.
+// 0007 뒤의 서버는 kind를 읽지 않는다. 사람에게 이유를 묻지 않고, 모두 같은 값이라 아무것도 알려 주지 않는다
+const LEGACY_KIND = 'dislike';
+
+// 서버 p_items 형식. 예: [{"tag":"seafood","kind":"dislike"},{"food_id":3,"kind":"dislike"}]
 export function toPayload(items: RestrictionItem[]) {
-  return items.map((i) => (i.tag !== null ? { tag: i.tag } : { food_id: i.foodId }));
+  return items.map((i) =>
+    i.tag !== null ? { tag: i.tag, kind: LEGACY_KIND } : { food_id: i.foodId, kind: LEGACY_KIND },
+  );
 }
 
 export async function getMyRestrictions(client: Client = getSupabase()): Promise<RestrictionItem[]> {
