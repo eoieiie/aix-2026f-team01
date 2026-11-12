@@ -12,7 +12,7 @@ insert into auth.users (id) values
 
 insert into public.foods (name, tags) values
   ('t_spicy', array['spicy']),
-  ('t_plain', array[]::text[]),
+  ('t_plain', array['beef']),
   ('t_target', array['veg_ok']),
   ('t_pork', array['pork']),
   ('t_veg', array['veg_ok']),
@@ -65,7 +65,7 @@ select public.join_session('20000000-0000-0000-0000-000000000001');
 reset role;
 
 select is(pg_temp.vetoed('20000000-0000-0000-0000-000000000001', 't_plain'), true,
-  '식단 태그: 채식인 사람이 있으면 veg_ok가 없는 음식이 빠진다');
+  '식단 태그: 채식인 사람이 있으면 고기가 든 음식에 표시된다 (0012, 재료로만 본다)');
 select is(pg_temp.vetoed('20000000-0000-0000-0000-000000000001', 't_target'), true,
   '음식 지정: 안 먹는다고 고른 음식은 veg_ok가 있어도 빠진다');
 select is(pg_temp.vetoed('20000000-0000-0000-0000-000000000001', 't_veg'), false,
