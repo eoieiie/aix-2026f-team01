@@ -10,7 +10,7 @@ insert into auth.users (id) values
 insert into public.foods (name, tags) values ('h_pork', array['pork']), ('h_plain', array[]::text[]);
 insert into public.groups (id, name, invite_code, created_by) values
   ('10000000-0000-0000-0000-000000000001', '힌트 모임', 'TESTHN', '00000000-0000-0000-0000-000000000001'),
-  ('10000000-0000-0000-0000-000000000002', '남의 모임', 'TESTHO', '00000000-0000-0000-0000-000000000003');
+  ('10000000-0000-0000-0000-000000000002', '남의 모임', 'TESTHP', '00000000-0000-0000-0000-000000000003');
 insert into public.memberships (group_id, user_id, display_name) values
   ('10000000-0000-0000-0000-000000000001', '00000000-0000-0000-0000-000000000001', '하나'),
   ('10000000-0000-0000-0000-000000000001', '00000000-0000-0000-0000-000000000002', '둘'),
