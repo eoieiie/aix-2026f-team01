@@ -75,7 +75,7 @@ export default function ProfileScreen() {
         <View className="flex-row gap-2">
           <Stat value={total} label="총 끼니" />
           <Stat value={stats.foods.length} label="먹어본 음식" />
-          <Stat value={stats.companions.length} label="같이 먹은 사람" />
+          <Stat value={stats.companions.length} label="밥 친구" />
         </View>
 
         <View className="gap-3">
