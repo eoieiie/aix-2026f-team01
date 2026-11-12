@@ -32,7 +32,8 @@ grant all on t_out to authenticated;
 
 -- 재료 짐작 ---------------------------------------------------------------
 select is(public.guess_food_tags('평양냉면'), array['beef','wheat'], '낱말 표: 냉면은 소고기, 밀');
-select is(public.guess_food_tags('치즈t김밥'), array['dairy','pork'], '목록 음식 이름이 들어 있으면 그 재료를 받고 낱말 태그를 더한다');
+-- "치즈t김밥"에는 기본 음식 "김밥"(seed: 돼지고기, 해산물, 밀가루, 달걀, 0007)도 들어 있어서 그 태그도 받는다
+select is(public.guess_food_tags('치즈t김밥'), array['dairy','egg','pork','seafood','wheat'], '목록 음식 이름이 들어 있으면 그 재료를 받고 낱말 태그를 더한다');
 select is(public.guess_food_tags('t비빔 정식'), array[]::text[], '목록 음식의 식단 표시(veg_ok)는 받지 않는다');
 select is(public.guess_food_tags('버섯 덮밥'), array[]::text[], '모르는 이름은 재료 태그가 없다');
 
