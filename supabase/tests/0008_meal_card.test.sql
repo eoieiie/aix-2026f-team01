@@ -57,7 +57,7 @@ set local role authenticated;
 
 -- 하나가 3번 식사를 본다. 뒤에 4번 식사가 더 있다 ----------------------------
 select is(
-  public.meal_card('30000000-0000-0000-0000-000000000003') - 'eaten_at' - 'food_id',
+  public.meal_card('30000000-0000-0000-0000-000000000003') - 'eaten_at' - 'food_id' - 'food_name' - 'group_month_cuisine',
   '{"group_name": "모임 하나",
     "group_food_nth": 2,
     "my_food_nth": 3,
@@ -75,7 +75,7 @@ select is(
 
 -- 첫 식사와 마지막 식사 --------------------------------------------------------
 select is(
-  public.meal_card('30000000-0000-0000-0000-000000000001') - 'eaten_at' - 'food_id' - 'group_name',
+  public.meal_card('30000000-0000-0000-0000-000000000001') - 'eaten_at' - 'food_id' - 'food_name' - 'group_month_cuisine' - 'group_name',
   '{"group_food_nth": 1,
     "my_food_nth": 1,
     "people": [
@@ -85,7 +85,7 @@ select is(
     ]}'::jsonb,
   '첫 식사는 모두 1번째');
 select is(
-  public.meal_card('30000000-0000-0000-0000-000000000004') - 'eaten_at' - 'food_id' - 'group_name',
+  public.meal_card('30000000-0000-0000-0000-000000000004') - 'eaten_at' - 'food_id' - 'food_name' - 'group_month_cuisine' - 'group_name',
   '{"group_food_nth": 3,
     "my_food_nth": 4,
     "people": [
