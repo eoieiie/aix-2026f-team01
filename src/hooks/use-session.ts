@@ -5,6 +5,7 @@ import {
   addCandidate,
   addCustomCandidate,
   castVote,
+  getFoodHints,
   getSession,
   getVoteCounts,
   joinSession,
@@ -20,6 +21,7 @@ import {
 
 export type {
   CantEat,
+  FoodHint,
   Candidate,
   Food,
   Participant,
@@ -33,6 +35,9 @@ export {
   sessionErrorMessage,
   SessionError,
   votingReady,
+  eatenNote,
+  groupFavorites,
+  quickFillPicks,
 } from '@/api/sessions';
 
 const sessionKey = (id: string) => ['session', id] as const;
@@ -78,6 +83,19 @@ export function useSession(sessionId: string) {
 export function useFoods() {
   const query = useQuery({ queryKey: ['foods'], queryFn: () => listFoods(), staleTime: Infinity });
   return { foods: query.data ?? [], isLoading: query.isPending };
+}
+
+// 4-20 음식마다 못 먹는 사람이 있는지, 이 모임이 언제 먹었는지. 사람이 들어오거나 못 먹는 것이 바뀌면 다시 읽는다.
+// 못 불러오면 빈 목록이고 판은 그대로 진행한다
+export function useFoodHints(sessionId: string, key: string) {
+  const query = useQuery({
+    queryKey: ['session-food-hints', sessionId, key],
+    queryFn: () => getFoodHints(sessionId),
+    enabled: !!sessionId,
+    retry: false,
+    staleTime: 60_000,
+  });
+  return query.data ?? [];
 }
 
 // 끝난 판에서만 표 수를 받는다. 결과가 나오기 전에는 부르지 않는다 (4-12)

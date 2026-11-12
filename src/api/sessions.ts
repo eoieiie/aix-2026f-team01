@@ -351,6 +351,77 @@ export async function getVoteCounts(
   }));
 }
 
+// 4-20 음식마다: 이 판에 못 먹는 사람이 있는지, 이 모임이 몇 번, 마지막으로 언제 먹었는지 (0011)
+export interface FoodHint {
+  foodId: number;
+  blocked: boolean;
+  eatenCount: number;
+  lastEatenAt: string | null;
+}
+
+export async function getFoodHints(sessionId: string, client: Client = getSupabase()): Promise<FoodHint[]> {
+  const { data, error } = await client.rpc('session_food_hints', { p_session_id: sessionId });
+  if (error) throwSessionError(error);
+  return (data ?? []).map((r: any) => ({
+    foodId: r.food_id,
+    blocked: Boolean(r.blocked),
+    eatenCount: r.eaten_count ?? 0,
+    lastEatenAt: r.last_eaten_at ?? null,
+  }));
+}
+
+// 한국 시간 날짜로 며칠 전인지. 오늘이면 0
+export function daysAgoKST(iso: string, now: Date = new Date()): number {
+  const day = (d: Date) => {
+    const k = new Date(d.getTime() + 9 * 3600 * 1000);
+    return Date.UTC(k.getUTCFullYear(), k.getUTCMonth(), k.getUTCDate());
+  };
+  return Math.round((day(now) - day(new Date(iso))) / 86400000);
+}
+
+// 후보 카드 아래 한 줄. 정한 날수보다 오래됐으면 없음
+export function eatenNote(lastEatenAt: string | null, withinDays: number, now: Date = new Date()): string | null {
+  if (!lastEatenAt) return null;
+  const d = daysAgoKST(lastEatenAt, now);
+  if (d < 0 || d > withinDays) return null;
+  if (d === 0) return '오늘 먹었어요';
+  if (d === 1) return '어제 먹었어요';
+  return `${d}일 전에 먹었어요`;
+}
+
+// 이 모임 단골: 많이 먹은 순, 같으면 최근에 먹은 순. 이미 후보이거나 못 먹는 사람이 있으면 뺀다
+export function groupFavorites(hints: FoodHint[], excludeIds: number[], max: number): FoodHint[] {
+  const ex = new Set(excludeIds);
+  return hints
+    .filter((h) => h.eatenCount > 0 && !h.blocked && !ex.has(h.foodId))
+    .sort((a, b) => b.eatenCount - a.eatenCount || String(b.lastEatenAt).localeCompare(String(a.lastEatenAt)))
+    .slice(0, max);
+}
+
+// 빈 판 채우기: 모두 먹을 수 있고, 정한 날수 안에 안 먹은 음식 중에서 무작위로. 모자라면 최근에 먹은 것도 쓴다
+export function quickFillPicks(
+  hints: FoodHint[],
+  excludeIds: number[],
+  count: number,
+  withinDays: number,
+  random: () => number = Math.random,
+  now: Date = new Date()
+): number[] {
+  const ex = new Set(excludeIds);
+  const safe = hints.filter((h) => !h.blocked && !ex.has(h.foodId));
+  const shuffle = (xs: FoodHint[]) => {
+    const a = xs.slice();
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  };
+  const fresh = shuffle(safe.filter((h) => eatenNote(h.lastEatenAt, withinDays, now) === null));
+  const recent = shuffle(safe.filter((h) => eatenNote(h.lastEatenAt, withinDays, now) !== null));
+  return [...fresh, ...recent].slice(0, count).map((h) => h.foodId);
+}
+
 // 원판 조각. 서버 추첨 대상과 같은 규칙: 1표 이상인 후보를 표 수만큼(못 먹는 사람이 있어도).
 // 아무도 안 찍었으면 못 먹는 사람이 없는 후보를 1씩, 그런 후보가 없으면 전체를 1씩.
 // 순서는 음식 id 순이라 모든 기기가 같다 (4-12, 0010)
