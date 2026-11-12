@@ -12,12 +12,22 @@ import { type Point, ResultMoment } from '@/components/result-moment';
 import { Roulette } from '@/components/roulette';
 import colors from '@/constants/colors.json';
 import { cantEatNotice } from '@/constants/restrictions';
-import { MAX_VOTES_PER_PERSON, ROULETTE_RESULT_FALLBACK_MS } from '@/constants';
+import {
+  GROUP_FAVORITES_MAX,
+  MAX_VOTES_PER_PERSON,
+  QUICK_FILL_COUNT,
+  RECENT_EATEN_DAYS,
+  ROULETTE_RESULT_FALLBACK_MS,
+} from '@/constants';
 import {
   rouletteSlices,
   SessionError,
   sessionErrorMessage,
   type SessionView,
+  eatenNote,
+  groupFavorites,
+  quickFillPicks,
+  useFoodHints,
   useFoods,
   useSession,
   useSessionActions,
@@ -91,7 +101,12 @@ export default function SessionScreen() {
         )}
       </SafeAreaView>
       {session.status === 'done' && moment ? (
-        <ResultMoment session={session} from={moment.from} onGroup={toGroup} />
+        <ResultMoment
+          session={session}
+          from={moment.from}
+          onGroup={toGroup}
+          onCard={(mealId) => router.push(`/meals/${mealId}` as any)}
+        />
       ) : null}
     </View>
   );
@@ -191,9 +206,31 @@ function CandidateStage({
 }) {
   const { foods } = useFoods();
   const { add, addCustom, pitch, remove, open } = useSessionActions(session.id);
+  // 4-20 식사 기록과 못 먹는 것. 참여자 수가 바뀌면 다시 읽는다
+  const hints = useFoodHints(session.id, `${session.participants.length}`);
+  const hintOf = new Map(hints.map((h) => [h.foodId, h]));
+  const candidateIds = session.candidates.map((c) => c.foodId);
+  const favorites = groupFavorites(hints, candidateIds, GROUP_FAVORITES_MAX);
+  const foodName = new Map(foods.map((f) => [f.id, f.name]));
+  // 검색칸이 비었을 때 보이는 추천에서 못 먹는 사람이 있는 음식은 뒤로 보낸다
+  const searchFoods = [...foods].sort(
+    (a, b) => Number(hintOf.get(a.id)?.blocked ?? false) - Number(hintOf.get(b.id)?.blocked ?? false)
+  );
+  const [filling, setFilling] = useState(false);
+  const quickFill = async () => {
+    const picks = quickFillPicks(hints, candidateIds, QUICK_FILL_COUNT, RECENT_EATEN_DAYS);
+    setFilling(true);
+    try {
+      for (const id of picks) await add.mutateAsync(id);
+    } catch {
+      // 오류 문구는 아래 검색칸 오류 자리에 보인다
+    } finally {
+      setFilling(false);
+    }
+  };
   // 0010부터 못 먹는 사람이 있는 후보도 남는다. 후보가 하나라도 있으면 투표를 연다
   const alive = session.candidates.length;
-  const busy = add.isPending || addCustom.isPending || pitch.isPending || remove.isPending;
+  const busy = filling || add.isPending || addCustom.isPending || pitch.isPending || remove.isPending;
   const actionError = add.error ?? addCustom.error ?? pitch.error ?? remove.error;
 
   return (
@@ -210,8 +247,39 @@ function CandidateStage({
           </Pressable>
         </View>
 
+        {/* 다 같이 딱히 먹고 싶은 게 없을 때 (#44 인터뷰 세 명, 설문 76.9%). 앱이 정하지 않고 후보만 채운다. 정하는 건 투표와 룰렛 (4-20) */}
+        {session.candidates.length === 0 && hints.length > 0 ? (
+          <Button
+            label="모두 먹을 수 있는 메뉴 3개 채우기"
+            variant="secondary"
+            onPress={quickFill}
+            loading={filling}
+            disabled={busy}
+          />
+        ) : null}
+
+        {favorites.length > 0 ? (
+          <View className="gap-2">
+            <Text className="text-sm font-bold text-text">이 모임 단골</Text>
+            <View className="flex-row flex-wrap gap-2">
+              {favorites.map((h) => (
+                <Pressable
+                  key={h.foodId}
+                  accessibilityRole="button"
+                  accessibilityLabel={`${foodName.get(h.foodId) ?? ''} 후보로 올리기, ${h.eatenCount}번 먹음`}
+                  disabled={busy}
+                  onPress={() => add.mutate(h.foodId)}
+                  className="h-11 flex-row items-center gap-2 rounded-full bg-ink px-4 active:opacity-80 disabled:opacity-50">
+                  <Text className="text-base font-bold text-on-ink">{foodName.get(h.foodId) ?? ''}</Text>
+                  <Text className="text-sm font-semibold text-on-ink opacity-60">{h.eatenCount}번</Text>
+                </Pressable>
+              ))}
+            </View>
+          </View>
+        ) : null}
+
         <FoodSearch
-          foods={foods}
+          foods={searchFoods}
           excludeIds={session.candidates.map((c) => c.foodId)}
           onPick={(food) => add.mutate(food.id)}
           onCustom={(name) => addCustom.mutate(name)}
@@ -226,6 +294,7 @@ function CandidateStage({
                 key={c.foodId}
                 candidate={c}
                 busy={busy}
+                eatenNote={eatenNote(hintOf.get(c.foodId)?.lastEatenAt ?? null, RECENT_EATEN_DAYS)}
                 onSavePitch={c.isMine ? (text) => pitch.mutate({ foodId: c.foodId, text }) : undefined}
                 onRemove={c.isMine ? () => remove.mutate(c.foodId) : undefined}
               />

@@ -21,6 +21,15 @@ export const PITCH_MAX = 60;
 // 4-11
 export const MAX_VOTES_PER_PERSON = 2;
 
+// 4-20 식사 기록을 판에 다시 쓰기. 며칠 안에 먹었으면 후보 카드에 알린다, 단골 칩 개수, 빈 판에서 한 번에 채우는 개수
+export const RECENT_EATEN_DAYS = 14;
+export const GROUP_FAVORITES_MAX = 3;
+export const QUICK_FILL_COUNT = 3;
+
+// 4-15 하단 탭(#41). 떠 있는 알약 높이와 아래 여백. 탭 화면은 목록 아래를 이만큼 비운다
+export const TAB_BAR_HEIGHT = 64;
+export const TAB_BAR_SPACE = 112;
+
 // 4-6, 4-12 먹을 인원수. 이 수만큼 골라야 방장이 돌릴 수 있다. 서버 0009와 같은 범위
 export const HEADCOUNT_MIN = 1;
 export const HEADCOUNT_MAX = 20;
