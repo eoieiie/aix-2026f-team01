@@ -9,12 +9,11 @@ import { FoodDot } from '@/components/food-dot';
 import { FoodSearch } from '@/components/food-search';
 import { IconButton } from '@/components/icon';
 import colors from '@/constants/colors.json';
-import { DIET_TAGS, INGREDIENT_TAGS, RESTRICTION_KINDS } from '@/constants/restrictions';
+import { DIET_TAGS, INGREDIENT_TAGS } from '@/constants/restrictions';
 import {
   itemKey,
   restrictionErrorMessage,
   type RestrictionItem,
-  setItemKind,
   toggleItem,
   useMyRestrictions,
   useSaveRestrictions,
@@ -135,25 +134,6 @@ export default function RestrictionsScreen() {
                       className="rounded-full bg-background px-3 py-1.5 active:opacity-70">
                       <Text className="text-sm font-semibold text-text">빼기</Text>
                     </Pressable>
-                  </View>
-                  {/* 이유. 판정에는 쓰지 않는다 */}
-                  <View className="flex-row gap-2">
-                    {RESTRICTION_KINDS.map((kind) => {
-                      const on = item.kind === kind.code;
-                      return (
-                        <Pressable
-                          key={kind.code}
-                          accessibilityRole="button"
-                          accessibilityState={{ selected: on }}
-                          accessibilityLabel={`${name} 이유 ${kind.label}`}
-                          onPress={() => update(setItemKind(draft, key, kind.code))}
-                          className={`rounded-full px-3 py-1.5 active:opacity-70 ${on ? 'bg-text' : 'bg-background'}`}>
-                          <Text className={`text-sm font-semibold ${on ? 'text-on-primary' : 'text-muted'}`}>
-                            {kind.label}
-                          </Text>
-                        </Pressable>
-                      );
-                    })}
                   </View>
                 </Card>
               );
