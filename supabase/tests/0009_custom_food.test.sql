@@ -68,7 +68,7 @@ select is(
   1, '같은 판 사람에게는 직접 적은 메뉴가 보인다');
 reset role;
 
--- 채식: 식단 표시가 없으니 직접 적은 메뉴는 빠진다
+-- 채식: 0012부터 재료로만 본다. 고기가 없다고 짐작한 직접 적은 메뉴는 걸리지 않는다
 select set_config('request.jwt.claims', '{"sub":"00000000-0000-0000-0000-000000000003","role":"authenticated"}', true);
 set local role authenticated;
 select is((select count(*)::int from public.foods where name = '평양냉면'), 0, '다른 모임 사람에게는 직접 적은 메뉴 이름이 안 보인다');
@@ -83,7 +83,7 @@ set local role authenticated;
 select public.join_session('20000000-0000-0000-0000-000000000002');
 select is(
   (public.add_custom_candidate('20000000-0000-0000-0000-000000000002', '버섯 덮밥') ->> 'vetoed'),
-  'true', '채식인 사람이 있으면 식단 표시가 없는 직접 적은 메뉴는 빠진다');
+  'false', '채식인 사람이 있어도 고기 낱말이 없는 직접 적은 메뉴는 걸리지 않는다 (0012)');
 reset role;
 
 select * from finish();
