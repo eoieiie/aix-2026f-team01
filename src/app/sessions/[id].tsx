@@ -101,7 +101,12 @@ export default function SessionScreen() {
         )}
       </SafeAreaView>
       {session.status === 'done' && moment ? (
-        <ResultMoment session={session} from={moment.from} onGroup={toGroup} />
+        <ResultMoment
+          session={session}
+          from={moment.from}
+          onGroup={toGroup}
+          onCard={(mealId) => router.push(`/meals/${mealId}` as any)}
+        />
       ) : null}
     </View>
   );

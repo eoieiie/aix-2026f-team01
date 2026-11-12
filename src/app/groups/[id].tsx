@@ -1,6 +1,6 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useState } from 'react';
-import { ActivityIndicator, ScrollView, Text, View } from 'react-native';
+import { ActivityIndicator, Pressable, ScrollView, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Button } from '@/components/button';
@@ -139,7 +139,13 @@ export default function GroupScreen() {
           ) : (
             <View className="gap-4 rounded-3xl bg-surface p-5">
               {group.recent_meals.map((meal: RecentMeal) => (
-                <View key={meal.id} className="flex-row items-center gap-3">
+                // 한 줄을 누르면 그 식사의 결과 카드 (4-17)
+                <Pressable
+                  key={meal.id}
+                  accessibilityRole="button"
+                  accessibilityLabel={`${meal.food_name} 결과 카드`}
+                  onPress={() => router.push(`/meals/${meal.id}` as any)}
+                  className="min-h-11 flex-row items-center gap-3 active:opacity-70">
                   <FoodDot foodId={meal.food_id} size="md" name={meal.food_name} />
                   <Text className="flex-1 text-lg font-extrabold text-text">{meal.food_name}</Text>
                   <Text className="text-sm text-muted">
@@ -148,7 +154,7 @@ export default function GroupScreen() {
                       day: 'numeric',
                     })}
                   </Text>
-                </View>
+                </Pressable>
               ))}
             </View>
           )}

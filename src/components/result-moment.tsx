@@ -15,6 +15,7 @@ import { Roulette } from '@/components/roulette';
 import colors from '@/constants/colors.json';
 import { RESULT_MOMENT_FLOOD_MS, RESULT_MOMENT_PAUSE_MS, RESULT_MOMENT_TEXT_MS } from '@/constants';
 import { rouletteSlices, type SessionView, useVoteCounts } from '@/hooks/use-session';
+import { useSessionMealId } from '@/hooks/use-meal';
 import { useReduceMotion } from '@/hooks/use-reduce-motion';
 
 export type Point = { x: number; y: number };
@@ -40,10 +41,13 @@ type ResultMomentProps = {
   // 원판 가운데(화면 좌표). 여기서 주황이 번진다. null이면 움직임 없이 바로 보인다 (이미 끝난 판)
   from: Point | null;
   onGroup: () => void;
+  // 결과 카드(4-17)로 간다. 식사 기록 id를 아직 못 읽었으면 버튼이 기다림으로 보인다
+  onCard: (mealId: string) => void;
 };
 
 // 룰렛이 멈춘 순간 (docs/design.md 순간 1). 화면 전체가 주황이 되고 음식 이름이 크게 나온다
-export function ResultMoment({ session, from, onGroup }: ResultMomentProps) {
+export function ResultMoment({ session, from, onGroup, onCard }: ResultMomentProps) {
+  const mealId = useSessionMealId(session.id, session.status === 'done');
   // 덮는 원의 크기는 창이 아니라 이 화면 크기로 잰다. 노트북에서는 화면이 가운데 폭 480 안에 있다
   const windowSize = useWindowDimensions();
   const [box, setBox] = useState({ width: windowSize.width, height: windowSize.height });
@@ -167,8 +171,19 @@ export function ResultMoment({ session, from, onGroup }: ResultMomentProps) {
               </View>
             ) : null}
           </ScrollView>
-          <View className="px-7 pb-4">
-            <Button label="모임으로" variant="inverse" onPress={onGroup} />
+          {/* 같은 역할의 버튼 둘은 같은 크기로 나란히. 결과 카드가 다음 할 일이라 흰 버튼, 모임으로는 회색 */}
+          <View className="flex-row gap-2 px-7 pb-4">
+            <View className="flex-1">
+              <Button label="모임으로" variant="secondary" onPress={onGroup} />
+            </View>
+            <View className="flex-1">
+              <Button
+                label="결과 카드"
+                variant="inverse"
+                loading={!mealId}
+                onPress={() => mealId && onCard(mealId)}
+              />
+            </View>
           </View>
         </SafeAreaView>
       </Animated.View>
