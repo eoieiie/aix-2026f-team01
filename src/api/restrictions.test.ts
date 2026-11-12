@@ -5,7 +5,6 @@ import {
   restrictionErrorMessage,
   type RestrictionItem,
   saveMyRestrictions,
-  setItemKind,
   toggleItem,
   toPayload,
 } from './restrictions';
@@ -17,9 +16,9 @@ function fakeClient(opts: { data?: unknown; error?: { message: string } }) {
 }
 
 describe('고르기 (spec.md 4-7)', () => {
-  it('처음 누르면 "안 먹어요"로 들어가고, 다시 누르면 빠진다', () => {
+  it('처음 누르면 들어가고, 다시 누르면 빠진다', () => {
     const once = toggleItem([], { tag: 'seafood' });
-    expect(once).toEqual([{ tag: 'seafood', foodId: null, kind: 'dislike' }]);
+    expect(once).toEqual([{ tag: 'seafood', foodId: null }]);
     expect(toggleItem(once, { tag: 'seafood' })).toEqual([]);
   });
 
@@ -28,19 +27,13 @@ describe('고르기 (spec.md 4-7)', () => {
     expect(items.map(itemKey)).toEqual(['tag:pork', 'food:3']);
   });
 
-  it('이유는 고른 항목 하나만 바뀐다', () => {
-    const items = toggleItem(toggleItem([], { tag: 'pork' }), { foodId: 3 });
-    const next = setItemKind(items, 'food:3', 'allergy');
-    expect(next.map((i) => i.kind)).toEqual(['dislike', 'allergy']);
-  });
-
-  it('서버 p_items 형식으로 바꾼다', () => {
+  it('서버 p_items 형식으로 바꾼다. kind는 0007 전 서버를 위한 같은 값 하나뿐이다', () => {
     const items: RestrictionItem[] = [
-      { tag: 'seafood', foodId: null, kind: 'allergy' },
-      { tag: null, foodId: 3, kind: 'dislike' },
+      { tag: 'egg', foodId: null },
+      { tag: null, foodId: 3 },
     ];
     expect(toPayload(items)).toEqual([
-      { tag: 'seafood', kind: 'allergy' },
+      { tag: 'egg', kind: 'dislike' },
       { food_id: 3, kind: 'dislike' },
     ]);
   });
@@ -50,13 +43,13 @@ describe('서버 호출 (spec.md 4-7)', () => {
   it('내 못 먹는 것을 읽는다', async () => {
     const { client, rpc } = fakeClient({
       data: [
-        { tag: 'halal', food_id: null, kind: 'belief' },
-        { tag: null, food_id: 7, kind: 'dislike' },
+        { tag: 'halal', food_id: null },
+        { tag: null, food_id: 7 },
       ],
     });
     await expect(getMyRestrictions(client)).resolves.toEqual([
-      { tag: 'halal', foodId: null, kind: 'belief' },
-      { tag: null, foodId: 7, kind: 'dislike' },
+      { tag: 'halal', foodId: null },
+      { tag: null, foodId: 7 },
     ]);
     expect(rpc).toHaveBeenCalledWith('get_my_restrictions');
   });

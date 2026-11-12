@@ -1,7 +1,7 @@
-// 못 먹는 것 태그와 이유 (spec.md 4-7). 코드는 서버(0001_schema.sql)와 같아야 한다.
-// 서버 값과 같은지는 restrictions.test.ts가 확인한다
+// 못 먹는 것 태그 (spec.md 4-7). 코드는 서버(supabase/migrations의 ingredient_tags, diet_tags)와 같아야 한다.
+// 서버 값과 같은지는 restrictions.test.ts가 확인한다. 이유(알레르기 등)는 받지 않는다 (2026-11-02, 0007)
 
-// 재료 8개. 이 재료가 든 후보에는 "못 먹는 사람이 있어요"가 붙는다 (0010부터 빠지지 않는다)
+// 재료 9개. 이 재료가 든 후보에는 "못 먹는 사람이 있어요"가 붙는다 (0010부터 빠지지 않는다)
 export const INGREDIENT_TAGS = [
   { code: 'spicy', label: '맵기' },
   { code: 'seafood', label: '해산물' },
@@ -11,25 +11,15 @@ export const INGREDIENT_TAGS = [
   { code: 'wheat', label: '밀가루' },
   { code: 'dairy', label: '유제품' },
   { code: 'nuts', label: '견과류' },
+  { code: 'egg', label: '달걀' },
 ] as const;
 
-// 식단 3개. 음식에 짝 표시(halal_ok 등)가 없으면 "못 먹는 사람이 있어요"가 붙는다
+// 식단 3개. 재료 묶음으로 판정한다(0012, 비건 달걀은 0014). 그 재료가 든 후보에 "못 먹는 사람이 있어요"가 붙는다
 export const DIET_TAGS = [
   { code: 'halal', label: '할랄' },
   { code: 'vegetarian', label: '채식' },
   { code: 'vegan', label: '비건' },
 ] as const;
-
-// 이유. 판정에는 쓰지 않고 2단계 모임 프로필 집계에만 쓴다. 고르면 '안 먹어요'로 시작한다
-export const RESTRICTION_KINDS = [
-  { code: 'allergy', label: '알레르기' },
-  { code: 'dislike', label: '안 먹어요' },
-  { code: 'belief', label: '신념' },
-] as const;
-
-export type RestrictionKind = (typeof RESTRICTION_KINDS)[number]['code'];
-
-export const DEFAULT_RESTRICTION_KIND: RestrictionKind = 'dislike';
 
 // 투표 화면 위 안내 문구 (0010). 재료와 음식은 "OO 못 먹는", 식단은 식단마다 다른 말
 const DIET_NOTICE: Record<string, string> = {

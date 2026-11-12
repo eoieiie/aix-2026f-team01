@@ -17,8 +17,8 @@ insert into public.groups (id, name, invite_code, created_by) values
 insert into public.memberships (group_id, user_id, display_name) values
   ('10000000-0000-0000-0000-000000000001', '00000000-0000-0000-0000-000000000001', '하나'),
   ('10000000-0000-0000-0000-000000000001', '00000000-0000-0000-0000-000000000002', '둘');
-insert into public.restrictions (user_id, tag, food_id, kind) values
-  ('00000000-0000-0000-0000-000000000002', 'halal', null, 'belief');
+insert into public.restrictions (user_id, tag, food_id) values
+  ('00000000-0000-0000-0000-000000000002', 'halal', null);
 insert into public.sessions (id, group_id, host_user_id) values
   ('20000000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-000000000001', '00000000-0000-0000-0000-000000000001');
 
