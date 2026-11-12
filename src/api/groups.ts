@@ -294,3 +294,23 @@ export async function startSession(
   if (!data) throw new Error('start_session 응답이 비어 있다');
   return data;
 }
+
+// 4-16 모임 프로필 카드 숫자 (group_profile_card, 0006). 누가 무엇을 못 먹는지는 오지 않는다.
+// 소속이 3명 미만이면 tag_counts, food_block_count가 null, 네 글자를 만든 사람이 3명 미만이면 axes가 null
+export interface GroupProfileCardData {
+  member_count: number;
+  tag_counts: { tag: string; count: number }[] | null;
+  food_block_count: number | null;
+  tested_count: number;
+  axes: { explore: number; spicy: number; korean: number; lead: number } | null;
+}
+
+export async function getGroupProfileCard(
+  groupId: string,
+  client: Client = getSupabase()
+): Promise<GroupProfileCardData> {
+  const { data, error } = await client.rpc('group_profile_card', { p_group_id: groupId });
+  if (error) throwServerError(error);
+  if (!data) throw new Error('group_profile_card 응답이 비어 있다');
+  return data as GroupProfileCardData;
+}

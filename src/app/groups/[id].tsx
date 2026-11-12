@@ -5,6 +5,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Button } from '@/components/button';
 import { FoodDot } from '@/components/food-dot';
+import { GroupProfileCard } from '@/components/group-profile-card';
 import { HeadcountModal } from '@/components/headcount-modal';
 import { IconButton } from '@/components/icon';
 import { InviteCard } from '@/components/invite-card';
@@ -153,6 +154,9 @@ export default function GroupScreen() {
             </View>
           )}
         </View>
+
+        {/* 모임 프로필 카드 (spec.md 4-16). 실패하면 카드 자리에만 문구가 나온다 */}
+        <GroupProfileCard groupId={group.id} />
       </ScrollView>
 
       {/* 하단 고정 버튼. 진행 중인 판이 있으면 "진행 중인 판으로" (spec.md 4-6) */}

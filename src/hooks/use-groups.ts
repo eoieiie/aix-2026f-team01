@@ -11,6 +11,8 @@ import {
   type GroupDetail,
   type Member,
   type RecentMeal,
+  getGroupProfileCard,
+  type GroupProfileCardData,
   startSession,
 } from '@/api/groups';
 import {
@@ -21,6 +23,7 @@ import {
 
 export type {
   CreateGroupInput,
+  GroupProfileCardData,
   CreateGroupResult,
   Group,
   GroupDetail,
@@ -145,4 +148,15 @@ export function useStartSession(groupId: string) {
     isPending: mutation.isPending,
     error: mutation.error,
   };
+}
+
+// 4-16 모임 프로필 카드. 실패해도 모임 화면은 그대로이고 카드 자리에만 문구가 나온다
+export function useGroupProfileCard(groupId: string) {
+  const query = useQuery({
+    queryKey: ['groups', 'profile-card', groupId],
+    queryFn: () => getGroupProfileCard(groupId),
+    enabled: !!groupId,
+    retry: false,
+  });
+  return { card: query.data ?? null, isLoading: query.isPending, isError: query.isError };
 }
