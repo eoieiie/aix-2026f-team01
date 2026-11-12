@@ -18,6 +18,8 @@ type CandidateCardProps = {
   onVote?: () => void;
   voted?: boolean;
   busy?: boolean;
+  // 4-20 이 모임이 최근에 먹었으면 "N일 전에 먹었어요"
+  eatenNote?: string | null;
 };
 
 // 후보 한 줄. 못 먹는 사람이 있는 후보는 이름 아래 한 줄로 알린다. 누가 원인인지는 데이터에도 없다 (4-9 익명)
@@ -28,6 +30,7 @@ export function CandidateCard({
   onVote,
   voted = false,
   busy = false,
+  eatenNote = null,
 }: CandidateCardProps) {
   const [pitch, setPitch] = useState(candidate.pitch ?? '');
   const dirty = pitch !== (candidate.pitch ?? '');
@@ -55,6 +58,11 @@ export function CandidateCard({
           {vetoed ? (
             <Text className={`text-sm font-semibold ${voted ? 'text-on-primary' : 'text-danger'}`}>
               {VETOED_TEXT}
+            </Text>
+          ) : null}
+          {eatenNote ? (
+            <Text className={`text-sm ${voted ? 'text-on-primary opacity-80' : 'text-muted'}`}>
+              {eatenNote}
             </Text>
           ) : null}
           {candidate.pitch && !onSavePitch ? (
