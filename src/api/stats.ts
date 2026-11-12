@@ -1,5 +1,6 @@
 import { getSupabase } from './supabase';
 import type { Client } from './groups';
+import { typeCode } from './profile';
 
 // 내 프로필(4-15)에 쓰는 숫자. 서버 함수는 0006(my_food_counts, my_companions)
 
@@ -87,14 +88,7 @@ export function authorityTitle(foods: FoodCount[]): string | null {
   return top ? `${top.name} 권위자` : null;
 }
 
-// 네 글자: 축 점수가 0 이상이면 앞 글자, 음수면 뒤 글자 (5절 "축 점수"). #40의 함수가 들어오면 그것으로 바꾼다
-const AXES = [
-  { key: 'explore', a: '탐', b: '반' },
-  { key: 'spicy', a: '매', b: '순' },
-  { key: 'korean', a: '한', b: '외' },
-  { key: 'lead', a: '주', b: '수' },
-] as const;
-
+// 네 글자 칸에 한 글자씩. 만드는 규칙은 온보딩(#40)의 typeCode 하나만 쓴다
 export function typeLetters(axes: Record<string, number>): string[] {
-  return AXES.map((x) => ((axes[x.key] ?? 0) >= 0 ? x.a : x.b));
+  return Array.from(typeCode(axes as any) ?? '');
 }
