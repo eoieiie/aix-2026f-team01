@@ -1,7 +1,7 @@
 -- 못 먹는 것 정리: 이유 빼기, 달걀 태그, 기본 음식 태그 (명세 4-7, 0007, 0014, 이슈 #39)
 begin;
 create extension if not exists pgtap with schema extensions;
-select plan(16);
+select plan(17);
 
 -- 이유는 저장하지 않는다 -----------------------------------------------------
 select hasnt_column('public', 'restrictions', 'kind', 'restrictions에 이유 칸이 없다');
@@ -39,6 +39,7 @@ select ok('egg' = any (public.ingredient_tags()), '재료 태그에 달걀이 �
 select is(public.restriction_blocks(1, array['egg'], 'egg', null), true, '달걀을 등록하면 달걀이 든 음식이 걸린다');
 select is(public.restriction_blocks(1, array['egg'], 'vegan', null), true, '비건: 달걀도 걸린다 (0014)');
 select is(public.restriction_blocks(1, array['egg'], 'vegetarian', null), false, '채식: 달걀은 걸리지 않는다');
+select ok('egg' = any (public.guess_food_tags('계란말이')), '직접 적은 메뉴 "계란말이"는 달걀 태그를 받는다 (0014)');
 
 -- 판에서: 달걀을 못 먹는 사람이 들어오면 달걀 후보에 "못 먹는 사람이 있어요"가 붙는다
 select set_config('request.jwt.claims', '{"sub":"00000000-0000-0000-0000-000000000001","role":"authenticated"}', true);
