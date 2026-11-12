@@ -12,10 +12,12 @@
 - 성공 기준 / Success criteria:
 
 ## 2. 사용자 확인 / User Validation
-인터뷰 3명 요지 / Summary of three interviews:
-1.
-2.
-3.
+인터뷰 3명 요지 / Summary of three interviews (원문: [`docs/interviews.md`](docs/interviews.md), 이슈 #44):
+1. 채식을 등록하니 고기가 든 후보가 다 지워져서 왜 빠지는지 몰랐다. 그래서 후보를 지우지 않고 "못 먹는 사람이 있어요"로 알리게 바꿨다 (PR #59)
+2. 친구가 고르는 중에 먼저 돌려버렸다, 아무거나 먹어도 되는 사람이 누를 칸이 있으면 좋겠다. 그래서 정한 인원이 다 골라야 돌리기가 켜지고 "아무거나 괜찮아요"를 넣었다 (PR #59)
+3. 검색칸에 음식 이름만 쓰고 고르지 않았다. 그래서 목록에 없는 메뉴도 적어 올리고, 엔터로도 올라가게 했다 (0008, PR #59)
+
+세 사람 모두 "딱히 먹고 싶은 게 없을 때 고르기 어렵다"고 했다. 설문 78명 중 76.9%도 "아무거나" 때문에 고민한 적이 있다 ([`docs/survey-result.md`](docs/survey-result.md)).
 
 ## 3. 실행 방법 / How to Run
 Node 버전은 `.nvmrc`를 따른다 (`nvm use`).
