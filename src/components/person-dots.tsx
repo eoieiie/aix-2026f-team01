@@ -2,11 +2,11 @@ import { Text, View } from 'react-native';
 
 import { PERSON_DOTS_MAX } from '@/constants';
 
-// 사람마다 돌려 쓰는 회색. 진한 색에는 흰 글자, 연한 색에는 검정 글자 (docs/design.md 1절)
+// 사람마다 돌려 쓰는 주황·살구 톤 아바타
 const DOT_COLORS = [
-  { bg: 'bg-food-8', text: 'text-on-ink' },
-  { bg: 'bg-food-2', text: 'text-on-ink' },
-  { bg: 'bg-food-4', text: 'text-text' },
+  { bg: 'bg-food-1', text: 'text-on-primary' },
+  { bg: 'bg-food-7', text: 'text-on-primary' },
+  { bg: 'bg-food-3', text: 'text-text' },
 ] as const;
 
 type PersonDotsProps = {

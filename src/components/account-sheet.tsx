@@ -80,8 +80,8 @@ export function AccountSheet({ visible, onClose }: { visible: boolean; onClose: 
                         claim.reset();
                         signIn.reset();
                       }}
-                      className={`h-11 flex-1 items-center justify-center rounded-full ${on ? 'bg-ink' : 'bg-surface'}`}>
-                      <Text className={`text-base font-bold ${on ? 'text-on-ink' : 'text-muted'}`}>{label}</Text>
+                      className={`h-11 flex-1 items-center justify-center rounded-full ${on ? 'bg-primary' : 'bg-surface'}`}>
+                      <Text className={`text-base font-bold ${on ? 'text-on-primary' : 'text-muted'}`}>{label}</Text>
                     </Pressable>
                   );
                 })}

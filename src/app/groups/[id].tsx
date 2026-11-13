@@ -18,11 +18,11 @@ import {
   useStartSession,
 } from '@/hooks/use-groups';
 
-// 멤버 동그라미 색. 홈 모임 카드의 사람 동그라미와 같은 순서 (docs/design.md 1절)
+// 멤버 동그라미 색. 홈 모임 카드의 사람 동그라미와 같은 순서
 const MEMBER_COLORS = [
-  { bg: 'bg-food-8', text: 'text-on-ink' },
-  { bg: 'bg-food-2', text: 'text-on-ink' },
-  { bg: 'bg-food-4', text: 'text-text' },
+  { bg: 'bg-food-1', text: 'text-on-primary' },
+  { bg: 'bg-food-7', text: 'text-on-primary' },
+  { bg: 'bg-food-3', text: 'text-text' },
 ] as const;
 
 export default function GroupScreen() {
