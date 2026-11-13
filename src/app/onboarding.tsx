@@ -325,20 +325,20 @@ function TypeReveal({ axes, onNext, onRetry }: { axes: Axes; onNext: () => void;
                 ],
               }}
             >
-              <View className="aspect-square items-center justify-center gap-1 rounded-3xl bg-food-8 shadow-sm">
-                <Text className="text-8xl font-extrabold text-on-ink">{l.letter}</Text>
-                <Text className="text-base font-semibold text-on-ink opacity-80">{l.line}</Text>
+              <View className="aspect-square items-center justify-center gap-1 rounded-3xl bg-on-primary shadow-sm">
+                <Text className="text-8xl font-extrabold text-primary">{l.letter}</Text>
+                <Text className="text-base font-bold text-text">{l.line}</Text>
               </View>
             </Animated.View>
           ))}
         </View>
       </View>
-      <View className="gap-2.5 px-5 pb-8">
+      <View className="gap-2 px-5 pb-8">
         <Pressable
           accessibilityRole="button"
           accessibilityLabel="아이디 정하고 시작하기"
           onPress={onNext}
-          className="h-14 items-center justify-center rounded-full bg-on-primary px-6 active:opacity-80"
+          className="h-14 items-center justify-center rounded-full bg-on-primary px-6 shadow-sm active:opacity-80"
         >
           <Text className="text-lg font-extrabold text-primary">아이디 정하고 시작하기</Text>
         </Pressable>
@@ -346,9 +346,9 @@ function TypeReveal({ axes, onNext, onRetry }: { axes: Axes; onNext: () => void;
           accessibilityRole="button"
           accessibilityLabel="다시 하기"
           onPress={onRetry}
-          className="h-14 items-center justify-center rounded-full bg-ink px-6 active:opacity-80"
+          className="h-12 items-center justify-center active:opacity-70"
         >
-          <Text className="text-base font-bold text-on-ink">다시 하기</Text>
+          <Text className="text-base font-bold text-on-primary opacity-80">다시 하기</Text>
         </Pressable>
       </View>
     </SafeAreaView>
