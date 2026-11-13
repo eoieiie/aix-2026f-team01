@@ -56,10 +56,10 @@ export function InviteCard({ inviteCode, groupName }: InviteCardProps) {
   };
 
   return (
-    <View className="w-full gap-4 rounded-3xl bg-ink p-5">
+    <View className="w-full gap-4 rounded-3xl bg-primary p-5">
       <View className="gap-1">
-        <Text className="text-sm font-semibold text-on-ink opacity-60">초대 코드</Text>
-        <Text className="text-4xl font-extrabold tracking-widest text-on-ink">{inviteCode}</Text>
+        <Text className="text-sm font-semibold text-on-primary opacity-80">초대 코드</Text>
+        <Text className="text-4xl font-extrabold tracking-widest text-on-primary">{inviteCode}</Text>
       </View>
 
       <View className="flex-row gap-2">
@@ -74,9 +74,9 @@ export function InviteCard({ inviteCode, groupName }: InviteCardProps) {
 
       {/* 복사가 안 되면 링크 글자를 보여줘서 직접 복사하게 한다 (spec.md 4-4) */}
       {copyFailed ? (
-        <View className="gap-1 rounded-2xl bg-on-ink/10 p-3">
-          <Text className="text-xs text-on-ink opacity-60">아래 링크를 길게 눌러 복사해 주세요</Text>
-          <Text selectable className="select-all text-sm font-semibold text-on-ink">
+        <View className="gap-1 rounded-2xl bg-on-primary/20 p-3">
+          <Text className="text-xs text-on-primary opacity-80">아래 링크를 길게 눌러 복사해 주세요</Text>
+          <Text selectable className="select-all text-sm font-semibold text-on-primary">
             {inviteUrl}
           </Text>
         </View>

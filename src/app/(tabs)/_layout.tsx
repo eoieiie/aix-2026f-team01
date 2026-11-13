@@ -29,7 +29,7 @@ function PillTabBar({ state, navigation }: { state: any; navigation: any }) {
       pointerEvents="box-none"
       className="absolute bottom-0 left-0 right-0 items-center"
       style={{ paddingBottom: insets.bottom + 16 }}>
-      <View className="flex-row gap-2 rounded-full bg-ink p-2" style={{ height: TAB_BAR_HEIGHT }}>
+      <View className="flex-row gap-2 rounded-full bg-primary p-2" style={{ height: TAB_BAR_HEIGHT }}>
         {state.routes.map((route: any, i: number) => {
           const tab = TABS.find((t) => t.name === route.name);
           if (!tab) return null;
@@ -43,8 +43,10 @@ function PillTabBar({ state, navigation }: { state: any; navigation: any }) {
               onPress={() => {
                 if (!on) navigation.navigate(route.name);
               }}
-              className="h-12 w-16 items-center justify-center rounded-full active:opacity-70">
-              <Icon name={tab.icon} size={24} color={on ? 'on-ink' : 'muted'} />
+              className={`h-12 w-16 items-center justify-center rounded-full active:opacity-70 ${on ? 'bg-on-primary/20' : ''}`}>
+              <View className={on ? 'opacity-100' : 'opacity-55'}>
+                <Icon name={tab.icon} size={24} color="on-primary" />
+              </View>
             </Pressable>
           );
         })}

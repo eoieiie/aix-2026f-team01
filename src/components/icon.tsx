@@ -16,6 +16,7 @@ const PATHS = {
   pencil: 'M5 19 L6 14.5 L15.5 5 L19 8.5 L9.5 18 Z M13.5 7 L17 10.5',
   home: 'M4 11 L12 4.5 L20 11 V19.5 H14.5 V14.5 H9.5 V19.5 H4 Z',
   person: 'M12 12 A4 4 0 1 0 12 4 A4 4 0 1 0 12 12 Z M4.5 20 C5.5 16.5 8.5 15 12 15 C15.5 15 18.5 16.5 19.5 20',
+  refresh: 'M20 12 A8 8 0 0 1 6.5 18.5 L4 16 M4 21 V16 H9 M4 12 A8 8 0 0 1 17.5 5.5 L20 8 M20 3 V8 H15',
 } as const;
 
 export type IconName = keyof typeof PATHS;

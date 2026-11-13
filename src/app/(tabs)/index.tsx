@@ -1,6 +1,6 @@
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
-import { FlatList, Image, Pressable, Text, View } from 'react-native';
+import { Image, Pressable, ScrollView, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Button } from '@/components/button';
@@ -21,15 +21,16 @@ export default function HomeScreen() {
   const hasGroups = groups.length > 0;
 
   // 모임 카드: 사람 동그라미, 모임 이름, 최근 먹은 것. 진행 중인 판이 있으면 주황 알약 하나 (docs/design.md 1절)
-  const renderGroupItem = ({ item }: { item: Group }) => (
+  const renderGroupItem = (item: Group) => (
     <Pressable
+      key={item.id}
       accessibilityRole="button"
       accessibilityLabel={`${item.name} 모임 열기`}
       className="gap-4 rounded-3xl bg-surface p-5 active:opacity-80"
       onPress={() => router.push(`/groups/${item.id}`)}
     >
       <View className="flex-row items-center justify-between">
-        <PersonDots names={item.members} />
+        <PersonDots names={item.members} ringClass="border-surface" />
         {item.has_open_session ? (
           <View className="rounded-full bg-primary px-4 py-2">
             <Text className="text-sm font-bold text-on-primary">판 진행 중</Text>
@@ -57,37 +58,37 @@ export default function HomeScreen() {
   );
 
   return (
-    <SafeAreaView className="flex-1 bg-background">
-      <View className="flex-1 px-5 pt-3">
-        {/* 로고와 + 버튼은 높이 48 한 줄에서 세로 가운데. 로고 왼쪽 선은 아래 제목과 같다 */}
-        <View className="h-12 flex-row items-center justify-between">
+    <SafeAreaView className="flex-1 bg-background" edges={['top']}>
+      <ScrollView
+        className="flex-1"
+        contentContainerClassName="px-5 pt-3"
+        contentContainerStyle={{ paddingBottom: TAB_BAR_SPACE }}
+        showsVerticalScrollIndicator={false}
+      >
+        {/* 상단 헤더: 로고 첫 글자와 좌측 선 일치 */}
+        <View className="h-14 flex-row items-center justify-between">
           <Logo />
-          {/* 오른쪽은 모임 만들기, 모임이 있을 때만. 계정(4-19)은 프로필 탭으로 옮겼다 (#41).
-              모임이 없을 때는 아래 카드의 "첫 모임 만들기" 하나만 둔다 (docs/design.md 4절) */}
           {hasGroups ? (
             <IconButton name="plus" label="모임 만들기" onPress={() => setModalVisible(true)} />
           ) : null}
         </View>
 
-        {/* 위쪽 줄과 제목 사이 24, 제목과 목록 사이 24 (docs/design.md 4절). 아래 설명 줄은 두지 않는다 */}
-        <Text className="mb-6 mt-6 text-3xl font-extrabold tracking-tight text-text">
+        {/* 화면 제목: 흰 바탕 위 시원하고 굵은 헤드라인 */}
+        <Text className="mb-6 mt-8 text-3xl font-extrabold tracking-tight text-text">
           오늘은 누구랑 먹어요?
         </Text>
 
         {isLoading ? (
           <Text className="text-sm text-muted">모임을 불러오는 중</Text>
         ) : isError ? (
-          // 오류 상태: 오류 문구와 다시 시도 버튼 (spec.md 4-3)
-          <View className="gap-3">
+          <View className="gap-3 rounded-2xl bg-surface p-5">
             <Text className="text-base font-bold text-text">모임을 불러올 수 없어요</Text>
             <Text className="text-sm text-muted">
-              {/* 오류 원문(영어)은 보이지 않고 한국어 문구만 (spec.md 4절 실패할 때) */}
               인터넷 연결을 확인하고 다시 시도해 주세요
             </Text>
             <Button label="다시 시도" variant="secondary" onPress={() => refetch()} />
           </View>
         ) : !hasGroups ? (
-          // 모임이 없을 때: 마스코트, "아직 모임이 없어요"(spec.md 4-3), 글 길이에 맞춘 가운데 버튼 (PR #52)
           <View className="items-center gap-4 rounded-3xl bg-surface p-6">
             <Image
               source={mascotSource}
@@ -103,17 +104,36 @@ export default function HomeScreen() {
             />
           </View>
         ) : (
-          // 최근에 들어간 순으로 보이는 모임 목록 (spec.md 4-3)
-          <FlatList
-            data={groups}
-            keyExtractor={(item) => item.id}
-            renderItem={renderGroupItem}
-            ItemSeparatorComponent={() => <View className="h-3" />}
-            showsVerticalScrollIndicator={false}
-            contentContainerStyle={{ paddingBottom: TAB_BAR_SPACE }}
-          />
+          <View className="gap-3">
+            {groups.map((group) => renderGroupItem(group))}
+          </View>
         )}
-      </View>
+
+        {/* 모임 목록 아래: 마스코트의 생각풍선 스토리텔링 영역 */}
+        {hasGroups ? (
+          <View className="mt-5 items-center gap-1.5 pb-8">
+            {/* 회색 모임 카드와 자연스럽게 연결되는 생각 방울 */}
+            <View className="h-4 w-4 rounded-full bg-surface-strong" />
+            <View className="h-2.5 w-2.5 rounded-full bg-surface-strong" />
+            <View className="h-1.5 w-1.5 rounded-full bg-surface-strong" />
+
+            {/* 생각에 잠긴 밥BTI 마스코트 (기존 125x95에서 1.5배 키운 188x143) */}
+            <Image
+              source={mascotSource}
+              style={{ width: 188, height: 143 }}
+              resizeMode="contain"
+              accessibilityLabel="생각하는 밥BTI 마스코트"
+            />
+
+            {/* 마스코트 아래 대사 말풍선 */}
+            <View className="mt-1 rounded-2xl bg-surface px-5 py-2">
+              <Text className="text-sm font-bold tracking-tight text-text">
+                제가 기억하는 모임은 여기까지예요!
+              </Text>
+            </View>
+          </View>
+        ) : null}
+      </ScrollView>
 
       <CreateGroupModal visible={modalVisible} onClose={() => setModalVisible(false)} />
     </SafeAreaView>

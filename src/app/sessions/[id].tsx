@@ -134,11 +134,11 @@ function Header({ session, onBack }: { session: SessionView; onBack: () => void 
           <View
             key={step.status}
             className={`h-10 flex-1 items-center justify-center rounded-full ${
-              i === current ? 'bg-ink' : i < current ? 'bg-surface-strong' : 'bg-surface'
+              i === current ? 'bg-primary' : i < current ? 'bg-surface-strong' : 'bg-surface'
             }`}>
             <Text
               className={`text-sm font-bold ${
-                i === current ? 'text-on-ink' : i < current ? 'text-text' : 'text-muted'
+                i === current ? 'text-on-primary' : i < current ? 'text-text' : 'text-muted'
               }`}>
               {step.label}
             </Text>
@@ -169,7 +169,7 @@ function Participants({ session }: { session: SessionView }) {
               key={p.userId}
               accessibilityLabel={`${p.displayName}${on ? ' 투표함' : ''}`}
               className={`h-9 w-9 items-center justify-center rounded-full ${
-                on ? 'bg-text' : 'bg-surface-strong'
+                on ? 'bg-primary' : 'bg-surface-strong'
               }`}>
               <Text className={`text-sm font-bold ${on ? 'text-on-primary' : 'text-text'}`}>
                 {Array.from(p.displayName)[0] ?? ''}
@@ -269,9 +269,9 @@ function CandidateStage({
                   accessibilityLabel={`${foodName.get(h.foodId) ?? ''} 후보로 올리기, ${h.eatenCount}번 먹음`}
                   disabled={busy}
                   onPress={() => add.mutate(h.foodId)}
-                  className="h-11 flex-row items-center gap-2 rounded-full bg-ink px-4 active:opacity-80 disabled:opacity-50">
-                  <Text className="text-base font-bold text-on-ink">{foodName.get(h.foodId) ?? ''}</Text>
-                  <Text className="text-sm font-semibold text-on-ink opacity-60">{h.eatenCount}번</Text>
+                  className="h-11 flex-row items-center gap-2 rounded-full bg-primary px-4 active:opacity-80 disabled:opacity-50">
+                  <Text className="text-base font-bold text-on-primary">{foodName.get(h.foodId) ?? ''}</Text>
+                  <Text className="text-sm font-semibold text-on-primary opacity-80">{h.eatenCount}번</Text>
                 </Pressable>
               ))}
             </View>
@@ -357,15 +357,15 @@ function VotingStage({ session }: { session: SessionView }) {
             </Text>
           </View>
           <View className="h-3 overflow-hidden rounded-full bg-surface-strong">
-            <View className="h-3 rounded-full bg-text" style={{ width: `${ratio * 100}%` }} />
+            <View className="h-3 rounded-full bg-primary" style={{ width: `${ratio * 100}%` }} />
           </View>
         </View>
 
         {/* 이 판 후보에 걸리는 못 먹는 것. 빼지 않고 알린다. 누가 적었는지는 없다 (0010) */}
         {notice.length > 0 ? (
-          <View accessibilityRole="alert" className="gap-1 rounded-3xl bg-ink p-5">
+          <View accessibilityRole="alert" className="gap-1 rounded-3xl bg-primary p-5">
             {notice.map((line) => (
-              <Text key={line} className="text-lg font-extrabold text-on-ink">
+              <Text key={line} className="text-lg font-extrabold text-on-primary">
                 {line}
               </Text>
             ))}
@@ -396,10 +396,10 @@ function VotingStage({ session }: { session: SessionView }) {
             disabled={anyOk.isPending}
             onPress={() => anyOk.mutate()}
             className={`h-14 flex-row items-center justify-center gap-2 rounded-full active:opacity-80 ${
-              session.myAnyOk ? 'bg-ink' : 'bg-surface'
+              session.myAnyOk ? 'bg-primary' : 'bg-surface'
             }`}>
-            {session.myAnyOk ? <Icon name="check" color="on-ink" /> : null}
-            <Text className={`text-lg font-bold ${session.myAnyOk ? 'text-on-ink' : 'text-text'}`}>
+            {session.myAnyOk ? <Icon name="check" color="on-primary" /> : null}
+            <Text className={`text-lg font-bold ${session.myAnyOk ? 'text-on-primary' : 'text-text'}`}>
               아무거나 괜찮아요
             </Text>
           </Pressable>

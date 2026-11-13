@@ -58,7 +58,7 @@ function Restrictions({ view }: { view: ReturnType<typeof restrictionView> }) {
             <Text className="text-base font-bold text-text">{r.count}명</Text>
           </View>
           <View className="h-3 overflow-hidden rounded-full bg-surface-strong">
-            <View className="h-3 rounded-full bg-text" style={{ width: `${r.ratio * 100}%` }} />
+            <View className="h-3 rounded-full bg-primary" style={{ width: `${r.ratio * 100}%` }} />
           </View>
         </View>
       ))}
@@ -94,11 +94,11 @@ function Axes({ view }: { view: ReturnType<typeof axesView> }) {
             <Text className={`w-16 text-sm font-bold ${leftOn ? 'text-text' : 'text-muted'}`}>{a.left}</Text>
             <View className="h-3 flex-1 flex-row overflow-hidden rounded-full bg-surface-strong">
               <View className="flex-1 flex-row justify-end">
-                {leftOn ? <View className="h-3 bg-text" style={{ width: `${Math.abs(a.value) * 100}%` }} /> : null}
+                {leftOn ? <View className="h-3 bg-primary" style={{ width: `${Math.abs(a.value) * 100}%` }} /> : null}
               </View>
               <View className="h-3 w-0.5 bg-muted" />
               <View className="flex-1 flex-row">
-                {rightOn ? <View className="h-3 bg-text" style={{ width: `${Math.abs(a.value) * 100}%` }} /> : null}
+                {rightOn ? <View className="h-3 bg-primary" style={{ width: `${Math.abs(a.value) * 100}%` }} /> : null}
               </View>
             </View>
             <Text className={`w-16 text-right text-sm font-bold ${rightOn ? 'text-text' : 'text-muted'}`}>
