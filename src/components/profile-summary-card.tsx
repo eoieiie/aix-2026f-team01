@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { Image, StyleSheet, Text, View } from 'react-native';
+import { Image, Platform, StyleSheet, Text, View } from 'react-native';
 import Svg, { Defs, LinearGradient, Rect, Stop } from 'react-native-svg';
 
 import colors from '@/constants/colors.json';
@@ -27,18 +27,28 @@ export function ProfileSummaryCard({
   action?: ReactNode;
 }) {
   return (
-    <View className="relative gap-5 overflow-hidden rounded-3xl p-6 shadow-sm">
-      {/* 주황 그라데이션 배경: 밝은 주황(food-7)에서 브랜드 주황(primary), 딥 오렌지(food-5)로 */}
-      <Svg style={StyleSheet.absoluteFill} width="100%" height="100%">
-        <Defs>
-          <LinearGradient id="profileCardGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-            <Stop offset="0%" stopColor={colors['food-7']} stopOpacity="1" />
-            <Stop offset="55%" stopColor={colors.primary} stopOpacity="1" />
-            <Stop offset="100%" stopColor={colors['food-5']} stopOpacity="1" />
-          </LinearGradient>
-        </Defs>
-        <Rect width="100%" height="100%" fill="url(#profileCardGrad)" rx={24} />
-      </Svg>
+    <View
+      className="relative gap-5 overflow-hidden rounded-3xl bg-primary p-6 shadow-sm"
+      style={
+        Platform.OS === 'web'
+          ? ({
+              backgroundImage: `linear-gradient(135deg, ${colors['food-7']} 0%, ${colors.primary} 55%, ${colors['food-5']} 100%)`,
+            } as any)
+          : undefined
+      }>
+      {/* 네이티브(iOS/Android)에서는 SVG LinearGradient 사용 (웹에서는 브라우저 라우팅 시 SVG fill url 해시 깨짐 방지를 위해 CSS 그라데이션) */}
+      {Platform.OS !== 'web' ? (
+        <Svg style={StyleSheet.absoluteFill} width="100%" height="100%">
+          <Defs>
+            <LinearGradient id="profileCardGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+              <Stop offset="0%" stopColor={colors['food-7']} stopOpacity="1" />
+              <Stop offset="55%" stopColor={colors.primary} stopOpacity="1" />
+              <Stop offset="100%" stopColor={colors['food-5']} stopOpacity="1" />
+            </LinearGradient>
+          </Defs>
+          <Rect width="100%" height="100%" fill="url(#profileCardGrad)" rx={24} />
+        </Svg>
+      ) : null}
 
       {letters ? (
         <View accessibilityLabel={`내 네 글자 ${letters.join('')}`} className="w-40 flex-row flex-wrap gap-2">

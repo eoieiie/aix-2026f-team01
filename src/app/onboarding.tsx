@@ -278,18 +278,28 @@ function TypeReveal({ axes, onNext, onRetry }: { axes: Axes; onNext: () => void;
   }, [anims, reduce]);
 
   return (
-    <SafeAreaView className="relative flex-1">
-      {/* 주황 그라데이션 배경: food-7 -> primary -> food-5 */}
-      <Svg style={StyleSheet.absoluteFill} width="100%" height="100%">
-        <Defs>
-          <LinearGradient id="typeRevealGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-            <Stop offset="0%" stopColor={colors['food-7']} stopOpacity="1" />
-            <Stop offset="55%" stopColor={colors.primary} stopOpacity="1" />
-            <Stop offset="100%" stopColor={colors['food-5']} stopOpacity="1" />
-          </LinearGradient>
-        </Defs>
-        <Rect width="100%" height="100%" fill="url(#typeRevealGrad)" />
-      </Svg>
+    <SafeAreaView
+      className="relative flex-1 bg-primary"
+      style={
+        Platform.OS === 'web'
+          ? ({
+              backgroundImage: `linear-gradient(135deg, ${colors['food-7']} 0%, ${colors.primary} 55%, ${colors['food-5']} 100%)`,
+            } as any)
+          : undefined
+      }>
+      {/* 네이티브(iOS/Android)에서는 SVG LinearGradient 사용 */}
+      {Platform.OS !== 'web' ? (
+        <Svg style={StyleSheet.absoluteFill} width="100%" height="100%">
+          <Defs>
+            <LinearGradient id="typeRevealGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+              <Stop offset="0%" stopColor={colors['food-7']} stopOpacity="1" />
+              <Stop offset="55%" stopColor={colors.primary} stopOpacity="1" />
+              <Stop offset="100%" stopColor={colors['food-5']} stopOpacity="1" />
+            </LinearGradient>
+          </Defs>
+          <Rect width="100%" height="100%" fill="url(#typeRevealGrad)" />
+        </Svg>
+      ) : null}
 
       <View className="flex-1 justify-center gap-8 px-5">
         <Text className="text-lg font-bold text-on-primary" accessibilityRole="header">
