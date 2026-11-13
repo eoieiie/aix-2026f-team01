@@ -1,8 +1,9 @@
 import * as Haptics from 'expo-haptics';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { ActivityIndicator, Animated, Platform, Pressable, Text, View } from 'react-native';
+import { ActivityIndicator, Animated, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import Svg, { Defs, LinearGradient, Rect, Stop } from 'react-native-svg';
 
 import { Button } from '@/components/button';
 import { IconButton } from '@/components/icon';
@@ -277,9 +278,21 @@ function TypeReveal({ axes, onNext, onRetry }: { axes: Axes; onNext: () => void;
   }, [anims, reduce]);
 
   return (
-    <SafeAreaView className="flex-1 bg-ink">
+    <SafeAreaView className="relative flex-1">
+      {/* 주황 그라데이션 배경: food-7 -> primary -> food-5 */}
+      <Svg style={StyleSheet.absoluteFill} width="100%" height="100%">
+        <Defs>
+          <LinearGradient id="typeRevealGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <Stop offset="0%" stopColor={colors['food-7']} stopOpacity="1" />
+            <Stop offset="55%" stopColor={colors.primary} stopOpacity="1" />
+            <Stop offset="100%" stopColor={colors['food-5']} stopOpacity="1" />
+          </LinearGradient>
+        </Defs>
+        <Rect width="100%" height="100%" fill="url(#typeRevealGrad)" />
+      </Svg>
+
       <View className="flex-1 justify-center gap-8 px-5">
-        <Text className="text-lg font-bold text-on-ink" accessibilityRole="header">
+        <Text className="text-lg font-bold text-on-primary" accessibilityRole="header">
           나의 밥BTI
         </Text>
         <View
@@ -302,23 +315,30 @@ function TypeReveal({ axes, onNext, onRetry }: { axes: Axes; onNext: () => void;
                 ],
               }}
             >
-              <View className="aspect-square items-center justify-center gap-1 rounded-3xl bg-food-8">
+              <View className="aspect-square items-center justify-center gap-1 rounded-3xl bg-food-8 shadow-sm">
                 <Text className="text-8xl font-extrabold text-on-ink">{l.letter}</Text>
-                <Text className="text-base font-semibold text-on-ink opacity-70">{l.line}</Text>
+                <Text className="text-base font-semibold text-on-ink opacity-80">{l.line}</Text>
               </View>
             </Animated.View>
           ))}
         </View>
       </View>
-      <View className="gap-2 px-5 pb-8">
-        <Button label="아이디 정하고 시작하기" onPress={onNext} />
+      <View className="gap-2.5 px-5 pb-8">
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="아이디 정하고 시작하기"
+          onPress={onNext}
+          className="h-14 items-center justify-center rounded-full bg-on-primary px-6 active:opacity-80"
+        >
+          <Text className="text-lg font-extrabold text-primary">아이디 정하고 시작하기</Text>
+        </Pressable>
         <Pressable
           accessibilityRole="button"
           accessibilityLabel="다시 하기"
           onPress={onRetry}
-          className="h-12 items-center justify-center active:opacity-70"
+          className="h-14 items-center justify-center rounded-full bg-ink px-6 active:opacity-80"
         >
-          <Text className="text-base font-bold text-on-ink opacity-70">다시 하기</Text>
+          <Text className="text-base font-bold text-on-ink">다시 하기</Text>
         </Pressable>
       </View>
     </SafeAreaView>
