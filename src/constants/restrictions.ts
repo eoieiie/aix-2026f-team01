@@ -21,13 +21,7 @@ export const DIET_TAGS = [
   { code: 'vegan', label: '비건' },
 ] as const;
 
-// 투표 화면 위 안내 문구 (0010). 재료와 음식은 "OO 못 먹는", 식단은 식단마다 다른 말
-const DIET_NOTICE: Record<string, string> = {
-  halal: '할랄 음식만 먹는',
-  vegetarian: '채식하는',
-  vegan: '비건인',
-};
-
+// 투표 화면 위 안내 문구. 서버(0012부터)는 식단을 재료로 풀어서 주므로 재료와 음식 이름만 다룬다
 export function cantEatNotice(tags: string[], foods: string[]): string[] {
   const label = (code: string) => INGREDIENT_TAGS.find((t) => t.code === code)?.label;
   const items = [
@@ -36,6 +30,5 @@ export function cantEatNotice(tags: string[], foods: string[]): string[] {
   ];
   const lines: string[] = [];
   if (items.length > 0) lines.push(`${items.join(', ')} 못 먹는 사람이 있어요`);
-  for (const t of tags) if (DIET_NOTICE[t]) lines.push(`${DIET_NOTICE[t]} 사람이 있어요`);
   return lines;
 }

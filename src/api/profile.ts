@@ -1,5 +1,5 @@
 import { HANDLE_MAX, HANDLE_MIN } from '@/constants';
-import { AXES, type AxisKey, type QuizAnswer } from '@/constants/quiz';
+import { AXES, type AxisKey, type QuizAnswer, tieBreak } from '@/constants/quiz';
 
 import type { Client } from './groups';
 import { getSupabase } from './supabase';
@@ -15,17 +15,28 @@ export interface MyProfile {
   quizAnswers: QuizAnswer[] | null;
 }
 
-// 네 글자. 축 값이 0 이상이면 앞 글자(탐, 매, 한, 주), 음수면 뒤 글자(반, 순, 외, 수) (5절 "축 점수")
-export function typeCode(axes: Partial<Axes> | null | undefined): string | null {
+// 축 하나가 앞 글자인지. 양수면 앞, 음수면 뒤, 0(두 답이 갈림)이면 그 축 두 번째 문항의 답을 따른다.
+// 답을 모르면 앞 글자 (5절 "축 점수")
+function isFront(value: number, axisIndex: number, answers?: readonly QuizAnswer[] | null): boolean {
+  if (value > 0) return true;
+  if (value < 0) return false;
+  return tieBreak(axisIndex, answers) ?? true;
+}
+
+// 네 글자 (탐, 매, 한, 주 / 반, 순, 외, 수)
+export function typeCode(
+  axes: Partial<Axes> | null | undefined,
+  answers?: readonly QuizAnswer[] | null
+): string | null {
   if (!axes) return null;
   if (AXES.some((a) => typeof axes[a.key] !== 'number')) return null;
-  return AXES.map((a) => ((axes[a.key] as number) >= 0 ? a.front : a.back)).join('');
+  return AXES.map((a, i) => (isFront(axes[a.key] as number, i, answers) ? a.front : a.back)).join('');
 }
 
 // 축마다 한 줄 설명 ("새 메뉴 먼저")
-export function typeLines(axes: Axes): { letter: string; line: string }[] {
-  return AXES.map((a) =>
-    axes[a.key] >= 0 ? { letter: a.front, line: a.frontLine } : { letter: a.back, line: a.backLine }
+export function typeLines(axes: Axes, answers?: readonly QuizAnswer[] | null): { letter: string; line: string }[] {
+  return AXES.map((a, i) =>
+    isFront(axes[a.key], i, answers) ? { letter: a.front, line: a.frontLine } : { letter: a.back, line: a.backLine }
   );
 }
 

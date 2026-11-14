@@ -21,8 +21,13 @@ describe('typeCode (spec.md 4-14, 5절 축 점수)', () => {
     expect(typeCode(scoreLikeServer(Array(8).fill('A')))).toBe('탐매한주');
     expect(typeCode(scoreLikeServer(Array(8).fill('B')))).toBe('반순외수');
   });
-  it('0이면 앞 글자', () => {
+  it('답을 모르고 0이면 앞 글자', () => {
     expect(typeCode({ explore: 0, spicy: 0, korean: -1, lead: 0 })).toBe('탐매외주');
+  });
+  it('0(두 답이 갈림)이면 그 축 두 번째 문항을 따른다 (2026-11-15)', () => {
+    // 탐험 A,B → 반 / 매운맛 B,A → 매 / 한식 A,A → 한 / 주도 B,B → 수
+    const answers = ['A', 'B', 'B', 'A', 'A', 'A', 'B', 'B'] as const;
+    expect(typeCode(scoreLikeServer([...answers]), answers)).toBe('반매한수');
   });
   it('축이 없으면 null', () => {
     expect(typeCode(null)).toBeNull();

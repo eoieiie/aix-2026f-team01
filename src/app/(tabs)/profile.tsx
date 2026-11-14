@@ -47,7 +47,7 @@ export default function ProfileScreen() {
 
   const total = stats.foods.reduce((s, f) => s + f.mealCount, 0);
   const { level, toNext } = levelOf(total);
-  const letters = stats.profile.axes ? typeLetters(stats.profile.axes) : null;
+  const letters = stats.profile.axes ? typeLetters(stats.profile.axes, stats.profile.quizAnswers) : null;
   const toOnboarding = () => router.push('/onboarding?from=profile' as any);
 
   return (

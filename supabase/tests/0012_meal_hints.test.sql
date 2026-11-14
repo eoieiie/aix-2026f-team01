@@ -1,13 +1,14 @@
 -- 식사 기록 힌트 (명세 4-20, 0011)
 begin;
 create extension if not exists pgtap with schema extensions;
-select plan(6);
+select plan(7);
 
 insert into auth.users (id) values
   ('00000000-0000-0000-0000-000000000001'),  -- 방장
   ('00000000-0000-0000-0000-000000000002'),  -- 돼지고기 못 먹음
   ('00000000-0000-0000-0000-000000000003');  -- 다른 모임
 insert into public.foods (name, tags) values ('h_pork', array['pork']), ('h_plain', array[]::text[]);
+insert into public.foods (name, tags, custom) values ('h_custom', array[]::text[], true);
 insert into public.groups (id, name, invite_code, created_by) values
   ('10000000-0000-0000-0000-000000000001', '힌트 모임', 'TESTHN', '00000000-0000-0000-0000-000000000001'),
   ('10000000-0000-0000-0000-000000000002', '남의 모임', 'TESTHP', '00000000-0000-0000-0000-000000000003');
@@ -53,6 +54,9 @@ select ok((select last_eaten_at from t_h where food_id = (select id from public.
   '마지막으로 먹은 때는 가장 최근 기록');
 select is((select eaten_count from t_h where food_id = (select id from public.foods where name = 'h_pork')), 0,
   '안 먹은 음식은 0');
+
+select is((select count(*)::int from t_h where food_id = (select id from public.foods where name = 'h_custom')), 0,
+  '직접 적은 메뉴는 결과에 없다 (다른 판 사람에게 이름이 새지 않게)');
 
 select * from finish();
 rollback;
