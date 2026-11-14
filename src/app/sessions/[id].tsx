@@ -165,21 +165,24 @@ function Participants({ session }: { session: SessionView }) {
         {participants.map((p) => {
           const on = showVoted && p.voted;
           return (
+            // 이름까지 보인다. 누가 들어와 있는지 알기 어렵다는 말이 있었다 (#44 인터뷰 2 다시, 11/13)
             <View
               key={p.userId}
               accessibilityLabel={`${p.displayName}${on ? ' 투표함' : ''}`}
-              className={`h-9 w-9 items-center justify-center rounded-full ${
-                on ? 'bg-text' : 'bg-surface-strong'
-              }`}>
-              <Text className={`text-sm font-bold ${on ? 'text-on-primary' : 'text-text'}`}>
-                {Array.from(p.displayName)[0] ?? ''}
+              className={`h-9 max-w-36 flex-row items-center rounded-full px-3 ${on ? 'bg-text' : 'bg-surface-strong'}`}>
+              <Text
+                numberOfLines={1}
+                className={`text-sm font-bold ${on ? 'text-on-primary' : 'text-text'}`}>
+                {p.displayName}
               </Text>
             </View>
           );
         })}
         {expected === null || !canEdit ? (
           <Text className="text-sm text-muted">
-            {expected === null ? `${participants.length}명 참여` : `${expected}명이서 먹어요`}
+            {expected === null
+              ? `${participants.length}명 참여`
+              : `${expected}명 중 ${Math.min(participants.length, expected)}명 들어왔어요`}
           </Text>
         ) : null}
       </View>

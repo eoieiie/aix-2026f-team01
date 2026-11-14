@@ -1,3 +1,4 @@
+import { AXES } from '@/constants/quiz';
 import { DIET_TAGS, INGREDIENT_TAGS } from '@/constants/restrictions';
 
 // 4-16 모임 프로필 카드에 보일 줄을 숫자에서 만든다. 화면 부품(src/components/group-profile-card.tsx)은 이것을 그리기만 한다.
@@ -19,26 +20,23 @@ const DIET_AS_INGREDIENTS: Record<string, string> = {
   vegan: '고기, 해산물, 유제품 (비건)',
 };
 
-// 서버에 태그가 먼저 생기고 앱 상수가 늦게 들어와도 코드가 그대로 보이지 않게 (#39의 달걀)
-const EXTRA_LABELS: Record<string, string> = { egg: '달걀' };
-
 export function tagLabel(code: string): string {
   return (
     DIET_AS_INGREDIENTS[code] ??
     INGREDIENT_TAGS.find((t) => t.code === code)?.label ??
     DIET_TAGS.find((t) => t.code === code)?.label ??
-    EXTRA_LABELS[code] ??
     code
   );
 }
 
-// 네 축. 앞 글자 쪽이 +1 (명세 4-14, 5절 "축 점수"). #40의 src/constants/quiz.ts가 들어오면 거기 이름으로 바꾼다
-export const GROUP_CARD_AXES = [
-  { key: 'explore', left: '탐험', right: '반복' },
-  { key: 'spicy', left: '매운맛', right: '순한맛' },
-  { key: 'korean', left: '한식', right: '외국음식' },
-  { key: 'lead', left: '주도', right: '수용' },
-] as const;
+// 네 축 이름은 온보딩과 같은 quiz.ts에서 가져온다. 앞 글자 쪽이 +1 (명세 4-14, 5절 "축 점수")
+const AXIS_NAMES: Record<string, { left: string; right: string }> = {
+  explore: { left: '탐험', right: '반복' },
+  spicy: { left: '매운맛', right: '순한맛' },
+  korean: { left: '한식', right: '외국음식' },
+  lead: { left: '주도', right: '수용' },
+};
+export const GROUP_CARD_AXES = AXES.map((a) => ({ key: a.key, ...AXIS_NAMES[a.key] }));
 
 export const GROUP_CARD_MIN_PEOPLE = 3;
 

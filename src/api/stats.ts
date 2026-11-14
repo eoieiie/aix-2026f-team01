@@ -9,6 +9,8 @@ export interface MyProfile {
   handle: string | null;
   // 축 점수. 네 글자를 만든 적이 없으면 null (4-14)
   axes: Record<string, number> | null;
+  // 축 점수가 0일 때 네 글자를 정하려고 받는다 (2026-11-15)
+  quizAnswers: ('A' | 'B')[] | null;
 }
 
 export interface FoodCount {
@@ -36,7 +38,7 @@ export async function getMyStats(client: Client = getSupabase()): Promise<MyStat
 
   const [profileRes, countsRes, companionsRes] = await Promise.all([
     userId
-      ? client.from('profiles').select('display_name, handle, axes').eq('user_id', userId).maybeSingle()
+      ? client.from('profiles').select('display_name, handle, axes, quiz_answers').eq('user_id', userId).maybeSingle()
       : Promise.resolve({ data: null, error: null }),
     client.rpc('my_food_counts'),
     client.rpc('my_companions'),
@@ -61,6 +63,7 @@ export async function getMyStats(client: Client = getSupabase()): Promise<MyStat
       displayName: p?.display_name ?? null,
       handle: p?.handle ?? null,
       axes: p?.axes && Object.keys(p.axes).length > 0 ? p.axes : null,
+      quizAnswers: Array.isArray(p?.quiz_answers) ? p.quiz_answers : null,
     },
     foods: counts.map((c) => ({ foodId: c.food_id, name: names.get(c.food_id) ?? '', mealCount: c.meal_count })),
     companions: ((companionsRes as any).data ?? []).map((c: any) => ({
@@ -89,6 +92,6 @@ export function authorityTitle(foods: FoodCount[]): string | null {
 }
 
 // 네 글자 칸에 한 글자씩. 만드는 규칙은 온보딩(#40)의 typeCode 하나만 쓴다
-export function typeLetters(axes: Record<string, number>): string[] {
-  return Array.from(typeCode(axes as any) ?? '');
+export function typeLetters(axes: Record<string, number>, answers?: ('A' | 'B')[] | null): string[] {
+  return Array.from(typeCode(axes as any, answers) ?? '');
 }

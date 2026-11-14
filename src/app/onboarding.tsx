@@ -178,6 +178,7 @@ export default function OnboardingScreen() {
     return (
       <TypeReveal
         axes={axes}
+        answers={answers}
         onNext={() => {
           save.reset();
           setStep('handle');
@@ -244,9 +245,19 @@ const REVEAL_MS = 140;
 
 // 순간 2 (docs/design.md). 검정 바탕, 2×2 칸에 한 글자씩 0.12초 간격으로 아래에서 12만큼 올라오며 나타난다.
 // 네 번째 칸이 나올 때 진동 한 번. 동작 줄이기면 움직임 없이 마지막 모습만
-function TypeReveal({ axes, onNext, onRetry }: { axes: Axes; onNext: () => void; onRetry: () => void }) {
+function TypeReveal({
+  axes,
+  answers,
+  onNext,
+  onRetry,
+}: {
+  axes: Axes;
+  answers: QuizAnswer[];
+  onNext: () => void;
+  onRetry: () => void;
+}) {
   const reduce = useReduceMotion();
-  const lines = typeLines(axes);
+  const lines = typeLines(axes, answers);
   const [anims] = useState(() => [0, 1, 2, 3].map(() => new Animated.Value(0)));
 
   useEffect(() => {
