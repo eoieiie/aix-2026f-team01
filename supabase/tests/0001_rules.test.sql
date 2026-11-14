@@ -26,10 +26,10 @@ insert into public.memberships (group_id, user_id, display_name) values
   ('10000000-0000-0000-0000-000000000001', '00000000-0000-0000-0000-000000000002', '둘'),
   ('10000000-0000-0000-0000-000000000001', '00000000-0000-0000-0000-000000000003', '셋');
 
-insert into public.restrictions (user_id, tag, food_id, kind) values
-  ('00000000-0000-0000-0000-000000000002', 'spicy', null, 'allergy'),
-  ('00000000-0000-0000-0000-000000000003', 'vegetarian', null, 'belief'),
-  ('00000000-0000-0000-0000-000000000003', null, (select id from public.foods where name = 't_target'), 'dislike');
+insert into public.restrictions (user_id, tag, food_id) values
+  ('00000000-0000-0000-0000-000000000002', 'spicy', null),
+  ('00000000-0000-0000-0000-000000000003', 'vegetarian', null),
+  ('00000000-0000-0000-0000-000000000003', null, (select id from public.foods where name = 't_target'));
 
 insert into public.sessions (id, group_id, host_user_id) values
   ('20000000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-000000000001', '00000000-0000-0000-0000-000000000001');

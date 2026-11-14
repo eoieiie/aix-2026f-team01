@@ -57,8 +57,8 @@ select throws_ok(
      values ('10000000-0000-0000-0000-000000000001', '00000000-0000-0000-0000-000000000002', '다른이름') $$,
   '42501', null, '모임 소속을 직접 만들 수 없다');
 select throws_ok(
-  $$ insert into public.restrictions (user_id, tag, kind)
-     values ('00000000-0000-0000-0000-000000000002', 'spicy', 'allergy') $$,
+  $$ insert into public.restrictions (user_id, tag)
+     values ('00000000-0000-0000-0000-000000000002', 'spicy') $$,
   '42501', null, '못 먹는 것을 직접 넣을 수 없다');
 select throws_ok(
   $$ select public.refresh_vetoes('20000000-0000-0000-0000-000000000001') $$,

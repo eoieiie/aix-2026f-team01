@@ -37,8 +37,8 @@ select is(
   0, '음식을 지정한 사람이 없으면 0');
 reset role;
 
-insert into public.restrictions (user_id, tag, food_id, kind)
-select v.u::uuid, v.t, (select id from public.foods where name = v.f), 'dislike'
+insert into public.restrictions (user_id, tag, food_id)
+select v.u::uuid, v.t, (select id from public.foods where name = v.f)
 from (values
   ('00000000-0000-0000-0000-000000000001', 'pork', null),
   ('00000000-0000-0000-0000-000000000002', 'pork', null),

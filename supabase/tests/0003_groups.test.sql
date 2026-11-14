@@ -93,13 +93,13 @@ select throws_ok($$ select public.set_my_restrictions('[{"food_id":999999999,"ki
   'P0001', 'invalid_items', '없는 음식 id');
 select throws_ok($$ select public.set_my_restrictions('[{"food_id":"abc","kind":"dislike"}]') $$,
   'P0001', 'invalid_items', '숫자가 아닌 food_id');
-select throws_ok($$ select public.set_my_restrictions('[{"tag":"pork"}]') $$,
-  'P0001', 'invalid_items', 'kind가 빠짐');
+select throws_ok($$ select public.set_my_restrictions('[{"food_id":null}]') $$,
+  'P0001', 'invalid_items', '태그도 음식도 없음');
 select throws_ok($$ select public.set_my_restrictions('[{"tag":"pork","food_id":1,"kind":"dislike"}]') $$,
   'P0001', 'invalid_items', '태그와 음식을 한 항목에 같이 줌');
 select results_eq(
-  $$ select tag, kind from public.get_my_restrictions() $$,
-  $$ values ('seafood'::text, 'allergy'::text) $$,
+  $$ select tag, food_id from public.get_my_restrictions() $$,
+  $$ values ('seafood'::text, null::bigint) $$,
   '저장에 실패하면 예전 값이 그대로 남는다');
 reset role;
 

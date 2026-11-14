@@ -10,7 +10,6 @@ export type { RestrictionItem } from '@/api/restrictions';
 export {
   itemKey,
   restrictionErrorMessage,
-  setItemKind,
   toggleItem,
 } from '@/api/restrictions';
 

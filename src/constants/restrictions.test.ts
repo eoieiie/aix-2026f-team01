@@ -1,20 +1,27 @@
 /// <reference types="node" />
-import { readFileSync } from 'fs';
+import { readdirSync, readFileSync } from 'fs';
 import { join } from 'path';
 
-import { DIET_TAGS, INGREDIENT_TAGS, RESTRICTION_KINDS } from '@/constants/restrictions';
+import { DIET_TAGS, INGREDIENT_TAGS } from '@/constants/restrictions';
 
-// 앱의 태그·이유 코드가 서버(supabase/migrations/0001_schema.sql)와 같은지 (spec.md 3절 4번, 4-7)
-const sql = readFileSync(join(__dirname, '../../supabase/migrations/0001_schema.sql'), 'utf8');
+// 앱의 태그 코드가 서버(supabase/migrations)와 같은지 (spec.md 3절 4번, 4-7).
+// 나중 migration이 다시 정의하면 그 값이 서버 값이다 (재료 태그는 0007에서 달걀이 더해졌다)
+const dir = join(__dirname, '../../supabase/migrations');
+const sql = readdirSync(dir)
+  .filter((file) => file.endsWith('.sql'))
+  .sort()
+  .map((file) => readFileSync(join(dir, file), 'utf8'))
+  .join('\n');
 
 function serverArray(fn: string): string[] {
-  const match = sql.match(new RegExp(`function public\\.${fn}\\(\\)[\\s\\S]*?array\\[([^\\]]*)\\]`));
-  if (!match) throw new Error(`0001_schema.sql에서 ${fn}을 찾지 못했다`);
-  return match[1].split(',').map((s) => s.trim().replace(/'/g, ''));
+  const matches = [...sql.matchAll(new RegExp(`function public\\.${fn}\\(\\)[\\s\\S]*?array\\[([^\\]]*)\\]`, 'g'))];
+  const last = matches[matches.length - 1];
+  if (!last) throw new Error(`migration에서 ${fn}을 찾지 못했다`);
+  return last[1].split(',').map((s) => s.trim().replace(/'/g, ''));
 }
 
 describe('못 먹는 것 코드', () => {
-  it('재료 태그 8개가 서버 ingredient_tags와 같다', () => {
+  it('재료 태그 9개가 서버 ingredient_tags와 같다', () => {
     expect(INGREDIENT_TAGS.map((t) => t.code)).toEqual(serverArray('ingredient_tags'));
   });
 
@@ -22,10 +29,7 @@ describe('못 먹는 것 코드', () => {
     expect(DIET_TAGS.map((t) => t.code)).toEqual(serverArray('diet_tags'));
   });
 
-  it('이유 3개가 서버 restrictions.kind 제약과 같다', () => {
-    const match = sql.match(/kind text not null check \(kind in \(([^)]*)\)\)/);
-    if (!match) throw new Error('0001_schema.sql에서 restrictions.kind 제약을 찾지 못했다');
-    const server = match[1].split(',').map((s) => s.trim().replace(/'/g, ''));
-    expect(RESTRICTION_KINDS.map((k) => k.code)).toEqual(server);
+  it('서버 restrictions 표에 이유 칸이 남아 있지 않다 (0007에서 지운다)', () => {
+    expect(sql).toMatch(/alter table public\.restrictions drop column if exists kind/);
   });
 });

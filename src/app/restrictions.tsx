@@ -7,14 +7,13 @@ import { Button } from '@/components/button';
 import { Card } from '@/components/card';
 import { FoodDot } from '@/components/food-dot';
 import { FoodSearch } from '@/components/food-search';
-import { IconButton } from '@/components/icon';
+import { Icon, IconButton } from '@/components/icon';
 import colors from '@/constants/colors.json';
-import { DIET_TAGS, INGREDIENT_TAGS, RESTRICTION_KINDS } from '@/constants/restrictions';
+import { DIET_TAGS, INGREDIENT_TAGS } from '@/constants/restrictions';
 import {
   itemKey,
   restrictionErrorMessage,
   type RestrictionItem,
-  setItemKind,
   toggleItem,
   useMyRestrictions,
   useSaveRestrictions,
@@ -82,11 +81,10 @@ export default function RestrictionsScreen() {
       </View>
 
       <ScrollView contentContainerClassName="gap-8 px-5 pb-48 pt-2">
+        {/* 설명은 처음 온 사람이 꼭 알아야 하는 한 줄만 (docs/design.md 4절 1번) */}
         <View className="gap-1">
           <Text className="text-3xl font-extrabold tracking-tight text-text">못 먹는 것</Text>
-          <Text className="text-sm text-muted">
-            한 번 적으면 내가 속한 모든 모임에 적용돼요. 누가 적었는지는 아무에게도 보이지 않아요
-          </Text>
+          <Text className="text-sm text-muted">모든 모임에 적용되고, 누가 적었는지는 안 보여요</Text>
         </View>
 
         <TagSection
@@ -126,34 +124,16 @@ export default function RestrictionsScreen() {
                   <View className="flex-row items-center gap-3">
                     {item.foodId !== null ? <FoodDot foodId={item.foodId} size="sm" /> : null}
                     <Text className="flex-1 text-base font-bold text-text">{name}</Text>
+                    {/* 빼기는 글 대신 아이콘. 읽어 주는 이름은 그대로 (docs/design.md 4절 3번) */}
                     <Pressable
                       accessibilityRole="button"
                       accessibilityLabel={`${name} 빼기`}
                       onPress={() =>
                         update(toggleItem(draft, item.tag !== null ? { tag: item.tag } : { foodId: item.foodId }))
                       }
-                      className="rounded-full bg-background px-3 py-1.5 active:opacity-70">
-                      <Text className="text-sm font-semibold text-text">빼기</Text>
+                      className="h-11 w-11 items-center justify-center rounded-full bg-background active:opacity-70">
+                      <Icon name="close" size={18} />
                     </Pressable>
-                  </View>
-                  {/* 이유. 판정에는 쓰지 않는다 */}
-                  <View className="flex-row gap-2">
-                    {RESTRICTION_KINDS.map((kind) => {
-                      const on = item.kind === kind.code;
-                      return (
-                        <Pressable
-                          key={kind.code}
-                          accessibilityRole="button"
-                          accessibilityState={{ selected: on }}
-                          accessibilityLabel={`${name} 이유 ${kind.label}`}
-                          onPress={() => update(setItemKind(draft, key, kind.code))}
-                          className={`rounded-full px-3 py-1.5 active:opacity-70 ${on ? 'bg-text' : 'bg-background'}`}>
-                          <Text className={`text-sm font-semibold ${on ? 'text-on-primary' : 'text-muted'}`}>
-                            {kind.label}
-                          </Text>
-                        </Pressable>
-                      );
-                    })}
                   </View>
                 </Card>
               );
@@ -168,8 +148,6 @@ export default function RestrictionsScreen() {
         <Button label="저장" onPress={onSave} loading={isPending} />
         {saveError ? (
           <Text className="text-center text-sm text-danger">{restrictionErrorMessage(saveError)}</Text>
-        ) : draft.length === 0 ? (
-          <Text className="text-center text-sm text-muted">아무것도 고르지 않고 저장하면 전부 해제돼요</Text>
         ) : null}
       </View>
     </SafeAreaView>
@@ -190,21 +168,27 @@ function TagSection({
   return (
     <View className="gap-3">
       <Text className="text-base font-bold text-text">{title}</Text>
-      <View className="flex-row flex-wrap gap-2">
+      {/* 태그는 글 길이와 상관없이 같은 폭으로 한 줄에 넷. 고른 태그는 주황으로 꽉 채운다 (docs/design.md 4절 2번, 4번) */}
+      <View className="-mx-1 flex-row flex-wrap">
         {tags.map((tag) => {
           const on = chosen.has(`tag:${tag.code}`);
           return (
-            <Pressable
-              key={tag.code}
-              accessibilityRole="button"
-              accessibilityState={{ selected: on }}
-              accessibilityLabel={tag.label}
-              onPress={() => onToggle(tag.code)}
-              className={`rounded-full px-4 py-2 active:opacity-70 ${on ? 'bg-primary-soft' : 'bg-surface'}`}>
-              <Text className={`text-sm font-semibold ${on ? 'text-primary' : 'text-text'}`}>
-                {tag.label}
-              </Text>
-            </Pressable>
+            <View key={tag.code} className="w-1/4 p-1">
+              <Pressable
+                accessibilityRole="button"
+                accessibilityState={{ selected: on }}
+                accessibilityLabel={tag.label}
+                onPress={() => onToggle(tag.code)}
+                className={`h-12 items-center justify-center rounded-full active:opacity-70 ${
+                  on ? 'bg-primary' : 'bg-surface'
+                }`}>
+                <Text
+                  className={`text-sm font-bold ${on ? 'text-on-primary' : 'text-text'}`}
+                  numberOfLines={1}>
+                  {tag.label}
+                </Text>
+              </Pressable>
+            </View>
           );
         })}
       </View>
