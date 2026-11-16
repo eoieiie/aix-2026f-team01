@@ -1,10 +1,8 @@
 import type { ReactNode } from 'react';
-import { Image, Platform, StyleSheet, Text, View } from 'react-native';
+import { Platform, StyleSheet, Text, View } from 'react-native';
 import Svg, { Defs, LinearGradient, Rect, Stop } from 'react-native-svg';
 
 import colors from '@/constants/colors.json';
-
-const mascotSource = require('../../assets/images/mascot.png');
 
 // 내 프로필 상단 카드 (4-15, docs/design.md 순간 3). 주황 그라데이션 바탕에 네 글자 타일과 아이디·레벨.
 // 공유 버튼은 L(#43)이 붙인다. 이 카드에는 못 먹는 것을 절대 넣지 않는다(공유 이미지 규칙)
@@ -60,7 +58,7 @@ export function ProfileSummaryCard({
         </View>
       ) : null}
 
-      <View className="gap-1 pr-44">
+      <View className="gap-1">
         <Text className="text-2xl font-extrabold tracking-tight text-on-primary" numberOfLines={1}>
           {handle ? `@${handle}` : name}
         </Text>
@@ -70,17 +68,6 @@ export function ProfileSummaryCard({
         </Text>
       </View>
 
-      {/* 우측 하단 1/4 공간에 맞춰 더 크게 배치된 마스코트 */}
-      <View
-        pointerEvents="none"
-        className="absolute bottom-1 right-1 items-end justify-end">
-        <Image
-          source={mascotSource}
-          style={{ width: 170, height: 135 }}
-          resizeMode="contain"
-          accessibilityLabel="밥BTI 마스코트"
-        />
-      </View>
       {action}
     </View>
   );
