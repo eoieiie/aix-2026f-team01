@@ -57,7 +57,7 @@ select throws_ok($$ update public.restaurants
   '23514', null, '제휴가 아닌 식당에는 사진을 넣을 수 없다');
 select throws_ok($$ update public.restaurants
   set photo_url = 'https://search.pstatic.net/common/w4.jpg' where source_id = 'w/4' $$,
-  '23514', null, '다른 사이트의 사진 주소는 넣을 수 없다');
+  '23514', null, '버킷 경로가 아닌 사진 주소는 넣을 수 없다');
 select throws_ok($$ update public.restaurants set partner = false where source_id = 'w/3' $$,
   '23514', null, '사진이 있는 채로 제휴를 풀 수 없다');
 

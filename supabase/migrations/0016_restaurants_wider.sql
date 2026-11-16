@@ -5,7 +5,7 @@
 -- 네이버, 카카오 지도의 별점과 사진은 가져오지 않는다. 사진은 제휴 식당이 직접 준 것만 우리 버킷에 올린다.
 -- 여러 번 돌려도 같은 결과가 되게 썼다(if not exists, drop if exists, or replace, on conflict).
 
--- (5) 사진 칸. 제휴 식당만, 우리 버킷(restaurant-photos)의 공개 주소만 들어간다. 다른 사이트 사진 주소는 여기서 막힌다
+-- (5) 사진 칸. 제휴 식당만, 버킷(restaurant-photos)의 공개 경로로 된 주소만 들어간다. 그 경로가 아닌 주소는 여기서 막힌다(호스트는 보지 않는다)
 alter table public.restaurants add column if not exists photo_url text;
 alter table public.restaurants drop constraint if exists restaurants_photo_partner;
 alter table public.restaurants add constraint restaurants_photo_partner
