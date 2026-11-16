@@ -1,7 +1,12 @@
 import type { ReactNode } from 'react';
-import { Text, View } from 'react-native';
+import { Image, StyleSheet, Text, View } from 'react-native';
+import Svg, { Defs, LinearGradient, Rect, Stop } from 'react-native-svg';
 
-// 내 프로필 상단 카드 (4-15, docs/design.md 순간 3). 검정 바탕에 네 글자 칸을 작게, 아래에 아이디와 레벨.
+import colors from '@/constants/colors.json';
+
+const mascotSource = require('../../assets/images/mascot.png');
+
+// 내 프로필 상단 카드 (4-15, docs/design.md 순간 3). 주황 그라데이션 바탕에 네 글자 타일과 아이디·레벨.
 // 공유 버튼은 L(#43)이 붙인다. 이 카드에는 못 먹는 것을 절대 넣지 않는다(공유 이미지 규칙)
 export function ProfileSummaryCard({
   letters,
@@ -22,24 +27,49 @@ export function ProfileSummaryCard({
   action?: ReactNode;
 }) {
   return (
-    <View className="gap-5 rounded-3xl bg-ink p-6">
+    <View className="relative gap-5 overflow-hidden rounded-3xl p-6 shadow-sm">
+      {/* 주황 그라데이션 배경: 밝은 주황(food-7)에서 브랜드 주황(primary), 딥 오렌지(food-5)로 */}
+      <Svg style={StyleSheet.absoluteFill} width="100%" height="100%">
+        <Defs>
+          <LinearGradient id="profileCardGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <Stop offset="0%" stopColor={colors['food-7']} stopOpacity="1" />
+            <Stop offset="55%" stopColor={colors.primary} stopOpacity="1" />
+            <Stop offset="100%" stopColor={colors['food-5']} stopOpacity="1" />
+          </LinearGradient>
+        </Defs>
+        <Rect width="100%" height="100%" fill="url(#profileCardGrad)" rx={24} />
+      </Svg>
+
       {letters ? (
         <View accessibilityLabel={`내 네 글자 ${letters.join('')}`} className="w-40 flex-row flex-wrap gap-2">
           {letters.map((l, i) => (
-            <View key={i} className="h-[76px] w-[76px] items-center justify-center rounded-2xl bg-food-8">
-              <Text className="text-5xl font-extrabold text-on-ink">{l}</Text>
+            <View key={i} className="h-[76px] w-[76px] items-center justify-center rounded-2xl bg-on-primary shadow-sm">
+              <Text className="text-5xl font-extrabold text-primary">{l}</Text>
             </View>
           ))}
         </View>
       ) : null}
-      <View className="gap-1">
-        <Text className="text-2xl font-extrabold tracking-tight text-on-ink" numberOfLines={1}>
+
+      <View className="gap-1 pr-44">
+        <Text className="text-2xl font-extrabold tracking-tight text-on-primary" numberOfLines={1}>
           {handle ? `@${handle}` : name}
         </Text>
-        {title ? <Text className="text-base font-bold text-on-ink opacity-80">{title}</Text> : null}
-        <Text className="text-base text-on-ink opacity-60">
+        {title ? <Text className="text-base font-bold text-on-primary opacity-90">{title}</Text> : null}
+        <Text className="text-base text-on-primary opacity-80">
           레벨 {level}, 다음 레벨까지 {toNext}끼
         </Text>
+      </View>
+
+      {/* 우측 하단 1/4 공간에 맞춰 더 크게 배치된 마스코트 */}
+      <View
+        pointerEvents="none"
+        className="absolute bottom-1 right-1 items-end justify-end">
+        <Image
+          source={mascotSource}
+          style={{ width: 170, height: 135 }}
+          resizeMode="contain"
+          accessibilityLabel="밥BTI 마스코트"
+        />
       </View>
       {action}
     </View>
