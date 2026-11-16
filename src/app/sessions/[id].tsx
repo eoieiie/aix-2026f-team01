@@ -245,7 +245,7 @@ function CandidateStage({
             accessibilityRole="button"
             accessibilityLabel="못 먹는 것"
             onPress={onRestrictions}
-            className="rounded-full bg-surface px-4 py-2 active:opacity-70">
+            className="h-11 justify-center rounded-full bg-surface px-4 active:opacity-70">
             <Text className="text-sm font-semibold text-text">못 먹는 것</Text>
           </Pressable>
         </View>

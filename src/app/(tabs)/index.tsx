@@ -32,7 +32,7 @@ export default function HomeScreen() {
         <PersonDots names={item.members} />
         {item.has_open_session ? (
           <View className="rounded-full bg-primary px-4 py-2">
-            <Text className="text-sm font-bold text-on-primary">판 진행 중</Text>
+            <Text className="text-sm font-bold text-text">판 진행 중</Text>
           </View>
         ) : null}
       </View>
@@ -91,7 +91,7 @@ export default function HomeScreen() {
           <View className="items-center gap-4 rounded-3xl bg-surface p-6">
             <Image
               source={mascotSource}
-              style={{ width: 88, height: 68 }}
+              style={{ width: 64, height: 49 }}
               resizeMode="contain"
               accessibilityLabel="밥BTI 마스코트"
             />

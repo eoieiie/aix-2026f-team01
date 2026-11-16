@@ -144,10 +144,10 @@ export function ResultMoment({ session, from, onGroup, onCard }: ResultMomentPro
         }}>
         <SafeAreaView className="flex-1">
           <ScrollView contentContainerClassName="px-7 pb-6 pt-6">
-            <Text className="text-base font-bold text-on-primary opacity-75" numberOfLines={1}>
+            <Text className="text-xl font-bold text-on-primary" numberOfLines={1}>
               {session.groupName}
             </Text>
-            <Text className="mt-10 text-lg font-extrabold text-on-primary">룰렛이 골랐어요</Text>
+            <Text className="mt-8 text-xl font-extrabold text-on-primary">룰렛이 골랐어요</Text>
             <Text
               className={`mt-1 font-extrabold tracking-tight text-on-primary ${nameSizeClass(winner)}`}
               numberOfLines={1}
@@ -155,7 +155,7 @@ export function ResultMoment({ session, from, onGroup, onCard }: ResultMomentPro
               {winner}
             </Text>
             {counts ? (
-              <Text className="mt-2 text-base font-semibold text-on-primary opacity-90">
+              <Text className="mt-2 text-xl font-bold text-on-primary">
                 {voteLine(counts, winnerId)}
               </Text>
             ) : null}

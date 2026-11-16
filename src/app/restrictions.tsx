@@ -183,7 +183,7 @@ function TagSection({
                   on ? 'bg-primary' : 'bg-surface'
                 }`}>
                 <Text
-                  className={`text-sm font-bold ${on ? 'text-on-primary' : 'text-text'}`}
+                  className="text-sm font-bold text-text"
                   numberOfLines={1}>
                   {tag.label}
                 </Text>

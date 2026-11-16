@@ -42,10 +42,10 @@ export function ResultCard({ card }: { card: MealCard }) {
         <View className="absolute -bottom-6 -right-6 h-28 w-28 rounded-full bg-on-primary opacity-15" />
 
         <View className="flex-row items-center justify-between gap-3">
-          <Text className="flex-1 text-base font-extrabold text-on-primary" numberOfLines={1}>
+          <Text className="flex-1 text-xl font-extrabold text-on-primary" numberOfLines={1}>
             {card.groupName}
           </Text>
-          <Text className="text-base font-semibold text-on-primary opacity-85">{mealDateLabel(card.eatenAt)}</Text>
+          <Text className="text-xl font-bold text-on-primary">{mealDateLabel(card.eatenAt)}</Text>
         </View>
 
         <View className="gap-2">
@@ -55,10 +55,10 @@ export function ResultCard({ card }: { card: MealCard }) {
             adjustsFontSizeToFit>
             {card.foodName}
           </Text>
-          <Text className="text-base font-bold text-on-primary">
+          <Text className="text-xl font-bold text-on-primary">
             우리 모임 {card.groupFoodNth}번째 {card.foodName}
           </Text>
-          {month ? <Text className="text-sm font-semibold text-on-primary opacity-85">{month}</Text> : null}
+          {month ? <Text className="text-xl font-bold text-on-primary">{month}</Text> : null}
         </View>
 
         <View className="gap-2">
@@ -66,16 +66,16 @@ export function ResultCard({ card }: { card: MealCard }) {
             <PersonDots names={card.people.map((p) => p.displayName)} ringClass="border-primary" />
           ) : null}
           {lines.map((line) => (
-            <Text key={line} className="text-sm font-semibold text-on-primary" numberOfLines={1}>
+            <Text key={line} className="text-xl font-bold text-on-primary" numberOfLines={1}>
               {line}
             </Text>
           ))}
         </View>
 
         <View className="flex-row items-end justify-between">
-          <Text className="text-base font-extrabold text-on-primary">밥비티아이</Text>
+          <Text className="text-xl font-extrabold text-on-primary">밥비티아이</Text>
           {card.myFoodNth !== null ? (
-            <Text className="text-sm font-bold text-on-primary">
+            <Text className="text-xl font-bold text-on-primary" numberOfLines={1}>
               나의 {card.myFoodNth}번째 {card.foodName}
             </Text>
           ) : null}
