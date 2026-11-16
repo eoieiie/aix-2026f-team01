@@ -50,7 +50,7 @@ export function Button({
         // 로딩 표시는 className을 받지 못해서 토큰 값을 colors.json에서 꺼내 준다
         <ActivityIndicator color={primary ? colors['on-primary'] : colors.text} />
       ) : (
-        <Text className={`text-lg font-bold ${fg}`}>
+        <Text className={`text-xl font-bold ${fg}`}>
           {label}
         </Text>
       )}

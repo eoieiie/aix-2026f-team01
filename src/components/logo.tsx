@@ -1,27 +1,14 @@
 import { Text, View } from 'react-native';
 
-// 앱 로고. 주황 네모 안의 흰 "밥"과 검정 "BTI" (docs/design.md 4절).
-// 위쪽 줄(높이 48) 안에서 세로 가운데로 맞추고, 옆 버튼보다 작게 둬서 아래 제목이 화면에서 가장 크다. 글자로 그려 어느 크기에서도 선명하다
+// 앱 로고. 글자만 쓰고 "밥"만 주황 (2026-11-16 병주 결정 1안, docs/decisions.md). 홈 위쪽 한 곳에만 둔다.
+// 위쪽 줄(높이 48) 안에서 세로 가운데로 맞추고, 아래 제목보다 작게 둔다
 export function Logo() {
   return (
-    <View
-      accessibilityRole="header"
-      accessibilityLabel="밥BTI"
-      className="h-12 flex-row items-center gap-1.5"
-    >
-      <View className="h-8 w-8 items-center justify-center rounded-lg bg-primary">
-        <Text
-          className="text-base font-extrabold leading-none text-on-primary"
-          style={{ includeFontPadding: false }}
-        >
-          밥
-        </Text>
-      </View>
+    <View accessibilityRole="header" accessibilityLabel="밥BTI" className="h-12 flex-row items-center">
       <Text
-        className="text-xl font-extrabold leading-none tracking-tight text-text"
-        style={{ includeFontPadding: false }}
-      >
-        BTI
+        className="text-2xl font-black leading-none tracking-tight text-text"
+        style={{ includeFontPadding: false }}>
+        <Text className="text-primary">밥</Text>BTI
       </Text>
     </View>
   );

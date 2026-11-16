@@ -61,7 +61,6 @@ export default function MealScreen() {
         <Text className="text-3xl font-extrabold tracking-tight text-text">이번 끼니</Text>
         <ResultCard card={card} />
         <ShareButton text={mealShareText(card, webBase())} />
-        <Text className="text-center text-sm text-muted">못 먹는 것은 카드에 나오지 않아요</Text>
         <NearbyRestaurants sessionId={sessionId} foodName={card.foodName} />
       </ScrollView>
     </SafeAreaView>
