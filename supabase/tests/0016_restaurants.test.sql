@@ -35,8 +35,8 @@ grant all on t_r to authenticated;
 select set_config('request.jwt.claims', '{"sub":"00000000-0000-0000-0000-000000000002","role":"authenticated"}', true);
 set local role authenticated;
 insert into t_r select * from public.session_restaurants('20000000-0000-0000-0000-000000000001');
-select throws_ok($$ select * from public.session_restaurants('20000000-0000-0000-0000-000000000002') $$,
-  'P0001', 'not_done', '결과가 나오기 전에는 식당을 주지 않는다');
+select is((select count(*)::int from public.session_restaurants('20000000-0000-0000-0000-000000000002')), 0,
+  '끝나지 않은 판에 후보가 없으면 식당이 없다 (0016부터 not_done 대신 0행)');
 select throws_ok($$ select public.claim_coupon('20000000-0000-0000-0000-000000000001',
   (select id from public.restaurants where source_id = 't/3')) $$,
   'P0001', 'not_partner', '제휴가 아닌 식당은 쿠폰이 없다');
