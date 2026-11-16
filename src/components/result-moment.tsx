@@ -173,7 +173,7 @@ export function ResultMoment({ session, from, onGroup, onCard }: ResultMomentPro
             ) : null}
             {/* 결과 뒤에만 학교 앞 식당 (4-21). 투표와 룰렛에는 쓰지 않는다 */}
             <View className="mt-8">
-              <NearbyRestaurants sessionId={session.id} foodName={winner} onPrimary />
+              <NearbyRestaurants sessionId={session.id} onPrimary />
             </View>
           </ScrollView>
           {/* 같은 역할의 버튼 둘은 같은 크기로 나란히. 결과 카드가 다음 할 일이라 흰 버튼, 모임으로는 회색 */}
