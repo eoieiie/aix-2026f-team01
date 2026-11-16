@@ -4,10 +4,12 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Button } from '@/components/button';
 import { IconButton } from '@/components/icon';
+import { NearbyRestaurants } from '@/components/nearby-restaurants';
 import { ResultCard } from '@/components/result-card';
 import { ShareButton } from '@/components/share-button';
 import colors from '@/constants/colors.json';
 import { MealError, mealErrorMessage, mealShareText, useMealCard } from '@/hooks/use-meal';
+import { useMealSessionId } from '@/hooks/use-restaurants';
 
 // 공유 글에 넣는 링크는 앱 첫 화면. 카드 주소는 모임 사람만 열린다
 function webBase() {
@@ -22,6 +24,7 @@ export default function MealScreen() {
   const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
   const { card, isLoading, error, retry } = useMealCard(id ?? '');
+  const sessionId = useMealSessionId(id ?? '');
   const back = () => (router.canGoBack() ? router.back() : router.replace('/'));
 
   if (isLoading) {
@@ -59,6 +62,7 @@ export default function MealScreen() {
         <ResultCard card={card} />
         <ShareButton text={mealShareText(card, webBase())} />
         <Text className="text-center text-sm text-muted">못 먹는 것은 카드에 나오지 않아요</Text>
+        <NearbyRestaurants sessionId={sessionId} foodName={card.foodName} />
       </ScrollView>
     </SafeAreaView>
   );
