@@ -67,4 +67,5 @@ export function restaurantLine(r: Pick<NearbyRestaurant, 'match' | 'cuisine'>, f
   return r.cuisine ? CUISINE_LABELS[r.cuisine] ?? '' : '';
 }
 
-export const OSM_CREDIT = '© OpenStreetMap contributors';
+// 식당 목록 출처: 오픈스트리트맵(ODbL, 표시 필요)과 공공데이터포털 일반음식점(0017)
+export const OSM_CREDIT = '© OpenStreetMap contributors, 공공데이터포털';
