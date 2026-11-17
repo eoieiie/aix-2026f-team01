@@ -105,11 +105,11 @@ export default function InviteScreen() {
       <View className="flex-1 justify-center gap-8 px-5">
         {/* 초대받은 모임 카드: 브랜드 주황 바탕으로 환영 느낌 강화 */}
         <View className="gap-3 rounded-3xl bg-primary p-6">
-          <Text className="text-base font-bold text-on-primary opacity-80">초대받은 모임</Text>
+          <Text className="text-xl font-bold text-on-primary">초대받은 모임</Text>
           <Text className="text-5xl font-extrabold leading-tight tracking-tight text-on-primary">
             {invite.groupName}
           </Text>
-          <Text className="text-base font-semibold text-on-primary opacity-90">
+          <Text className="text-xl font-bold text-on-primary">
             가입 없이 이름만 적으면 들어가요
           </Text>
         </View>

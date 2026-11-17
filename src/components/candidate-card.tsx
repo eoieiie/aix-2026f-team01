@@ -1,12 +1,14 @@
-import { useState } from 'react';
-import { Pressable, Text, TextInput, View } from 'react-native';
+import { useEffect, useState } from 'react';
+import { AccessibilityInfo, Animated, Pressable, Text, TextInput, View } from 'react-native';
 
 import { FoodDot } from '@/components/food-dot';
 import { Icon } from '@/components/icon';
 import { PITCH_MAX } from '@/constants';
+import colors from '@/constants/colors.json';
 import type { Candidate } from '@/hooks/use-session';
 
 // 0010부터 빠지지 않고 표시만 한다. 찍을 수 있다
+// 고른(주황) 카드 안의 작은 줄은 검정 글자. 주황 위 흰 작은 글자는 4.5:1이 안 된다 (#80)
 const VETOED_TEXT = '못 먹는 사람이 있어요';
 
 type CandidateCardProps = {
@@ -20,6 +22,8 @@ type CandidateCardProps = {
   busy?: boolean;
   // 4-20 이 모임이 최근에 먹었으면 "N일 전에 먹었어요"
   eatenNote?: string | null;
+  // 방금 올린 후보. 주황 테두리가 잠깐 보였다가 사라진다
+  highlight?: boolean;
 };
 
 // 후보 한 줄. 못 먹는 사람이 있는 후보는 이름 아래 한 줄로 알린다. 누가 원인인지는 데이터에도 없다 (4-9 익명)
@@ -31,7 +35,33 @@ export function CandidateCard({
   voted = false,
   busy = false,
   eatenNote = null,
+  highlight = false,
 }: CandidateCardProps) {
+  // 테두리는 JS로 흐려지게 한다(웹과 앱이 같게). 움직임 줄이기가 켜져 있으면 흐려지지 않고 바로 사라진다
+  const [ring] = useState(() => new Animated.Value(0));
+  useEffect(() => {
+    if (!highlight) {
+      ring.setValue(0);
+      return;
+    }
+    ring.setValue(1);
+    let anim: Animated.CompositeAnimation | null = null;
+    let live = true;
+    AccessibilityInfo.isReduceMotionEnabled()
+      .catch(() => false)
+      .then((reduce) => {
+        if (!live || reduce) return;
+        anim = Animated.sequence([
+          Animated.delay(1000),
+          Animated.timing(ring, { toValue: 0, duration: 400, useNativeDriver: false }),
+        ]);
+        anim.start();
+      });
+    return () => {
+      live = false;
+      anim?.stop();
+    };
+  }, [highlight, ring]);
   const [pitch, setPitch] = useState(candidate.pitch ?? '');
   const dirty = pitch !== (candidate.pitch ?? '');
   const { vetoed } = candidate;
@@ -39,7 +69,7 @@ export function CandidateCard({
   const body = (
     <>
       <View className="flex-row items-center gap-3">
-        <FoodDot foodId={candidate.foodId} size="lg" name={candidate.foodName} />
+        <FoodDot foodId={candidate.foodId} size="md" name={candidate.foodName} />
         <View className="flex-1 gap-0.5">
           <View className="flex-row items-center gap-2">
             <Text
@@ -56,17 +86,17 @@ export function CandidateCard({
             ) : null}
           </View>
           {vetoed ? (
-            <Text className={`text-sm font-semibold ${voted ? 'text-on-primary' : 'text-danger'}`}>
+            <Text className={`text-sm font-semibold ${voted ? 'text-text' : 'text-danger'}`}>
               {VETOED_TEXT}
             </Text>
           ) : null}
           {eatenNote ? (
-            <Text className={`text-sm ${voted ? 'text-on-primary opacity-80' : 'text-muted'}`}>
+            <Text className={`text-sm ${voted ? 'text-text' : 'text-muted'}`}>
               {eatenNote}
             </Text>
           ) : null}
           {candidate.pitch && !onSavePitch ? (
-            <Text className={`text-sm ${voted ? 'text-on-primary opacity-80' : 'text-muted'}`}>
+            <Text className={`text-sm ${voted ? 'text-text' : 'text-muted'}`}>
               {candidate.pitch}
             </Text>
           ) : null}
@@ -118,7 +148,7 @@ export function CandidateCard({
     </>
   );
 
-  const box = `gap-3 rounded-3xl p-5 ${voted ? 'bg-primary' : 'bg-surface'}`;
+  const box = `gap-3 rounded-3xl p-4 ${voted ? 'bg-primary' : 'bg-surface'}`;
 
   if (onVote) {
     return (
@@ -134,5 +164,24 @@ export function CandidateCard({
     );
   }
 
-  return <View className={box}>{body}</View>;
+  return (
+    <View className={box}>
+      {body}
+      {/* Animated.View는 className을 받지 못해서 style로 쓴다. 모서리 24는 rounded-3xl과 같다 */}
+      <Animated.View
+        pointerEvents="none"
+        style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          borderRadius: 24,
+          borderWidth: 4,
+          borderColor: colors.primary,
+          opacity: ring,
+        }}
+      />
+    </View>
+  );
 }

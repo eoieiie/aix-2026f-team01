@@ -62,8 +62,8 @@ export function ProfileSummaryCard({
         <Text className="text-2xl font-extrabold tracking-tight text-on-primary" numberOfLines={1}>
           {handle ? `@${handle}` : name}
         </Text>
-        {title ? <Text className="text-base font-bold text-on-primary opacity-90">{title}</Text> : null}
-        <Text className="text-base text-on-primary opacity-80">
+        {title ? <Text className="text-xl font-bold text-on-primary">{title}</Text> : null}
+        <Text className="text-xl font-bold text-on-primary">
           레벨 {level}, 다음 레벨까지 {toNext}끼
         </Text>
       </View>
