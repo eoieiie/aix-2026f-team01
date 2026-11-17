@@ -87,10 +87,10 @@ export function FoodSearch({
             }}
             className="h-14 w-full flex-row items-center gap-2 rounded-full bg-primary pl-4 pr-5 active:opacity-80 disabled:opacity-50">
             <Icon name="plus" size={20} color="on-primary" />
-            <Text className="flex-1 text-base font-bold text-on-primary" numberOfLines={1}>
+            {/* 주황 위 흰 글자는 20 굵게 (#80 대비 규칙). "올리기" 글은 더하기 아이콘으로 대신한다 */}
+            <Text className="flex-1 text-xl font-bold text-on-primary" numberOfLines={1}>
               {typed}
             </Text>
-            <Text className="text-sm font-semibold text-on-primary opacity-80">올리기</Text>
           </Pressable>
         ) : results.length === 0 ? (
           <Text className="text-sm text-muted">찾는 음식이 없어요</Text>

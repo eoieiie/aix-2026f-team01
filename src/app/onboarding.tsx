@@ -317,7 +317,7 @@ function TypeReveal({
       ) : null}
 
       <View className="flex-1 justify-center gap-8 px-5">
-        <Text className="text-lg font-bold text-on-primary" accessibilityRole="header">
+        <Text className="text-xl font-extrabold text-on-primary" accessibilityRole="header">
           나의 밥BTI
         </Text>
         <View
@@ -363,7 +363,7 @@ function TypeReveal({
           onPress={onRetry}
           className="h-12 items-center justify-center active:opacity-70"
         >
-          <Text className="text-base font-bold text-on-primary opacity-80">다시 하기</Text>
+          <Text className="text-xl font-bold text-on-primary">다시 하기</Text>
         </Pressable>
       </View>
     </SafeAreaView>

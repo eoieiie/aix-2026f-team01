@@ -87,11 +87,11 @@ export default function ProfileScreen() {
               accessibilityLabel={`음식 도감 ${stats.foods.length}개`}
               onPress={() => setSubTab('foods')}
               className={`flex-1 items-center justify-center rounded-xl py-3 active:opacity-80 ${
-                subTab === 'foods' ? 'bg-primary/20' : ''
+                subTab === 'foods' ? 'bg-background' : ''
               }`}>
               <Text
                 className={`text-base font-bold ${
-                  subTab === 'foods' ? 'text-primary font-extrabold' : 'text-muted'
+                  subTab === 'foods' ? 'text-text font-extrabold' : 'text-muted'
                 }`}>
                 음식 도감 ({stats.foods.length})
               </Text>
@@ -101,11 +101,11 @@ export default function ProfileScreen() {
               accessibilityLabel={`밥 친구 랭킹 ${stats.companions.length}명`}
               onPress={() => setSubTab('companions')}
               className={`flex-1 items-center justify-center rounded-xl py-3 active:opacity-80 ${
-                subTab === 'companions' ? 'bg-primary/20' : ''
+                subTab === 'companions' ? 'bg-background' : ''
               }`}>
               <Text
                 className={`text-base font-bold ${
-                  subTab === 'companions' ? 'text-primary font-extrabold' : 'text-muted'
+                  subTab === 'companions' ? 'text-text font-extrabold' : 'text-muted'
                 }`}>
                 밥 친구 랭킹 ({stats.companions.length})
               </Text>
@@ -141,7 +141,7 @@ export default function ProfileScreen() {
               {stats.companions.map((c) => (
                 <View key={c.userId} className="flex-row items-center gap-3">
                   <View className="h-10 w-10 items-center justify-center rounded-full bg-primary">
-                    <Text className="text-base font-extrabold text-on-primary">
+                    <Text className="text-xl font-extrabold text-on-primary">
                       {Array.from(c.displayName)[0] ?? ''}
                     </Text>
                   </View>

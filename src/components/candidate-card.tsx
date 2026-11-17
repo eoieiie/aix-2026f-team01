@@ -7,6 +7,7 @@ import { PITCH_MAX } from '@/constants';
 import type { Candidate } from '@/hooks/use-session';
 
 // 0010부터 빠지지 않고 표시만 한다. 찍을 수 있다
+// 고른(주황) 카드 안의 작은 줄은 검정 글자. 주황 위 흰 작은 글자는 4.5:1이 안 된다 (#80)
 const VETOED_TEXT = '못 먹는 사람이 있어요';
 
 type CandidateCardProps = {
@@ -71,7 +72,7 @@ export function CandidateCard({
         <View className="flex-1 gap-0.5">
           <View className="flex-row items-center gap-2">
             <Text
-              className={`shrink text-lg font-extrabold tracking-tight ${
+              className={`shrink text-xl font-extrabold tracking-tight ${
                 voted ? 'text-on-primary' : 'text-text'
               }`}>
               {candidate.foodName}
@@ -84,17 +85,17 @@ export function CandidateCard({
             ) : null}
           </View>
           {vetoed ? (
-            <Text className={`text-sm font-semibold ${voted ? 'text-on-primary' : 'text-danger'}`}>
+            <Text className={`text-sm font-semibold ${voted ? 'text-text' : 'text-danger'}`}>
               {VETOED_TEXT}
             </Text>
           ) : null}
           {eatenNote ? (
-            <Text className={`text-sm ${voted ? 'text-on-primary opacity-80' : 'text-muted'}`}>
+            <Text className={`text-sm ${voted ? 'text-text' : 'text-muted'}`}>
               {eatenNote}
             </Text>
           ) : null}
           {candidate.pitch && !onSavePitch ? (
-            <Text className={`text-sm ${voted ? 'text-on-primary opacity-80' : 'text-muted'}`}>
+            <Text className={`text-sm ${voted ? 'text-text' : 'text-muted'}`}>
               {candidate.pitch}
             </Text>
           ) : null}
