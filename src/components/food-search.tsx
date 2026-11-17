@@ -85,12 +85,12 @@ export function FoodSearch({
               onCustom?.(typed);
               setQuery('');
             }}
-            className="h-14 w-full flex-row items-center gap-2 rounded-full bg-ink pl-4 pr-5 active:opacity-80 disabled:opacity-50">
-            <Icon name="plus" size={20} color="on-ink" />
-            <Text className="flex-1 text-base font-bold text-on-ink" numberOfLines={1}>
+            className="h-14 w-full flex-row items-center gap-2 rounded-full bg-primary pl-4 pr-5 active:opacity-80 disabled:opacity-50">
+            <Icon name="plus" size={20} color="on-primary" />
+            <Text className="flex-1 text-base font-bold text-on-primary" numberOfLines={1}>
               {typed}
             </Text>
-            <Text className="text-sm font-semibold text-on-ink opacity-60">올리기</Text>
+            <Text className="text-sm font-semibold text-on-primary opacity-80">올리기</Text>
           </Pressable>
         ) : results.length === 0 ? (
           <Text className="text-sm text-muted">찾는 음식이 없어요</Text>
