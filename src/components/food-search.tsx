@@ -68,7 +68,7 @@ export function FoodSearch({
               onPick(food);
               setQuery('');
             }}
-            className="h-14 w-[49%] flex-row items-center gap-2 rounded-full bg-surface pl-3 pr-4 active:opacity-70 disabled:opacity-50">
+            className="h-12 w-[49%] flex-row items-center gap-2 rounded-full bg-surface pl-3 pr-4 active:opacity-70 disabled:opacity-50">
             <FoodDot foodId={food.id} size="sm" />
             <Text className="flex-1 text-base font-bold text-text" numberOfLines={1}>
               {food.name}

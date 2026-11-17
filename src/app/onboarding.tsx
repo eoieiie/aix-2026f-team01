@@ -142,9 +142,13 @@ export default function OnboardingScreen() {
           </Text>
         </View>
         <View className="flex-1 justify-center gap-8 px-5 pb-16">
-          <Text className="text-3xl font-extrabold leading-tight tracking-tight text-text">
-            {q.situation}
-          </Text>
+          {/* 첫 문항에서 무엇을 하라는지 몰랐다는 말이 있었다 (#44 인터뷰 3 다시, 11/17). 모든 문항 같은 자리에 한 줄만 */}
+          <View className="gap-2">
+            <Text className="text-base font-bold text-muted">끌리는 쪽을 골라요</Text>
+            <Text className="text-3xl font-extrabold leading-tight tracking-tight text-text">
+              {q.situation}
+            </Text>
+          </View>
           {/* 두 답은 같은 크기의 칸 (4절 2번) */}
           <View className="gap-3">
             {(['A', 'B'] as const).map((a) => (

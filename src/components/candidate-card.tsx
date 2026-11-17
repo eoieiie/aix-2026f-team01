@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { Pressable, Text, TextInput, View } from 'react-native';
+import { useEffect, useState } from 'react';
+import { AccessibilityInfo, Animated, Pressable, Text, TextInput, View } from 'react-native';
 
 import { FoodDot } from '@/components/food-dot';
 import { Icon } from '@/components/icon';
@@ -20,6 +20,8 @@ type CandidateCardProps = {
   busy?: boolean;
   // 4-20 이 모임이 최근에 먹었으면 "N일 전에 먹었어요"
   eatenNote?: string | null;
+  // 방금 올린 후보. 주황 테두리가 잠깐 보였다가 사라진다
+  highlight?: boolean;
 };
 
 // 후보 한 줄. 못 먹는 사람이 있는 후보는 이름 아래 한 줄로 알린다. 누가 원인인지는 데이터에도 없다 (4-9 익명)
@@ -31,7 +33,33 @@ export function CandidateCard({
   voted = false,
   busy = false,
   eatenNote = null,
+  highlight = false,
 }: CandidateCardProps) {
+  // 테두리는 JS로 흐려지게 한다(웹과 앱이 같게). 움직임 줄이기가 켜져 있으면 흐려지지 않고 바로 사라진다
+  const [ring] = useState(() => new Animated.Value(0));
+  useEffect(() => {
+    if (!highlight) {
+      ring.setValue(0);
+      return;
+    }
+    ring.setValue(1);
+    let anim: Animated.CompositeAnimation | null = null;
+    let live = true;
+    AccessibilityInfo.isReduceMotionEnabled()
+      .catch(() => false)
+      .then((reduce) => {
+        if (!live || reduce) return;
+        anim = Animated.sequence([
+          Animated.delay(1000),
+          Animated.timing(ring, { toValue: 0, duration: 400, useNativeDriver: false }),
+        ]);
+        anim.start();
+      });
+    return () => {
+      live = false;
+      anim?.stop();
+    };
+  }, [highlight, ring]);
   const [pitch, setPitch] = useState(candidate.pitch ?? '');
   const dirty = pitch !== (candidate.pitch ?? '');
   const { vetoed } = candidate;
@@ -39,11 +67,11 @@ export function CandidateCard({
   const body = (
     <>
       <View className="flex-row items-center gap-3">
-        <FoodDot foodId={candidate.foodId} size="lg" name={candidate.foodName} />
+        <FoodDot foodId={candidate.foodId} size="md" name={candidate.foodName} />
         <View className="flex-1 gap-0.5">
           <View className="flex-row items-center gap-2">
             <Text
-              className={`shrink text-xl font-extrabold tracking-tight ${
+              className={`shrink text-lg font-extrabold tracking-tight ${
                 voted ? 'text-on-primary' : 'text-text'
               }`}>
               {candidate.foodName}
@@ -118,7 +146,7 @@ export function CandidateCard({
     </>
   );
 
-  const box = `gap-3 rounded-3xl p-5 ${voted ? 'bg-primary' : 'bg-surface'}`;
+  const box = `gap-3 rounded-3xl p-4 ${voted ? 'bg-primary' : 'bg-surface'}`;
 
   if (onVote) {
     return (
@@ -134,5 +162,14 @@ export function CandidateCard({
     );
   }
 
-  return <View className={box}>{body}</View>;
+  return (
+    <View className={box}>
+      {body}
+      <Animated.View
+        pointerEvents="none"
+        className="absolute inset-0 rounded-3xl border-4 border-primary"
+        style={{ opacity: ring }}
+      />
+    </View>
+  );
 }
