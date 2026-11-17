@@ -128,22 +128,23 @@ function Header({ session, onBack }: { session: SessionView; onBack: () => void 
           {session.groupName}
         </Text>
       </View>
-      {/* 한 판의 세 단계. 같은 크기의 칸 셋이고 지금 단계만 검정으로 채운다. 지나온 단계는 진한 회색 */}
-      <View className="flex-row gap-2">
-        {STEPS.map((step, i) => (
-          <View
-            key={step.status}
-            className={`h-10 flex-1 items-center justify-center rounded-full ${
-              i === current ? 'bg-ink' : i < current ? 'bg-surface-strong' : 'bg-surface'
-            }`}>
-            <Text
-              className={`text-sm font-bold ${
-                i === current ? 'text-on-ink' : i < current ? 'text-text' : 'text-muted'
-              }`}>
-              {step.label}
-            </Text>
-          </View>
-        ))}
+      {/* 한 판의 세 단계. 누르는 것이 아니라서 버튼 모양 대신 "2 / 3 투표" 한 줄과 막대 세 칸으로 보인다.
+          지나온 단계와 지금 단계는 검정, 남은 단계는 회색 (2026-11-16 병주 1안) */}
+      <View
+        className="gap-2"
+        accessible
+        accessibilityLabel={`${STEPS.length}단계 중 ${current + 1}단계, ${STEPS[current]?.label ?? ''}`}>
+        <Text className="text-base font-extrabold text-text">
+          {current + 1} / {STEPS.length}  {STEPS[current]?.label}
+        </Text>
+        <View className="flex-row gap-2">
+          {STEPS.map((step, i) => (
+            <View
+              key={step.status}
+              className={`h-3 flex-1 rounded-full ${i <= current ? 'bg-ink' : 'bg-surface-strong'}`}
+            />
+          ))}
+        </View>
       </View>
       <Participants session={session} />
     </View>
