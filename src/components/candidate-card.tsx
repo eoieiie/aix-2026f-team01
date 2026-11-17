@@ -105,8 +105,8 @@ export function CandidateCard({
               accessibilityLabel={`${candidate.foodName} 어필 저장`}
               disabled={busy}
               onPress={() => onSavePitch(pitch)}
-              className="h-12 items-center justify-center rounded-full bg-ink px-5 active:opacity-80 disabled:opacity-50">
-              <Text className="text-base font-bold text-on-ink">저장</Text>
+              className="h-12 items-center justify-center rounded-full bg-primary px-5 active:opacity-80 disabled:opacity-50">
+              <Text className="text-base font-bold text-on-primary">저장</Text>
             </Pressable>
           ) : null}
         </View>

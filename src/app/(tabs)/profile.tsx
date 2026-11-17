@@ -17,6 +17,7 @@ export default function ProfileScreen() {
   const router = useRouter();
   const { stats, isLoading, isError, refetch } = useMyStats();
   const [accountVisible, setAccountVisible] = useState(false);
+  const [subTab, setSubTab] = useState<'foods' | 'companions'>('foods');
 
   // 못 먹는 것이나 온보딩에서 돌아오면 다시 읽는다
   useFocusEffect(
@@ -74,58 +75,97 @@ export default function ProfileScreen() {
 
         <View className="flex-row gap-2">
           <Stat value={total} label="총 끼니" />
-          <Stat value={stats.foods.length} label="먹어본 음식" />
+          <Stat value={stats.foods.length} label="음식 도감" />
           <Stat value={stats.companions.length} label="밥 친구" />
         </View>
 
+        {/* 기록 탭: 음식 도감과 밥 친구 랭킹을 세그먼트 탭으로 전환 */}
         <View className="gap-3">
-          <Text className="text-2xl font-extrabold tracking-tight text-text">먹어본 음식</Text>
-          {stats.foods.length === 0 ? (
+          <View className="flex-row rounded-2xl bg-surface p-1.5">
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={`음식 도감 ${stats.foods.length}개`}
+              onPress={() => setSubTab('foods')}
+              className={`flex-1 items-center justify-center rounded-xl py-3 active:opacity-80 ${
+                subTab === 'foods' ? 'bg-primary/20' : ''
+              }`}>
+              <Text
+                className={`text-base font-bold ${
+                  subTab === 'foods' ? 'text-primary font-extrabold' : 'text-muted'
+                }`}>
+                음식 도감 ({stats.foods.length})
+              </Text>
+            </Pressable>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={`밥 친구 랭킹 ${stats.companions.length}명`}
+              onPress={() => setSubTab('companions')}
+              className={`flex-1 items-center justify-center rounded-xl py-3 active:opacity-80 ${
+                subTab === 'companions' ? 'bg-primary/20' : ''
+              }`}>
+              <Text
+                className={`text-base font-bold ${
+                  subTab === 'companions' ? 'text-primary font-extrabold' : 'text-muted'
+                }`}>
+                밥 친구 랭킹 ({stats.companions.length})
+              </Text>
+            </Pressable>
+          </View>
+
+          {subTab === 'foods' ? (
+            stats.foods.length === 0 ? (
+              <View className="rounded-3xl bg-surface p-6">
+                <Text className="text-lg font-extrabold text-muted">아직 같이 먹은 기록이 없어요</Text>
+              </View>
+            ) : (
+              <View className="flex-row flex-wrap justify-between gap-y-2">
+                {stats.foods.map((f) => (
+                  <View
+                    key={f.foodId}
+                    className="h-14 w-[49%] flex-row items-center gap-2 rounded-full bg-surface pl-3 pr-4">
+                    <FoodDot foodId={f.foodId} size="sm" />
+                    <Text className="flex-1 text-base font-bold text-text" numberOfLines={1}>
+                      {f.name}
+                    </Text>
+                    <Text className="text-sm font-semibold text-muted">{f.mealCount}번</Text>
+                  </View>
+                ))}
+              </View>
+            )
+          ) : stats.companions.length === 0 ? (
             <View className="rounded-3xl bg-surface p-6">
-              <Text className="text-lg font-extrabold text-muted">아직 같이 먹은 기록이 없어요</Text>
+              <Text className="text-lg font-extrabold text-muted">아직 같이 먹은 밥 친구가 없어요</Text>
             </View>
           ) : (
-            <View className="flex-row flex-wrap justify-between gap-y-2">
-              {stats.foods.map((f) => (
-                <View
-                  key={f.foodId}
-                  className="h-14 w-[49%] flex-row items-center gap-2 rounded-full bg-surface pl-3 pr-4">
-                  <FoodDot foodId={f.foodId} size="sm" />
-                  <Text className="flex-1 text-base font-bold text-text" numberOfLines={1}>
-                    {f.name}
-                  </Text>
-                  <Text className="text-sm font-semibold text-muted">{f.mealCount}번</Text>
-                </View>
-              ))}
-            </View>
-          )}
-        </View>
-
-        {stats.companions.length > 0 ? (
-          <View className="gap-3">
-            <Text className="text-2xl font-extrabold tracking-tight text-text">같이 먹은 사람</Text>
-            <View className="gap-4 rounded-3xl bg-surface p-5">
+            <View className="gap-3 rounded-3xl bg-surface p-4">
               {stats.companions.map((c) => (
                 <View key={c.userId} className="flex-row items-center gap-3">
-                  <View className="h-10 w-10 items-center justify-center rounded-full bg-food-8">
-                    <Text className="text-base font-extrabold text-on-ink">
+                  <View className="h-10 w-10 items-center justify-center rounded-full bg-primary">
+                    <Text className="text-base font-extrabold text-on-primary">
                       {Array.from(c.displayName)[0] ?? ''}
                     </Text>
                   </View>
                   <Text className="flex-1 text-lg font-extrabold text-text" numberOfLines={1}>
                     {c.displayName}
                   </Text>
-                  <Text className="text-sm text-muted">{c.mealCount}번</Text>
+                  <Text className="text-sm font-semibold text-muted">{c.mealCount}번</Text>
                 </View>
               ))}
             </View>
-          </View>
-        ) : null}
+          )}
+        </View>
 
-        <View className="gap-2">
-          <Row icon="close" label="못 먹는 것" onPress={() => router.push('/restrictions' as any)} />
-          {letters ? <Row icon="pencil" label="네 글자 다시 만들기" onPress={toOnboarding} /> : null}
-          <Row icon="person" label="아이디로 이어 쓰기" onPress={() => setAccountVisible(true)} />
+        {/* 설정 메뉴: 하나의 통합 그룹 카드로 정돈 */}
+        <View className="overflow-hidden rounded-3xl bg-surface">
+          <Row icon="close" label="못 먹는 음식 재설정" onPress={() => router.push('/restrictions' as any)} />
+          <View className="mx-5 h-[1px] bg-surface-strong" />
+          {letters ? (
+            <>
+              <Row icon="pencil" label="밥BTI 다시 만들기" onPress={toOnboarding} />
+              <View className="mx-5 h-[1px] bg-surface-strong" />
+            </>
+          ) : null}
+          <Row icon="person" label="다른 기기에서 이어 쓰기 (계정 연동)" onPress={() => setAccountVisible(true)} />
         </View>
       </ScrollView>
       <AccountSheet visible={accountVisible} onClose={() => setAccountVisible(false)} />
@@ -142,14 +182,14 @@ function Stat({ value, label }: { value: number; label: string }) {
   );
 }
 
-// 설정 줄. 같은 높이 56, 왼쪽 아이콘, 오른쪽 화살표 없이 (docs/design.md 4절)
+// 설정 줄. 그룹 카드 내부 행
 function Row({ icon, label, onPress }: { icon: IconName; label: string; onPress: () => void }) {
   return (
     <Pressable
       accessibilityRole="button"
       accessibilityLabel={label}
       onPress={onPress}
-      className="h-14 flex-row items-center gap-3 rounded-full bg-surface px-5 active:opacity-70">
+      className="h-14 flex-row items-center gap-3 px-5 active:bg-surface-strong/50">
       <Icon name={icon} size={20} />
       <Text className="text-base font-bold text-text">{label}</Text>
     </Pressable>
