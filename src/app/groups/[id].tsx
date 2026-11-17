@@ -72,6 +72,14 @@ export default function GroupScreen() {
   const handleStartOrJoinSession = async (expectedCount?: number) => {
     if (isStartingSession) return;
     if (!hasOpenSession && expectedCount === undefined) {
+      // 화면을 연 뒤 다른 사람이 판을 열었을 수 있다. 몇 명인지 묻기 전에 다시 읽어서,
+      // 이미 열린 판이 있으면 인원수를 묻지 않고 그 판으로 간다. 인원수는 판을 연 사람만 정한다 (#67 GONI1130, 11/17)
+      const fresh = await refetch();
+      const openId = fresh.data?.open_session_id;
+      if (openId) {
+        router.push(`/sessions/${openId}` as any);
+        return;
+      }
       setStartError(null);
       setAskHeadcount(true);
       return;
