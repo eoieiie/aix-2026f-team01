@@ -4,6 +4,7 @@ import { AccessibilityInfo, Animated, Pressable, Text, TextInput, View } from 'r
 import { FoodDot } from '@/components/food-dot';
 import { Icon } from '@/components/icon';
 import { PITCH_MAX } from '@/constants';
+import colors from '@/constants/colors.json';
 import type { Candidate } from '@/hooks/use-session';
 
 // 0010부터 빠지지 않고 표시만 한다. 찍을 수 있다
@@ -166,10 +167,20 @@ export function CandidateCard({
   return (
     <View className={box}>
       {body}
+      {/* Animated.View는 className을 받지 못해서 style로 쓴다. 모서리 24는 rounded-3xl과 같다 */}
       <Animated.View
         pointerEvents="none"
-        className="absolute inset-0 rounded-3xl border-4 border-primary"
-        style={{ opacity: ring }}
+        style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          borderRadius: 24,
+          borderWidth: 4,
+          borderColor: colors.primary,
+          opacity: ring,
+        }}
       />
     </View>
   );
