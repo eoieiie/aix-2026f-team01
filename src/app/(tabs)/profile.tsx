@@ -122,9 +122,9 @@ export default function ProfileScreen() {
                 {stats.foods.map((f) => (
                   <View
                     key={f.foodId}
-                    className="h-14 w-[49%] flex-row items-center gap-2 rounded-full bg-surface pl-3 pr-4">
+                    className="min-h-14 w-[49%] flex-row items-center gap-2 rounded-3xl bg-surface py-2 pl-3 pr-4">
                     <FoodDot foodId={f.foodId} size="sm" />
-                    <Text className="flex-1 text-base font-bold text-text" numberOfLines={1}>
+                    <Text className="flex-1 text-base font-bold text-text">
                       {f.name}
                     </Text>
                     <Text className="text-sm font-semibold text-muted">{f.mealCount}번</Text>

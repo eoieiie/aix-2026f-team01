@@ -37,7 +37,7 @@ export default function HomeScreen() {
         ) : null}
       </View>
       <View className="gap-2">
-        <Text className="text-2xl font-extrabold tracking-tight text-text" numberOfLines={1}>
+        <Text className="text-2xl font-extrabold tracking-tight text-text" numberOfLines={2}>
           {item.name}
         </Text>
         {item.recent_foods.length > 0 ? (

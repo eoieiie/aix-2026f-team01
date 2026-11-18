@@ -27,6 +27,8 @@ export function ResultCard({ card }: { card: MealCard }) {
     return () => anim.stop();
   }, [reduceMotion, scale]);
 
+  // 카드는 4:5를 최소 높이로 둔다. 좁은 화면에서 글이 길면 잘리지 않고 카드가 늘어난다
+  const [minH, setMinH] = useState<number | null>(null);
   const lines = togetherLines(card);
   const month = monthCuisineLine(card.monthCuisine);
   const n = Array.from(card.foodName).length;
@@ -36,13 +38,15 @@ export function ResultCard({ card }: { card: MealCard }) {
     <Animated.View style={{ transform: [{ scale }] }}>
       <View
         accessibilityLabel={`${card.groupName} ${mealDateLabel(card.eatenAt)} ${card.foodName}`}
-        className="aspect-[4/5] w-full justify-between overflow-hidden rounded-3xl bg-primary p-6">
+        onLayout={(e) => setMinH(Math.round((e.nativeEvent.layout.width * 5) / 4))}
+        style={minH ? { minHeight: minH } : undefined}
+        className="w-full justify-between gap-6 overflow-hidden rounded-3xl bg-primary p-6">
         {/* 음식 동그라미를 크게 키운 무늬. 옅은 흰 동그라미 두 개 */}
         <View className="absolute -bottom-24 -right-24 h-64 w-64 rounded-full bg-on-primary opacity-15" />
         <View className="absolute -bottom-6 -right-6 h-28 w-28 rounded-full bg-on-primary opacity-15" />
 
         <View className="flex-row items-center justify-between gap-3">
-          <Text className="flex-1 text-xl font-extrabold text-on-primary" numberOfLines={1}>
+          <Text className="flex-1 text-xl font-extrabold text-on-primary" numberOfLines={2}>
             {card.groupName}
           </Text>
           <Text className="text-xl font-bold text-on-primary">{mealDateLabel(card.eatenAt)}</Text>
@@ -51,7 +55,7 @@ export function ResultCard({ card }: { card: MealCard }) {
         <View className="gap-2">
           <Text
             className={`font-extrabold tracking-tight text-on-primary ${nameSize}`}
-            numberOfLines={1}
+            numberOfLines={2}
             adjustsFontSizeToFit>
             {card.foodName}
           </Text>
@@ -66,16 +70,17 @@ export function ResultCard({ card }: { card: MealCard }) {
             <PersonDots names={card.people.map((p) => p.displayName)} ringClass="border-primary" />
           ) : null}
           {lines.map((line) => (
-            <Text key={line} className="text-xl font-bold text-on-primary" numberOfLines={1}>
+            <Text key={line} className="text-xl font-bold text-on-primary">
               {line}
             </Text>
           ))}
         </View>
 
-        <View className="flex-row items-end justify-between">
+        {/* 좁은 화면에서 "밥비티아이"와 "나의 N번째 OO"가 붙거나 잘리지 않게 사이를 띄우고 오른쪽 줄은 줄바꿈한다 */}
+        <View className="flex-row items-end justify-between gap-4">
           <Text className="text-xl font-extrabold text-on-primary">밥비티아이</Text>
           {card.myFoodNth !== null ? (
-            <Text className="text-xl font-bold text-on-primary" numberOfLines={1}>
+            <Text className="flex-1 text-right text-xl font-bold text-on-primary">
               나의 {card.myFoodNth}번째 {card.foodName}
             </Text>
           ) : null}
