@@ -14,6 +14,7 @@ import {
   getGroupProfileCard,
   type GroupProfileCardData,
   startSession,
+  type SessionOptions,
 } from '@/api/groups';
 import {
   DISPLAY_NAME_MAX,
@@ -22,6 +23,7 @@ import {
 } from '@/constants';
 
 export type {
+  SessionOptions,
   CreateGroupInput,
   GroupProfileCardData,
   CreateGroupResult,
@@ -135,8 +137,11 @@ export function useStartSession(groupId: string) {
   const queryClient = useQueryClient();
 
   const mutation = useMutation({
-    mutationFn: async (expectedCount?: number): Promise<string> => {
-      return await startSession(groupId, expectedCount);
+    mutationFn: async (
+      args?: number | { expectedCount: number; options: SessionOptions }
+    ): Promise<string> => {
+      if (args === undefined || typeof args === 'number') return await startSession(groupId, args);
+      return await startSession(groupId, args.expectedCount, undefined, args.options);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['groups', 'detail', groupId] });

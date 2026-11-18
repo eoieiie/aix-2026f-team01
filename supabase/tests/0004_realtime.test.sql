@@ -6,8 +6,8 @@ select plan(2);
 select set_eq(
   $$ select tablename::text from pg_publication_tables
      where pubname = 'supabase_realtime' and schemaname = 'public' $$,
-  array['sessions', 'session_participants', 'candidates'],
-  '판 화면이 구독하는 세 표가 실시간 구독에 들어 있다'
+  array['sessions', 'session_participants', 'candidates', 'memberships'],
+  '판 화면이 구독하는 세 표와 모임 화면의 memberships(0019)가 실시간 구독에 들어 있다'
 );
 
 select is(

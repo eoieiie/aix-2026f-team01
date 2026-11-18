@@ -69,7 +69,7 @@ export function restrictionView(card: GroupCardInput): RestrictionView {
 }
 
 export function axesView(card: GroupCardInput): AxesView {
-  if (card.axes === null) return { kind: 'hidden', text: '세 명 이상 네 글자를 만들면 보여요' };
+  if (card.axes === null) return { kind: 'hidden', text: '아직 아무도 네 글자를 만들지 않았어요' };
   const axes = card.axes;
   return {
     kind: 'rows',

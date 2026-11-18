@@ -19,6 +19,8 @@ type CandidateCardProps = {
   // 투표 단계: 누르면 찍힘과 취소가 바뀐다 (4-11)
   onVote?: () => void;
   voted?: boolean;
+  // 한 메뉴에 여러 표가 켜진 판에서 내가 이 메뉴에 준 표 수. 2 이상이면 체크 대신 숫자 (0019)
+  myVoteCount?: number;
   busy?: boolean;
   // 4-20 이 모임이 최근에 먹었으면 "N일 전에 먹었어요"
   eatenNote?: string | null;
@@ -33,6 +35,7 @@ export function CandidateCard({
   onRemove,
   onVote,
   voted = false,
+  myVoteCount = 0,
   busy = false,
   eatenNote = null,
   highlight = false,
@@ -104,7 +107,11 @@ export function CandidateCard({
         {onVote ? (
           // 고른 카드는 주황으로 꽉 채우고 흰 동그라미에 체크, 안 고른 카드는 빈 흰 동그라미. 글 대신 면과 표시로 (docs/design.md 1절 "고른 상태", 4절)
           <View className="h-11 w-11 items-center justify-center rounded-full bg-background">
-            {voted ? <Icon name="check" color="primary" /> : null}
+            {myVoteCount > 1 ? (
+              <Text className="text-lg font-extrabold text-primary">{myVoteCount}</Text>
+            ) : voted ? (
+              <Icon name="check" color="primary" />
+            ) : null}
           </View>
         ) : null}
         {onRemove ? (

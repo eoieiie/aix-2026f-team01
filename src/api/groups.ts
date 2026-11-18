@@ -38,6 +38,7 @@ export interface GroupDetail {
   invite_code: string;
   is_member: boolean;
   open_session_id: string | null;
+  my_user_id: string | null; // 같이 먹을 사람 창에서 나를 늘 체크해 두려고 (4-6)
   members: Member[];
   recent_meals: RecentMeal[];
 }
@@ -206,6 +207,7 @@ export async function getGroupDetail(
       invite_code: '',
       is_member: false,
       open_session_id: null,
+      my_user_id: userId ?? null,
       members: [],
       recent_meals: [],
     };
@@ -232,6 +234,7 @@ export async function getGroupDetail(
       invite_code: groupData.invite_code,
       is_member: false,
       open_session_id: null,
+      my_user_id: userId ?? null,
       members: [],
       recent_meals: [],
     };
@@ -273,23 +276,31 @@ export async function getGroupDetail(
     invite_code: groupData.invite_code,
     is_member: true,
     open_session_id: openSessionId,
+    my_user_id: userId ?? null,
     members,
     recent_meals: recentMeals,
   };
 }
 
-// 판 시작 (RPC start_session). 새 판이면 먹을 인원수를 함께 보낸다. 진행 중인 판이 있으면 서버가 그 판을 돌려주고 인원수는 무시한다
+// 판 시작 (RPC start_session). 새 판이면 먹을 인원수와 방장 옵션을 함께 보낸다. 진행 중인 판이 있으면 서버가 그 판을 돌려주고 둘 다 무시한다
+export interface SessionOptions {
+  voteLimit: number; // 인당 표 수 1~3
+  allowRepeat: boolean; // 한 메뉴에 여러 표
+}
+
 export async function startSession(
   groupId: string,
   expectedCount?: number,
-  client: Client = getSupabase()
+  client: Client = getSupabase(),
+  options?: SessionOptions
 ): Promise<string> {
-  const { data, error } = await client.rpc(
-    'start_session',
-    expectedCount === undefined
-      ? { p_group_id: groupId }
-      : { p_group_id: groupId, p_expected_count: expectedCount }
-  );
+  const args: Record<string, unknown> = { p_group_id: groupId };
+  if (expectedCount !== undefined) args.p_expected_count = expectedCount;
+  if (options) {
+    args.p_vote_limit = options.voteLimit;
+    args.p_allow_repeat = options.allowRepeat;
+  }
+  const { data, error } = await client.rpc('start_session', args);
   if (error) throwServerError(error);
   if (!data) throw new Error('start_session 응답이 비어 있다');
   return data;
@@ -313,4 +324,23 @@ export async function getGroupProfileCard(
   if (error) throwServerError(error);
   if (!data) throw new Error('group_profile_card 응답이 비어 있다');
   return data as GroupProfileCardData;
+}
+
+// 모임에 누가 들어오면(초대 링크, QR) onChange를 부른다. 화면은 모임을 통째로 다시 읽는다 (0019, 4-6)
+export function subscribeGroupMembers(
+  groupId: string,
+  onChange: () => void,
+  client = getSupabase()
+): () => void {
+  const channel = client
+    .channel(`group:${groupId}`)
+    .on(
+      'postgres_changes',
+      { event: '*', schema: 'public', table: 'memberships', filter: `group_id=eq.${groupId}` },
+      onChange
+    )
+    .subscribe();
+  return () => {
+    client.removeChannel(channel);
+  };
 }

@@ -15,7 +15,6 @@ import colors from '@/constants/colors.json';
 import { cantEatNotice } from '@/constants/restrictions';
 import {
   GROUP_FAVORITES_MAX,
-  MAX_VOTES_PER_PERSON,
   QUICK_FILL_COUNT,
   RECENT_EATEN_DAYS,
   ROULETTE_RESULT_FALLBACK_MS,
@@ -398,7 +397,7 @@ function VotingStage({ session }: { session: SessionView }) {
               {votedCount}/{total}명 골랐어요
             </Text>
             <Text className="text-sm text-muted">
-              내 표 {session.myVotes.length}/{MAX_VOTES_PER_PERSON}
+              내 표 {session.myVotes.length}/{session.voteLimit}
             </Text>
           </View>
           <View className="h-3 overflow-hidden rounded-full bg-surface-strong">
@@ -429,6 +428,7 @@ function VotingStage({ session }: { session: SessionView }) {
               key={c.foodId}
               candidate={c}
               voted={session.myVotes.includes(c.foodId)}
+              myVoteCount={session.myVotes.filter((f) => f === c.foodId).length}
               busy={vote.isPending}
               onVote={() => vote.mutate(c.foodId)}
             />
