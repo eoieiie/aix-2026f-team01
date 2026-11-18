@@ -1,6 +1,14 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { useState } from 'react';
-import { ActivityIndicator, Pressable, ScrollView, Text, View } from 'react-native';
+import { useEffect, useRef, useState } from 'react';
+import {
+  AccessibilityInfo,
+  ActivityIndicator,
+  Animated,
+  Pressable,
+  ScrollView,
+  Text,
+  View,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Button } from '@/components/button';
@@ -10,19 +18,20 @@ import { HeadcountModal } from '@/components/headcount-modal';
 import { IconButton } from '@/components/icon';
 import { InviteCard } from '@/components/invite-card';
 import colors from '@/constants/colors.json';
-import { HEADCOUNT_MAX } from '@/constants';
 import {
   Member,
   RecentMeal,
+  type SessionOptions,
   useGroupDetail,
+  useGroupMembersLive,
   useStartSession,
 } from '@/hooks/use-groups';
 
-// 멤버 동그라미 색. 홈 모임 카드의 사람 동그라미와 같은 순서 (docs/design.md 1절)
+// 멤버 동그라미 색. 홈 모임 카드의 사람 동그라미와 같은 순서
 const MEMBER_COLORS = [
-  { bg: 'bg-food-8', text: 'text-on-ink' },
-  { bg: 'bg-food-2', text: 'text-on-ink' },
-  { bg: 'bg-food-4', text: 'text-text' },
+  { bg: 'bg-food-1', text: 'text-on-primary' },
+  { bg: 'bg-food-7', text: 'text-on-primary' },
+  { bg: 'bg-food-3', text: 'text-text' },
 ] as const;
 
 export default function GroupScreen() {
@@ -32,6 +41,26 @@ export default function GroupScreen() {
   const { startSession, isPending: isStartingSession } = useStartSession(id || '');
   const [askHeadcount, setAskHeadcount] = useState(false);
   const [startError, setStartError] = useState<string | null>(null);
+
+  // 누가 초대 링크, QR로 들어오면 새로고침 없이 바로 멤버 줄에 붙는다 (0019, 4-6)
+  useGroupMembersLive(id || '');
+
+  // 화면을 연 뒤 새로 들어온 사람. 동그라미에 주황 테두리가 잠깐 보인다
+  const seen = useRef<Set<string> | null>(null);
+  const [fresh, setFresh] = useState<Set<string>>(new Set());
+  const memberKey = group?.members.map((m: Member) => m.user_id).join(',') ?? '';
+  useEffect(() => {
+    if (!group) return;
+    const ids = group.members.map((m: Member) => m.user_id);
+    if (seen.current === null) {
+      seen.current = new Set(ids);
+      return;
+    }
+    const added = ids.filter((u: string) => !seen.current!.has(u));
+    ids.forEach((u: string) => seen.current!.add(u));
+    if (added.length > 0) setFresh((prev) => new Set([...prev, ...added]));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [memberKey]);
 
   // 로딩 상태
   if (isLoading) {
@@ -69,16 +98,26 @@ export default function GroupScreen() {
   const hasOpenSession = !!group.open_session_id;
 
   // 진행 중인 판이 있으면 그 판으로, 없으면 먼저 몇 명이서 먹는지 묻는다 (4-6)
-  const handleStartOrJoinSession = async (expectedCount?: number) => {
+  const handleStartOrJoinSession = async (expectedCount?: number, options?: SessionOptions) => {
     if (isStartingSession) return;
     if (!hasOpenSession && expectedCount === undefined) {
+      // 화면을 연 뒤 다른 사람이 판을 열었을 수 있다. 몇 명인지 묻기 전에 다시 읽어서,
+      // 이미 열린 판이 있으면 인원수를 묻지 않고 그 판으로 간다. 인원수는 판을 연 사람만 정한다 (#67 GONI1130, 11/17)
+      const fresh = await refetch();
+      const openId = fresh.data?.open_session_id;
+      if (openId) {
+        router.push(`/sessions/${openId}` as any);
+        return;
+      }
       setStartError(null);
       setAskHeadcount(true);
       return;
     }
     try {
       // 진행 중인 판이 있으면 그 판 id, 없으면 새로 만든 판 id를 서버가 돌려준다 (spec.md 4-6, 4-8)
-      const sessionId = await startSession(expectedCount);
+      const sessionId = await startSession(
+        expectedCount !== undefined && options ? { expectedCount, options } : expectedCount
+      );
       setAskHeadcount(false);
       router.push(`/sessions/${sessionId}` as any);
     } catch (err: unknown) {
@@ -112,11 +151,14 @@ export default function GroupScreen() {
               const color = MEMBER_COLORS[i % MEMBER_COLORS.length];
               return (
                 <View key={member.user_id} className="items-center gap-2">
-                  <View
-                    className={`h-14 w-14 items-center justify-center rounded-full ${color.bg}`}>
-                    <Text className={`text-lg font-extrabold ${color.text}`}>
-                      {Array.from(member.display_name)[0] ?? ''}
-                    </Text>
+                  <View>
+                    <View
+                      className={`h-14 w-14 items-center justify-center rounded-full ${color.bg}`}>
+                      <Text className={`text-lg font-extrabold ${color.text}`}>
+                        {Array.from(member.display_name)[0] ?? ''}
+                      </Text>
+                    </View>
+                    {fresh.has(member.user_id) ? <NewRing /> : null}
                   </View>
                   <Text className="max-w-16 text-sm font-semibold text-text" numberOfLines={1}>
                     {member.display_name}
@@ -177,13 +219,59 @@ export default function GroupScreen() {
       {askHeadcount ? (
         <HeadcountModal
           visible
-          initial={Math.min(HEADCOUNT_MAX, Math.max(2, group.members.length))}
+          members={group.members}
+          myUserId={group.my_user_id}
           loading={isStartingSession}
           error={startError}
           onClose={() => setAskHeadcount(false)}
-          onStart={(count) => handleStartOrJoinSession(count)}
+          onStart={(count, options) => handleStartOrJoinSession(count, options)}
         />
       ) : null}
     </SafeAreaView>
+  );
+}
+
+// 새로 들어온 사람 동그라미의 주황 테두리. 1초 보였다가 0.4초에 걸쳐 사라진다.
+// 움직임은 JS로(웹과 앱이 같게). 움직임 줄이기가 켜져 있으면 흐려지지 않고 1.6초 뒤 바로 사라진다
+function NewRing() {
+  const [opacity] = useState(() => new Animated.Value(1));
+  const [gone, setGone] = useState(false);
+  useEffect(() => {
+    let alive = true;
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    AccessibilityInfo.isReduceMotionEnabled()
+      .catch(() => false)
+      .then((reduce) => {
+        if (!alive) return;
+        if (reduce) {
+          timer = setTimeout(() => alive && setGone(true), 1600);
+          return;
+        }
+        Animated.timing(opacity, { toValue: 0, duration: 400, delay: 1000, useNativeDriver: false }).start(
+          () => alive && setGone(true)
+        );
+      });
+    return () => {
+      alive = false;
+      if (timer) clearTimeout(timer);
+    };
+  }, [opacity]);
+  if (gone) return null;
+  return (
+    <Animated.View
+      pointerEvents="none"
+      accessibilityLabel="새로 들어옴"
+      style={{
+        position: 'absolute',
+        top: -4,
+        left: -4,
+        right: -4,
+        bottom: -4,
+        borderRadius: 999,
+        borderWidth: 3,
+        borderColor: colors.primary,
+        opacity,
+      }}
+    />
   );
 }

@@ -92,7 +92,7 @@ describe('src/api/sessions.ts', () => {
     const { client } = fakeClient({ rpc: { cast_vote: { error: { message: 'vote_limit' } } } });
     const err = await castVote('s1', 3, client).catch((e) => e);
     expect(err).toBeInstanceOf(SessionError);
-    expect(sessionErrorMessage(err)).toBe('최대 2개까지 고를 수 있어요');
+    expect(sessionErrorMessage(err)).toBe('표를 다 썼어요');
   });
 
   it('투표가 시작된 뒤 후보를 올리면 "이미 투표가 시작됐어요" (4-9)', async () => {

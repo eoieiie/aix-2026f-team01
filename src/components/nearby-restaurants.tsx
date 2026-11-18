@@ -1,6 +1,9 @@
-import { Pressable, Text, View } from 'react-native';
+import { Linking, Platform, Pressable, Text, View } from 'react-native';
+
+import { Icon } from '@/components/icon';
 
 import {
+  kakaoMapUrl,
   OSM_CREDIT,
   restaurantLine,
   useClaimCoupon,
@@ -31,17 +34,25 @@ export function NearbyRestaurants({
         const code = r.myCode;
         return (
           <View key={r.id} className="gap-2">
-            <View className="flex-row items-center gap-2">
-              <Text className="shrink text-base font-bold text-text" numberOfLines={1}>
-                {r.name}
-              </Text>
-              {r.partner ? (
-                <View accessibilityLabel="광고" className="rounded-md border border-muted px-1.5">
-                  <Text className="text-xs font-bold text-muted">광고</Text>
+            {/* 이름 줄을 누르면 카카오맵에서 그 가게가 열린다. 웹은 새 탭 */}
+            <Pressable
+              accessibilityRole="link"
+              accessibilityLabel={`${r.name} 카카오맵에서 보기`}
+              onPress={() => openMap(kakaoMapUrl(r))}
+              className="min-h-11 flex-row items-center gap-3 active:opacity-70">
+              <View className="flex-1 gap-1">
+                <View className="flex-row items-center gap-2">
+                  <Text className="shrink text-base font-bold text-text">{r.name}</Text>
+                  {r.partner ? (
+                    <View accessibilityLabel="광고" className="rounded-md border border-muted px-1.5">
+                      <Text className="text-xs font-bold text-muted">광고</Text>
+                    </View>
+                  ) : null}
                 </View>
-              ) : null}
-            </View>
-            {line ? <Text className="text-sm text-muted">{line}</Text> : null}
+                {line ? <Text className="text-sm text-muted">{line}</Text> : null}
+              </View>
+              <Icon name="pin" size={22} color="muted" />
+            </Pressable>
             {r.partner && r.couponText ? (
               <View className="flex-row items-center gap-3">
                 <Text className="flex-1 text-sm text-text">{r.couponText}</Text>
@@ -67,4 +78,12 @@ export function NearbyRestaurants({
       <Text className="text-xs text-muted">{OSM_CREDIT}</Text>
     </View>
   );
+}
+
+function openMap(url: string) {
+  if (Platform.OS === 'web' && typeof window !== 'undefined') {
+    window.open(url, '_blank', 'noopener');
+    return;
+  }
+  Linking.openURL(url).catch(() => {});
 }
