@@ -11,7 +11,6 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { subscribeGroupMembers } from '@/api/groups';
 import { Button } from '@/components/button';
 import { FoodDot } from '@/components/food-dot';
 import { GroupProfileCard } from '@/components/group-profile-card';
@@ -24,6 +23,7 @@ import {
   RecentMeal,
   type SessionOptions,
   useGroupDetail,
+  useGroupMembersLive,
   useStartSession,
 } from '@/hooks/use-groups';
 
@@ -43,13 +43,7 @@ export default function GroupScreen() {
   const [startError, setStartError] = useState<string | null>(null);
 
   // 누가 초대 링크, QR로 들어오면 새로고침 없이 바로 멤버 줄에 붙는다 (0019, 4-6)
-  useEffect(() => {
-    if (!id) return;
-    return subscribeGroupMembers(id, () => {
-      refetch();
-    });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [id]);
+  useGroupMembersLive(id || '');
 
   // 화면을 연 뒤 새로 들어온 사람. 동그라미에 주황 테두리가 잠깐 보인다
   const seen = useRef<Set<string> | null>(null);
@@ -240,7 +234,7 @@ export default function GroupScreen() {
 // 새로 들어온 사람 동그라미의 주황 테두리. 1초 보였다가 0.4초에 걸쳐 사라진다.
 // 움직임은 JS로(웹과 앱이 같게). 움직임 줄이기가 켜져 있으면 흐려지지 않고 1.6초 뒤 바로 사라진다
 function NewRing() {
-  const opacity = useRef(new Animated.Value(1)).current;
+  const [opacity] = useState(() => new Animated.Value(1));
   const [gone, setGone] = useState(false);
   useEffect(() => {
     let alive = true;

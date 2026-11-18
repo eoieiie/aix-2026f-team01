@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useEffect } from 'react';
 
 import {
   createGroup,
@@ -14,6 +15,7 @@ import {
   getGroupProfileCard,
   type GroupProfileCardData,
   startSession,
+  subscribeGroupMembers,
   type SessionOptions,
 } from '@/api/groups';
 import {
@@ -164,4 +166,15 @@ export function useGroupProfileCard(groupId: string) {
     retry: false,
   });
   return { card: query.data ?? null, isLoading: query.isPending, isError: query.isError };
+}
+
+// 모임에 누가 들어오면(초대 링크, QR) 모임 상세를 다시 읽는다 (0019, 4-6)
+export function useGroupMembersLive(groupId: string) {
+  const queryClient = useQueryClient();
+  useEffect(() => {
+    if (!groupId) return;
+    return subscribeGroupMembers(groupId, () => {
+      queryClient.invalidateQueries({ queryKey: ['groups', 'detail', groupId] });
+    });
+  }, [groupId, queryClient]);
 }
