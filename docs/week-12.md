@@ -3,7 +3,7 @@
 **테스트와 검증 / Testing and verification**
 
 - 작성일 / Date: 2026-11-18
-- 참여자 / Present: 황병주 이혁준 이학준 이재곤
+- 참여자 / Present: 황병주 이학준
 - 결과보고서 / Report chapter: 7장 검증과 실행 환경
 - 최종 반영 / Feeds into: tests/ 폴더 (우리 저장소는 `src/**/*.test.ts` jest 136개, `supabase/tests/` pgTAP 18개 파일)
 
