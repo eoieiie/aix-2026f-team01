@@ -14,6 +14,9 @@ export interface NearbyRestaurant {
   match: 'menu' | 'cuisine';
   // 이 판에서 내가 받은 쿠폰 코드
   myCode: string | null;
+  // 지도 앱으로 열 위치. 못 읽으면 null이고 이름으로 찾는다
+  lat: number | null;
+  lng: number | null;
 }
 
 export async function getSessionRestaurants(
@@ -22,7 +25,22 @@ export async function getSessionRestaurants(
 ): Promise<NearbyRestaurant[]> {
   const { data, error } = await client.rpc('session_restaurants', { p_session_id: sessionId });
   if (error) throw error;
-  return ((data as any[]) ?? []).map((r) => ({
+  const rows = (data as any[]) ?? [];
+  // 서버 함수가 좌표를 주지 않으면 식당 표에서 따로 읽는다 (식당 표는 로그인한 사람 누구나 읽는다, 0015).
+  // 못 읽어도 목록은 그대로 보인다
+  const coords = new Map<number, { lat: number; lng: number }>();
+  const missing = rows.filter((r) => r.lat == null || r.lng == null).map((r) => r.id);
+  if (missing.length > 0 && typeof (client as any).from === 'function') {
+    try {
+      const { data: pts } = await client.from('restaurants').select('id, lat, lng').in('id', missing);
+      for (const p of (pts as any[]) ?? []) {
+        if (typeof p.lat === 'number' && typeof p.lng === 'number') coords.set(p.id, { lat: p.lat, lng: p.lng });
+      }
+    } catch {
+      // 좌표 없이 이름으로 찾는다
+    }
+  }
+  return rows.map((r) => ({
     id: r.id,
     name: r.name,
     cuisine: r.cuisine ?? null,
@@ -30,7 +48,17 @@ export async function getSessionRestaurants(
     couponText: r.coupon_text ?? null,
     match: r.match === 'menu' ? 'menu' : 'cuisine',
     myCode: r.my_code ?? null,
+    lat: typeof r.lat === 'number' ? r.lat : coords.get(r.id)?.lat ?? null,
+    lng: typeof r.lng === 'number' ? r.lng : coords.get(r.id)?.lng ?? null,
   }));
+}
+
+// 식당 줄을 누르면 여는 카카오맵 주소. 키가 필요 없는 공개 링크다(앱이 깔려 있으면 휴대폰이 앱으로 넘긴다).
+// 좌표가 있으면 그 자리에 핀, 없으면 이름으로 찾기
+export function kakaoMapUrl(r: Pick<NearbyRestaurant, 'name' | 'lat' | 'lng'>): string {
+  const name = encodeURIComponent(r.name.replace(/,/g, ' '));
+  if (r.lat !== null && r.lng !== null) return `https://map.kakao.com/link/map/${name},${r.lat},${r.lng}`;
+  return `https://map.kakao.com/link/search/${encodeURIComponent('안산 ' + r.name)}`;
 }
 
 export async function claimCoupon(

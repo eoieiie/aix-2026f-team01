@@ -125,7 +125,7 @@ function Header({ session, onBack }: { session: SessionView; onBack: () => void 
     <View className="gap-4 px-5 pb-2 pt-3">
       <View className="flex-row items-center gap-3">
         <IconButton name="back" label="모임으로" onPress={onBack} />
-        <Text className="flex-1 text-lg font-extrabold text-text" numberOfLines={1}>
+        <Text className="flex-1 text-lg font-extrabold text-text" numberOfLines={2}>
           {session.groupName}
         </Text>
       </View>
