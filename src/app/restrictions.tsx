@@ -1,24 +1,15 @@
-import { useRouter } from "expo-router";
-import { useState } from "react";
-import {
-  ActivityIndicator,
-  Pressable,
-  ScrollView,
-  Text,
-  View,
-} from "react-native";
-import {
-  SafeAreaView,
-  useSafeAreaInsets,
-} from "react-native-safe-area-context";
+import { useRouter } from 'expo-router';
+import { useState } from 'react';
+import { ActivityIndicator, Pressable, ScrollView, Text, View } from 'react-native';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { Button } from "@/components/button";
-import { Card } from "@/components/card";
-import { FoodDot } from "@/components/food-dot";
-import { FoodSearch } from "@/components/food-search";
-import { Icon, IconButton } from "@/components/icon";
-import colors from "@/constants/colors.json";
-import { DIET_TAGS, INGREDIENT_TAGS } from "@/constants/restrictions";
+import { Button } from '@/components/button';
+import { Card } from '@/components/card';
+import { FoodDot } from '@/components/food-dot';
+import { FoodSearch } from '@/components/food-search';
+import { Icon, IconButton } from '@/components/icon';
+import colors from '@/constants/colors.json';
+import { DIET_TAGS, INGREDIENT_TAGS } from '@/constants/restrictions';
 import {
   itemKey,
   restrictionErrorMessage,
@@ -26,8 +17,8 @@ import {
   toggleItem,
   useMyRestrictions,
   useSaveRestrictions,
-} from "@/hooks/use-restrictions";
-import { useFoods } from "@/hooks/use-session";
+} from '@/hooks/use-restrictions';
+import { useFoods } from '@/hooks/use-session';
 
 const TAG_LABELS = new Map<string, string>(
   [...INGREDIENT_TAGS, ...DIET_TAGS].map((t) => [t.code, t.label]),
@@ -37,8 +28,7 @@ const TAG_LABELS = new Map<string, string>(
 export default function RestrictionsScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const { restrictions, isLoading, error, retrying, refetch } =
-    useMyRestrictions();
+  const { restrictions, isLoading, error, retrying, refetch } = useMyRestrictions();
   const { foods } = useFoods();
   const { save, isPending, error: saveError, reset } = useSaveRestrictions();
 
@@ -46,16 +36,12 @@ export default function RestrictionsScreen() {
   const [draft, setDraft] = useState<RestrictionItem[] | null>(null);
   if (draft === null && restrictions) setDraft(restrictions);
 
-  const close = () =>
-    router.canGoBack() ? router.back() : router.replace("/");
+  const close = () => (router.canGoBack() ? router.back() : router.replace('/'));
 
   if (isLoading) {
     return (
       <SafeAreaView className="flex-1 items-center justify-center bg-background">
-        <ActivityIndicator
-          color={colors.primary}
-          accessibilityLabel="못 먹는 것을 불러오는 중"
-        />
+        <ActivityIndicator color={colors.primary} accessibilityLabel="못 먹는 것을 불러오는 중" />
       </SafeAreaView>
     );
   }
@@ -63,16 +49,9 @@ export default function RestrictionsScreen() {
   if (error || draft === null) {
     return (
       <SafeAreaView className="flex-1 items-center justify-center gap-4 bg-background px-6">
-        <Text className="text-lg font-bold text-text">
-          {restrictionErrorMessage(error)}
-        </Text>
+        <Text className="text-lg font-bold text-text">{restrictionErrorMessage(error)}</Text>
         <View className="w-full max-w-xs">
-          <Button
-            label="다시 시도"
-            variant="secondary"
-            onPress={() => refetch()}
-            loading={retrying}
-          />
+          <Button label="다시 시도" variant="secondary" onPress={() => refetch()} loading={retrying} />
         </View>
       </SafeAreaView>
     );
@@ -96,24 +75,16 @@ export default function RestrictionsScreen() {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-background" edges={["top"]}>
+    <SafeAreaView className="flex-1 bg-background" edges={['top']}>
       <View className="flex-row px-5 pb-2 pt-3">
         <IconButton name="back" label="뒤로" onPress={close} />
       </View>
 
-      <ScrollView
-        keyboardShouldPersistTaps="handled"
-        automaticallyAdjustKeyboardInsets
-        contentContainerClassName="gap-8 px-5 pb-48 pt-2"
-      >
+      <ScrollView keyboardShouldPersistTaps="handled" automaticallyAdjustKeyboardInsets contentContainerClassName="gap-8 px-5 pb-48 pt-2">
         {/* 설명은 처음 온 사람이 꼭 알아야 하는 한 줄만 (docs/design.md 4절 1번) */}
         <View className="gap-1">
-          <Text className="text-3xl font-bold tracking-tight text-text">
-            못 먹는 것
-          </Text>
-          <Text className="text-sm text-muted">
-            모든 모임에 적용되고, 누가 적었는지는 안 보여요
-          </Text>
+          <Text className="text-3xl font-bold tracking-tight text-text">못 먹는 것</Text>
+          <Text className="text-sm text-muted">모든 모임에 적용되고, 누가 적었는지는 안 보여요</Text>
         </View>
 
         <TagSection
@@ -133,52 +104,34 @@ export default function RestrictionsScreen() {
           <Text className="text-base font-bold text-text">음식</Text>
           <FoodSearch
             foods={foods}
-            excludeIds={draft.flatMap((i) =>
-              i.foodId !== null ? [i.foodId] : [],
-            )}
+            excludeIds={draft.flatMap((i) => (i.foodId !== null ? [i.foodId] : []))}
             onPick={(food) => update(toggleItem(draft, { foodId: food.id }))}
             pickLabel="못 먹는 것에 추가"
           />
         </View>
 
         <View className="gap-3">
-          <Text className="text-base font-bold text-text">
-            고른 것 {draft.length}개
-          </Text>
+          <Text className="text-base font-bold text-text">고른 것 {draft.length}개</Text>
           {draft.length === 0 ? (
             <Text className="text-sm text-muted">아직 고른 것이 없어요</Text>
           ) : (
             draft.map((item) => {
               const key = itemKey(item);
               const name =
-                item.tag !== null
-                  ? (TAG_LABELS.get(item.tag) ?? item.tag)
-                  : (foodNames.get(item.foodId) ?? "");
+                item.tag !== null ? (TAG_LABELS.get(item.tag) ?? item.tag) : (foodNames.get(item.foodId) ?? '');
               return (
                 <Card key={key}>
                   <View className="flex-row items-center gap-3">
-                    {item.foodId !== null ? (
-                      <FoodDot foodId={item.foodId} size="sm" />
-                    ) : null}
-                    <Text className="flex-1 text-base font-bold text-text">
-                      {name}
-                    </Text>
+                    {item.foodId !== null ? <FoodDot foodId={item.foodId} size="sm" /> : null}
+                    <Text className="flex-1 text-base font-bold text-text">{name}</Text>
                     {/* 빼기는 글 대신 아이콘. 읽어 주는 이름은 그대로 (docs/design.md 4절 3번) */}
                     <Pressable
                       accessibilityRole="button"
                       accessibilityLabel={`${name} 빼기`}
                       onPress={() =>
-                        update(
-                          toggleItem(
-                            draft,
-                            item.tag !== null
-                              ? { tag: item.tag }
-                              : { foodId: item.foodId },
-                          ),
-                        )
+                        update(toggleItem(draft, item.tag !== null ? { tag: item.tag } : { foodId: item.foodId }))
                       }
-                      className="h-11 w-11 items-center justify-center rounded-full bg-background active:opacity-70"
-                    >
+                      className="h-11 w-11 items-center justify-center rounded-full bg-background active:opacity-70">
                       <Icon name="close" size={18} />
                     </Pressable>
                   </View>
@@ -191,13 +144,10 @@ export default function RestrictionsScreen() {
 
       <View
         className="absolute bottom-0 left-0 right-0 gap-2 bg-background px-5 pt-3"
-        style={{ paddingBottom: insets.bottom + 16 }}
-      >
+        style={{ paddingBottom: insets.bottom + 16 }}>
         <Button label="저장" onPress={onSave} loading={isPending} />
         {saveError ? (
-          <Text className="text-center text-sm text-danger">
-            {restrictionErrorMessage(saveError)}
-          </Text>
+          <Text className="text-center text-sm text-danger">{restrictionErrorMessage(saveError)}</Text>
         ) : null}
       </View>
     </SafeAreaView>
@@ -230,10 +180,11 @@ function TagSection({
                 accessibilityLabel={tag.label}
                 onPress={() => onToggle(tag.code)}
                 className={`h-12 items-center justify-center rounded-full active:opacity-70 ${
-                  on ? "bg-primary" : "bg-surface"
-                }`}
-              >
-                <Text className="text-sm font-bold text-text" numberOfLines={1}>
+                  on ? 'bg-primary' : 'bg-surface'
+                }`}>
+                <Text
+                  className="text-sm font-bold text-text"
+                  numberOfLines={1}>
                   {tag.label}
                 </Text>
               </Pressable>

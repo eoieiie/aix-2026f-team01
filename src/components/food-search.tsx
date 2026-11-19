@@ -1,11 +1,11 @@
-import { useState } from "react";
-import { Pressable, Text, View } from "react-native";
+import { useState } from 'react';
+import { Pressable, Text, View } from 'react-native';
 
-import { FoodDot } from "@/components/food-dot";
-import { Icon } from "@/components/icon";
-import { TextField } from "@/components/text-field";
-import { FOOD_NAME_MAX, FOOD_SEARCH_LIMIT } from "@/constants";
-import { type Food, searchFoods } from "@/hooks/use-session";
+import { FoodDot } from '@/components/food-dot';
+import { Icon } from '@/components/icon';
+import { TextField } from '@/components/text-field';
+import { FOOD_NAME_MAX, FOOD_SEARCH_LIMIT } from '@/constants';
+import { type Food, searchFoods } from '@/hooks/use-session';
 
 type FoodSearchProps = {
   foods: Food[];
@@ -25,17 +25,16 @@ export function FoodSearch({
   foods,
   excludeIds,
   onPick,
-  pickLabel = "후보로 올리기",
+  pickLabel = '후보로 올리기',
   disabled,
   error,
   onCustom,
 }: FoodSearchProps) {
-  const [query, setQuery] = useState("");
+  const [query, setQuery] = useState('');
   const results = searchFoods(foods, query, excludeIds, FOOD_SEARCH_LIMIT);
   const typed = query.trim();
   // 적은 이름과 똑같은 음식이 목록에 없을 때만 "올리기" 줄을 보인다
-  const canCustom =
-    !!onCustom && typed.length > 0 && !foods.some((f) => f.name === typed);
+  const canCustom = !!onCustom && typed.length > 0 && !foods.some((f) => f.name === typed);
 
   return (
     <View className="gap-2">
@@ -54,7 +53,7 @@ export function FoodSearch({
           if (pick) onPick(pick);
           else if (canCustom) onCustom?.(typed);
           else return;
-          setQuery("");
+          setQuery('');
         }}
       />
       {/* 고르기 칸은 글 길이와 상관없이 같은 크기로 두 칸씩 (docs/design.md 4절 "같은 역할은 같은 크기") */}
@@ -67,15 +66,11 @@ export function FoodSearch({
             disabled={disabled}
             onPress={() => {
               onPick(food);
-              setQuery("");
+              setQuery('');
             }}
-            className="h-12 w-[49%] flex-row items-center gap-2 rounded-2xl bg-surface pl-3 pr-4 active:opacity-70 disabled:opacity-50"
-          >
+            className="h-12 w-[49%] flex-row items-center gap-2 rounded-2xl bg-surface pl-3 pr-4 active:opacity-70 disabled:opacity-50">
             <FoodDot foodId={food.id} size="sm" />
-            <Text
-              className="flex-1 text-base font-bold text-text"
-              numberOfLines={1}
-            >
+            <Text className="flex-1 text-base font-bold text-text" numberOfLines={1}>
               {food.name}
             </Text>
           </Pressable>
@@ -88,16 +83,12 @@ export function FoodSearch({
             disabled={disabled}
             onPress={() => {
               onCustom?.(typed);
-              setQuery("");
+              setQuery('');
             }}
-            className="h-14 w-full flex-row items-center gap-2 rounded-2xl bg-primary pl-4 pr-5 active:opacity-80 disabled:opacity-50"
-          >
+            className="h-14 w-full flex-row items-center gap-2 rounded-2xl bg-primary pl-4 pr-5 active:opacity-80 disabled:opacity-50">
             <Icon name="plus" size={20} color="on-primary" />
             {/* 주황 위 흰 글자는 20 굵게 (#80 대비 규칙). "올리기" 글은 더하기 아이콘으로 대신한다 */}
-            <Text
-              className="flex-1 text-xl font-bold text-on-primary"
-              numberOfLines={1}
-            >
+            <Text className="flex-1 text-xl font-bold text-on-primary" numberOfLines={1}>
               {typed}
             </Text>
           </Pressable>

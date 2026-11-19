@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState } from 'react';
 import {
   Animated,
   Easing,
@@ -7,44 +7,33 @@ import {
   Text,
   useWindowDimensions,
   View,
-} from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+} from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { Button } from "@/components/button";
-import { NearbyCafes } from "@/components/nearby-cafes";
-import { NearbyRestaurants } from "@/components/nearby-restaurants";
-import { Roulette } from "@/components/roulette";
-import colors from "@/constants/colors.json";
-import {
-  RESULT_MOMENT_FLOOD_MS,
-  RESULT_MOMENT_PAUSE_MS,
-  RESULT_MOMENT_TEXT_MS,
-} from "@/constants";
-import {
-  rouletteSlices,
-  type SessionView,
-  useVoteCounts,
-} from "@/hooks/use-session";
-import { useSessionMealId } from "@/hooks/use-meal";
-import { useReduceMotion } from "@/hooks/use-reduce-motion";
+import { Button } from '@/components/button';
+import { NearbyCafes } from '@/components/nearby-cafes';
+import { NearbyRestaurants } from '@/components/nearby-restaurants';
+import { Roulette } from '@/components/roulette';
+import colors from '@/constants/colors.json';
+import { RESULT_MOMENT_FLOOD_MS, RESULT_MOMENT_PAUSE_MS, RESULT_MOMENT_TEXT_MS } from '@/constants';
+import { rouletteSlices, type SessionView, useVoteCounts } from '@/hooks/use-session';
+import { useSessionMealId } from '@/hooks/use-meal';
+import { useReduceMotion } from '@/hooks/use-reduce-motion';
 
 export type Point = { x: number; y: number };
 
 // 음식 이름이 길면 한 단계씩 작게. 화면 폭(약 320) 안에 한 줄로 들어가게 한다
 function nameSizeClass(name: string) {
   const n = Array.from(name).length;
-  if (n <= 3) return "text-7xl";
-  if (n <= 5) return "text-6xl";
-  return "text-5xl";
+  if (n <= 3) return 'text-7xl';
+  if (n <= 5) return 'text-6xl';
+  return 'text-5xl';
 }
 
 // 4표 중 1표로 뽑혔는지. 아무도 안 찍었으면 모든 후보가 같은 크기로 돌았다 (4-12)
-export function voteLine(
-  counts: { foodId: number; voteCount: number }[],
-  winnerId: number,
-) {
+export function voteLine(counts: { foodId: number; voteCount: number }[], winnerId: number) {
   const total = counts.reduce((sum, c) => sum + c.voteCount, 0);
-  if (total === 0) return "아무도 안 찍어서 모두 같은 크기로 돌렸어요";
+  if (total === 0) return '아무도 안 찍어서 모두 같은 크기로 돌렸어요';
   const mine = counts.find((c) => c.foodId === winnerId)?.voteCount ?? 0;
   return `${total}표 중 ${mine}표로 뽑혔어요`;
 }
@@ -59,19 +48,11 @@ type ResultMomentProps = {
 };
 
 // 룰렛이 멈춘 순간 (docs/design.md 순간 1). 화면 전체가 주황이 되고 음식 이름이 크게 나온다
-export function ResultMoment({
-  session,
-  from,
-  onGroup,
-  onCard,
-}: ResultMomentProps) {
-  const mealId = useSessionMealId(session.id, session.status === "done");
+export function ResultMoment({ session, from, onGroup, onCard }: ResultMomentProps) {
+  const mealId = useSessionMealId(session.id, session.status === 'done');
   // 덮는 원의 크기는 창이 아니라 이 화면 크기로 잰다. 노트북에서는 화면이 가운데 폭 480 안에 있다
   const windowSize = useWindowDimensions();
-  const [box, setBox] = useState({
-    width: windowSize.width,
-    height: windowSize.height,
-  });
+  const [box, setBox] = useState({ width: windowSize.width, height: windowSize.height });
   const { width, height } = box;
   const reduceMotion = useReduceMotion();
   const { counts } = useVoteCounts(session.id, true);
@@ -81,7 +62,7 @@ export function ResultMoment({
 
   useEffect(() => {
     if (!animateIn) return;
-    const native = Platform.OS !== "web";
+    const native = Platform.OS !== 'web';
     const anim = Animated.sequence([
       Animated.delay(RESULT_MOMENT_PAUSE_MS),
       Animated.timing(flood, {
@@ -115,17 +96,17 @@ export function ResultMoment({
       Math.hypot(origin.x, origin.y),
       Math.hypot(width - origin.x, origin.y),
       Math.hypot(origin.x, height - origin.y),
-      Math.hypot(width - origin.x, height - origin.y),
-    ),
+      Math.hypot(width - origin.x, height - origin.y)
+    )
   );
 
   const names = new Map(session.candidates.map((c) => [c.foodId, c.foodName]));
   const winnerId = session.decidedFoodId ?? -1;
-  const winner = names.get(winnerId) ?? "";
+  const winner = names.get(winnerId) ?? '';
   const slices = counts
     ? rouletteSlices(counts).map((s) => ({
         ...s,
-        name: names.get(s.foodId) ?? "",
+        name: names.get(s.foodId) ?? '',
       }))
     : [];
   const anyVotes = (counts ?? []).some((c) => c.voteCount > 0);
@@ -134,16 +115,12 @@ export function ResultMoment({
     <View
       className="absolute inset-0 overflow-hidden"
       onLayout={(e) =>
-        setBox({
-          width: e.nativeEvent.layout.width,
-          height: e.nativeEvent.layout.height,
-        })
-      }
-    >
+        setBox({ width: e.nativeEvent.layout.width, height: e.nativeEvent.layout.height })
+      }>
       {/* Animated.View는 className을 받지 않아서 style로 준다. 색은 colors.json의 토큰 값 */}
       <Animated.View
         style={{
-          position: "absolute",
+          position: 'absolute',
           borderRadius: radius,
           backgroundColor: colors.primary,
           left: origin.x - radius,
@@ -165,28 +142,17 @@ export function ResultMoment({
               }),
             },
           ],
-        }}
-      >
+        }}>
         <SafeAreaView className="flex-1">
-          <ScrollView
-            keyboardShouldPersistTaps="handled"
-            automaticallyAdjustKeyboardInsets
-            contentContainerClassName="px-7 pb-6 pt-6"
-          >
-            <Text
-              className="text-xl font-bold text-on-primary"
-              numberOfLines={2}
-            >
+          <ScrollView keyboardShouldPersistTaps="handled" automaticallyAdjustKeyboardInsets contentContainerClassName="px-7 pb-6 pt-6">
+            <Text className="text-xl font-bold text-on-primary" numberOfLines={2}>
               {session.groupName}
             </Text>
-            <Text className="mt-8 text-xl font-bold text-on-primary">
-              룰렛이 골랐어요
-            </Text>
+            <Text className="mt-8 text-xl font-bold text-on-primary">룰렛이 골랐어요</Text>
             <Text
               className={`mt-1 font-bold tracking-tight text-on-primary ${nameSizeClass(winner)}`}
               numberOfLines={2}
-              adjustsFontSizeToFit
-            >
+              adjustsFontSizeToFit>
               {winner}
             </Text>
             {counts ? (
@@ -208,11 +174,7 @@ export function ResultMoment({
             ) : null}
             {/* 결과 뒤에만 학교 앞 식당 (4-21). 투표와 룰렛에는 쓰지 않는다 */}
             <View className="mt-8 gap-4">
-              <NearbyRestaurants
-                sessionId={session.id}
-                foodName={winner}
-                onPrimary
-              />
+              <NearbyRestaurants sessionId={session.id} foodName={winner} onPrimary />
               <NearbyCafes sessionId={session.id} onPrimary />
             </View>
           </ScrollView>

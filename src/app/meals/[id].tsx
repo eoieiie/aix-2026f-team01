@@ -1,35 +1,22 @@
-import { useLocalSearchParams, useRouter } from "expo-router";
-import {
-  ActivityIndicator,
-  Platform,
-  ScrollView,
-  Text,
-  View,
-} from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { useLocalSearchParams, useRouter } from 'expo-router';
+import { ActivityIndicator, Platform, ScrollView, Text, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { Button } from "@/components/button";
-import { IconButton } from "@/components/icon";
-import { NearbyCafes } from "@/components/nearby-cafes";
-import { NearbyRestaurants } from "@/components/nearby-restaurants";
-import { ResultCard } from "@/components/result-card";
-import { ShareButton } from "@/components/share-button";
-import colors from "@/constants/colors.json";
-import {
-  MealError,
-  mealErrorMessage,
-  mealShareText,
-  useMealCard,
-} from "@/hooks/use-meal";
-import { useMealSessionId } from "@/hooks/use-restaurants";
+import { Button } from '@/components/button';
+import { IconButton } from '@/components/icon';
+import { NearbyCafes } from '@/components/nearby-cafes';
+import { NearbyRestaurants } from '@/components/nearby-restaurants';
+import { ResultCard } from '@/components/result-card';
+import { ShareButton } from '@/components/share-button';
+import colors from '@/constants/colors.json';
+import { MealError, mealErrorMessage, mealShareText, useMealCard } from '@/hooks/use-meal';
+import { useMealSessionId } from '@/hooks/use-restaurants';
 
 // 공유 글에 넣는 링크는 앱 첫 화면. 카드 주소는 모임 사람만 열린다
 function webBase() {
   return (
     process.env.EXPO_PUBLIC_WEB_BASE ||
-    (Platform.OS === "web" && typeof window !== "undefined"
-      ? window.location.origin
-      : "https://babti.expo.app")
+    (Platform.OS === 'web' && typeof window !== 'undefined' ? window.location.origin : 'https://babti.expo.app')
   );
 }
 
@@ -37,17 +24,14 @@ function webBase() {
 export default function MealScreen() {
   const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
-  const { card, isLoading, error, retry } = useMealCard(id ?? "");
-  const sessionId = useMealSessionId(id ?? "");
-  const back = () => (router.canGoBack() ? router.back() : router.replace("/"));
+  const { card, isLoading, error, retry } = useMealCard(id ?? '');
+  const sessionId = useMealSessionId(id ?? '');
+  const back = () => (router.canGoBack() ? router.back() : router.replace('/'));
 
   if (isLoading) {
     return (
       <SafeAreaView className="flex-1 items-center justify-center bg-background">
-        <ActivityIndicator
-          color={colors.primary}
-          accessibilityLabel="결과 카드를 불러오는 중"
-        />
+        <ActivityIndicator color={colors.primary} accessibilityLabel="결과 카드를 불러오는 중" />
       </SafeAreaView>
     );
   }
@@ -57,18 +41,12 @@ export default function MealScreen() {
     const known = error instanceof MealError;
     return (
       <SafeAreaView className="flex-1 items-center justify-center gap-4 bg-background px-6">
-        <Text className="text-lg font-bold text-text">
-          {mealErrorMessage(error)}
-        </Text>
+        <Text className="text-lg font-bold text-text">{mealErrorMessage(error)}</Text>
         <View className="w-full max-w-xs">
           {known ? (
-            <Button label="홈으로" onPress={() => router.replace("/")} />
+            <Button label="홈으로" onPress={() => router.replace('/')} />
           ) : (
-            <Button
-              label="다시 시도"
-              variant="secondary"
-              onPress={() => retry()}
-            />
+            <Button label="다시 시도" variant="secondary" onPress={() => retry()} />
           )}
         </View>
       </SafeAreaView>
@@ -80,14 +58,8 @@ export default function MealScreen() {
       <View className="flex-row items-center px-5 py-3">
         <IconButton name="back" label="뒤로" onPress={back} />
       </View>
-      <ScrollView
-        keyboardShouldPersistTaps="handled"
-        automaticallyAdjustKeyboardInsets
-        contentContainerClassName="gap-5 px-5 pb-10 pt-2"
-      >
-        <Text className="text-3xl font-bold tracking-tight text-text">
-          이번 끼니
-        </Text>
+      <ScrollView keyboardShouldPersistTaps="handled" automaticallyAdjustKeyboardInsets contentContainerClassName="gap-5 px-5 pb-10 pt-2">
+        <Text className="text-3xl font-bold tracking-tight text-text">이번 끼니</Text>
         <ResultCard card={card} />
         <ShareButton text={mealShareText(card, webBase())} />
         <NearbyRestaurants sessionId={sessionId} foodName={card.foodName} />

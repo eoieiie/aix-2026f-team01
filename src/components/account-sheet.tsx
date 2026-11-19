@@ -1,34 +1,28 @@
-import { useState } from "react";
-import { Modal, Pressable, Text, View } from "react-native";
+import { useState } from 'react';
+import { Modal, Pressable, Text, View } from 'react-native';
 
-import { Button } from "@/components/button";
-import { TextField } from "@/components/text-field";
-import { HANDLE_MAX } from "@/constants";
-import { accountErrorMessage, useAccount } from "@/hooks/use-account";
+import { Button } from '@/components/button';
+import { TextField } from '@/components/text-field';
+import { HANDLE_MAX } from '@/constants';
+import { accountErrorMessage, useAccount } from '@/hooks/use-account';
 
-type Mode = "claim" | "signIn";
+type Mode = 'claim' | 'signIn';
 
 // 4-19 아이디로 이어 쓰기. 홈 위쪽 사람 아이콘을 누르면 뜨는 창.
 // 모양은 모임 만들기 창과 같다(가운데 카드, 여백 24, 아래 버튼 둘)
-export function AccountSheet({
-  visible,
-  onClose,
-}: {
-  visible: boolean;
-  onClose: () => void;
-}) {
+export function AccountSheet({ visible, onClose }: { visible: boolean; onClose: () => void }) {
   const { loginId, claim, signIn, signOut } = useAccount();
-  const [mode, setMode] = useState<Mode>("claim");
-  const [id, setId] = useState("");
-  const [password, setPassword] = useState("");
+  const [mode, setMode] = useState<Mode>('claim');
+  const [id, setId] = useState('');
+  const [password, setPassword] = useState('');
 
-  const action = mode === "claim" ? claim : signIn;
+  const action = mode === 'claim' ? claim : signIn;
   const busy = claim.isPending || signIn.isPending || signOut.isPending;
   const error = action.error ?? signOut.error;
 
   const close = () => {
-    setId("");
-    setPassword("");
+    setId('');
+    setPassword('');
     claim.reset();
     signIn.reset();
     signOut.reset();
@@ -41,29 +35,16 @@ export function AccountSheet({
   };
 
   return (
-    <Modal
-      visible={visible}
-      transparent
-      animationType="fade"
-      onRequestClose={close}
-    >
+    <Modal visible={visible} transparent animationType="fade" onRequestClose={close}>
       <View className="flex-1 items-center justify-center bg-black/40 px-5">
         <View className="w-full max-w-sm gap-6 rounded-3xl bg-background p-6">
           {loginId ? (
             <>
               <View className="gap-1">
-                <Text className="text-3xl font-bold tracking-tight text-text">
-                  @{loginId}
-                </Text>
-                <Text className="text-base text-muted">
-                  다른 기기에서도 이 아이디로 들어와요
-                </Text>
+                <Text className="text-3xl font-bold tracking-tight text-text">@{loginId}</Text>
+                <Text className="text-base text-muted">다른 기기에서도 이 아이디로 들어와요</Text>
               </View>
-              {error ? (
-                <Text className="text-sm font-semibold text-danger">
-                  {accountErrorMessage(error)}
-                </Text>
-              ) : null}
+              {error ? <Text className="text-sm font-semibold text-danger">{accountErrorMessage(error)}</Text> : null}
               <View className="flex-row gap-2">
                 <View className="flex-1">
                   <Button label="닫기" variant="secondary" onPress={close} />
@@ -72,9 +53,7 @@ export function AccountSheet({
                   <Button
                     label="로그아웃"
                     variant="secondary"
-                    onPress={() =>
-                      signOut.mutate(undefined, { onSuccess: close })
-                    }
+                    onPress={() => signOut.mutate(undefined, { onSuccess: close })}
                     loading={signOut.isPending}
                   />
                 </View>
@@ -86,8 +65,8 @@ export function AccountSheet({
               <View className="flex-row gap-2">
                 {(
                   [
-                    ["claim", "아이디 만들기"],
-                    ["signIn", "로그인"],
+                    ['claim', '아이디 만들기'],
+                    ['signIn', '로그인'],
                   ] as const
                 ).map(([value, label]) => {
                   const on = mode === value;
@@ -101,13 +80,8 @@ export function AccountSheet({
                         claim.reset();
                         signIn.reset();
                       }}
-                      className={`h-11 flex-1 items-center justify-center rounded-xl ${on ? "bg-primary" : "bg-surface"}`}
-                    >
-                      <Text
-                        className={`text-base font-bold ${on ? "text-on-primary" : "text-muted"}`}
-                      >
-                        {label}
-                      </Text>
+                      className={`h-11 flex-1 items-center justify-center rounded-xl ${on ? 'bg-primary' : 'bg-surface'}`}>
+                      <Text className={`text-base font-bold ${on ? 'text-on-primary' : 'text-muted'}`}>{label}</Text>
                     </Pressable>
                   );
                 })}
@@ -136,30 +110,23 @@ export function AccountSheet({
                   onSubmitEditing={submit}
                 />
                 {error ? (
-                  <Text className="text-sm font-semibold text-danger">
-                    {accountErrorMessage(error)}
-                  </Text>
+                  <Text className="text-sm font-semibold text-danger">{accountErrorMessage(error)}</Text>
                 ) : (
                   <Text className="text-sm text-muted">
-                    {mode === "claim"
-                      ? "지금 기록이 이 아이디에 남아요"
-                      : "이 기기에서 쓰던 기록은 옮겨지지 않아요"}
+                    {mode === 'claim'
+                      ? '지금 기록이 이 아이디에 남아요'
+                      : '이 기기에서 쓰던 기록은 옮겨지지 않아요'}
                   </Text>
                 )}
               </View>
 
               <View className="flex-row gap-2">
                 <View className="flex-1">
-                  <Button
-                    label="취소"
-                    variant="secondary"
-                    onPress={close}
-                    disabled={busy}
-                  />
+                  <Button label="취소" variant="secondary" onPress={close} disabled={busy} />
                 </View>
                 <View className="flex-1">
                   <Button
-                    label={mode === "claim" ? "만들기" : "들어가기"}
+                    label={mode === 'claim' ? '만들기' : '들어가기'}
                     onPress={submit}
                     disabled={id.trim().length === 0 || password.length === 0}
                     loading={action.isPending}

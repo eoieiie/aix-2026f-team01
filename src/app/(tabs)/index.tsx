@@ -1,18 +1,18 @@
-import { useRouter } from "expo-router";
-import { useState } from "react";
-import { FlatList, Image, Pressable, Text, View } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { useRouter } from 'expo-router';
+import { useState } from 'react';
+import { FlatList, Image, Pressable, Text, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { Button } from "@/components/button";
-import { CreateGroupModal } from "@/components/create-group-modal";
-import { FoodDot } from "@/components/food-dot";
-import { IconButton } from "@/components/icon";
-import { Logo } from "@/components/logo";
-import { PersonDots } from "@/components/person-dots";
-import { Group, useMyGroups, useMyGroupsLive } from "@/hooks/use-groups";
-import { TAB_BAR_SPACE } from "@/constants";
+import { Button } from '@/components/button';
+import { CreateGroupModal } from '@/components/create-group-modal';
+import { FoodDot } from '@/components/food-dot';
+import { IconButton } from '@/components/icon';
+import { Logo } from '@/components/logo';
+import { PersonDots } from '@/components/person-dots';
+import { Group, useMyGroups, useMyGroupsLive } from '@/hooks/use-groups';
+import { TAB_BAR_SPACE } from '@/constants';
 
-const mascotSource = require("../../../assets/images/mascot.png");
+const mascotSource = require('../../../assets/images/mascot.png');
 
 export default function HomeScreen() {
   const router = useRouter();
@@ -39,30 +39,20 @@ export default function HomeScreen() {
         ) : null}
       </View>
       <View className="gap-2">
-        <Text
-          className="text-2xl font-bold tracking-tight text-text"
-          numberOfLines={2}
-        >
+        <Text className="text-2xl font-bold tracking-tight text-text" numberOfLines={2}>
           {item.name}
         </Text>
         {item.recent_foods.length > 0 ? (
           <View className="flex-row flex-wrap items-center gap-x-4 gap-y-1">
             {item.recent_foods.map((food, i) => (
-              <View
-                key={`${i}-${food.food_id}`}
-                className="flex-row items-center gap-2"
-              >
+              <View key={`${i}-${food.food_id}`} className="flex-row items-center gap-2">
                 <FoodDot foodId={food.food_id} size="xs" />
-                <Text className="text-sm font-semibold text-text">
-                  {food.food_name}
-                </Text>
+                <Text className="text-sm font-semibold text-text">{food.food_name}</Text>
               </View>
             ))}
           </View>
         ) : (
-          <Text className="text-sm text-muted">
-            아직 같이 먹은 기록이 없어요
-          </Text>
+          <Text className="text-sm text-muted">아직 같이 먹은 기록이 없어요</Text>
         )}
       </View>
     </Pressable>
@@ -77,11 +67,7 @@ export default function HomeScreen() {
           {/* 오른쪽은 모임 만들기, 모임이 있을 때만. 계정(4-19)은 프로필 탭으로 옮겼다 (#41).
               모임이 없을 때는 아래 카드의 "첫 모임 만들기" 하나만 둔다 (docs/design.md 4절) */}
           {hasGroups ? (
-            <IconButton
-              name="plus"
-              label="모임 만들기"
-              onPress={() => setModalVisible(true)}
-            />
+            <IconButton name="plus" label="모임 만들기" onPress={() => setModalVisible(true)} />
           ) : null}
         </View>
 
@@ -95,18 +81,12 @@ export default function HomeScreen() {
         ) : isError ? (
           // 오류 상태: 오류 문구와 다시 시도 버튼 (spec.md 4-3)
           <View className="gap-3">
-            <Text className="text-base font-bold text-text">
-              모임을 불러올 수 없어요
-            </Text>
+            <Text className="text-base font-bold text-text">모임을 불러올 수 없어요</Text>
             <Text className="text-sm text-muted">
               {/* 오류 원문(영어)은 보이지 않고 한국어 문구만 (spec.md 4절 실패할 때) */}
               인터넷 연결을 확인하고 다시 시도해 주세요
             </Text>
-            <Button
-              label="다시 시도"
-              variant="secondary"
-              onPress={() => refetch()}
-            />
+            <Button label="다시 시도" variant="secondary" onPress={() => refetch()} />
           </View>
         ) : !hasGroups ? (
           // 모임이 없을 때: 마스코트, "아직 모임이 없어요"(spec.md 4-3), 글 길이에 맞춘 가운데 버튼 (PR #52)
@@ -117,9 +97,7 @@ export default function HomeScreen() {
               resizeMode="contain"
               accessibilityLabel="밥BTI 마스코트"
             />
-            <Text className="text-xl font-bold tracking-tight text-text">
-              아직 모임이 없어요
-            </Text>
+            <Text className="text-xl font-bold tracking-tight text-text">아직 모임이 없어요</Text>
             <Button
               label="첫 모임 만들기"
               className="self-center px-8"
@@ -129,7 +107,6 @@ export default function HomeScreen() {
         ) : (
           // 최근에 들어간 순으로 보이는 모임 목록 (spec.md 4-3)
           <FlatList
-            keyboardShouldPersistTaps="handled"
             data={groups}
             keyExtractor={(item) => item.id}
             renderItem={renderGroupItem}
@@ -140,10 +117,7 @@ export default function HomeScreen() {
         )}
       </View>
 
-      <CreateGroupModal
-        visible={modalVisible}
-        onClose={() => setModalVisible(false)}
-      />
+      <CreateGroupModal visible={modalVisible} onClose={() => setModalVisible(false)} />
     </SafeAreaView>
   );
 }

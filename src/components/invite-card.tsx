@@ -1,25 +1,18 @@
-import { useEffect, useRef, useState } from "react";
-import {
-  Modal,
-  Platform,
-  Pressable,
-  Text,
-  useWindowDimensions,
-  View,
-} from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { useEffect, useRef, useState } from 'react';
+import { Modal, Platform, Pressable, Text, useWindowDimensions, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { Icon, IconButton, type IconName } from "@/components/icon";
-import { QrCode } from "@/components/qr-code";
-import { COPIED_TOAST_MS } from "@/constants";
+import { Icon, IconButton, type IconName } from '@/components/icon';
+import { QrCode } from '@/components/qr-code';
+import { COPIED_TOAST_MS } from '@/constants';
 
 // 초대 링크는 항상 웹 주소 (spec.md 4-4). 미리보기에서는 그 미리보기 주소가 된다
 export function inviteUrlFor(inviteCode: string) {
   const webBase =
     process.env.EXPO_PUBLIC_WEB_BASE ||
-    (Platform.OS === "web" && typeof window !== "undefined"
+    (Platform.OS === 'web' && typeof window !== 'undefined'
       ? window.location.origin
-      : "https://babti.expo.app");
+      : 'https://babti.expo.app');
   return `${webBase}/g/${inviteCode}`;
 }
 
@@ -45,15 +38,11 @@ export function InviteCard({ inviteCode, groupName }: InviteCardProps) {
 
   const handleCopy = async () => {
     try {
-      if (
-        Platform.OS === "web" &&
-        typeof navigator !== "undefined" &&
-        navigator.clipboard
-      ) {
+      if (Platform.OS === 'web' && typeof navigator !== 'undefined' && navigator.clipboard) {
         await navigator.clipboard.writeText(inviteUrl);
       } else {
         // 클립보드 미지원 환경에서는 실패로 간주하여 링크 텍스트 직접 노출
-        throw new Error("Clipboard unsupported");
+        throw new Error('Clipboard unsupported');
       }
       setCopied(true);
       setCopyFailed(false);
@@ -70,36 +59,24 @@ export function InviteCard({ inviteCode, groupName }: InviteCardProps) {
     <View className="w-full gap-4 rounded-3xl bg-primary p-5">
       <View className="gap-1">
         <Text className="text-xl font-bold text-on-primary">초대 코드</Text>
-        <Text className="text-4xl font-bold tracking-widest text-on-primary">
-          {inviteCode}
-        </Text>
+        <Text className="text-4xl font-bold tracking-widest text-on-primary">{inviteCode}</Text>
       </View>
 
       <View className="flex-row gap-2">
         <CardButton
-          icon={copied ? "check" : "link"}
-          label={copied ? "복사했어요" : "링크 복사"}
+          icon={copied ? 'check' : 'link'}
+          label={copied ? '복사했어요' : '링크 복사'}
           accessibilityLabel="초대 링크 복사"
           onPress={handleCopy}
         />
-        <CardButton
-          icon="qr"
-          label="QR"
-          accessibilityLabel="초대 QR 보기"
-          onPress={() => setQrOpen(true)}
-        />
+        <CardButton icon="qr" label="QR" accessibilityLabel="초대 QR 보기" onPress={() => setQrOpen(true)} />
       </View>
 
       {/* 복사가 안 되면 링크 글자를 보여줘서 직접 복사하게 한다 (spec.md 4-4) */}
       {copyFailed ? (
         <View className="gap-1 rounded-2xl bg-background p-3">
-          <Text className="text-sm text-muted">
-            아래 링크를 길게 눌러 복사해 주세요
-          </Text>
-          <Text
-            selectable
-            className="select-all text-sm font-semibold text-text"
-          >
+          <Text className="text-sm text-muted">아래 링크를 길게 눌러 복사해 주세요</Text>
+          <Text selectable className="select-all text-sm font-semibold text-text">
             {inviteUrl}
           </Text>
         </View>
@@ -133,8 +110,7 @@ function CardButton({
       accessibilityRole="button"
       accessibilityLabel={accessibilityLabel}
       onPress={onPress}
-      className="h-12 flex-1 flex-row items-center justify-center gap-2 rounded-2xl bg-background active:opacity-80"
-    >
+      className="h-12 flex-1 flex-row items-center justify-center gap-2 rounded-2xl bg-background active:opacity-80">
       <Icon name={icon} size={20} />
       <Text className="text-base font-bold text-text">{label}</Text>
     </Pressable>
@@ -169,18 +145,13 @@ function InviteQr({
           <View className="flex-1 items-center justify-center gap-6 pb-12">
             <Text
               className="text-center text-3xl font-bold tracking-tight text-text"
-              numberOfLines={2}
-            >
+              numberOfLines={2}>
               {groupName}
             </Text>
             <QrCode value={inviteUrl} size={size} />
             <View className="items-center gap-1">
-              <Text className="text-3xl font-bold tracking-widest text-text">
-                {inviteCode}
-              </Text>
-              <Text className="text-base text-muted">
-                카메라로 찍으면 바로 들어와요
-              </Text>
+              <Text className="text-3xl font-bold tracking-widest text-text">{inviteCode}</Text>
+              <Text className="text-base text-muted">카메라로 찍으면 바로 들어와요</Text>
             </View>
           </View>
         </View>
