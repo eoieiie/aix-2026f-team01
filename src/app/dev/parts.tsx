@@ -17,7 +17,7 @@ export default function PartsScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-background">
-      <ScrollView contentContainerClassName="gap-8 px-6 py-8">
+      <ScrollView keyboardShouldPersistTaps="handled" automaticallyAdjustKeyboardInsets contentContainerClassName="gap-8 px-6 py-8">
         <Text className="text-2xl font-bold text-text">부품 모음</Text>
 
         <View className="gap-3">

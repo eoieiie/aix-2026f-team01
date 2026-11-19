@@ -41,7 +41,7 @@ export function AccountSheet({ visible, onClose }: { visible: boolean; onClose: 
           {loginId ? (
             <>
               <View className="gap-1">
-                <Text className="text-3xl font-extrabold tracking-tight text-text">@{loginId}</Text>
+                <Text className="text-3xl font-bold tracking-tight text-text">@{loginId}</Text>
                 <Text className="text-base text-muted">다른 기기에서도 이 아이디로 들어와요</Text>
               </View>
               {error ? <Text className="text-sm font-semibold text-danger">{accountErrorMessage(error)}</Text> : null}
@@ -80,7 +80,7 @@ export function AccountSheet({ visible, onClose }: { visible: boolean; onClose: 
                         claim.reset();
                         signIn.reset();
                       }}
-                      className={`h-11 flex-1 items-center justify-center rounded-full ${on ? 'bg-primary' : 'bg-surface'}`}>
+                      className={`h-11 flex-1 items-center justify-center rounded-xl ${on ? 'bg-primary' : 'bg-surface'}`}>
                       <Text className={`text-base font-bold ${on ? 'text-on-primary' : 'text-muted'}`}>{label}</Text>
                     </Pressable>
                   );

@@ -12,7 +12,7 @@ export function GroupProfileCard({ groupId }: { groupId: string }) {
 
   return (
     <View className="gap-3">
-      <Text className="text-2xl font-extrabold tracking-tight text-text">우리 모임</Text>
+      <Text className="text-2xl font-bold tracking-tight text-text">우리 모임</Text>
       <View className="gap-6 rounded-3xl bg-surface p-5">
         {isLoading ? (
           <ActivityIndicator color={colors.text} accessibilityLabel="모임 카드를 불러오는 중" />
@@ -33,7 +33,7 @@ function Section({ title, note, children }: { title: string; note?: string; chil
   return (
     <View className="gap-3">
       <View className="flex-row items-baseline justify-between">
-        <Text className="text-lg font-extrabold text-text">{title}</Text>
+        <Text className="text-lg font-bold text-text">{title}</Text>
         {note ? <Text className="text-sm text-muted">{note}</Text> : null}
       </View>
       {children}

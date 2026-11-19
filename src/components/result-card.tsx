@@ -46,7 +46,7 @@ export function ResultCard({ card }: { card: MealCard }) {
         <View className="absolute -bottom-6 -right-6 h-28 w-28 rounded-full bg-on-primary opacity-15" />
 
         <View className="flex-row items-center justify-between gap-3">
-          <Text className="flex-1 text-xl font-extrabold text-on-primary" numberOfLines={2}>
+          <Text className="flex-1 text-xl font-bold text-on-primary" numberOfLines={2}>
             {card.groupName}
           </Text>
           <Text className="text-xl font-bold text-on-primary">{mealDateLabel(card.eatenAt)}</Text>
@@ -54,7 +54,7 @@ export function ResultCard({ card }: { card: MealCard }) {
 
         <View className="gap-2">
           <Text
-            className={`font-extrabold tracking-tight text-on-primary ${nameSize}`}
+            className={`font-bold tracking-tight text-on-primary ${nameSize}`}
             numberOfLines={2}
             adjustsFontSizeToFit>
             {card.foodName}
@@ -78,7 +78,7 @@ export function ResultCard({ card }: { card: MealCard }) {
 
         {/* 좁은 화면에서 "밥비티아이"와 "나의 N번째 OO"가 붙거나 잘리지 않게 사이를 띄우고 오른쪽 줄은 줄바꿈한다 */}
         <View className="flex-row items-end justify-between gap-4">
-          <Text className="text-xl font-extrabold text-on-primary">밥비티아이</Text>
+          <Text className="text-xl font-bold text-on-primary">밥비티아이</Text>
           {card.myFoodNth !== null ? (
             <Text className="flex-1 text-right text-xl font-bold text-on-primary">
               나의 {card.myFoodNth}번째 {card.foodName}

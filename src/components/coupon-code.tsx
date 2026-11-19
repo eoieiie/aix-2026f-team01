@@ -9,7 +9,7 @@ export function CouponCode({ code, shop, benefit }: { code: string; shop: string
       accessibilityLabel={`${shop} 쿠폰 코드 ${code.split('').join(' ')}, ${benefit}`}
       className="items-center gap-2 rounded-2xl border-2 border-ink bg-background px-4 py-4">
       <Text className="text-sm font-bold text-text">{shop}</Text>
-      <Text className="text-4xl font-extrabold tracking-widest text-text">{code}</Text>
+      <Text className="text-4xl font-bold tracking-widest text-text">{code}</Text>
       <Text className="text-center text-sm text-text">{benefit}</Text>
       <Text className="text-xs text-muted">{today} 밥비티아이</Text>
     </View>

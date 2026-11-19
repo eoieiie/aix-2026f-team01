@@ -54,7 +54,7 @@ export function HeadcountModal({
       accessibilityRole="button"
       accessibilityState={{ selected: on }}
       onPress={onPress}
-      className={`h-12 flex-1 items-center justify-center rounded-full ${on ? 'bg-ink' : 'bg-surface'} active:opacity-70`}>
+      className={`h-12 flex-1 items-center justify-center rounded-xl ${on ? 'bg-ink' : 'bg-surface'} active:opacity-70`}>
       <Text className={`text-base font-bold ${on ? 'text-on-ink' : 'text-text'}`}>{label}</Text>
     </Pressable>
   );
@@ -75,8 +75,8 @@ export function HeadcountModal({
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
       <View className="flex-1 items-center justify-center bg-black/40 px-5">
         <View className="max-h-full w-full max-w-sm rounded-3xl bg-background">
-          <ScrollView contentContainerClassName="gap-6 p-6">
-            <Text className="text-3xl font-extrabold tracking-tight text-text">같이 먹을 사람</Text>
+          <ScrollView keyboardShouldPersistTaps="handled" automaticallyAdjustKeyboardInsets contentContainerClassName="gap-6 p-6">
+            <Text className="text-3xl font-bold tracking-tight text-text">같이 먹을 사람</Text>
 
             <View className="flex-row flex-wrap gap-2">
               {members.map((m) => {
@@ -103,7 +103,7 @@ export function HeadcountModal({
             <View className="flex-row items-center gap-2">
               <Text className="flex-1 text-base font-bold text-text">앱 없는 사람</Text>
               {round('minus', '앱 없는 사람 한 명 빼기', extra <= 0, -1)}
-              <Text accessibilityLabel={`앱 없는 사람 ${extra}명`} className="min-w-10 text-center text-xl font-extrabold text-text">
+              <Text accessibilityLabel={`앱 없는 사람 ${extra}명`} className="min-w-10 text-center text-xl font-bold text-text">
                 {extra}
               </Text>
               {round('plus', '앱 없는 사람 한 명 더하기', total >= HEADCOUNT_MAX, 1)}
@@ -113,7 +113,7 @@ export function HeadcountModal({
               accessibilityRole="button"
               accessibilityState={{ expanded: showOptions }}
               onPress={() => setShowOptions((v) => !v)}
-              className="h-12 flex-row items-center justify-between rounded-full bg-surface px-4 active:opacity-70">
+              className="h-12 flex-row items-center justify-between rounded-2xl bg-surface px-4 active:opacity-70">
               <Text className="text-base font-bold text-text">
                 옵션 · 인당 {voteLimit}표{allowRepeat ? ' · 한 메뉴에 여러 표' : ''}
               </Text>

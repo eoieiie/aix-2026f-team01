@@ -147,14 +147,14 @@ export default function GroupScreen() {
         <IconButton name="back" label="홈으로" onPress={() => router.replace('/')} />
       </View>
 
-      <ScrollView
+      <ScrollView keyboardShouldPersistTaps="handled" automaticallyAdjustKeyboardInsets
         className="flex-1"
         showsVerticalScrollIndicator={false}
         contentContainerClassName="gap-8 px-5 pb-36 pt-2"
       >
         {/* 모임 이름과 멤버 이름 동그라미 (spec.md 4-6) */}
         <View className="gap-4">
-          <Text className="text-4xl font-extrabold leading-tight tracking-tight text-text">
+          <Text className="text-4xl font-bold leading-tight tracking-tight text-text">
             {group.name}
           </Text>
           <View className="flex-row flex-wrap items-center gap-3">
@@ -165,7 +165,7 @@ export default function GroupScreen() {
                   <View>
                     <View
                       className={`h-14 w-14 items-center justify-center rounded-full ${color.bg}`}>
-                      <Text className={`text-lg font-extrabold ${color.text}`}>
+                      <Text className={`text-lg font-bold ${color.text}`}>
                         {Array.from(member.display_name)[0] ?? ''}
                       </Text>
                     </View>
@@ -185,10 +185,10 @@ export default function GroupScreen() {
 
         {/* 최근 식사 5개 (spec.md 4-6) */}
         <View className="gap-3">
-          <Text className="text-2xl font-extrabold tracking-tight text-text">최근에 먹은 것</Text>
+          <Text className="text-2xl font-bold tracking-tight text-text">최근에 먹은 것</Text>
           {group.recent_meals.length === 0 ? (
             <View className="rounded-3xl bg-surface p-6">
-              <Text className="text-lg font-extrabold text-muted">아직 기록이 없어요</Text>
+              <Text className="text-lg font-bold text-muted">아직 기록이 없어요</Text>
             </View>
           ) : (
             <View className="gap-4 rounded-3xl bg-surface p-5">
@@ -201,7 +201,7 @@ export default function GroupScreen() {
                   onPress={() => router.push(`/meals/${meal.id}` as any)}
                   className="min-h-11 flex-row items-center gap-3 active:opacity-70">
                   <FoodDot foodId={meal.food_id} size="md" name={meal.food_name} />
-                  <Text className="flex-1 text-lg font-extrabold text-text">{meal.food_name}</Text>
+                  <Text className="flex-1 text-lg font-bold text-text">{meal.food_name}</Text>
                   <Text className="text-sm text-muted">
                     {new Date(meal.eaten_at).toLocaleDateString('ko-KR', {
                       month: 'long',

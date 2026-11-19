@@ -29,7 +29,7 @@ export function NearbyRestaurants({
 
   return (
     <View className={`gap-4 rounded-3xl p-5 ${onPrimary ? 'bg-on-primary' : 'bg-surface'}`}>
-      <Text className="text-lg font-extrabold text-text">이 메뉴 파는 학교 앞</Text>
+      <Text className="text-lg font-bold text-text">이 메뉴 파는 학교 앞</Text>
       {list.map((r) => {
         const line = restaurantLine(r, foodName);
         const code = r.myCode;
@@ -65,7 +65,7 @@ export function NearbyRestaurants({
                     accessibilityLabel={`${r.name} 쿠폰 받기`}
                     disabled={claim.isPending}
                     onPress={() => claim.mutate(r.id)}
-                    className="h-11 items-center justify-center rounded-full bg-ink px-4 active:opacity-80 disabled:opacity-50">
+                    className="h-11 items-center justify-center rounded-xl bg-ink px-4 active:opacity-80 disabled:opacity-50">
                     <Text className="text-sm font-bold text-on-ink">쿠폰 받기</Text>
                   </Pressable>
                 </View>

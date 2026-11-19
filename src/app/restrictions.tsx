@@ -80,10 +80,10 @@ export default function RestrictionsScreen() {
         <IconButton name="back" label="뒤로" onPress={close} />
       </View>
 
-      <ScrollView contentContainerClassName="gap-8 px-5 pb-48 pt-2">
+      <ScrollView keyboardShouldPersistTaps="handled" automaticallyAdjustKeyboardInsets contentContainerClassName="gap-8 px-5 pb-48 pt-2">
         {/* 설명은 처음 온 사람이 꼭 알아야 하는 한 줄만 (docs/design.md 4절 1번) */}
         <View className="gap-1">
-          <Text className="text-3xl font-extrabold tracking-tight text-text">못 먹는 것</Text>
+          <Text className="text-3xl font-bold tracking-tight text-text">못 먹는 것</Text>
           <Text className="text-sm text-muted">모든 모임에 적용되고, 누가 적었는지는 안 보여요</Text>
         </View>
 

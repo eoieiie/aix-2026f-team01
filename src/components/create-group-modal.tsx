@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { Modal, Text, View } from 'react-native';
 
 import { Button } from '@/components/button';
+import { KeyboardSafe } from '@/components/keyboard-safe';
 import { TextField } from '@/components/text-field';
 
 import { DISPLAY_NAME_MAX, GROUP_NAME_MAX } from '@/constants';
@@ -69,10 +70,11 @@ export function CreateGroupModal({ visible, onClose }: CreateGroupModalProps) {
   // 입력칸과 버튼은 다른 화면과 같은 공통 부품을 쓴다 (spec.md 7절 공통 부품). 이름 칸의 라벨이 할 일을 말하므로 따로 설명 줄을 두지 않는다
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={handleClose}>
+      <KeyboardSafe>
       <View className="flex-1 items-center justify-center bg-black/40 px-5">
         <View className="w-full max-w-sm gap-6 rounded-3xl bg-background p-6">
           <View className="gap-1">
-            <Text className="text-3xl font-extrabold tracking-tight text-text">새 모임</Text>
+            <Text className="text-3xl font-bold tracking-tight text-text">새 모임</Text>
             {profileName !== null ? (
               <Text className="text-base text-muted">{withRo(profileName)} 들어가요</Text>
             ) : null}
@@ -124,6 +126,7 @@ export function CreateGroupModal({ visible, onClose }: CreateGroupModalProps) {
           </View>
         </View>
       </View>
+      </KeyboardSafe>
     </Modal>
   );
 }

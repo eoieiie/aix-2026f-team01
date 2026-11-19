@@ -6,7 +6,7 @@ export function Logo() {
   return (
     <View accessibilityRole="header" accessibilityLabel="밥BTI" className="h-12 flex-row items-center">
       <Text
-        className="text-2xl font-black leading-none tracking-tight text-text"
+        className="text-2xl font-black leading-tight tracking-tight text-text"
         style={{ includeFontPadding: false }}>
         <Text className="text-primary">밥</Text>BTI
       </Text>

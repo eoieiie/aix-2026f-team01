@@ -144,13 +144,13 @@ export function ResultMoment({ session, from, onGroup, onCard }: ResultMomentPro
           ],
         }}>
         <SafeAreaView className="flex-1">
-          <ScrollView contentContainerClassName="px-7 pb-6 pt-6">
+          <ScrollView keyboardShouldPersistTaps="handled" automaticallyAdjustKeyboardInsets contentContainerClassName="px-7 pb-6 pt-6">
             <Text className="text-xl font-bold text-on-primary" numberOfLines={2}>
               {session.groupName}
             </Text>
-            <Text className="mt-8 text-xl font-extrabold text-on-primary">룰렛이 골랐어요</Text>
+            <Text className="mt-8 text-xl font-bold text-on-primary">룰렛이 골랐어요</Text>
             <Text
-              className={`mt-1 font-extrabold tracking-tight text-on-primary ${nameSizeClass(winner)}`}
+              className={`mt-1 font-bold tracking-tight text-on-primary ${nameSizeClass(winner)}`}
               numberOfLines={2}
               adjustsFontSizeToFit>
               {winner}
