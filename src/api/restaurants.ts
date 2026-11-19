@@ -61,6 +61,31 @@ export function kakaoMapUrl(r: Pick<NearbyRestaurant, 'name' | 'lat' | 'lng'>): 
   return `https://map.kakao.com/link/search/${encodeURIComponent('안산 ' + r.name)}`;
 }
 
+// 먹고 나서 카페 (spec.md 4-23, 0020). 제휴가 먼저, 나머지는 정문에서 가까운 순으로 서버가 3곳까지 준다
+export interface NearbyCafe {
+  id: number;
+  name: string;
+  partner: boolean;
+  couponText: string | null;
+  myCode: string | null;
+  lat: number | null;
+  lng: number | null;
+}
+
+export async function getSessionCafes(sessionId: string, client: Client = getSupabase()): Promise<NearbyCafe[]> {
+  const { data, error } = await client.rpc('session_cafes', { p_session_id: sessionId });
+  if (error) throw error;
+  return ((data as any[]) ?? []).map((r) => ({
+    id: r.id,
+    name: r.name,
+    partner: Boolean(r.partner),
+    couponText: r.coupon_text ?? null,
+    myCode: r.my_code ?? null,
+    lat: typeof r.lat === 'number' ? r.lat : null,
+    lng: typeof r.lng === 'number' ? r.lng : null,
+  }));
+}
+
 export async function claimCoupon(
   sessionId: string,
   restaurantId: number,

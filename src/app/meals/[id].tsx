@@ -4,6 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Button } from '@/components/button';
 import { IconButton } from '@/components/icon';
+import { NearbyCafes } from '@/components/nearby-cafes';
 import { NearbyRestaurants } from '@/components/nearby-restaurants';
 import { ResultCard } from '@/components/result-card';
 import { ShareButton } from '@/components/share-button';
@@ -62,6 +63,7 @@ export default function MealScreen() {
         <ResultCard card={card} />
         <ShareButton text={mealShareText(card, webBase())} />
         <NearbyRestaurants sessionId={sessionId} foodName={card.foodName} />
+        <NearbyCafes sessionId={sessionId} />
       </ScrollView>
     </SafeAreaView>
   );

@@ -339,6 +339,23 @@ export function subscribeGroupMembers(
       { event: '*', schema: 'public', table: 'memberships', filter: `group_id=eq.${groupId}` },
       onChange
     )
+    // 누가 판을 열거나 끝내면 아래 버튼("오늘 뭐 먹지" / "진행 중인 판으로")도 바로 바뀐다 (0004의 sessions 구독)
+    .on(
+      'postgres_changes',
+      { event: '*', schema: 'public', table: 'sessions', filter: `group_id=eq.${groupId}` },
+      onChange
+    )
+    .subscribe();
+  return () => {
+    client.removeChannel(channel);
+  };
+}
+
+// 홈 모임 카드의 "판 진행 중"을 실시간으로. 구독도 RLS를 따라 내 모임의 판만 온다 (0002, 0004)
+export function subscribeMySessions(onChange: () => void, client = getSupabase()): () => void {
+  const channel = client
+    .channel('my-sessions')
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'sessions' }, onChange)
     .subscribe();
   return () => {
     client.removeChannel(channel);

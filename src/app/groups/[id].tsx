@@ -62,6 +62,17 @@ export default function GroupScreen() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [memberKey]);
 
+  // 다른 사람이 판을 열면 아래 버튼이 "진행 중인 판으로"로 바뀌고 테두리가 한 번 반짝인다 (4-6, 시연 흐름)
+  const openId = group?.open_session_id ?? null;
+  const prevOpen = useRef<string | null | undefined>(undefined);
+  const [openFlash, setOpenFlash] = useState(0);
+  useEffect(() => {
+    if (group === null || group === undefined) return;
+    if (prevOpen.current === null && openId) setOpenFlash((n) => n + 1);
+    prevOpen.current = openId;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [openId, !!group]);
+
   // 로딩 상태
   if (isLoading) {
     return (
@@ -209,11 +220,14 @@ export default function GroupScreen() {
 
       {/* 하단 고정 버튼. 진행 중인 판이 있으면 "진행 중인 판으로" (spec.md 4-6) */}
       <View className="absolute bottom-0 left-0 right-0 bg-background px-5 pb-8 pt-3">
-        <Button
-          label={hasOpenSession ? '진행 중인 판으로' : '오늘 뭐 먹지'}
-          onPress={() => handleStartOrJoinSession()}
-          loading={isStartingSession && !askHeadcount}
-        />
+        <View>
+          <Button
+            label={hasOpenSession ? '진행 중인 판으로' : '오늘 뭐 먹지'}
+            onPress={() => handleStartOrJoinSession()}
+            loading={isStartingSession && !askHeadcount}
+          />
+          {openFlash > 0 ? <NewRing key={openFlash} label="판이 열렸어요" /> : null}
+        </View>
       </View>
 
       {askHeadcount ? (
@@ -233,7 +247,7 @@ export default function GroupScreen() {
 
 // 새로 들어온 사람 동그라미의 주황 테두리. 1초 보였다가 0.4초에 걸쳐 사라진다.
 // 움직임은 JS로(웹과 앱이 같게). 움직임 줄이기가 켜져 있으면 흐려지지 않고 1.6초 뒤 바로 사라진다
-function NewRing() {
+function NewRing({ label = '새로 들어옴' }: { label?: string }) {
   const [opacity] = useState(() => new Animated.Value(1));
   const [gone, setGone] = useState(false);
   useEffect(() => {
@@ -260,7 +274,7 @@ function NewRing() {
   return (
     <Animated.View
       pointerEvents="none"
-      accessibilityLabel="새로 들어옴"
+      accessibilityLabel={label}
       style={{
         position: 'absolute',
         top: -4,
