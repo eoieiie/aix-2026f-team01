@@ -1,4 +1,5 @@
-import { Text, View } from 'react-native';
+import { View } from 'react-native';
+import { Text } from '@/components/text';
 
 // 받은 쿠폰을 가게 직원에게 보여 주는 칸 (spec.md 4-21, 4-23). 코드는 멀리서도 읽히게 크게, 가게 이름과 혜택, 받은 날을 같이
 export function CouponCode({ code, shop, benefit }: { code: string; shop: string; benefit: string }) {

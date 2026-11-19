@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { Modal, Pressable, Text, View } from 'react-native';
+import { Modal, Pressable, View } from 'react-native';
+import { Text } from '@/components/text';
 
 import { Button } from '@/components/button';
 import { TextField } from '@/components/text-field';

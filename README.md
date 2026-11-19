@@ -111,3 +111,5 @@ graph TD
 
 ## 7. 라이선스 / License
 MIT ([`LICENSE`](LICENSE)) — 선택 이유 / Why: 기록 없음 (팀 확인 필요)
+
+- 글꼴 Pretendard (orioncactus, SIL Open Font License 1.1, [`assets/fonts/Pretendard-OFL.txt`](assets/fonts/Pretendard-OFL.txt))

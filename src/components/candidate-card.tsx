@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
-import { AccessibilityInfo, Animated, Pressable, Text, TextInput, View } from 'react-native';
+import { AccessibilityInfo, Animated, Pressable, View } from 'react-native';
+import { Text, TextInput } from '@/components/text';
 
 import { FoodDot } from '@/components/food-dot';
 import { Icon } from '@/components/icon';

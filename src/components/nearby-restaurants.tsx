@@ -1,4 +1,5 @@
-import { Linking, Platform, Pressable, Text, View } from 'react-native';
+import { Linking, Platform, Pressable, View } from 'react-native';
+import { Text } from '@/components/text';
 
 import { CouponCode } from '@/components/coupon-code';
 import { Icon } from '@/components/icon';

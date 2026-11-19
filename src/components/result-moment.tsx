@@ -1,13 +1,6 @@
 import { useEffect, useState } from 'react';
-import {
-  Animated,
-  Easing,
-  Platform,
-  ScrollView,
-  Text,
-  useWindowDimensions,
-  View,
-} from 'react-native';
+import { Animated, Easing, Platform, ScrollView, useWindowDimensions, View } from 'react-native';
+import { Text } from '@/components/text';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Button } from '@/components/button';

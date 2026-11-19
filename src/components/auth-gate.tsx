@@ -1,6 +1,7 @@
 import { usePathname, useRouter } from 'expo-router';
 import { type ReactNode, useEffect } from 'react';
-import { ActivityIndicator, Pressable, Text, View } from 'react-native';
+import { ActivityIndicator, Pressable, View } from 'react-native';
+import { Text } from '@/components/text';
 
 import { useAnonymousAuth } from '@/hooks/use-anonymous-auth';
 import { useMyProfile } from '@/hooks/use-profile';
