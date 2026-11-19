@@ -1,6 +1,10 @@
-import { Image, Pressable, Text, View } from 'react-native';
+import { Image, Linking, Platform, Pressable, Text, View } from 'react-native';
+
+import { CouponCode } from '@/components/coupon-code';
+import { Icon } from '@/components/icon';
 
 import {
+  kakaoMapUrl,
   type NearbyRestaurant,
   OSM_CREDIT,
   restaurantInfo,
@@ -33,15 +37,11 @@ export function NearbyRestaurants({
         <View key={r.id} className="gap-2">
           <RestaurantRow r={r} />
           {r.partner && r.couponText ? (
-            <View className="flex-row items-center gap-3">
-              <Text className="flex-1 text-sm text-text">{r.couponText}</Text>
-              {r.myCode ? (
-                <Text
-                  accessibilityLabel={`쿠폰 코드 ${r.myCode}`}
-                  className="text-base font-extrabold tracking-widest text-text">
-                  {r.myCode}
-                </Text>
-              ) : (
+            r.myCode ? (
+              <CouponCode code={r.myCode} shop={r.name} benefit={r.couponText} />
+            ) : (
+              <View className="flex-row items-center gap-3">
+                <Text className="flex-1 text-sm text-text">{r.couponText}</Text>
                 <Pressable
                   accessibilityRole="button"
                   accessibilityLabel={`${r.name} 쿠폰 받기`}
@@ -50,8 +50,8 @@ export function NearbyRestaurants({
                   className="h-11 items-center justify-center rounded-full bg-ink px-4 active:opacity-80 disabled:opacity-50">
                   <Text className="text-sm font-bold text-on-ink">쿠폰 받기</Text>
                 </Pressable>
-              )}
-            </View>
+              </View>
+            )
           ) : null}
         </View>
       ))}
@@ -76,11 +76,16 @@ export function VoteRestaurants({ sessionId, candidateKey }: { sessionId: string
   );
 }
 
-// 줄 하나: (제휴면 사진) 이름과 "광고", 아래에 걸어서 N분 · 영업 중 · 밥BTI로 간 모임 N팀
+// 줄 하나: (제휴면 사진) 이름과 "광고", 아래에 걸어서 N분 · 영업 중 · 밥BTI로 간 모임 N팀.
+// 줄을 누르면 카카오맵에서 그 가게가 열린다. 웹은 새 탭
 function RestaurantRow({ r }: { r: NearbyRestaurant }) {
   const info = restaurantInfo(r);
   return (
-    <View className="flex-row items-center gap-3">
+    <Pressable
+      accessibilityRole="link"
+      accessibilityLabel={`${r.name} 카카오맵에서 보기`}
+      onPress={() => openMap(kakaoMapUrl(r))}
+      className="min-h-11 flex-row items-center gap-3 active:opacity-70">
       {r.photoUrl ? (
         <Image
           source={{ uri: r.photoUrl }}
@@ -91,9 +96,7 @@ function RestaurantRow({ r }: { r: NearbyRestaurant }) {
       ) : null}
       <View className="flex-1 gap-1">
         <View className="flex-row items-center gap-2">
-          <Text className="shrink text-base font-bold text-text" numberOfLines={1}>
-            {r.name}
-          </Text>
+          <Text className="shrink text-base font-bold text-text">{r.name}</Text>
           {r.partner ? (
             <View accessibilityLabel="광고" className="rounded-md border border-muted px-1.5">
               <Text className="text-xs font-bold text-muted">광고</Text>
@@ -102,6 +105,15 @@ function RestaurantRow({ r }: { r: NearbyRestaurant }) {
         </View>
         {info ? <Text className="text-sm text-muted">{info}</Text> : null}
       </View>
-    </View>
+      <Icon name="pin" size={22} color="muted" />
+    </Pressable>
   );
+}
+
+function openMap(url: string) {
+  if (Platform.OS === 'web' && typeof window !== 'undefined') {
+    window.open(url, '_blank', 'noopener');
+    return;
+  }
+  Linking.openURL(url).catch(() => {});
 }

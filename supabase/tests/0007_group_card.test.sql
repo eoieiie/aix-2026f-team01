@@ -1,4 +1,4 @@
--- 모임 프로필 카드(4-16): 인원수만 돌려주고, 3명 미만이면 숫자를 숨긴다.
+-- 모임 프로필 카드(4-16): 인원수만 돌려주고, 3명 미만이면 못 먹는 것 숫자를 숨긴다. 네 글자 축은 1명부터 (0019).
 begin;
 create extension if not exists pgtap with schema extensions;
 select plan(13);
@@ -59,8 +59,8 @@ select is(
     "tag_counts": [{"tag": "pork", "count": 2}, {"tag": "halal", "count": 1}, {"tag": "nuts", "count": 1}],
     "food_block_count": 1,
     "tested_count": 2,
-    "axes": null}'::jsonb,
-  '태그는 많은 순, 같으면 코드 순. 모임 밖 사람은 세지 않는다. 음식은 사람 수로 센다. 테스트한 사람이 2명이면 축은 null');
+    "axes": {"explore": 0, "spicy": 0, "korean": 0, "lead": 0}}'::jsonb,
+  '태그는 많은 순, 같으면 코드 순. 모임 밖 사람은 세지 않는다. 음식은 사람 수로 센다. 축은 테스트한 사람이 1명이라도 있으면 평균 (0019)');
 reset role;
 
 -- 소속 3명, 테스트한 사람 3명 -----------------------------------------------
@@ -86,8 +86,8 @@ select ok(
 -- 소속 2명 ------------------------------------------------------------------
 select is(
   public.group_profile_card('10000000-0000-0000-0000-000000000002'),
-  '{"member_count": 2, "tag_counts": null, "food_block_count": null, "tested_count": 2, "axes": null}'::jsonb,
-  '소속이 2명이면 못 먹는 것 숫자와 축이 null');
+  '{"member_count": 2, "tag_counts": null, "food_block_count": null, "tested_count": 2, "axes": {"explore": 0, "spicy": 0, "korean": 0, "lead": 0}}'::jsonb,
+  '소속이 2명이면 못 먹는 것 숫자는 null(누구인지 드러남), 축은 보인다 (0019)');
 reset role;
 
 -- 소속이 아닐 때 -------------------------------------------------------------

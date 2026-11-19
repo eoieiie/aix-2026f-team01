@@ -1,10 +1,16 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
-import { claimCoupon, getSessionIdForMeal, getSessionRestaurants, pickForMe } from '@/api/restaurants';
+import {
+  claimCoupon,
+  getSessionCafes,
+  getSessionIdForMeal,
+  getSessionRestaurants,
+  pickForMe,
+} from '@/api/restaurants';
 import { useMyStats } from '@/hooks/use-stats';
 
-export type { NearbyRestaurant } from '@/api/restaurants';
-export { OSM_CREDIT, restaurantInfo } from '@/api/restaurants';
+export type { NearbyCafe, NearbyRestaurant } from '@/api/restaurants';
+export { kakaoMapUrl, OSM_CREDIT, restaurantInfo } from '@/api/restaurants';
 
 // 판의 학교 앞 식당 (4-21). 실패하거나 서버에 함수가 없으면 빈 목록이고 칸을 숨긴다.
 // candidateKey: 투표 화면은 후보가 바뀌면 다시 읽는다. 결과 뒤에는 비워 둔다
@@ -30,6 +36,18 @@ export function useVoteRestaurants(sessionId: string, candidateKey: string) {
   });
 }
 
+// 결과가 나온 판의 학교 앞 카페 (4-23). 실패하거나 서버에 함수가 없으면 빈 목록이고 칸을 숨긴다
+export function useSessionCafes(sessionId: string | null) {
+  const query = useQuery({
+    queryKey: ['session-cafes', sessionId],
+    queryFn: () => getSessionCafes(sessionId as string),
+    enabled: !!sessionId,
+    retry: false,
+    staleTime: 60_000,
+  });
+  return query.data ?? [];
+}
+
 export function useMealSessionId(mealId: string) {
   const query = useQuery({
     queryKey: ['meal-session-id', mealId],
@@ -44,6 +62,10 @@ export function useClaimCoupon(sessionId: string) {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (restaurantId: number) => claimCoupon(sessionId, restaurantId),
-    onSettled: () => queryClient.invalidateQueries({ queryKey: ['session-restaurants', sessionId] }),
+    // 식당과 카페 쿠폰이 같은 함수라 두 목록을 같이 다시 읽는다
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ['session-restaurants', sessionId] });
+      queryClient.invalidateQueries({ queryKey: ['session-cafes', sessionId] });
+    },
   });
 }

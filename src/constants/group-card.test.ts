@@ -51,8 +51,8 @@ describe('tagLabel', () => {
 });
 
 describe('axesView', () => {
-  it('네 글자를 만든 사람이 3명 미만이면 문구', () => {
-    expect(axesView(base)).toEqual({ kind: 'hidden', text: '세 명 이상 네 글자를 만들면 보여요' });
+  it('네 글자를 만든 사람이 없으면 문구 (0019, 1명부터 보임)', () => {
+    expect(axesView(base)).toEqual({ kind: 'hidden', text: '아직 아무도 네 글자를 만들지 않았어요' });
   });
 
   it('축 순서와 값. -1~1 밖은 자른다', () => {

@@ -11,6 +11,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Button } from '@/components/button';
+import { NearbyCafes } from '@/components/nearby-cafes';
 import { NearbyRestaurants } from '@/components/nearby-restaurants';
 import { Roulette } from '@/components/roulette';
 import colors from '@/constants/colors.json';
@@ -144,13 +145,13 @@ export function ResultMoment({ session, from, onGroup, onCard }: ResultMomentPro
         }}>
         <SafeAreaView className="flex-1">
           <ScrollView contentContainerClassName="px-7 pb-6 pt-6">
-            <Text className="text-xl font-bold text-on-primary" numberOfLines={1}>
+            <Text className="text-xl font-bold text-on-primary" numberOfLines={2}>
               {session.groupName}
             </Text>
             <Text className="mt-8 text-xl font-extrabold text-on-primary">룰렛이 골랐어요</Text>
             <Text
               className={`mt-1 font-extrabold tracking-tight text-on-primary ${nameSizeClass(winner)}`}
-              numberOfLines={1}
+              numberOfLines={2}
               adjustsFontSizeToFit>
               {winner}
             </Text>
@@ -172,8 +173,9 @@ export function ResultMoment({ session, from, onGroup, onCard }: ResultMomentPro
               </View>
             ) : null}
             {/* 결과 뒤에만 학교 앞 식당 (4-21). 투표와 룰렛에는 쓰지 않는다 */}
-            <View className="mt-8">
+            <View className="mt-8 gap-4">
               <NearbyRestaurants sessionId={session.id} onPrimary />
+              <NearbyCafes sessionId={session.id} onPrimary />
             </View>
           </ScrollView>
           {/* 같은 역할의 버튼 둘은 같은 크기로 나란히. 결과 카드가 다음 할 일이라 흰 버튼, 모임으로는 회색 */}

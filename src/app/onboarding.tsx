@@ -1,8 +1,9 @@
 import * as Haptics from 'expo-haptics';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { ActivityIndicator, Animated, Platform, Pressable, Text, View } from 'react-native';
+import { ActivityIndicator, Animated, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import Svg, { Defs, LinearGradient, Rect, Stop } from 'react-native-svg';
 
 import { Button } from '@/components/button';
 import { IconButton } from '@/components/icon';
@@ -142,9 +143,13 @@ export default function OnboardingScreen() {
           </Text>
         </View>
         <View className="flex-1 justify-center gap-8 px-5 pb-16">
-          <Text className="text-3xl font-extrabold leading-tight tracking-tight text-text">
-            {q.situation}
-          </Text>
+          {/* 첫 문항에서 무엇을 하라는지 몰랐다는 말이 있었다 (#44 인터뷰 3 다시, 11/17). 모든 문항 같은 자리에 한 줄만 */}
+          <View className="gap-2">
+            <Text className="text-base font-bold text-muted">끌리는 쪽을 골라요</Text>
+            <Text className="text-3xl font-extrabold leading-tight tracking-tight text-text">
+              {q.situation}
+            </Text>
+          </View>
           {/* 두 답은 같은 크기의 칸 (4절 2번) */}
           <View className="gap-3">
             {(['A', 'B'] as const).map((a) => (
@@ -288,9 +293,31 @@ function TypeReveal({
   }, [anims, reduce]);
 
   return (
-    <SafeAreaView className="flex-1 bg-ink">
+    <SafeAreaView
+      className="relative flex-1 bg-primary"
+      style={
+        Platform.OS === 'web'
+          ? ({
+              backgroundImage: `linear-gradient(135deg, ${colors['food-7']} 0%, ${colors.primary} 55%, ${colors['food-5']} 100%)`,
+            } as any)
+          : undefined
+      }>
+      {/* 네이티브(iOS/Android)에서는 SVG LinearGradient 사용 */}
+      {Platform.OS !== 'web' ? (
+        <Svg style={StyleSheet.absoluteFill} width="100%" height="100%">
+          <Defs>
+            <LinearGradient id="typeRevealGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+              <Stop offset="0%" stopColor={colors['food-7']} stopOpacity="1" />
+              <Stop offset="55%" stopColor={colors.primary} stopOpacity="1" />
+              <Stop offset="100%" stopColor={colors['food-5']} stopOpacity="1" />
+            </LinearGradient>
+          </Defs>
+          <Rect width="100%" height="100%" fill="url(#typeRevealGrad)" />
+        </Svg>
+      ) : null}
+
       <View className="flex-1 justify-center gap-8 px-5">
-        <Text className="text-lg font-bold text-on-ink" accessibilityRole="header">
+        <Text className="text-xl font-extrabold text-on-primary" accessibilityRole="header">
           나의 밥BTI
         </Text>
         <View
@@ -313,23 +340,30 @@ function TypeReveal({
                 ],
               }}
             >
-              <View className="aspect-square items-center justify-center gap-1 rounded-3xl bg-food-8">
-                <Text className="text-8xl font-extrabold text-on-ink">{l.letter}</Text>
-                <Text className="text-base font-semibold text-on-ink opacity-70">{l.line}</Text>
+              <View className="aspect-square items-center justify-center gap-1 rounded-3xl bg-on-primary shadow-sm">
+                <Text className="text-8xl font-extrabold text-primary">{l.letter}</Text>
+                <Text className="text-base font-bold text-text">{l.line}</Text>
               </View>
             </Animated.View>
           ))}
         </View>
       </View>
       <View className="gap-2 px-5 pb-8">
-        <Button label="아이디 정하고 시작하기" onPress={onNext} />
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="아이디 정하고 시작하기"
+          onPress={onNext}
+          className="h-14 items-center justify-center rounded-full bg-on-primary px-6 shadow-sm active:opacity-80"
+        >
+          <Text className="text-lg font-extrabold text-primary">아이디 정하고 시작하기</Text>
+        </Pressable>
         <Pressable
           accessibilityRole="button"
           accessibilityLabel="다시 하기"
           onPress={onRetry}
           className="h-12 items-center justify-center active:opacity-70"
         >
-          <Text className="text-base font-bold text-on-ink opacity-70">다시 하기</Text>
+          <Text className="text-xl font-bold text-on-primary">다시 하기</Text>
         </Pressable>
       </View>
     </SafeAreaView>

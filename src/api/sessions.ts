@@ -37,6 +37,8 @@ export interface SessionView {
   hostName: string;
   // 몇 명이서 먹는지 (4-6). 이 수만큼 골라야 돌릴 수 있다. 0009 전에 연 판은 null
   expectedCount: number | null;
+  voteLimit: number; // 인당 표 수 (방장 옵션, 0019)
+  allowRepeat: boolean; // 한 메뉴에 여러 표
   decidedFoodId: number | null;
   decidedAt: string | null;
   participants: Participant[];
@@ -79,7 +81,8 @@ export const SESSION_ERROR_MESSAGES: Record<string, string> = {
   not_voting: '투표 중에만 할 수 있어요',
   candidate_not_found: '후보를 찾을 수 없어요',
   candidate_vetoed: '못 먹는 사람이 있어서 빠졌어요',
-  vote_limit: '최대 2개까지 고를 수 있어요',
+  vote_limit: '표를 다 썼어요',
+  bad_vote_limit: '인당 표 수는 1~3개예요',
   not_done: '아직 결과가 나오지 않았어요',
   name_empty: '메뉴 이름을 적어 주세요',
   name_too_long: '메뉴 이름은 20자까지예요',
@@ -165,7 +168,7 @@ export async function getSession(
       .from('candidates')
       .select('food_id, proposed_by, pitch, vetoed, created_at, foods ( * )')
       .eq('session_id', sessionId),
-    client.from('votes').select('food_id').eq('session_id', sessionId),
+    client.from('votes').select('food_id, weight').eq('session_id', sessionId),
   ]);
   // 못 먹는 것 안내는 없어도 판은 보인다. 실패하면 빈 안내
   const cantRes: any = await Promise.resolve(
@@ -211,11 +214,14 @@ export async function getSession(
     isHost: session.host_user_id === userId,
     hostName: names.get(session.host_user_id) ?? '',
     expectedCount: (session as any).expected_count ?? null,
+    voteLimit: (session as any).vote_limit ?? 2,
+    allowRepeat: (session as any).allow_repeat ?? false,
     decidedFoodId: session.decided_food_id,
     decidedAt: session.decided_at,
     participants,
     candidates,
-    myVotes: (votesRes.data ?? []).map((v: any) => v.food_id),
+    // 한 메뉴에 두 표를 줬으면 그 id가 두 번 들어간다. 길이가 쓴 표 수다
+    myVotes: (votesRes.data ?? []).flatMap((v: any) => Array(v.weight ?? 1).fill(v.food_id)),
     myAnyOk:
       (votesRes.data ?? []).length === 0 &&
       participants.some((p) => p.userId === userId && p.voted),

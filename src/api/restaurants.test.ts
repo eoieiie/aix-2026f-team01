@@ -1,4 +1,4 @@
-import { getSessionRestaurants, type NearbyRestaurant, pickForMe, restaurantInfo } from './restaurants';
+import { getSessionRestaurants, kakaoMapUrl, type NearbyRestaurant, pickForMe, restaurantInfo } from './restaurants';
 
 // PR #78 본문의 돌려주는 값 표 모양으로 만든 가짜 식당. 실제 가게가 아니다
 function fake(over: Partial<NearbyRestaurant> & { id: number }): NearbyRestaurant {
@@ -9,6 +9,8 @@ function fake(over: Partial<NearbyRestaurant> & { id: number }): NearbyRestauran
     couponText: null,
     match: 'cuisine',
     myCode: null,
+    lat: null,
+    lng: null,
     foodId: null,
     walkMinutes: null,
     openNow: null,
@@ -131,6 +133,8 @@ describe('getSessionRestaurants', () => {
       couponText: '음료 1개',
       match: 'cuisine',
       myCode: null,
+      lat: null,
+      lng: null,
       foodId: null,
       walkMinutes: 5,
       openNow: true,
@@ -150,5 +154,30 @@ describe('getSessionRestaurants', () => {
     }));
     const [r] = await getSessionRestaurants('s1', { rpc } as any);
     expect([r.foodId, r.walkMinutes, r.openNow, r.teamCount, r.photoUrl]).toEqual([null, null, null, 0, null]);
+  });
+});
+
+describe('좌표와 카카오맵 주소', () => {
+  it('서버 함수에 좌표가 없으면 식당 표에서 읽어 붙인다', async () => {
+    const rpc = jest.fn(async () => ({
+      data: [{ id: 7, name: '보배반점', cuisine: 'chinese', partner: false, coupon_text: null, match: 'menu', my_code: null }],
+      error: null,
+    }));
+    const inFn = jest.fn(async () => ({ data: [{ id: 7, lat: 37.3, lng: 126.84 }], error: null }));
+    const from = jest.fn(() => ({ select: () => ({ in: inFn }) }));
+    const list = await getSessionRestaurants('s1', { rpc, from } as any);
+    expect(from).toHaveBeenCalledWith('restaurants');
+    expect(inFn).toHaveBeenCalledWith('id', [7]);
+    expect(list[0].lat).toBe(37.3);
+    expect(list[0].lng).toBe(126.84);
+  });
+
+  it('좌표가 있으면 그 자리, 없으면 이름으로 찾기', () => {
+    expect(kakaoMapUrl({ name: '보배반점', lat: 37.3, lng: 126.84 })).toBe(
+      `https://map.kakao.com/link/map/${encodeURIComponent('보배반점')},37.3,126.84`
+    );
+    expect(kakaoMapUrl({ name: '이모네', lat: null, lng: null })).toBe(
+      `https://map.kakao.com/link/search/${encodeURIComponent('안산 이모네')}`
+    );
   });
 });

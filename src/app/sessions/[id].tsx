@@ -1,6 +1,7 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { type ReactNode, useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, Text, View } from 'react-native';
+import type { LayoutChangeEvent } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Button } from '@/components/button';
@@ -15,7 +16,6 @@ import colors from '@/constants/colors.json';
 import { cantEatNotice } from '@/constants/restrictions';
 import {
   GROUP_FAVORITES_MAX,
-  MAX_VOTES_PER_PERSON,
   QUICK_FILL_COUNT,
   RECENT_EATEN_DAYS,
   ROULETTE_RESULT_FALLBACK_MS,
@@ -125,26 +125,27 @@ function Header({ session, onBack }: { session: SessionView; onBack: () => void 
     <View className="gap-4 px-5 pb-2 pt-3">
       <View className="flex-row items-center gap-3">
         <IconButton name="back" label="모임으로" onPress={onBack} />
-        <Text className="flex-1 text-lg font-extrabold text-text" numberOfLines={1}>
+        <Text className="flex-1 text-lg font-extrabold text-text" numberOfLines={2}>
           {session.groupName}
         </Text>
       </View>
-      {/* 한 판의 세 단계. 같은 크기의 칸 셋이고 지금 단계만 검정으로 채운다. 지나온 단계는 진한 회색 */}
-      <View className="flex-row gap-2">
-        {STEPS.map((step, i) => (
-          <View
-            key={step.status}
-            className={`h-10 flex-1 items-center justify-center rounded-full ${
-              i === current ? 'bg-ink' : i < current ? 'bg-surface-strong' : 'bg-surface'
-            }`}>
-            <Text
-              className={`text-sm font-bold ${
-                i === current ? 'text-on-ink' : i < current ? 'text-text' : 'text-muted'
-              }`}>
-              {step.label}
-            </Text>
-          </View>
-        ))}
+      {/* 한 판의 세 단계. 누르는 것이 아니라서 버튼 모양 대신 "2 / 3 투표" 한 줄과 막대 세 칸으로 보인다.
+          지나온 단계와 지금 단계는 검정, 남은 단계는 회색 (2026-11-16 병주 1안) */}
+      <View
+        className="gap-2"
+        accessible
+        accessibilityLabel={`${STEPS.length}단계 중 ${current + 1}단계, ${STEPS[current]?.label ?? ''}`}>
+        <Text className="text-base font-extrabold text-text">
+          {current + 1} / {STEPS.length}  {STEPS[current]?.label}
+        </Text>
+        <View className="flex-row gap-2">
+          {STEPS.map((step, i) => (
+            <View
+              key={step.status}
+              className={`h-3 flex-1 rounded-full ${i <= current ? 'bg-ink' : 'bg-surface-strong'}`}
+            />
+          ))}
+        </View>
       </View>
       <Participants session={session} />
     </View>
@@ -237,11 +238,47 @@ function CandidateStage({
   const busy = filling || add.isPending || addCustom.isPending || pitch.isPending || remove.isPending;
   const actionError = add.error ?? addCustom.error ?? pitch.error ?? remove.error;
 
+  // 후보를 올리면 어디로 갔는지 몰랐다는 말이 있었다 (#44 인터뷰 3 다시, #67, 11/17).
+  // 그래서 후보는 새것부터 보이고, 내가 방금 올린 후보는 잠깐 주황 테두리가 생긴다. 후보 칸이 화면 아래에 있으면 그 자리로 내린다
+  const scrollRef = useRef<ScrollView>(null);
+  const scrollY = useRef(0);
+  const viewH = useRef(0);
+  const listY = useRef(0);
+  const seen = useRef<Set<number> | null>(null);
+  const freshTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [fresh, setFresh] = useState<number | null>(null);
+  const idsKey = candidateIds.join(',');
+  useEffect(() => {
+    const prev = seen.current;
+    seen.current = new Set(candidateIds);
+    if (!prev) return;
+    const mine = session.candidates.filter((c) => c.isMine && !prev.has(c.foodId));
+    if (mine.length === 0) return;
+    const id = mine[mine.length - 1].foodId;
+    setFresh(id);
+    if (freshTimer.current) clearTimeout(freshTimer.current);
+    freshTimer.current = setTimeout(() => setFresh(null), FRESH_MS);
+    // 후보 칸 머리가 아래 버튼(약 120)에 가려지면 머리가 위쪽에 오게 내린다
+    if (listY.current + 80 > scrollY.current + viewH.current - 120) {
+      scrollRef.current?.scrollTo({ y: Math.max(0, listY.current - 8), animated: true });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [idsKey]);
+  useEffect(() => () => {
+    if (freshTimer.current) clearTimeout(freshTimer.current);
+  }, []);
+  const newestFirst = [...session.candidates].reverse();
+
   return (
     <View className="flex-1">
-      <ScrollView contentContainerClassName="gap-5 px-5 pb-40 pt-2">
+      <ScrollView
+        ref={scrollRef}
+        onScroll={(e) => (scrollY.current = e.nativeEvent.contentOffset.y)}
+        scrollEventThrottle={64}
+        onLayout={(e: LayoutChangeEvent) => (viewH.current = e.nativeEvent.layout.height)}
+        contentContainerClassName="gap-4 px-5 pb-40 pt-2">
         <View className="flex-row items-end justify-between">
-          <Text className="flex-1 text-3xl font-extrabold tracking-tight text-text">뭐 먹고 싶어요?</Text>
+          <Text className="flex-1 text-2xl font-extrabold tracking-tight text-text">뭐 먹고 싶어요?</Text>
           <Pressable
             accessibilityRole="button"
             accessibilityLabel="못 먹는 것"
@@ -291,12 +328,13 @@ function CandidateStage({
           error={actionError ? sessionErrorMessage(actionError) : null}
         />
 
-        <View className="gap-3">
-          <Text className="text-xl font-extrabold text-text">후보 {session.candidates.length}개</Text>
-          {session.candidates.map((c) => (
+        <View className="gap-2" onLayout={(e: LayoutChangeEvent) => (listY.current = e.nativeEvent.layout.y)}>
+          <Text className="text-lg font-extrabold text-text">후보 {session.candidates.length}개</Text>
+          {newestFirst.map((c) => (
               <CandidateCard
                 key={c.foodId}
                 candidate={c}
+                highlight={fresh === c.foodId}
                 busy={busy}
                 eatenNote={eatenNote(hintOf.get(c.foodId)?.lastEatenAt ?? null, RECENT_EATEN_DAYS)}
                 onSavePitch={c.isMine ? (text) => pitch.mutate({ foodId: c.foodId, text }) : undefined}
@@ -331,6 +369,9 @@ function CandidateStage({
   );
 }
 
+// 방금 올린 후보 테두리가 보이는 시간
+const FRESH_MS = 1600;
+
 // 4-11 익명 투표. 투표 중에는 음식별 표 수를 보여주지 않는다
 function VotingStage({ session }: { session: SessionView }) {
   const { vote, spin, anyOk } = useSessionActions(session.id);
@@ -357,7 +398,7 @@ function VotingStage({ session }: { session: SessionView }) {
               {votedCount}/{total}명 골랐어요
             </Text>
             <Text className="text-sm text-muted">
-              내 표 {session.myVotes.length}/{MAX_VOTES_PER_PERSON}
+              내 표 {session.myVotes.length}/{session.voteLimit}
             </Text>
           </View>
           <View className="h-3 overflow-hidden rounded-full bg-surface-strong">
@@ -388,6 +429,7 @@ function VotingStage({ session }: { session: SessionView }) {
               key={c.foodId}
               candidate={c}
               voted={session.myVotes.includes(c.foodId)}
+              myVoteCount={session.myVotes.filter((f) => f === c.foodId).length}
               busy={vote.isPending}
               onVote={() => vote.mutate(c.foodId)}
             />

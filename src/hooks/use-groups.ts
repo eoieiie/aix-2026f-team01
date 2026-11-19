@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useEffect } from 'react';
 
 import {
   createGroup,
@@ -14,6 +15,9 @@ import {
   getGroupProfileCard,
   type GroupProfileCardData,
   startSession,
+  subscribeGroupMembers,
+  subscribeMySessions,
+  type SessionOptions,
 } from '@/api/groups';
 import {
   DISPLAY_NAME_MAX,
@@ -22,6 +26,7 @@ import {
 } from '@/constants';
 
 export type {
+  SessionOptions,
   CreateGroupInput,
   GroupProfileCardData,
   CreateGroupResult,
@@ -135,8 +140,11 @@ export function useStartSession(groupId: string) {
   const queryClient = useQueryClient();
 
   const mutation = useMutation({
-    mutationFn: async (expectedCount?: number): Promise<string> => {
-      return await startSession(groupId, expectedCount);
+    mutationFn: async (
+      args?: number | { expectedCount: number; options: SessionOptions }
+    ): Promise<string> => {
+      if (args === undefined || typeof args === 'number') return await startSession(groupId, args);
+      return await startSession(groupId, args.expectedCount, undefined, args.options);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['groups', 'detail', groupId] });
@@ -159,4 +167,25 @@ export function useGroupProfileCard(groupId: string) {
     retry: false,
   });
   return { card: query.data ?? null, isLoading: query.isPending, isError: query.isError };
+}
+
+// 모임에 누가 들어오면(초대 링크, QR) 모임 상세를 다시 읽는다 (0019, 4-6)
+export function useGroupMembersLive(groupId: string) {
+  const queryClient = useQueryClient();
+  useEffect(() => {
+    if (!groupId) return;
+    return subscribeGroupMembers(groupId, () => {
+      queryClient.invalidateQueries({ queryKey: ['groups', 'detail', groupId] });
+    });
+  }, [groupId, queryClient]);
+}
+
+// 홈: 내 모임 어디서든 판이 열리거나 끝나면 모임 목록을 다시 읽는다 ("판 진행 중" 딱지)
+export function useMyGroupsLive() {
+  const queryClient = useQueryClient();
+  useEffect(() => {
+    return subscribeMySessions(() => {
+      queryClient.invalidateQueries({ queryKey: ['groups'], exact: true });
+    });
+  }, [queryClient]);
 }
