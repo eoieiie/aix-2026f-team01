@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
-import { ActivityIndicator, Text, View } from 'react-native';
+import { ActivityIndicator, View } from 'react-native';
+import { Text } from '@/components/text';
 
 import colors from '@/constants/colors.json';
 import { axesView, restrictionView } from '@/constants/group-card';

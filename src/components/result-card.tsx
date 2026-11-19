@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
-import { Animated, Easing, Platform, Text, View } from 'react-native';
+import { Animated, Easing, Platform, View } from 'react-native';
+import { Text } from '@/components/text';
 
 import { PersonDots } from '@/components/person-dots';
 import { useReduceMotion } from '@/hooks/use-reduce-motion';

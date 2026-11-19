@@ -4,6 +4,7 @@ import { Animated, Easing, Platform, useWindowDimensions, View } from 'react-nat
 import Svg, { Circle, G, Path, Text as SvgText } from 'react-native-svg';
 
 import { foodColorValues } from '@/components/food-dot';
+import { FONT_FAMILY } from '@/components/text';
 import colors from '@/constants/colors.json';
 import {
   ROULETTE_LABEL_MAX,
@@ -237,6 +238,7 @@ export function Roulette({
                   fill={s.label}
                   fontSize={tone === 'onPrimary' ? 16 : 14}
                   fontWeight="bold"
+                  fontFamily={FONT_FAMILY}
                   textAnchor="middle">
                   {rouletteLabel(a.name)}
                 </SvgText>
@@ -247,6 +249,7 @@ export function Roulette({
                     fill={s.label}
                     fontSize={13}
                     fontWeight="bold"
+                    fontFamily={FONT_FAMILY}
                     textAnchor="middle">
                     {`${a.weight}표`}
                   </SvgText>

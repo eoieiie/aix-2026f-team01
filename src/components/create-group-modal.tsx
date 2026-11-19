@@ -1,6 +1,7 @@
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
-import { Modal, Text, View } from 'react-native';
+import { Modal, View } from 'react-native';
+import { Text } from '@/components/text';
 
 import { Button } from '@/components/button';
 import { KeyboardSafe } from '@/components/keyboard-safe';

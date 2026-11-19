@@ -1,14 +1,7 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
-import {
-  AccessibilityInfo,
-  ActivityIndicator,
-  Animated,
-  Pressable,
-  ScrollView,
-  Text,
-  View,
-} from 'react-native';
+import { AccessibilityInfo, ActivityIndicator, Animated, Pressable, ScrollView, View } from 'react-native';
+import { Text } from '@/components/text';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Button } from '@/components/button';

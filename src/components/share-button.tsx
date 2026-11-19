@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
-import { Platform, Pressable, Share, Text } from 'react-native';
+import { Platform, Pressable, Share } from 'react-native';
+import { Text } from '@/components/text';
 
 import { COPIED_TOAST_MS } from '@/constants';
 

@@ -131,3 +131,11 @@ prezl.pages.dev(첫 화면, /guide/)를 폰 폭 390에서 재서 숫자와 원�
 - 입력칸이 있는 화면과 창(이름, 아이디, 초대 들어가기, 새 모임)은 `KeyboardSafe`로 감싼다. 키보드가 아래 버튼을 가리지 않는다
 - 스크롤 화면은 `keyboardShouldPersistTaps="handled"`. 키보드가 열린 채로 "올리기" 같은 버튼이 한 번에 눌린다(전에는 첫 번째 누름이 키보드만 닫았다)
 - 한글 큰 글자는 `leading-none`을 쓰지 않는다. 아이폰에서 글자 위가 잘린다
+
+### 글꼴 (2026-11-19, 병주 "응 ㄱㄱ")
+
+- 모든 글자는 Pretendard(OFL-1.1). 시스템 기본 글꼴은 "기본값 느낌"이 나서 바꿨다
+- 화면에서는 `react-native`의 `Text`, `TextInput` 대신 `@/components/text`를 쓴다. 여기서 글꼴 이름 하나를 붙이고, 굵기는 지금처럼 `font-semibold`, `font-bold`, `font-extrabold`로 고른다
+- 앱에 넣은 굵기: 400(기본), 600, 700, 800. `font-black`(900)은 쓰지 않는다(로고는 800으로 바꿈). 다른 굵기를 쓰려면 `app.json` expo-font에 파일을 더하고 앱을 새로 빌드한다
+- 웹은 Pretendard 웹 글꼴(dynamic subset)을 늦게 받아 붙인다. 받기 전에는 시스템 글꼴로 먼저 그린다(QR 합류가 글꼴 때문에 늦지 않게)
+- 1.0.0 (6) 이하로 깐 앱은 글꼴 파일이 없어 시스템 글꼴로 보인다. 1.0.0 (7)부터 Pretendard

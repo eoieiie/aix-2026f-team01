@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
-import { Modal, Platform, Pressable, Text, useWindowDimensions, View } from 'react-native';
+import { Modal, Platform, Pressable, useWindowDimensions, View } from 'react-native';
+import { Text } from '@/components/text';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Icon, IconButton, type IconName } from '@/components/icon';
