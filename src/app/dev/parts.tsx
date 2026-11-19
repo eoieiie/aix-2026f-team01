@@ -1,40 +1,62 @@
-import { useState } from 'react';
-import { ScrollView, Text, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { useState } from "react";
+import { ScrollView, Text, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
-import { Button } from '@/components/button';
-import { Card } from '@/components/card';
-import { FoodDot } from '@/components/food-dot';
-import { PersonDots } from '@/components/person-dots';
-import { TextField } from '@/components/text-field';
-import { DISPLAY_NAME_MAX, GROUP_NAME_MAX } from '@/constants';
+import { Button } from "@/components/button";
+import { Card } from "@/components/card";
+import { FoodDot } from "@/components/food-dot";
+import { PersonDots } from "@/components/person-dots";
+import { TextField } from "@/components/text-field";
+import { DISPLAY_NAME_MAX, GROUP_NAME_MAX } from "@/constants";
 
 // 개발용 부품 모음 (이슈 #10). 공통 부품이 어떻게 보이는지 한 화면에서 확인한다. 1단계 화면 목록에는 없다
 export default function PartsScreen() {
-  const [groupName, setGroupName] = useState('');
-  const [displayName, setDisplayName] = useState('밥친구');
+  const [groupName, setGroupName] = useState("");
+  const [displayName, setDisplayName] = useState("밥친구");
   const [pressed, setPressed] = useState(0);
 
   return (
     <SafeAreaView className="flex-1 bg-background">
-      <ScrollView contentContainerClassName="gap-8 px-6 py-8">
+      <ScrollView
+        keyboardShouldPersistTaps="handled"
+        automaticallyAdjustKeyboardInsets
+        contentContainerClassName="gap-8 px-6 py-8"
+      >
         <Text className="text-2xl font-bold text-text">부품 모음</Text>
 
         <View className="gap-3">
           <Text className="text-base font-semibold text-muted">Button</Text>
-          <Button label={`눌러 보기 (${pressed})`} onPress={() => setPressed((n) => n + 1)} />
-          <Button label="보조 버튼" variant="secondary" onPress={() => setPressed((n) => n + 1)} />
-          <Button label="이름을 적으면 켜져요" disabled={groupName.trim() === ''} onPress={() => {}} />
+          <Button
+            label={`눌러 보기 (${pressed})`}
+            onPress={() => setPressed((n) => n + 1)}
+          />
+          <Button
+            label="보조 버튼"
+            variant="secondary"
+            onPress={() => setPressed((n) => n + 1)}
+          />
+          <Button
+            label="이름을 적으면 켜져요"
+            disabled={groupName.trim() === ""}
+            onPress={() => {}}
+          />
           <Button label="기다리는 중" loading onPress={() => {}} />
           <View className="gap-3 rounded-3xl bg-primary p-4">
-            <Button label="주황 위 흰 버튼" variant="inverse" onPress={() => setPressed((n) => n + 1)} />
+            <Button
+              label="주황 위 흰 버튼"
+              variant="inverse"
+              onPress={() => setPressed((n) => n + 1)}
+            />
           </View>
         </View>
 
         <View className="gap-3">
           <Text className="text-base font-semibold text-muted">PersonDots</Text>
-          <PersonDots names={['민지']} ringClass="border-background" />
-          <PersonDots names={['민지', '준호', '서연', '하늘', '윤']} ringClass="border-background" />
+          <PersonDots names={["민지"]} ringClass="border-background" />
+          <PersonDots
+            names={["민지", "준호", "서연", "하늘", "윤"]}
+            ringClass="border-background"
+          />
         </View>
 
         <View className="gap-3">
@@ -58,11 +80,18 @@ export default function PartsScreen() {
         <View className="gap-3">
           <Text className="text-base font-semibold text-muted">Card</Text>
           <Card>
-            <Text className="text-base font-semibold text-text">점심 메이트</Text>
+            <Text className="text-base font-semibold text-text">
+              점심 메이트
+            </Text>
             <Text className="text-sm text-muted">멤버 4명</Text>
           </Card>
-          <Card accessibilityLabel="초대 링크 복사" onPress={() => setPressed((n) => n + 1)}>
-            <Text className="text-base font-semibold text-text">초대 링크 복사</Text>
+          <Card
+            accessibilityLabel="초대 링크 복사"
+            onPress={() => setPressed((n) => n + 1)}
+          >
+            <Text className="text-base font-semibold text-text">
+              초대 링크 복사
+            </Text>
             <Text className="text-sm text-muted">누를 수 있는 카드</Text>
           </Card>
         </View>

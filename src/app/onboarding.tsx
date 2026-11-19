@@ -1,17 +1,24 @@
-import * as Haptics from 'expo-haptics';
-import { useLocalSearchParams, useRouter } from 'expo-router';
-import { useEffect, useState } from 'react';
-import { ActivityIndicator, Animated, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import Svg, { Defs, LinearGradient, Rect, Stop } from 'react-native-svg';
+import * as Haptics from "expo-haptics";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import { useEffect, useState } from "react";
+import {
+  ActivityIndicator,
+  Animated,
+  Platform,
+  Pressable,
+  Text,
+  View,
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
-import { Button } from '@/components/button';
-import { IconButton } from '@/components/icon';
-import { TextField } from '@/components/text-field';
-import colors from '@/constants/colors.json';
-import { DISPLAY_NAME_MAX, HANDLE_MAX, QUIZ_LENGTH } from '@/constants';
-import { QUIZ, type QuizAnswer } from '@/constants/quiz';
-import { useReduceMotion } from '@/hooks/use-reduce-motion';
+import { Button } from "@/components/button";
+import { IconButton } from "@/components/icon";
+import { KeyboardSafe } from "@/components/keyboard-safe";
+import { TextField } from "@/components/text-field";
+import colors from "@/constants/colors.json";
+import { DISPLAY_NAME_MAX, HANDLE_MAX, QUIZ_LENGTH } from "@/constants";
+import { QUIZ, type QuizAnswer } from "@/constants/quiz";
+import { useReduceMotion } from "@/hooks/use-reduce-motion";
 import {
   type Axes,
   isValidHandle,
@@ -19,9 +26,9 @@ import {
   typeLines,
   useMyProfile,
   useSaveProfile,
-} from '@/hooks/use-profile';
+} from "@/hooks/use-profile";
 
-type Step = 'name' | 'quiz' | 'result' | 'handle';
+type Step = "name" | "quiz" | "result" | "handle";
 
 // 온보딩 (spec.md 4-14). 이름 → 8문항 → 네 글자 → 아이디(건너뛰기) → 홈.
 // 단계마다 save_my_profile로 저장해서 중간에 나가도 그때까지는 남는다
@@ -32,26 +39,32 @@ export default function OnboardingScreen() {
   const save = useSaveProfile();
 
   const [chosenStep, setStep] = useState<Step | null>(null);
-  const [name, setName] = useState('');
+  const [name, setName] = useState("");
   const [answers, setAnswers] = useState<QuizAnswer[]>([]);
   const [axes, setAxes] = useState<Axes | null>(null);
-  const [handle, setHandle] = useState('');
+  const [handle, setHandle] = useState("");
   const [handleError, setHandleError] = useState<string | null>(null);
   // 마지막 문항 저장이 실패하면 같은 답으로 다시 보낸다
   const [lastPick, setLastPick] = useState<QuizAnswer | null>(null);
 
   // 이름이 이미 있으면(링크로 들어왔거나 이름 단계에서 저장했으면) 이름 단계를 건너뛴다
   const step: Step | null =
-    chosenStep ?? (profile.isPending ? null : profile.data?.displayName ? 'quiz' : 'name');
+    chosenStep ??
+    (profile.isPending ? null : profile.data?.displayName ? "quiz" : "name");
 
-  const finish = () => router.replace((from === 'profile' ? '/profile' : '/') as any);
+  const finish = () =>
+    router.replace((from === "profile" ? "/profile" : "/") as any);
 
   if (profile.isError) {
     return (
       <SafeAreaView className="flex-1 items-center justify-center gap-4 bg-background px-6">
         <Text className="text-lg font-bold text-text">연결할 수 없어요</Text>
         <View className="w-full max-w-xs">
-          <Button label="다시 시도" variant="secondary" onPress={() => profile.refetch()} />
+          <Button
+            label="다시 시도"
+            variant="secondary"
+            onPress={() => profile.refetch()}
+          />
         </View>
       </SafeAreaView>
     );
@@ -60,45 +73,60 @@ export default function OnboardingScreen() {
   if (step === null) {
     return (
       <SafeAreaView className="flex-1 items-center justify-center bg-background">
-        <ActivityIndicator color={colors.primary} accessibilityLabel="불러오는 중" />
+        <ActivityIndicator
+          color={colors.primary}
+          accessibilityLabel="불러오는 중"
+        />
       </SafeAreaView>
     );
   }
 
   const saveError = save.error ? profileErrorMessage(save.error) : null;
 
-  if (step === 'name') {
+  if (step === "name") {
     const trimmed = name.trim();
     const submit = () => {
       if (!trimmed || save.isPending) return;
-      save.mutate({ displayName: trimmed }, { onSuccess: () => setStep('quiz') });
+      save.mutate(
+        { displayName: trimmed },
+        { onSuccess: () => setStep("quiz") },
+      );
     };
     return (
       <SafeAreaView className="flex-1 bg-background">
-        <View className="flex-1 gap-8 px-5 pt-16">
-          <Text className="text-3xl font-extrabold tracking-tight text-text">뭐라고 부를까요?</Text>
-          <TextField
-            label="이름"
-            placeholder="예: 홍길동"
-            value={name}
-            onChangeText={(t) => {
-              setName(t);
-              save.reset();
-            }}
-            maxLength={DISPLAY_NAME_MAX}
-            autoFocus
-            onSubmitEditing={submit}
-            error={saveError}
-          />
-        </View>
-        <View className="px-5 pb-8">
-          <Button label="다음" onPress={submit} disabled={!trimmed} loading={save.isPending} />
-        </View>
+        <KeyboardSafe>
+          <View className="flex-1 gap-8 px-5 pt-16">
+            <Text className="text-3xl font-bold tracking-tight text-text">
+              뭐라고 부를까요?
+            </Text>
+            <TextField
+              label="이름"
+              placeholder="예: 홍길동"
+              value={name}
+              onChangeText={(t) => {
+                setName(t);
+                save.reset();
+              }}
+              maxLength={DISPLAY_NAME_MAX}
+              autoFocus
+              onSubmitEditing={submit}
+              error={saveError}
+            />
+          </View>
+          <View className="px-5 pb-8">
+            <Button
+              label="다음"
+              onPress={submit}
+              disabled={!trimmed}
+              loading={save.isPending}
+            />
+          </View>
+        </KeyboardSafe>
       </SafeAreaView>
     );
   }
 
-  if (step === 'quiz') {
+  if (step === "quiz") {
     const i = answers.length;
     const q = QUIZ[i];
     const pick = (a: QuizAnswer) => {
@@ -115,16 +143,20 @@ export default function OnboardingScreen() {
           onSuccess: (r) => {
             setAnswers(next);
             setAxes(r.axes);
-            setStep('result');
+            setStep("result");
           },
-        }
+        },
       );
     };
     return (
       <SafeAreaView className="flex-1 bg-background">
         <View className="flex-row items-center gap-3 px-5 py-3">
           {i > 0 ? (
-            <IconButton name="back" label="이전 문항" onPress={() => setAnswers(answers.slice(0, -1))} />
+            <IconButton
+              name="back"
+              label="이전 문항"
+              onPress={() => setAnswers(answers.slice(0, -1))}
+            />
           ) : (
             <View className="h-12 w-12" />
           )}
@@ -145,33 +177,46 @@ export default function OnboardingScreen() {
         <View className="flex-1 justify-center gap-8 px-5 pb-16">
           {/* 첫 문항에서 무엇을 하라는지 몰랐다는 말이 있었다 (#44 인터뷰 3 다시, 11/17). 모든 문항 같은 자리에 한 줄만 */}
           <View className="gap-2">
-            <Text className="text-base font-bold text-muted">끌리는 쪽을 골라요</Text>
-            <Text className="text-3xl font-extrabold leading-tight tracking-tight text-text">
+            <Text className="text-base font-bold text-muted">
+              끌리는 쪽을 골라요
+            </Text>
+            <Text className="text-3xl font-bold leading-tight tracking-tight text-text">
               {q.situation}
             </Text>
           </View>
           {/* 두 답은 같은 크기의 칸 (4절 2번) */}
           <View className="gap-3">
-            {(['A', 'B'] as const).map((a) => (
+            {(["A", "B"] as const).map((a) => (
               <Pressable
                 key={a}
                 accessibilityRole="button"
-                accessibilityLabel={a === 'A' ? q.a : q.b}
+                accessibilityLabel={a === "A" ? q.a : q.b}
                 disabled={save.isPending}
                 onPress={() => pick(a)}
                 className="h-20 justify-center rounded-3xl bg-surface px-6 active:bg-surface-strong disabled:opacity-50"
               >
-                <Text className="text-xl font-bold text-text">{a === 'A' ? q.a : q.b}</Text>
+                <Text className="text-xl font-bold text-text">
+                  {a === "A" ? q.a : q.b}
+                </Text>
               </Pressable>
             ))}
           </View>
           {save.isPending ? (
-            <ActivityIndicator color={colors.primary} accessibilityLabel="저장하는 중" />
+            <ActivityIndicator
+              color={colors.primary}
+              accessibilityLabel="저장하는 중"
+            />
           ) : null}
           {saveError && lastPick ? (
             <View className="gap-2">
-              <Text className="text-sm font-semibold text-danger">{saveError}</Text>
-              <Button label="다시 시도" variant="secondary" onPress={() => pick(lastPick)} />
+              <Text className="text-sm font-semibold text-danger">
+                {saveError}
+              </Text>
+              <Button
+                label="다시 시도"
+                variant="secondary"
+                onPress={() => pick(lastPick)}
+              />
             </View>
           ) : null}
         </View>
@@ -179,20 +224,20 @@ export default function OnboardingScreen() {
     );
   }
 
-  if (step === 'result' && axes) {
+  if (step === "result" && axes) {
     return (
       <TypeReveal
         axes={axes}
         answers={answers}
         onNext={() => {
           save.reset();
-          setStep('handle');
+          setStep("handle");
         }}
         onRetry={() => {
           save.reset();
           setAnswers([]);
           setAxes(null);
-          setStep('quiz');
+          setStep("quiz");
         }}
       />
     );
@@ -203,44 +248,53 @@ export default function OnboardingScreen() {
   const submitHandle = () => {
     if (save.isPending) return;
     if (!isValidHandle(trimmedHandle)) {
-      setHandleError('영어 소문자, 숫자, 밑줄로 3~16자');
+      setHandleError("영어 소문자, 숫자, 밑줄로 3~16자");
       return;
     }
     save.mutate({ handle: trimmedHandle }, { onSuccess: finish });
   };
   return (
     <SafeAreaView className="flex-1 bg-background">
-      <View className="flex-1 gap-8 px-5 pt-16">
-        <Text className="text-3xl font-extrabold tracking-tight text-text">아이디를 정해요</Text>
-        <TextField
-          label="아이디"
-          placeholder="영어 소문자, 숫자, 밑줄 3~16자"
-          value={handle}
-          onChangeText={(t) => {
-            setHandle(t);
-            setHandleError(null);
-            save.reset();
-          }}
-          maxLength={HANDLE_MAX}
-          autoCapitalize="none"
-          autoFocus
-          onSubmitEditing={submitHandle}
-          error={handleError ?? saveError}
-        />
-      </View>
-      <View className="flex-row gap-2 px-5 pb-8">
-        <View className="flex-1">
-          <Button label="건너뛰기" variant="secondary" onPress={finish} disabled={save.isPending} />
-        </View>
-        <View className="flex-1">
-          <Button
-            label="시작하기"
-            onPress={submitHandle}
-            disabled={!trimmedHandle}
-            loading={save.isPending}
+      <KeyboardSafe>
+        <View className="flex-1 gap-8 px-5 pt-16">
+          <Text className="text-3xl font-bold tracking-tight text-text">
+            아이디를 정해요
+          </Text>
+          <TextField
+            label="아이디"
+            placeholder="영어 소문자, 숫자, 밑줄 3~16자"
+            value={handle}
+            onChangeText={(t) => {
+              setHandle(t);
+              setHandleError(null);
+              save.reset();
+            }}
+            maxLength={HANDLE_MAX}
+            autoCapitalize="none"
+            autoFocus
+            onSubmitEditing={submitHandle}
+            error={handleError ?? saveError}
           />
         </View>
-      </View>
+        <View className="flex-row gap-2 px-5 pb-8">
+          <View className="flex-1">
+            <Button
+              label="건너뛰기"
+              variant="secondary"
+              onPress={finish}
+              disabled={save.isPending}
+            />
+          </View>
+          <View className="flex-1">
+            <Button
+              label="시작하기"
+              onPress={submitHandle}
+              disabled={!trimmedHandle}
+              loading={save.isPending}
+            />
+          </View>
+        </View>
+      </KeyboardSafe>
     </SafeAreaView>
   );
 }
@@ -276,14 +330,16 @@ function TypeReveal({
         Animated.timing(a, {
           toValue: 1,
           duration: REVEAL_MS,
-          useNativeDriver: Platform.OS !== 'web',
-        })
-      )
+          useNativeDriver: Platform.OS !== "web",
+        }),
+      ),
     );
     run.start();
     const t = setTimeout(() => {
-      if (Platform.OS !== 'web') {
-        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(() => {});
+      if (Platform.OS !== "web") {
+        Haptics.notificationAsync(
+          Haptics.NotificationFeedbackType.Success,
+        ).catch(() => {});
       }
     }, REVEAL_GAP_MS * 3);
     return () => {
@@ -293,42 +349,25 @@ function TypeReveal({
   }, [anims, reduce]);
 
   return (
-    <SafeAreaView
-      className="relative flex-1 bg-primary"
-      style={
-        Platform.OS === 'web'
-          ? ({
-              backgroundImage: `linear-gradient(135deg, ${colors['food-7']} 0%, ${colors.primary} 55%, ${colors['food-5']} 100%)`,
-            } as any)
-          : undefined
-      }>
-      {/* 네이티브(iOS/Android)에서는 SVG LinearGradient 사용 */}
-      {Platform.OS !== 'web' ? (
-        <Svg style={StyleSheet.absoluteFill} width="100%" height="100%">
-          <Defs>
-            <LinearGradient id="typeRevealGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-              <Stop offset="0%" stopColor={colors['food-7']} stopOpacity="1" />
-              <Stop offset="55%" stopColor={colors.primary} stopOpacity="1" />
-              <Stop offset="100%" stopColor={colors['food-5']} stopOpacity="1" />
-            </LinearGradient>
-          </Defs>
-          <Rect width="100%" height="100%" fill="url(#typeRevealGrad)" />
-        </Svg>
-      ) : null}
+    <SafeAreaView className="relative flex-1 bg-primary">
+      {/* 그라데이션은 뺐다. 주황 한 면으로 둔다 (2026-11-19, 웹과 앱이 같게, 흰 글자 대비) */}
 
       <View className="flex-1 justify-center gap-8 px-5">
-        <Text className="text-xl font-extrabold text-on-primary" accessibilityRole="header">
+        <Text
+          className="text-xl font-bold text-on-primary"
+          accessibilityRole="header"
+        >
           나의 밥BTI
         </Text>
         <View
-          accessibilityLabel={`네 글자 ${lines.map((l) => l.letter).join('')}`}
+          accessibilityLabel={`네 글자 ${lines.map((l) => l.letter).join("")}`}
           className="flex-row flex-wrap justify-between gap-y-3"
         >
           {lines.map((l, i) => (
             <Animated.View
               key={l.letter}
               style={{
-                width: '48.5%',
+                width: "48.5%",
                 opacity: anims[i],
                 transform: [
                   {
@@ -340,8 +379,10 @@ function TypeReveal({
                 ],
               }}
             >
-              <View className="aspect-square items-center justify-center gap-1 rounded-3xl bg-on-primary shadow-sm">
-                <Text className="text-8xl font-extrabold text-primary">{l.letter}</Text>
+              <View className="aspect-square items-center justify-center gap-1 rounded-3xl bg-on-primary">
+                <Text className="text-8xl font-extrabold text-primary">
+                  {l.letter}
+                </Text>
                 <Text className="text-base font-bold text-text">{l.line}</Text>
               </View>
             </Animated.View>
@@ -353,9 +394,11 @@ function TypeReveal({
           accessibilityRole="button"
           accessibilityLabel="아이디 정하고 시작하기"
           onPress={onNext}
-          className="h-14 items-center justify-center rounded-full bg-on-primary px-6 shadow-sm active:opacity-80"
+          className="h-14 items-center justify-center rounded-2xl bg-on-primary px-6 active:opacity-80"
         >
-          <Text className="text-lg font-extrabold text-primary">아이디 정하고 시작하기</Text>
+          <Text className="text-lg font-bold text-primary">
+            아이디 정하고 시작하기
+          </Text>
         </Pressable>
         <Pressable
           accessibilityRole="button"

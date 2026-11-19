@@ -1,5 +1,5 @@
-import { useLocalSearchParams, useRouter } from 'expo-router';
-import { useEffect, useRef, useState } from 'react';
+import { useLocalSearchParams, useRouter } from "expo-router";
+import { useEffect, useRef, useState } from "react";
 import {
   AccessibilityInfo,
   ActivityIndicator,
@@ -8,16 +8,16 @@ import {
   ScrollView,
   Text,
   View,
-} from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
-import { Button } from '@/components/button';
-import { FoodDot } from '@/components/food-dot';
-import { GroupProfileCard } from '@/components/group-profile-card';
-import { HeadcountModal } from '@/components/headcount-modal';
-import { IconButton } from '@/components/icon';
-import { InviteCard } from '@/components/invite-card';
-import colors from '@/constants/colors.json';
+import { Button } from "@/components/button";
+import { FoodDot } from "@/components/food-dot";
+import { GroupProfileCard } from "@/components/group-profile-card";
+import { HeadcountModal } from "@/components/headcount-modal";
+import { IconButton } from "@/components/icon";
+import { InviteCard } from "@/components/invite-card";
+import colors from "@/constants/colors.json";
 import {
   Member,
   RecentMeal,
@@ -25,30 +25,33 @@ import {
   useGroupDetail,
   useGroupMembersLive,
   useStartSession,
-} from '@/hooks/use-groups';
+} from "@/hooks/use-groups";
 
 // 멤버 동그라미 색. 홈 모임 카드의 사람 동그라미와 같은 순서
 const MEMBER_COLORS = [
-  { bg: 'bg-food-1', text: 'text-on-primary' },
-  { bg: 'bg-food-7', text: 'text-on-primary' },
-  { bg: 'bg-food-3', text: 'text-text' },
+  { bg: "bg-food-1", text: "text-on-primary" },
+  { bg: "bg-food-7", text: "text-on-primary" },
+  { bg: "bg-food-3", text: "text-text" },
 ] as const;
 
 export default function GroupScreen() {
   const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
-  const { group, isLoading, isError, refetch } = useGroupDetail(id || '');
-  const { startSession, isPending: isStartingSession } = useStartSession(id || '');
+  const { group, isLoading, isError, refetch } = useGroupDetail(id || "");
+  const { startSession, isPending: isStartingSession } = useStartSession(
+    id || "",
+  );
   const [askHeadcount, setAskHeadcount] = useState(false);
   const [startError, setStartError] = useState<string | null>(null);
 
   // 누가 초대 링크, QR로 들어오면 새로고침 없이 바로 멤버 줄에 붙는다 (0019, 4-6)
-  useGroupMembersLive(id || '');
+  useGroupMembersLive(id || "");
 
   // 화면을 연 뒤 새로 들어온 사람. 동그라미에 주황 테두리가 잠깐 보인다
   const seen = useRef<Set<string> | null>(null);
   const [fresh, setFresh] = useState<Set<string>>(new Set());
-  const memberKey = group?.members.map((m: Member) => m.user_id).join(',') ?? '';
+  const memberKey =
+    group?.members.map((m: Member) => m.user_id).join(",") ?? "";
   useEffect(() => {
     if (!group) return;
     const ids = group.members.map((m: Member) => m.user_id);
@@ -77,7 +80,10 @@ export default function GroupScreen() {
   if (isLoading) {
     return (
       <SafeAreaView className="flex-1 items-center justify-center bg-background">
-        <ActivityIndicator color={colors.primary} accessibilityLabel="모임을 불러오는 중" />
+        <ActivityIndicator
+          color={colors.primary}
+          accessibilityLabel="모임을 불러오는 중"
+        />
       </SafeAreaView>
     );
   }
@@ -86,9 +92,15 @@ export default function GroupScreen() {
   if (isError) {
     return (
       <SafeAreaView className="flex-1 items-center justify-center gap-4 bg-background px-6">
-        <Text className="text-lg font-bold text-text">모임 정보를 불러올 수 없어요</Text>
+        <Text className="text-lg font-bold text-text">
+          모임 정보를 불러올 수 없어요
+        </Text>
         <View className="w-full max-w-xs">
-          <Button label="다시 시도" variant="secondary" onPress={() => refetch()} />
+          <Button
+            label="다시 시도"
+            variant="secondary"
+            onPress={() => refetch()}
+          />
         </View>
       </SafeAreaView>
     );
@@ -98,9 +110,11 @@ export default function GroupScreen() {
   if (!group || !group.is_member) {
     return (
       <SafeAreaView className="flex-1 items-center justify-center gap-4 bg-background px-6">
-        <Text className="text-lg font-bold text-text">이 모임 멤버가 아니에요</Text>
+        <Text className="text-lg font-bold text-text">
+          이 모임 멤버가 아니에요
+        </Text>
         <View className="w-full max-w-xs">
-          <Button label="홈으로" onPress={() => router.replace('/')} />
+          <Button label="홈으로" onPress={() => router.replace("/")} />
         </View>
       </SafeAreaView>
     );
@@ -109,7 +123,10 @@ export default function GroupScreen() {
   const hasOpenSession = !!group.open_session_id;
 
   // 진행 중인 판이 있으면 그 판으로, 없으면 먼저 몇 명이서 먹는지 묻는다 (4-6)
-  const handleStartOrJoinSession = async (expectedCount?: number, options?: SessionOptions) => {
+  const handleStartOrJoinSession = async (
+    expectedCount?: number,
+    options?: SessionOptions,
+  ) => {
     if (isStartingSession) return;
     if (!hasOpenSession && expectedCount === undefined) {
       // 화면을 연 뒤 다른 사람이 판을 열었을 수 있다. 몇 명인지 묻기 전에 다시 읽어서,
@@ -127,7 +144,9 @@ export default function GroupScreen() {
     try {
       // 진행 중인 판이 있으면 그 판 id, 없으면 새로 만든 판 id를 서버가 돌려준다 (spec.md 4-6, 4-8)
       const sessionId = await startSession(
-        expectedCount !== undefined && options ? { expectedCount, options } : expectedCount
+        expectedCount !== undefined && options
+          ? { expectedCount, options }
+          : expectedCount,
       );
       setAskHeadcount(false);
       router.push(`/sessions/${sessionId}` as any);
@@ -136,7 +155,9 @@ export default function GroupScreen() {
         setAskHeadcount(false);
         router.push(`/sessions/${group.open_session_id}` as any);
       } else {
-        setStartError(err instanceof Error ? err.message : '판을 열지 못했어요');
+        setStartError(
+          err instanceof Error ? err.message : "판을 열지 못했어요",
+        );
       }
     }
   };
@@ -144,17 +165,23 @@ export default function GroupScreen() {
   return (
     <SafeAreaView className="flex-1 bg-background">
       <View className="flex-row items-center px-5 py-3">
-        <IconButton name="back" label="홈으로" onPress={() => router.replace('/')} />
+        <IconButton
+          name="back"
+          label="홈으로"
+          onPress={() => router.replace("/")}
+        />
       </View>
 
       <ScrollView
+        keyboardShouldPersistTaps="handled"
+        automaticallyAdjustKeyboardInsets
         className="flex-1"
         showsVerticalScrollIndicator={false}
         contentContainerClassName="gap-8 px-5 pb-36 pt-2"
       >
         {/* 모임 이름과 멤버 이름 동그라미 (spec.md 4-6) */}
         <View className="gap-4">
-          <Text className="text-4xl font-extrabold leading-tight tracking-tight text-text">
+          <Text className="text-4xl font-bold leading-tight tracking-tight text-text">
             {group.name}
           </Text>
           <View className="flex-row flex-wrap items-center gap-3">
@@ -164,14 +191,18 @@ export default function GroupScreen() {
                 <View key={member.user_id} className="items-center gap-2">
                   <View>
                     <View
-                      className={`h-14 w-14 items-center justify-center rounded-full ${color.bg}`}>
-                      <Text className={`text-lg font-extrabold ${color.text}`}>
-                        {Array.from(member.display_name)[0] ?? ''}
+                      className={`h-14 w-14 items-center justify-center rounded-full ${color.bg}`}
+                    >
+                      <Text className={`text-lg font-bold ${color.text}`}>
+                        {Array.from(member.display_name)[0] ?? ""}
                       </Text>
                     </View>
                     {fresh.has(member.user_id) ? <NewRing /> : null}
                   </View>
-                  <Text className="max-w-16 text-sm font-semibold text-text" numberOfLines={1}>
+                  <Text
+                    className="max-w-16 text-sm font-semibold text-text"
+                    numberOfLines={1}
+                  >
                     {member.display_name}
                   </Text>
                 </View>
@@ -185,10 +216,14 @@ export default function GroupScreen() {
 
         {/* 최근 식사 5개 (spec.md 4-6) */}
         <View className="gap-3">
-          <Text className="text-2xl font-extrabold tracking-tight text-text">최근에 먹은 것</Text>
+          <Text className="text-2xl font-bold tracking-tight text-text">
+            최근에 먹은 것
+          </Text>
           {group.recent_meals.length === 0 ? (
             <View className="rounded-3xl bg-surface p-6">
-              <Text className="text-lg font-extrabold text-muted">아직 기록이 없어요</Text>
+              <Text className="text-lg font-bold text-muted">
+                아직 기록이 없어요
+              </Text>
             </View>
           ) : (
             <View className="gap-4 rounded-3xl bg-surface p-5">
@@ -199,13 +234,20 @@ export default function GroupScreen() {
                   accessibilityRole="button"
                   accessibilityLabel={`${meal.food_name} 결과 카드`}
                   onPress={() => router.push(`/meals/${meal.id}` as any)}
-                  className="min-h-11 flex-row items-center gap-3 active:opacity-70">
-                  <FoodDot foodId={meal.food_id} size="md" name={meal.food_name} />
-                  <Text className="flex-1 text-lg font-extrabold text-text">{meal.food_name}</Text>
+                  className="min-h-11 flex-row items-center gap-3 active:opacity-70"
+                >
+                  <FoodDot
+                    foodId={meal.food_id}
+                    size="md"
+                    name={meal.food_name}
+                  />
+                  <Text className="flex-1 text-lg font-bold text-text">
+                    {meal.food_name}
+                  </Text>
                   <Text className="text-sm text-muted">
-                    {new Date(meal.eaten_at).toLocaleDateString('ko-KR', {
-                      month: 'long',
-                      day: 'numeric',
+                    {new Date(meal.eaten_at).toLocaleDateString("ko-KR", {
+                      month: "long",
+                      day: "numeric",
                     })}
                   </Text>
                 </Pressable>
@@ -222,11 +264,13 @@ export default function GroupScreen() {
       <View className="absolute bottom-0 left-0 right-0 bg-background px-5 pb-8 pt-3">
         <View>
           <Button
-            label={hasOpenSession ? '진행 중인 판으로' : '오늘 뭐 먹지'}
+            label={hasOpenSession ? "진행 중인 판으로" : "오늘 뭐 먹지"}
             onPress={() => handleStartOrJoinSession()}
             loading={isStartingSession && !askHeadcount}
           />
-          {openFlash > 0 ? <NewRing key={openFlash} label="판이 열렸어요" /> : null}
+          {openFlash > 0 ? (
+            <NewRing key={openFlash} label="판이 열렸어요" />
+          ) : null}
         </View>
       </View>
 
@@ -247,7 +291,7 @@ export default function GroupScreen() {
 
 // 새로 들어온 사람 동그라미의 주황 테두리. 1초 보였다가 0.4초에 걸쳐 사라진다.
 // 움직임은 JS로(웹과 앱이 같게). 움직임 줄이기가 켜져 있으면 흐려지지 않고 1.6초 뒤 바로 사라진다
-function NewRing({ label = '새로 들어옴' }: { label?: string }) {
+function NewRing({ label = "새로 들어옴" }: { label?: string }) {
   const [opacity] = useState(() => new Animated.Value(1));
   const [gone, setGone] = useState(false);
   useEffect(() => {
@@ -261,9 +305,12 @@ function NewRing({ label = '새로 들어옴' }: { label?: string }) {
           timer = setTimeout(() => alive && setGone(true), 1600);
           return;
         }
-        Animated.timing(opacity, { toValue: 0, duration: 400, delay: 1000, useNativeDriver: false }).start(
-          () => alive && setGone(true)
-        );
+        Animated.timing(opacity, {
+          toValue: 0,
+          duration: 400,
+          delay: 1000,
+          useNativeDriver: false,
+        }).start(() => alive && setGone(true));
       });
     return () => {
       alive = false;
@@ -276,7 +323,7 @@ function NewRing({ label = '새로 들어옴' }: { label?: string }) {
       pointerEvents="none"
       accessibilityLabel={label}
       style={{
-        position: 'absolute',
+        position: "absolute",
         top: -4,
         left: -4,
         right: -4,

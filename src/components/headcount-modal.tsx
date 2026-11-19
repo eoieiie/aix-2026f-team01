@@ -1,10 +1,10 @@
-import { useState } from 'react';
-import { Modal, Pressable, ScrollView, Text, View } from 'react-native';
+import { useState } from "react";
+import { Modal, Pressable, ScrollView, Text, View } from "react-native";
 
-import { Button } from '@/components/button';
-import { Icon } from '@/components/icon';
-import { HEADCOUNT_MAX } from '@/constants';
-import type { Member, SessionOptions } from '@/hooks/use-groups';
+import { Button } from "@/components/button";
+import { Icon } from "@/components/icon";
+import { HEADCOUNT_MAX } from "@/constants";
+import type { Member, SessionOptions } from "@/hooks/use-groups";
 
 const MIN_PEOPLE = 2;
 
@@ -31,12 +31,16 @@ export function HeadcountModal({
   // 뺀 사람만 적어 둔다. 그래서 새로 들어온 사람은 처음부터 체크돼 있다
   const [unchecked, setUnchecked] = useState<Set<string>>(new Set());
   // 혼자인 모임은 예전처럼 2명에서 시작한다
-  const [extra, setExtra] = useState(members.length < MIN_PEOPLE ? MIN_PEOPLE - members.length : 0);
+  const [extra, setExtra] = useState(
+    members.length < MIN_PEOPLE ? MIN_PEOPLE - members.length : 0,
+  );
   const [showOptions, setShowOptions] = useState(false);
   const [voteLimit, setVoteLimit] = useState(2);
   const [allowRepeat, setAllowRepeat] = useState(false);
 
-  const checked = members.filter((m) => m.user_id === myUserId || !unchecked.has(m.user_id)).length;
+  const checked = members.filter(
+    (m) => m.user_id === myUserId || !unchecked.has(m.user_id),
+  ).length;
   const total = checked + extra;
   const canStart = total >= MIN_PEOPLE && total <= HEADCOUNT_MAX;
 
@@ -54,29 +58,51 @@ export function HeadcountModal({
       accessibilityRole="button"
       accessibilityState={{ selected: on }}
       onPress={onPress}
-      className={`h-12 flex-1 items-center justify-center rounded-full ${on ? 'bg-ink' : 'bg-surface'} active:opacity-70`}>
-      <Text className={`text-base font-bold ${on ? 'text-on-ink' : 'text-text'}`}>{label}</Text>
+      className={`h-12 flex-1 items-center justify-center rounded-xl ${on ? "bg-ink" : "bg-surface"} active:opacity-70`}
+    >
+      <Text
+        className={`text-base font-bold ${on ? "text-on-ink" : "text-text"}`}
+      >
+        {label}
+      </Text>
     </Pressable>
   );
 
-  const round = (name: 'minus' | 'plus', label: string, off: boolean, d: number) => (
+  const round = (
+    name: "minus" | "plus",
+    label: string,
+    off: boolean,
+    d: number,
+  ) => (
     <Pressable
       accessibilityRole="button"
       accessibilityLabel={label}
       accessibilityState={{ disabled: off }}
       disabled={off}
       onPress={() => setExtra((n) => n + d)}
-      className={`h-12 w-12 items-center justify-center rounded-full bg-surface active:opacity-70 ${off ? 'opacity-40' : ''}`}>
+      className={`h-12 w-12 items-center justify-center rounded-full bg-surface active:opacity-70 ${off ? "opacity-40" : ""}`}
+    >
       <Icon name={name} size={22} />
     </Pressable>
   );
 
   return (
-    <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
+    <Modal
+      visible={visible}
+      transparent
+      animationType="fade"
+      onRequestClose={onClose}
+    >
       <View className="flex-1 items-center justify-center bg-black/40 px-5">
         <View className="max-h-full w-full max-w-sm rounded-3xl bg-background">
-          <ScrollView contentContainerClassName="gap-6 p-6">
-            <Text className="text-3xl font-extrabold tracking-tight text-text">같이 먹을 사람</Text>
+          <ScrollView
+            keyboardShouldPersistTaps="handled"
+            automaticallyAdjustKeyboardInsets
+            contentContainerClassName="gap-6 p-6"
+          >
+            <Text className="text-3xl font-bold tracking-tight text-text">
+              같이 먹을 사람
+            </Text>
 
             <View className="flex-row flex-wrap gap-2">
               {members.map((m) => {
@@ -90,9 +116,13 @@ export function HeadcountModal({
                     accessibilityState={{ checked: on, disabled: me }}
                     disabled={me}
                     onPress={() => toggle(m.user_id)}
-                    className={`h-11 max-w-full flex-row items-center gap-1 rounded-full px-4 ${on ? 'bg-ink' : 'bg-surface'} active:opacity-70`}>
+                    className={`h-11 max-w-full flex-row items-center gap-1 rounded-full px-4 ${on ? "bg-ink" : "bg-surface"} active:opacity-70`}
+                  >
                     {on ? <Icon name="check" size={16} color="on-ink" /> : null}
-                    <Text numberOfLines={1} className={`text-base font-bold ${on ? 'text-on-ink' : 'text-muted'}`}>
+                    <Text
+                      numberOfLines={1}
+                      className={`text-base font-bold ${on ? "text-on-ink" : "text-muted"}`}
+                    >
                       {m.display_name}
                     </Text>
                   </Pressable>
@@ -101,47 +131,72 @@ export function HeadcountModal({
             </View>
 
             <View className="flex-row items-center gap-2">
-              <Text className="flex-1 text-base font-bold text-text">앱 없는 사람</Text>
-              {round('minus', '앱 없는 사람 한 명 빼기', extra <= 0, -1)}
-              <Text accessibilityLabel={`앱 없는 사람 ${extra}명`} className="min-w-10 text-center text-xl font-extrabold text-text">
+              <Text className="flex-1 text-base font-bold text-text">
+                앱 없는 사람
+              </Text>
+              {round("minus", "앱 없는 사람 한 명 빼기", extra <= 0, -1)}
+              <Text
+                accessibilityLabel={`앱 없는 사람 ${extra}명`}
+                className="min-w-10 text-center text-xl font-bold text-text"
+              >
                 {extra}
               </Text>
-              {round('plus', '앱 없는 사람 한 명 더하기', total >= HEADCOUNT_MAX, 1)}
+              {round(
+                "plus",
+                "앱 없는 사람 한 명 더하기",
+                total >= HEADCOUNT_MAX,
+                1,
+              )}
             </View>
 
             <Pressable
               accessibilityRole="button"
               accessibilityState={{ expanded: showOptions }}
               onPress={() => setShowOptions((v) => !v)}
-              className="h-12 flex-row items-center justify-between rounded-full bg-surface px-4 active:opacity-70">
+              className="h-12 flex-row items-center justify-between rounded-2xl bg-surface px-4 active:opacity-70"
+            >
               <Text className="text-base font-bold text-text">
-                옵션 · 인당 {voteLimit}표{allowRepeat ? ' · 한 메뉴에 여러 표' : ''}
+                옵션 · 인당 {voteLimit}표
+                {allowRepeat ? " · 한 메뉴에 여러 표" : ""}
               </Text>
-              <Icon name={showOptions ? 'minus' : 'plus'} size={18} />
+              <Icon name={showOptions ? "minus" : "plus"} size={18} />
             </Pressable>
 
             {showOptions ? (
               <View className="gap-4">
                 <View className="gap-2">
-                  <Text className="text-sm font-bold text-text">인당 표 수</Text>
+                  <Text className="text-sm font-bold text-text">
+                    인당 표 수
+                  </Text>
                   <View className="flex-row gap-2">
-                    {[1, 2, 3].map((n) => seg(`${n}표`, voteLimit === n, () => setVoteLimit(n)))}
+                    {[1, 2, 3].map((n) =>
+                      seg(`${n}표`, voteLimit === n, () => setVoteLimit(n)),
+                    )}
                   </View>
                 </View>
                 <View className="gap-2">
-                  <Text className="text-sm font-bold text-text">한 메뉴에 여러 표</Text>
+                  <Text className="text-sm font-bold text-text">
+                    한 메뉴에 여러 표
+                  </Text>
                   <View className="flex-row gap-2">
-                    {seg('끔', !allowRepeat, () => setAllowRepeat(false))}
-                    {seg('켬', allowRepeat, () => setAllowRepeat(true))}
+                    {seg("끔", !allowRepeat, () => setAllowRepeat(false))}
+                    {seg("켬", allowRepeat, () => setAllowRepeat(true))}
                   </View>
                 </View>
               </View>
             ) : null}
 
-            {error ? <Text className="text-sm font-semibold text-danger">{error}</Text> : null}
+            {error ? (
+              <Text className="text-sm font-semibold text-danger">{error}</Text>
+            ) : null}
             <View className="flex-row gap-2">
               <View className="flex-1">
-                <Button label="취소" variant="secondary" onPress={onClose} disabled={loading} />
+                <Button
+                  label="취소"
+                  variant="secondary"
+                  onPress={onClose}
+                  disabled={loading}
+                />
               </View>
               <View className="flex-1">
                 <Button
