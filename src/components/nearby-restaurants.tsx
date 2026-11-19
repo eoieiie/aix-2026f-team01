@@ -1,5 +1,6 @@
 import { Linking, Platform, Pressable, Text, View } from 'react-native';
 
+import { CouponCode } from '@/components/coupon-code';
 import { Icon } from '@/components/icon';
 
 import {
@@ -54,13 +55,11 @@ export function NearbyRestaurants({
               <Icon name="pin" size={22} color="muted" />
             </Pressable>
             {r.partner && r.couponText ? (
-              <View className="flex-row items-center gap-3">
-                <Text className="flex-1 text-sm text-text">{r.couponText}</Text>
-                {code ? (
-                  <Text accessibilityLabel={`쿠폰 코드 ${code}`} className="text-base font-extrabold tracking-widest text-text">
-                    {code}
-                  </Text>
-                ) : (
+              code ? (
+                <CouponCode code={code} shop={r.name} benefit={r.couponText} />
+              ) : (
+                <View className="flex-row items-center gap-3">
+                  <Text className="flex-1 text-sm text-text">{r.couponText}</Text>
                   <Pressable
                     accessibilityRole="button"
                     accessibilityLabel={`${r.name} 쿠폰 받기`}
@@ -69,8 +68,8 @@ export function NearbyRestaurants({
                     className="h-11 items-center justify-center rounded-full bg-ink px-4 active:opacity-80 disabled:opacity-50">
                     <Text className="text-sm font-bold text-on-ink">쿠폰 받기</Text>
                   </Pressable>
-                )}
-              </View>
+                </View>
+              )
             ) : null}
           </View>
         );

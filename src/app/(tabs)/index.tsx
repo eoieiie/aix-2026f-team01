@@ -9,7 +9,7 @@ import { FoodDot } from '@/components/food-dot';
 import { IconButton } from '@/components/icon';
 import { Logo } from '@/components/logo';
 import { PersonDots } from '@/components/person-dots';
-import { Group, useMyGroups } from '@/hooks/use-groups';
+import { Group, useMyGroups, useMyGroupsLive } from '@/hooks/use-groups';
 import { TAB_BAR_SPACE } from '@/constants';
 
 const mascotSource = require('../../../assets/images/mascot.png');
@@ -17,6 +17,8 @@ const mascotSource = require('../../../assets/images/mascot.png');
 export default function HomeScreen() {
   const router = useRouter();
   const { groups, isLoading, isError, refetch } = useMyGroups();
+  // 다른 사람이 판을 열면 "판 진행 중"이 바로 붙는다
+  useMyGroupsLive();
   const [modalVisible, setModalVisible] = useState(false);
   const hasGroups = groups.length > 0;
 

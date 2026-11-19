@@ -16,6 +16,7 @@ import {
   type GroupProfileCardData,
   startSession,
   subscribeGroupMembers,
+  subscribeMySessions,
   type SessionOptions,
 } from '@/api/groups';
 import {
@@ -177,4 +178,14 @@ export function useGroupMembersLive(groupId: string) {
       queryClient.invalidateQueries({ queryKey: ['groups', 'detail', groupId] });
     });
   }, [groupId, queryClient]);
+}
+
+// 홈: 내 모임 어디서든 판이 열리거나 끝나면 모임 목록을 다시 읽는다 ("판 진행 중" 딱지)
+export function useMyGroupsLive() {
+  const queryClient = useQueryClient();
+  useEffect(() => {
+    return subscribeMySessions(() => {
+      queryClient.invalidateQueries({ queryKey: ['groups'], exact: true });
+    });
+  }, [queryClient]);
 }
