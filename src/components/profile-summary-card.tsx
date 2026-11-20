@@ -30,10 +30,15 @@ export function ProfileSummaryCard({
       {/* 그라데이션은 뺐다. 주황 한 면으로 둔다 (2026-11-19, 웹과 앱이 같게, 흰 글자 대비) */}
 
       {letters ? (
-        <View accessibilityLabel={`내 네 글자 ${letters.join('')}`} className="w-40 flex-row flex-wrap gap-2">
-          {letters.map((l, i) => (
-            <View key={i} className="h-[76px] w-[76px] items-center justify-center rounded-2xl bg-on-primary">
-              <Text className="text-5xl font-extrabold text-primary">{l}</Text>
+        // 2x2를 줄 두 개로 나눠 그린다. flex-wrap과 고정 폭(160)은 아이폰에서 글자 칸이 한 줄에 하나씩 떨어졌다(11/20 실기기)
+        <View accessibilityLabel={`내 네 글자 ${letters.join('')}`} className="gap-2">
+          {[letters.slice(0, 2), letters.slice(2, 4)].map((row, r) => (
+            <View key={r} className="flex-row gap-2">
+              {row.map((l, i) => (
+                <View key={i} className="h-[76px] w-[76px] items-center justify-center rounded-2xl bg-on-primary">
+                  <Text className="text-5xl font-extrabold text-primary">{l}</Text>
+                </View>
+              ))}
             </View>
           ))}
         </View>

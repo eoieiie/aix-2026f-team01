@@ -2,7 +2,7 @@ import { useFocusEffect, useRouter } from 'expo-router';
 import { useCallback, useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, View } from 'react-native';
 import { Text } from '@/components/text';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { AccountSheet } from '@/components/account-sheet';
 import { Button } from '@/components/button';
@@ -15,6 +15,7 @@ import { authorityTitle, levelOf, typeLetters, useMyStats } from '@/hooks/use-st
 
 // 내 프로필 탭 (4-15, #41). 네 글자, 레벨과 숫자, 먹어본 음식 도감, 같이 먹은 사람, 그리고 설정 줄
 export default function ProfileScreen() {
+  const insets = useSafeAreaInsets();
   const router = useRouter();
   const { stats, isLoading, isError, refetch } = useMyStats();
   const [accountVisible, setAccountVisible] = useState(false);
@@ -56,7 +57,8 @@ export default function ProfileScreen() {
     <SafeAreaView className="flex-1 bg-background" edges={['top']}>
       <ScrollView keyboardShouldPersistTaps="handled" automaticallyAdjustKeyboardInsets
         contentContainerClassName="gap-8 px-5 pt-3"
-        contentContainerStyle={{ paddingBottom: TAB_BAR_SPACE }}
+        // 아래 안전 영역(홈 막대) 위에 탭이 떠 있으니 그만큼 더 비운다. 아이폰에서 마지막 설정 줄이 탭에 가렸다(11/20 실기기)
+        contentContainerStyle={{ paddingBottom: TAB_BAR_SPACE + insets.bottom }}
         showsVerticalScrollIndicator={false}>
         <View className="h-12 justify-center">
           <Text className="text-3xl font-bold tracking-tight text-text">내 프로필</Text>
