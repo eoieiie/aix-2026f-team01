@@ -1,10 +1,12 @@
 import { type Href, useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, Text, View } from 'react-native';
+import { ActivityIndicator, View } from 'react-native';
+import { Text } from '@/components/text';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Button } from '@/components/button';
 import { Card } from '@/components/card';
+import { KeyboardSafe } from '@/components/keyboard-safe';
 import { TextField } from '@/components/text-field';
 import colors from '@/constants/colors.json';
 import { DISPLAY_NAME_MAX } from '@/constants';
@@ -102,15 +104,13 @@ export default function InviteScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-background">
+      <KeyboardSafe>
       <View className="flex-1 justify-center gap-8 px-5">
-        {/* 초대받은 모임 카드: 브랜드 주황 바탕으로 환영 느낌 강화 */}
+        {/* 초대받은 모임 카드. 이름표 한 줄과 모임 이름만 둔다 (설명 줄은 버튼과 입력칸이 대신한다) */}
         <View className="gap-3 rounded-3xl bg-primary p-6">
           <Text className="text-xl font-bold text-on-primary">초대받은 모임</Text>
           <Text className="text-5xl font-extrabold leading-tight tracking-tight text-on-primary">
             {invite.groupName}
-          </Text>
-          <Text className="text-xl font-bold text-on-primary">
-            가입 없이 이름만 적으면 들어가요
           </Text>
         </View>
 
@@ -149,6 +149,7 @@ export default function InviteScreen() {
           loading={isPending}
         />
       </View>
+      </KeyboardSafe>
     </SafeAreaView>
   );
 }

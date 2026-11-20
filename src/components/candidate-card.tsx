@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
-import { AccessibilityInfo, Animated, Pressable, Text, TextInput, View } from 'react-native';
+import { AccessibilityInfo, Animated, Pressable, View } from 'react-native';
+import { Text, TextInput } from '@/components/text';
 
 import { FoodDot } from '@/components/food-dot';
 import { Icon } from '@/components/icon';
@@ -76,7 +77,7 @@ export function CandidateCard({
         <View className="flex-1 gap-0.5">
           <View className="flex-row items-center gap-2">
             <Text
-              className={`shrink text-xl font-extrabold tracking-tight ${
+              className={`shrink text-xl font-bold tracking-tight ${
                 voted ? 'text-on-primary' : 'text-text'
               }`}>
               {candidate.foodName}
@@ -108,7 +109,7 @@ export function CandidateCard({
           // 고른 카드는 주황으로 꽉 채우고 흰 동그라미에 체크, 안 고른 카드는 빈 흰 동그라미. 글 대신 면과 표시로 (docs/design.md 1절 "고른 상태", 4절)
           <View className="h-11 w-11 items-center justify-center rounded-full bg-background">
             {myVoteCount > 1 ? (
-              <Text className="text-lg font-extrabold text-primary">{myVoteCount}</Text>
+              <Text className="text-lg font-bold text-primary">{myVoteCount}</Text>
             ) : voted ? (
               <Icon name="check" color="primary" />
             ) : null}
@@ -142,7 +143,7 @@ export function CandidateCard({
               accessibilityLabel={`${candidate.foodName} 어필 저장`}
               disabled={busy}
               onPress={() => onSavePitch(pitch)}
-              className="h-12 items-center justify-center rounded-full bg-primary px-5 active:opacity-80 disabled:opacity-50">
+              className="h-12 items-center justify-center rounded-xl bg-primary px-5 active:opacity-80 disabled:opacity-50">
               <Text className="text-base font-bold text-on-primary">저장</Text>
             </Pressable>
           ) : null}

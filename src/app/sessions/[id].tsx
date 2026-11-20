@@ -1,6 +1,7 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { type ReactNode, useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, Pressable, ScrollView, Text, View } from 'react-native';
+import { ActivityIndicator, Pressable, ScrollView, View } from 'react-native';
+import { Text } from '@/components/text';
 import type { LayoutChangeEvent } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -125,7 +126,7 @@ function Header({ session, onBack }: { session: SessionView; onBack: () => void 
     <View className="gap-4 px-5 pb-2 pt-3">
       <View className="flex-row items-center gap-3">
         <IconButton name="back" label="모임으로" onPress={onBack} />
-        <Text className="flex-1 text-lg font-extrabold text-text" numberOfLines={2}>
+        <Text className="flex-1 text-lg font-bold text-text" numberOfLines={2}>
           {session.groupName}
         </Text>
       </View>
@@ -135,7 +136,7 @@ function Header({ session, onBack }: { session: SessionView; onBack: () => void 
         className="gap-2"
         accessible
         accessibilityLabel={`${STEPS.length}단계 중 ${current + 1}단계, ${STEPS[current]?.label ?? ''}`}>
-        <Text className="text-base font-extrabold text-text">
+        <Text className="text-base font-bold text-text">
           {current + 1} / {STEPS.length}  {STEPS[current]?.label}
         </Text>
         <View className="flex-row gap-2">
@@ -271,19 +272,19 @@ function CandidateStage({
 
   return (
     <View className="flex-1">
-      <ScrollView
+      <ScrollView keyboardShouldPersistTaps="handled" automaticallyAdjustKeyboardInsets
         ref={scrollRef}
         onScroll={(e) => (scrollY.current = e.nativeEvent.contentOffset.y)}
         scrollEventThrottle={64}
         onLayout={(e: LayoutChangeEvent) => (viewH.current = e.nativeEvent.layout.height)}
         contentContainerClassName="gap-4 px-5 pb-40 pt-2">
         <View className="flex-row items-end justify-between">
-          <Text className="flex-1 text-2xl font-extrabold tracking-tight text-text">뭐 먹고 싶어요?</Text>
+          <Text className="flex-1 text-2xl font-bold tracking-tight text-text">뭐 먹고 싶어요?</Text>
           <Pressable
             accessibilityRole="button"
             accessibilityLabel="못 먹는 것"
             onPress={onRestrictions}
-            className="h-11 justify-center rounded-full bg-surface px-4 active:opacity-70">
+            className="h-11 justify-center rounded-xl bg-surface px-4 active:opacity-70">
             <Text className="text-sm font-semibold text-text">못 먹는 것</Text>
           </Pressable>
         </View>
@@ -310,7 +311,7 @@ function CandidateStage({
                   accessibilityLabel={`${foodName.get(h.foodId) ?? ''} 후보로 올리기, ${h.eatenCount}번 먹음`}
                   disabled={busy}
                   onPress={() => add.mutate(h.foodId)}
-                  className="h-11 flex-row items-center gap-2 rounded-full bg-ink px-4 active:opacity-80 disabled:opacity-50">
+                  className="h-11 flex-row items-center gap-2 rounded-xl bg-ink px-4 active:opacity-80 disabled:opacity-50">
                   <Text className="text-base font-bold text-on-ink">{foodName.get(h.foodId) ?? ''}</Text>
                   <Text className="text-sm font-semibold text-on-ink opacity-60">{h.eatenCount}번</Text>
                 </Pressable>
@@ -329,7 +330,7 @@ function CandidateStage({
         />
 
         <View className="gap-2" onLayout={(e: LayoutChangeEvent) => (listY.current = e.nativeEvent.layout.y)}>
-          <Text className="text-lg font-extrabold text-text">후보 {session.candidates.length}개</Text>
+          <Text className="text-lg font-bold text-text">후보 {session.candidates.length}개</Text>
           {newestFirst.map((c) => (
               <CandidateCard
                 key={c.foodId}
@@ -385,9 +386,9 @@ function VotingStage({ session }: { session: SessionView }) {
 
   return (
     <View className="flex-1">
-      <ScrollView contentContainerClassName="gap-5 px-5 pb-40 pt-2">
+      <ScrollView keyboardShouldPersistTaps="handled" automaticallyAdjustKeyboardInsets contentContainerClassName="gap-5 px-5 pb-40 pt-2">
         <View className="gap-1">
-          <Text className="text-3xl font-extrabold tracking-tight text-text">골라 주세요</Text>
+          <Text className="text-3xl font-bold tracking-tight text-text">골라 주세요</Text>
           {/* 몇 개까지인지는 아래 "내 표 0/2"가 보인다 */}
           <Text className="text-base text-muted">누가 뭘 골랐는지는 아무도 몰라요</Text>
         </View>
@@ -410,7 +411,7 @@ function VotingStage({ session }: { session: SessionView }) {
         {notice.length > 0 ? (
           <View accessibilityRole="alert" className="gap-1 rounded-3xl bg-ink p-5">
             {notice.map((line) => (
-              <Text key={line} className="text-lg font-extrabold text-on-ink">
+              <Text key={line} className="text-lg font-bold text-on-ink">
                 {line}
               </Text>
             ))}
@@ -441,7 +442,7 @@ function VotingStage({ session }: { session: SessionView }) {
             accessibilityLabel={session.myAnyOk ? '아무거나 괜찮아요 취소' : '아무거나 괜찮아요'}
             disabled={anyOk.isPending}
             onPress={() => anyOk.mutate()}
-            className={`h-14 flex-row items-center justify-center gap-2 rounded-full active:opacity-80 ${
+            className={`h-14 flex-row items-center justify-center gap-2 rounded-2xl active:opacity-80 ${
               session.myAnyOk ? 'bg-ink' : 'bg-surface'
             }`}>
             {session.myAnyOk ? <Icon name="check" color="on-ink" /> : null}
@@ -526,7 +527,7 @@ function ResultStage({
 
   return (
     <View className="flex-1">
-      <ScrollView contentContainerClassName="items-center gap-6 px-5 pb-40 pt-4">
+      <ScrollView keyboardShouldPersistTaps="handled" automaticallyAdjustKeyboardInsets contentContainerClassName="items-center gap-6 px-5 pb-40 pt-4">
         {error ? (
           <Text className="text-sm text-danger">{sessionErrorMessage(error)}</Text>
         ) : slices.length > 0 && session.decidedFoodId !== null ? (

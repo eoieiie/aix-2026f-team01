@@ -1,7 +1,8 @@
 import { useFocusEffect, useRouter } from 'expo-router';
 import { useCallback, useState } from 'react';
-import { ActivityIndicator, Pressable, ScrollView, Text, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { ActivityIndicator, Pressable, ScrollView, View } from 'react-native';
+import { Text } from '@/components/text';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { AccountSheet } from '@/components/account-sheet';
 import { Button } from '@/components/button';
@@ -14,6 +15,7 @@ import { authorityTitle, levelOf, typeLetters, useMyStats } from '@/hooks/use-st
 
 // 내 프로필 탭 (4-15, #41). 네 글자, 레벨과 숫자, 먹어본 음식 도감, 같이 먹은 사람, 그리고 설정 줄
 export default function ProfileScreen() {
+  const insets = useSafeAreaInsets();
   const router = useRouter();
   const { stats, isLoading, isError, refetch } = useMyStats();
   const [accountVisible, setAccountVisible] = useState(false);
@@ -53,12 +55,13 @@ export default function ProfileScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-background" edges={['top']}>
-      <ScrollView
+      <ScrollView keyboardShouldPersistTaps="handled" automaticallyAdjustKeyboardInsets
         contentContainerClassName="gap-8 px-5 pt-3"
-        contentContainerStyle={{ paddingBottom: TAB_BAR_SPACE }}
+        // 아래 안전 영역(홈 막대) 위에 탭이 떠 있으니 그만큼 더 비운다. 아이폰에서 마지막 설정 줄이 탭에 가렸다(11/20 실기기)
+        contentContainerStyle={{ paddingBottom: TAB_BAR_SPACE + insets.bottom }}
         showsVerticalScrollIndicator={false}>
         <View className="h-12 justify-center">
-          <Text className="text-3xl font-extrabold tracking-tight text-text">내 프로필</Text>
+          <Text className="text-3xl font-bold tracking-tight text-text">내 프로필</Text>
         </View>
 
         <ProfileSummaryCard
@@ -91,7 +94,7 @@ export default function ProfileScreen() {
               }`}>
               <Text
                 className={`text-base font-bold ${
-                  subTab === 'foods' ? 'text-text font-extrabold' : 'text-muted'
+                  subTab === 'foods' ? 'text-text font-bold' : 'text-muted'
                 }`}>
                 음식 도감 ({stats.foods.length})
               </Text>
@@ -105,7 +108,7 @@ export default function ProfileScreen() {
               }`}>
               <Text
                 className={`text-base font-bold ${
-                  subTab === 'companions' ? 'text-text font-extrabold' : 'text-muted'
+                  subTab === 'companions' ? 'text-text font-bold' : 'text-muted'
                 }`}>
                 밥 친구 랭킹 ({stats.companions.length})
               </Text>
@@ -115,7 +118,7 @@ export default function ProfileScreen() {
           {subTab === 'foods' ? (
             stats.foods.length === 0 ? (
               <View className="rounded-3xl bg-surface p-6">
-                <Text className="text-lg font-extrabold text-muted">아직 같이 먹은 기록이 없어요</Text>
+                <Text className="text-lg font-bold text-muted">아직 같이 먹은 기록이 없어요</Text>
               </View>
             ) : (
               <View className="flex-row flex-wrap justify-between gap-y-2">
@@ -134,18 +137,18 @@ export default function ProfileScreen() {
             )
           ) : stats.companions.length === 0 ? (
             <View className="rounded-3xl bg-surface p-6">
-              <Text className="text-lg font-extrabold text-muted">아직 같이 먹은 밥 친구가 없어요</Text>
+              <Text className="text-lg font-bold text-muted">아직 같이 먹은 밥 친구가 없어요</Text>
             </View>
           ) : (
             <View className="gap-3 rounded-3xl bg-surface p-4">
               {stats.companions.map((c) => (
                 <View key={c.userId} className="flex-row items-center gap-3">
                   <View className="h-10 w-10 items-center justify-center rounded-full bg-primary">
-                    <Text className="text-xl font-extrabold text-on-primary">
+                    <Text className="text-xl font-bold text-on-primary">
                       {Array.from(c.displayName)[0] ?? ''}
                     </Text>
                   </View>
-                  <Text className="flex-1 text-lg font-extrabold text-text" numberOfLines={1}>
+                  <Text className="flex-1 text-lg font-bold text-text" numberOfLines={1}>
                     {c.displayName}
                   </Text>
                   <Text className="text-sm font-semibold text-muted">{c.mealCount}번</Text>
@@ -176,7 +179,7 @@ export default function ProfileScreen() {
 function Stat({ value, label }: { value: number; label: string }) {
   return (
     <View className="flex-1 gap-1 rounded-3xl bg-surface p-4">
-      <Text className="text-3xl font-extrabold tracking-tight text-text">{value}</Text>
+      <Text className="text-3xl font-bold tracking-tight text-text">{value}</Text>
       <Text className="text-sm text-muted">{label}</Text>
     </View>
   );

@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { Pressable, Text, View } from 'react-native';
+import { Pressable, View } from 'react-native';
+import { Text } from '@/components/text';
 
 import { FoodDot } from '@/components/food-dot';
 import { Icon } from '@/components/icon';
@@ -68,7 +69,7 @@ export function FoodSearch({
               onPick(food);
               setQuery('');
             }}
-            className="h-12 w-[49%] flex-row items-center gap-2 rounded-full bg-surface pl-3 pr-4 active:opacity-70 disabled:opacity-50">
+            className="h-12 w-[49%] flex-row items-center gap-2 rounded-2xl bg-surface pl-3 pr-4 active:opacity-70 disabled:opacity-50">
             <FoodDot foodId={food.id} size="sm" />
             <Text className="flex-1 text-base font-bold text-text" numberOfLines={1}>
               {food.name}
@@ -85,7 +86,7 @@ export function FoodSearch({
               onCustom?.(typed);
               setQuery('');
             }}
-            className="h-14 w-full flex-row items-center gap-2 rounded-full bg-primary pl-4 pr-5 active:opacity-80 disabled:opacity-50">
+            className="h-14 w-full flex-row items-center gap-2 rounded-2xl bg-primary pl-4 pr-5 active:opacity-80 disabled:opacity-50">
             <Icon name="plus" size={20} color="on-primary" />
             {/* 주황 위 흰 글자는 20 굵게 (#80 대비 규칙). "올리기" 글은 더하기 아이콘으로 대신한다 */}
             <Text className="flex-1 text-xl font-bold text-on-primary" numberOfLines={1}>

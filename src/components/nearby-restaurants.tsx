@@ -1,4 +1,5 @@
-import { Image, Linking, Platform, Pressable, Text, View } from 'react-native';
+import { Image, Linking, Platform, Pressable, View } from 'react-native';
+import { Text } from '@/components/text';
 
 import { CouponCode } from '@/components/coupon-code';
 import { Icon } from '@/components/icon';
@@ -32,7 +33,7 @@ export function NearbyRestaurants({
 
   return (
     <View className={`gap-4 rounded-3xl p-5 ${onPrimary ? 'bg-on-primary' : 'bg-surface'}`}>
-      <Text className="text-lg font-extrabold text-text">이 메뉴 파는 학교 앞</Text>
+      <Text className="text-lg font-bold text-text">이 메뉴 파는 학교 앞</Text>
       {list.map((r) => (
         <View key={r.id} className="gap-2">
           <RestaurantRow r={r} />
@@ -47,7 +48,7 @@ export function NearbyRestaurants({
                   accessibilityLabel={`${r.name} 쿠폰 받기`}
                   disabled={claim.isPending}
                   onPress={() => claim.mutate(r.id)}
-                  className="h-11 items-center justify-center rounded-full bg-ink px-4 active:opacity-80 disabled:opacity-50">
+                  className="h-11 items-center justify-center rounded-xl bg-ink px-4 active:opacity-80 disabled:opacity-50">
                   <Text className="text-sm font-bold text-on-ink">쿠폰 받기</Text>
                 </Pressable>
               </View>
@@ -67,7 +68,7 @@ export function VoteRestaurants({ sessionId, candidateKey }: { sessionId: string
 
   return (
     <View className="gap-4 rounded-3xl bg-surface p-5">
-      <Text className="text-lg font-extrabold text-text">학교 앞 추천</Text>
+      <Text className="text-lg font-bold text-text">학교 앞 추천</Text>
       {list.map((r) => (
         <RestaurantRow key={r.id} r={r} />
       ))}

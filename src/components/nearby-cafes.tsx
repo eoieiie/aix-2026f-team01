@@ -1,4 +1,5 @@
-import { Linking, Platform, Pressable, Text, View } from 'react-native';
+import { Linking, Platform, Pressable, View } from 'react-native';
+import { Text } from '@/components/text';
 
 import { CouponCode } from '@/components/coupon-code';
 import { Icon } from '@/components/icon';
@@ -13,7 +14,7 @@ export function NearbyCafes({ sessionId, onPrimary = false }: { sessionId: strin
 
   return (
     <View className={`gap-4 rounded-3xl p-5 ${onPrimary ? 'bg-on-primary' : 'bg-surface'}`}>
-      <Text className="text-lg font-extrabold text-text">먹고 나서 카페</Text>
+      <Text className="text-lg font-bold text-text">먹고 나서 카페</Text>
       {list.map((c) => (
         <View key={c.id} className="gap-2">
           <Pressable
@@ -42,7 +43,7 @@ export function NearbyCafes({ sessionId, onPrimary = false }: { sessionId: strin
                   accessibilityLabel={`${c.name} 쿠폰 받기`}
                   disabled={claim.isPending}
                   onPress={() => claim.mutate(c.id)}
-                  className="h-11 items-center justify-center rounded-full bg-ink px-4 active:opacity-80 disabled:opacity-50">
+                  className="h-11 items-center justify-center rounded-xl bg-ink px-4 active:opacity-80 disabled:opacity-50">
                   <Text className="text-sm font-bold text-on-ink">쿠폰 받기</Text>
                 </Pressable>
               </View>

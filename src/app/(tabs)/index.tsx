@@ -1,6 +1,7 @@
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
-import { FlatList, Image, Pressable, Text, View } from 'react-native';
+import { FlatList, Image, Pressable, View } from 'react-native';
+import { Text } from '@/components/text';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Button } from '@/components/button';
@@ -39,7 +40,7 @@ export default function HomeScreen() {
         ) : null}
       </View>
       <View className="gap-2">
-        <Text className="text-2xl font-extrabold tracking-tight text-text" numberOfLines={2}>
+        <Text className="text-2xl font-bold tracking-tight text-text" numberOfLines={2}>
           {item.name}
         </Text>
         {item.recent_foods.length > 0 ? (
@@ -72,7 +73,7 @@ export default function HomeScreen() {
         </View>
 
         {/* 위쪽 줄과 제목 사이 24, 제목과 목록 사이 24 (docs/design.md 4절). 아래 설명 줄은 두지 않는다 */}
-        <Text className="mb-6 mt-6 text-3xl font-extrabold tracking-tight text-text">
+        <Text className="mb-6 mt-6 text-3xl font-bold tracking-tight text-text">
           오늘은 누구랑 먹어요?
         </Text>
 
@@ -97,7 +98,7 @@ export default function HomeScreen() {
               resizeMode="contain"
               accessibilityLabel="밥BTI 마스코트"
             />
-            <Text className="text-xl font-extrabold tracking-tight text-text">아직 모임이 없어요</Text>
+            <Text className="text-xl font-bold tracking-tight text-text">아직 모임이 없어요</Text>
             <Button
               label="첫 모임 만들기"
               className="self-center px-8"

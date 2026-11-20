@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
-import { Modal, Platform, Pressable, Text, useWindowDimensions, View } from 'react-native';
+import { Modal, Platform, Pressable, useWindowDimensions, View } from 'react-native';
+import { Text } from '@/components/text';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Icon, IconButton, type IconName } from '@/components/icon';
@@ -59,7 +60,7 @@ export function InviteCard({ inviteCode, groupName }: InviteCardProps) {
     <View className="w-full gap-4 rounded-3xl bg-primary p-5">
       <View className="gap-1">
         <Text className="text-xl font-bold text-on-primary">초대 코드</Text>
-        <Text className="text-4xl font-extrabold tracking-widest text-on-primary">{inviteCode}</Text>
+        <Text className="text-4xl font-bold tracking-widest text-on-primary">{inviteCode}</Text>
       </View>
 
       <View className="flex-row gap-2">
@@ -110,7 +111,7 @@ function CardButton({
       accessibilityRole="button"
       accessibilityLabel={accessibilityLabel}
       onPress={onPress}
-      className="h-12 flex-1 flex-row items-center justify-center gap-2 rounded-full bg-background active:opacity-80">
+      className="h-12 flex-1 flex-row items-center justify-center gap-2 rounded-2xl bg-background active:opacity-80">
       <Icon name={icon} size={20} />
       <Text className="text-base font-bold text-text">{label}</Text>
     </Pressable>
@@ -144,13 +145,13 @@ function InviteQr({
           </View>
           <View className="flex-1 items-center justify-center gap-6 pb-12">
             <Text
-              className="text-center text-3xl font-extrabold tracking-tight text-text"
+              className="text-center text-3xl font-bold tracking-tight text-text"
               numberOfLines={2}>
               {groupName}
             </Text>
             <QrCode value={inviteUrl} size={size} />
             <View className="items-center gap-1">
-              <Text className="text-3xl font-extrabold tracking-widest text-text">{inviteCode}</Text>
+              <Text className="text-3xl font-bold tracking-widest text-text">{inviteCode}</Text>
               <Text className="text-base text-muted">카메라로 찍으면 바로 들어와요</Text>
             </View>
           </View>

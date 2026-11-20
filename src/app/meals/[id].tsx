@@ -1,5 +1,6 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { ActivityIndicator, Platform, ScrollView, Text, View } from 'react-native';
+import { ActivityIndicator, Platform, ScrollView, View } from 'react-native';
+import { Text } from '@/components/text';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Button } from '@/components/button';
@@ -58,8 +59,8 @@ export default function MealScreen() {
       <View className="flex-row items-center px-5 py-3">
         <IconButton name="back" label="뒤로" onPress={back} />
       </View>
-      <ScrollView contentContainerClassName="gap-5 px-5 pb-10 pt-2">
-        <Text className="text-3xl font-extrabold tracking-tight text-text">이번 끼니</Text>
+      <ScrollView keyboardShouldPersistTaps="handled" automaticallyAdjustKeyboardInsets contentContainerClassName="gap-5 px-5 pb-10 pt-2">
+        <Text className="text-3xl font-bold tracking-tight text-text">이번 끼니</Text>
         <ResultCard card={card} />
         <ShareButton text={mealShareText(card, webBase())} />
         <NearbyRestaurants sessionId={sessionId} />
