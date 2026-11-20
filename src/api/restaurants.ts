@@ -155,9 +155,10 @@ export interface Taste {
   eatenFoodIds: ReadonlySet<number>;
 }
 
-// 투표 화면 추천 칸 (4-21). 서버가 준 최대 6곳(순서: 메뉴 맞음 → 같은 종류, 같은 조건이면 제휴)에서 내 취향으로 3곳.
-// 점수: 메뉴가 맞으면 +2. 한식↔외국음식 축과 종류가 맞으면 +1. 탐험이면 안 먹어 본 음식, 반복이면 먹어 본 음식에 +1.
-// 지금 닫았으면 -3. 점수가 같으면 서버 순서. 제휴에는 점수를 더하지 않는다(광고가 취향보다 앞서지 않게)
+// 투표 화면 추천 칸 (4-21). 서버가 준 최대 6곳(순서: 메뉴 맞음 → 같은 종류, 같은 조건이면 제휴)에서 3곳.
+// 제휴 식당이 먼저 온다(#53 11/19 병주 요청, 이름 옆 "광고"는 숨기지 않는다). 지금 닫은 제휴는 먼저 오지 않는다.
+// 그 안에서는 내 취향 점수 순: 메뉴가 맞으면 +2. 한식↔외국음식 축과 종류가 맞으면 +1.
+// 탐험이면 안 먹어 본 음식, 반복이면 먹어 본 음식에 +1. 지금 닫았으면 -3. 점수가 같으면 서버 순서
 export function pickForMe(
   list: readonly NearbyRestaurant[],
   taste: Taste,
@@ -172,9 +173,10 @@ export function pickForMe(
     if (r.openNow === false) s -= 3;
     return s;
   };
+  const first = (r: NearbyRestaurant) => (r.partner && r.openNow !== false ? 1 : 0);
   return list
-    .map((r, i) => ({ r, i, s: score(r) }))
-    .sort((a, b) => b.s - a.s || a.i - b.i)
+    .map((r, i) => ({ r, i, p: first(r), s: score(r) }))
+    .sort((a, b) => b.p - a.p || b.s - a.s || a.i - b.i)
     .slice(0, count)
     .map((x) => x.r);
 }

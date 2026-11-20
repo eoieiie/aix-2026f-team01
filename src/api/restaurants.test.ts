@@ -76,10 +76,21 @@ describe('pickForMe (4-21 투표 화면 추천 칸)', () => {
     expect(pickForMe(list, noTaste).map((r) => r.id)).toEqual([2, 1]);
   });
 
-  it('제휴에는 점수를 더하지 않는다. 취향이 맞는 곳이 광고보다 앞', () => {
-    const list = [fake({ id: 1, partner: true, cuisine: 'korean' }), fake({ id: 2, cuisine: 'western' })];
+  it('제휴가 먼저 온다. 취향이 더 맞는 곳이 있어도 (#53 11/19)', () => {
+    const list = [fake({ id: 1, cuisine: 'western' }), fake({ id: 2, partner: true, cuisine: 'korean' })];
     const outside = { axes: { explore: 0, spicy: 0, korean: -1, lead: 0 }, eatenFoodIds: new Set<number>() };
     expect(pickForMe(list, outside).map((r) => r.id)).toEqual([2, 1]);
+  });
+
+  it('제휴끼리는 취향 순, 지금 닫은 제휴는 먼저 오지 않는다', () => {
+    const list = [
+      fake({ id: 1, partner: true, cuisine: 'korean' }),
+      fake({ id: 2, partner: true, cuisine: 'western' }),
+      fake({ id: 3, partner: true, openNow: false }),
+      fake({ id: 4 }),
+    ];
+    const outside = { axes: { explore: 0, spicy: 0, korean: -1, lead: 0 }, eatenFoodIds: new Set<number>() };
+    expect(pickForMe(list, outside).map((r) => r.id)).toEqual([2, 1, 4]);
   });
 
   it('6곳보다 적으면 있는 만큼, 없으면 빈 목록', () => {
