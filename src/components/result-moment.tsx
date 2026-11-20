@@ -167,7 +167,7 @@ export function ResultMoment({ session, from, onGroup, onCard }: ResultMomentPro
             ) : null}
             {/* 결과 뒤에만 학교 앞 식당 (4-21). 투표와 룰렛에는 쓰지 않는다 */}
             <View className="mt-8 gap-4">
-              <NearbyRestaurants sessionId={session.id} foodName={winner} onPrimary />
+              <NearbyRestaurants sessionId={session.id} onPrimary />
               <NearbyCafes sessionId={session.id} onPrimary />
             </View>
           </ScrollView>
