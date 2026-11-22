@@ -3,6 +3,7 @@ import { readdirSync, readFileSync } from 'fs';
 import { join } from 'path';
 
 import {
+  AI_DAILY_MAX,
   DISPLAY_NAME_MAX,
   FOOD_NAME_MAX,
   GROUP_NAME_MAX,
@@ -15,6 +16,7 @@ import {
 } from '@/constants';
 
 const app: Record<string, number> = {
+  AI_DAILY_MAX,
   DISPLAY_NAME_MAX,
   FOOD_NAME_MAX,
   GROUP_NAME_MAX,

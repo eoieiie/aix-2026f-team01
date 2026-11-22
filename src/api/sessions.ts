@@ -25,6 +25,9 @@ export interface Candidate {
   // vetoed: 이 판에 못 먹는 사람이 있다. 0010부터 빠지지 않고 표시만 한다
   // 목록에 없어서 이름을 직접 적어 올린 메뉴 (4-9). 재료는 이름으로 짐작했다
   custom: boolean;
+  // 4-22 AI가 추정해 더한 재료 태그와 태그별 이유 한 줄. 누가 못 먹는지는 없다
+  aiTags: string[];
+  aiNotes: Record<string, string>;
 }
 
 export interface SessionView {
@@ -201,6 +204,8 @@ export async function getSession(
       foodId: c.food_id,
       foodName: c.foods?.name ?? '',
       custom: c.foods?.custom === true,
+      aiTags: Array.isArray(c.foods?.ai_tags) ? c.foods.ai_tags : [],
+      aiNotes: c.foods?.ai_notes && typeof c.foods.ai_notes === 'object' ? c.foods.ai_notes : {},
       isMine: c.proposed_by === userId,
       pitch: c.pitch,
       vetoed: c.vetoed,
@@ -258,7 +263,21 @@ export async function addCustomCandidate(
     p_name: name,
   });
   if (error) throwSessionError(error);
+  const foodId = (data as { food_id?: number } | null)?.food_id;
+  if (foodId) requestAiIngredients(foodId, client);
   return Boolean((data as { vetoed?: boolean } | null)?.vetoed);
+}
+
+// 4-22 직접 적은 메뉴의 재료를 AI에게 묻게 한다. 기다리지 않는다. 답이 오면 서버가 재료를 더하고
+// 후보 판정을 다시 해서 판 화면이 실시간으로 바뀐다. 실패해도 낱말 표 태그로 그대로 간다
+export function requestAiIngredients(foodId: number, client: Client = getSupabase()): void {
+  try {
+    Promise.resolve((client as any).functions?.invoke?.('guess-ingredients', { body: { food_id: foodId } })).catch(
+      () => undefined
+    );
+  } catch {
+    // 무시
+  }
 }
 
 // 내가 올린 후보의 어필. 빈 글이면 지운다 (4-9)
