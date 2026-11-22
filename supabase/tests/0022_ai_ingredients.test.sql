@@ -1,7 +1,7 @@
 -- AI 재료 추정 (명세 4-22, 0023): 태그 밖 값은 버림, 더하기만, 같은 이름은 저장한 값, 하루 상한, 참여자만
 begin;
 create extension if not exists pgtap with schema extensions;
-select plan(12);
+select plan(14);
 
 insert into auth.users (id) values
   ('00000000-0000-0000-0000-0000000000a1'),  -- 올린 사람
@@ -74,6 +74,19 @@ set local role authenticated;
 insert into t_ai select 'req3', public.ai_ingredient_request((select id from public.foods where name = 't새메뉴'));
 reset role;
 select is((select r->>'reason' from t_ai where k = 'req3'), 'daily_limit', '하루 상한을 넘으면 낱말 표만');
+
+-- 0024: 묻다가 멈춘 이름은 10분 뒤 다시 묻는다
+update public.foods set ai_status = 'failed', ai_tried_at = now() where name = 't분짜 특선';
+select set_config('request.jwt.claims', '{"sub":"00000000-0000-0000-0000-0000000000a1","role":"authenticated"}', true);
+set local role authenticated;
+insert into t_ai select 'retry_soon', public.ai_ingredient_request((select (r->>'food_id')::bigint from t_ai where k = 'add'));
+reset role;
+update public.foods set ai_tried_at = now() - interval '11 minutes' where name = 't분짜 특선';
+set local role authenticated;
+insert into t_ai select 'retry_late', public.ai_ingredient_request((select (r->>'food_id')::bigint from t_ai where k = 'add'));
+reset role;
+select is((select r->>'reason' from t_ai where k = 'retry_soon'), 'failed', '실패한 지 10분 안이면 다시 묻지 않는다');
+select is((select r->>'action' from t_ai where k = 'retry_late'), 'ask', '10분이 지나면 다시 묻는다 (0024)');
 
 select * from finish();
 rollback;

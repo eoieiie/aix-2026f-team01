@@ -76,7 +76,8 @@ export function CandidateCard({
 
   const body = (
     <>
-      <View className="flex-row items-center gap-3">
+      {/* 동그라미와 빼기·고르기 버튼은 첫 줄(음식 이름) 높이에 붙인다. AI 이유를 펼쳐도 가운데로 내려가지 않게 (11/21 실기기) */}
+      <View className="flex-row items-start gap-3">
         <FoodDot foodId={candidate.foodId} size="md" name={candidate.foodName} />
         <View className="flex-1 gap-0.5">
           <View className="flex-row items-center gap-2">
@@ -105,17 +106,16 @@ export function CandidateCard({
               accessibilityLabel={`AI가 추정한 재료 ${aiTags.map((t) => TAG_LABEL[t] ?? t).join(', ')}`}
               accessibilityState={{ expanded: aiOpen }}
               onPress={() => setAiOpen((v) => !v)}
-              className="min-h-11 justify-center gap-1 py-1">
-              <View className="flex-row items-center gap-1">
-                <Icon name="pencil" size={12} color={voted ? 'on-primary' : 'muted'} />
-                <Text className={`text-sm font-semibold ${voted ? 'text-text' : 'text-muted'}`}>
-                  AI가 추정한 재료 · {aiTags.map((t) => TAG_LABEL[t] ?? t).join(', ')}
-                </Text>
-              </View>
+              className="min-h-11 justify-center gap-0.5 py-1">
+              {/* 연필은 이름 옆 하나로 충분하다 (빼기 원칙) */}
+              <Text className={`text-sm font-semibold ${voted ? 'text-text' : 'text-muted'}`}>
+                AI가 추정한 재료 · {aiTags.map((t) => TAG_LABEL[t] ?? t).join(', ')}
+              </Text>
               {aiOpen
                 ? aiTags.map((t) => (
-                    <Text key={t} className={`text-sm ${voted ? 'text-text' : 'text-muted'}`}>
-                      {TAG_LABEL[t] ?? t}: {candidate.aiNotes?.[t] ?? '흔히 들어가는 재료예요'}
+                    <Text key={t} className={`text-sm leading-5 ${voted ? 'text-text' : 'text-muted'}`}>
+                      <Text className={`font-bold text-text`}>{TAG_LABEL[t] ?? t}</Text>{' '}
+                      {candidate.aiNotes?.[t] ?? '흔히 들어가는 재료예요'}
                     </Text>
                   ))
                 : null}
