@@ -5,12 +5,14 @@ import { Text, TextInput } from '@/components/text';
 import { FoodDot } from '@/components/food-dot';
 import { Icon } from '@/components/icon';
 import { PITCH_MAX } from '@/constants';
+import { INGREDIENT_TAGS } from '@/constants/restrictions';
 import colors from '@/constants/colors.json';
 import type { Candidate } from '@/hooks/use-session';
 
 // 0010부터 빠지지 않고 표시만 한다. 찍을 수 있다
 // 고른(주황) 카드 안의 작은 줄은 검정 글자. 주황 위 흰 작은 글자는 4.5:1이 안 된다 (#80)
 const VETOED_TEXT = '못 먹는 사람이 있어요';
+const TAG_LABEL: Record<string, string> = Object.fromEntries(INGREDIENT_TAGS.map((t) => [t.code, t.label]));
 
 type CandidateCardProps = {
   candidate: Candidate;
@@ -69,6 +71,8 @@ export function CandidateCard({
   const [pitch, setPitch] = useState(candidate.pitch ?? '');
   const dirty = pitch !== (candidate.pitch ?? '');
   const { vetoed } = candidate;
+  const aiTags = candidate.aiTags ?? [];
+  const [aiOpen, setAiOpen] = useState(false);
 
   const body = (
     <>
@@ -93,6 +97,29 @@ export function CandidateCard({
             <Text className={`text-sm font-semibold ${voted ? 'text-text' : 'text-danger'}`}>
               {VETOED_TEXT}
             </Text>
+          ) : null}
+          {/* 4-22 AI가 추정해 더한 재료. 누르면 재료마다 이유 한 줄. 누가 못 먹는지는 보이지 않는다 */}
+          {aiTags.length > 0 ? (
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={`AI가 추정한 재료 ${aiTags.map((t) => TAG_LABEL[t] ?? t).join(', ')}`}
+              accessibilityState={{ expanded: aiOpen }}
+              onPress={() => setAiOpen((v) => !v)}
+              className="min-h-11 justify-center gap-1 py-1">
+              <View className="flex-row items-center gap-1">
+                <Icon name="pencil" size={12} color={voted ? 'on-primary' : 'muted'} />
+                <Text className={`text-sm font-semibold ${voted ? 'text-text' : 'text-muted'}`}>
+                  AI가 추정한 재료 · {aiTags.map((t) => TAG_LABEL[t] ?? t).join(', ')}
+                </Text>
+              </View>
+              {aiOpen
+                ? aiTags.map((t) => (
+                    <Text key={t} className={`text-sm ${voted ? 'text-text' : 'text-muted'}`}>
+                      {TAG_LABEL[t] ?? t}: {candidate.aiNotes?.[t] ?? '흔히 들어가는 재료예요'}
+                    </Text>
+                  ))
+                : null}
+            </Pressable>
           ) : null}
           {eatenNote ? (
             <Text className={`text-sm ${voted ? 'text-text' : 'text-muted'}`}>
