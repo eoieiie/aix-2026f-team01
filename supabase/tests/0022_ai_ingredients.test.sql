@@ -44,9 +44,9 @@ select public.ai_ingredient_apply((select id from public.foods where name = 't�
 select ok((select tags @> array['pork','seafood','egg'] from public.foods where name = 't분짜 특선'), '더하기만 한다(앞 태그가 남는다)');
 
 -- 같은 이름(공백 달라도)은 저장한 값을 바로 쓴다
+update public.sessions set status = 'done' where id = '20000000-0000-0000-0000-0000000000a1';
 insert into public.sessions (id, group_id, host_user_id) values
   ('20000000-0000-0000-0000-0000000000a2', '10000000-0000-0000-0000-0000000000a1', '00000000-0000-0000-0000-0000000000a1');
-update public.sessions set status = 'done' where id = '20000000-0000-0000-0000-0000000000a1';
 insert into public.foods (name, tags, cuisine, custom) values ('t분짜특선', '{}', 'custom', true);
 insert into public.session_participants (session_id, user_id) values ('20000000-0000-0000-0000-0000000000a2', '00000000-0000-0000-0000-0000000000a1');
 insert into public.candidates (session_id, food_id, proposed_by) values
