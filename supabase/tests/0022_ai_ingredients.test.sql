@@ -77,9 +77,16 @@ select is((select r->>'reason' from t_ai where k = 'req3'), 'daily_limit', '하�
 
 -- 0024: 묻다가 멈춘 이름은 10분 뒤 다시 묻는다 (저장한 값이 없는 새 이름으로)
 reset role;
+insert into public.groups (id, name, invite_code, created_by) values
+  ('10000000-0000-0000-0000-0000000000b1', 'ai 모임2', 'TESTBX', '00000000-0000-0000-0000-0000000000a1');
+insert into public.memberships (group_id, user_id, display_name) values
+  ('10000000-0000-0000-0000-0000000000b1', '00000000-0000-0000-0000-0000000000a1', '하나');
+insert into public.sessions (id, group_id, host_user_id) values
+  ('20000000-0000-0000-0000-0000000000b1', '10000000-0000-0000-0000-0000000000b1', '00000000-0000-0000-0000-0000000000a1');
 select set_config('request.jwt.claims', '{"sub":"00000000-0000-0000-0000-0000000000a1","role":"authenticated"}', true);
 set local role authenticated;
-insert into t_ai select 'add2', public.add_custom_candidate('20000000-0000-0000-0000-0000000000a1', 't재시도 메뉴');
+select public.join_session('20000000-0000-0000-0000-0000000000b1');
+insert into t_ai select 'add2', public.add_custom_candidate('20000000-0000-0000-0000-0000000000b1', 't재시도 메뉴');
 reset role;
 update public.foods set ai_status = 'failed', ai_tried_at = now() where name = 't재시도 메뉴';
 set local role authenticated;
