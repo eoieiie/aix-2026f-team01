@@ -100,7 +100,13 @@ export function CandidateCard({
             </Text>
           ) : null}
           {/* 4-22 AI가 추정해 더한 재료. 누르면 재료마다 이유 한 줄. 누가 못 먹는지는 보이지 않는다 */}
-          {aiTags.length > 0 ? (
+          {/* 투표 카드는 카드 전체가 "고르기" 버튼이라, 안에 또 누르는 것을 두지 않는다(버튼 안 버튼, WCAG 4.1.2). 투표 때는 재료 이름만 글로 보이고 이유는 후보 단계에서 본다 */}
+          {aiTags.length > 0 && onVote ? (
+            <Text className={`text-sm font-semibold ${voted ? 'text-text' : 'text-muted'}`}>
+              AI가 추정한 재료 · {aiTags.map((t) => TAG_LABEL[t] ?? t).join(', ')}
+            </Text>
+          ) : null}
+          {aiTags.length > 0 && !onVote ? (
             <Pressable
               accessibilityRole="button"
               accessibilityLabel={`AI가 추정한 재료 ${aiTags.map((t) => TAG_LABEL[t] ?? t).join(', ')}`}
@@ -190,7 +196,7 @@ export function CandidateCard({
       <Pressable
         accessibilityRole="button"
         accessibilityState={{ selected: voted, disabled: busy }}
-        accessibilityLabel={`${candidate.foodName} ${voted ? '고른 것 취소' : '고르기'}`}
+        accessibilityLabel={`${candidate.foodName}${aiTags.length > 0 ? `, AI가 추정한 재료 ${aiTags.map((t) => TAG_LABEL[t] ?? t).join(', ')}` : ''} ${voted ? '고른 것 취소' : '고르기'}`}
         disabled={busy}
         onPress={onVote}
         className={`${box} active:opacity-80`}>
