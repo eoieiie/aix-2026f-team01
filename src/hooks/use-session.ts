@@ -59,8 +59,8 @@ export function useSession(sessionId: string) {
     queryFn: () => getSession(sessionId),
     enabled: join.isSuccess,
     retry: false,
-    // 실시간이 끊겨도 10초마다 한 번은 맞춘다
-    refetchInterval: 10_000,
+    // 실시간 신호를 놓쳐도 4초마다 한 번은 맞춘다. 40명 부하 시험(11/21)에서 신호 일부가 빠져 10초는 시연에 길었다
+    refetchInterval: 4_000,
   });
 
   useEffect(() => {
