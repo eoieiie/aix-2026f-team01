@@ -34,6 +34,7 @@ export default function GroupScreen() {
   const { startSession, isPending: isStartingSession } = useStartSession(id || '');
   const [askHeadcount, setAskHeadcount] = useState(false);
   const [startError, setStartError] = useState<string | null>(null);
+  const [checking, setChecking] = useState(false);
 
   // 누가 초대 링크, QR로 들어오면 새로고침 없이 바로 멤버 줄에 붙는다 (0019, 4-6)
   useGroupMembersLive(id || '');
@@ -107,7 +108,10 @@ export default function GroupScreen() {
     if (!hasOpenSession && expectedCount === undefined) {
       // 화면을 연 뒤 다른 사람이 판을 열었을 수 있다. 몇 명인지 묻기 전에 다시 읽어서,
       // 이미 열린 판이 있으면 인원수를 묻지 않고 그 판으로 간다. 인원수는 판을 연 사람만 정한다 (#67 GONI1130, 11/17)
-      const fresh = await refetch();
+      // 다시 읽는 동안 버튼에 로딩을 보인다. 누른 뒤 0.4초 안에 반응이 보여야 한다(도허티 임계, 닐슨 1번 시스템 상태)
+      if (checking) return;
+      setChecking(true);
+      const fresh = await refetch().finally(() => setChecking(false));
       const openId = fresh.data?.open_session_id;
       if (openId) {
         router.push(`/sessions/${openId}` as any);
@@ -217,7 +221,7 @@ export default function GroupScreen() {
           <Button
             label={hasOpenSession ? '진행 중인 판으로' : '오늘 뭐 먹지'}
             onPress={() => handleStartOrJoinSession()}
-            loading={isStartingSession && !askHeadcount}
+            loading={(isStartingSession && !askHeadcount) || checking}
           />
           {openFlash > 0 ? <NewRing key={openFlash} label="판이 열렸어요" /> : null}
         </View>
