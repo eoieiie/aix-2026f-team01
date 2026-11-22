@@ -58,9 +58,11 @@ select is((select r->>'action' from t_ai where k = 'req2'), 'cached', '같은 �
 select is((select ai_tags from public.foods where name = 't분짜특선'), array['pork','seafood'], '저장한 태그가 붙는다');
 
 -- 참여자가 아니면 거절, 하루 상한을 넘으면 묻지 않는다
+-- 다른 사람에게는 직접 적은 메뉴가 보이지 않으니 id를 미리 꺼내 둔다
+insert into t_ai select 'id', jsonb_build_object('id', id) from public.foods where name = 't분짜특선';
 select set_config('request.jwt.claims', '{"sub":"00000000-0000-0000-0000-0000000000a3","role":"authenticated"}', true);
 set local role authenticated;
-select throws_ok($$ select public.ai_ingredient_request((select id from public.foods where name = 't분짜특선')) $$,
+select throws_ok($$ select public.ai_ingredient_request((select (r->>'id')::bigint from t_ai where k = 'id')) $$,
   'P0001', 'not_participant', '그 메뉴가 후보인 판의 참여자만 부른다');
 reset role;
 update public.ai_usage set calls = public.app_limit('AI_DAILY_MAX') where day = (now() at time zone 'Asia/Seoul')::date;
