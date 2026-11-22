@@ -38,7 +38,12 @@ cp .env.example .env
 npx expo start --web
 ```
 
-`.env`에 Supabase 주소와 공개 키를 채워야 로그인된다. 비어 있으면 "연결할 수 없어요" 화면이 뜬다.
+`.env`에 Supabase 주소와 공개 키를 채워야 로그인된다. 비어 있으면 "연결할 수 없어요" 화면이 뜬다. 방법은 둘이다.
+
+- 바로 써 보기: 설치 없이 https://babti.expo.app (실제 서버)
+- 내 컴퓨터에 서버까지 띄우기(Docker 필요): `npx supabase start` → `npx supabase db reset`(표, 서버 함수, 식당 자료가 모두 들어간다) → 출력된 `API URL`과 `anon key`를 `.env`의 `EXPO_PUBLIC_SUPABASE_URL`, `EXPO_PUBLIC_SUPABASE_ANON_KEY`에 넣고 `npx expo start --web`
+
+새로 받은 폴더에서 `npm ci`, `npm run typecheck`, `npm test`(136개), `npm run build:web`이 모두 통과하는 것을 2026-11-20에 확인했다.
 필요한 환경변수 / Required environment variables: `.env.example` 참고
 
 폴더 / Folders:
