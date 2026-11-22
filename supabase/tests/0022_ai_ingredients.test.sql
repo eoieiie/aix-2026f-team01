@@ -75,15 +75,20 @@ insert into t_ai select 'req3', public.ai_ingredient_request((select id from pub
 reset role;
 select is((select r->>'reason' from t_ai where k = 'req3'), 'daily_limit', '하루 상한을 넘으면 낱말 표만');
 
--- 0024: 묻다가 멈춘 이름은 10분 뒤 다시 묻는다
-update public.foods set ai_status = 'failed', ai_tried_at = now() where name = 't분짜 특선';
+-- 0024: 묻다가 멈춘 이름은 10분 뒤 다시 묻는다 (저장한 값이 없는 새 이름으로)
+reset role;
 select set_config('request.jwt.claims', '{"sub":"00000000-0000-0000-0000-0000000000a1","role":"authenticated"}', true);
 set local role authenticated;
-insert into t_ai select 'retry_soon', public.ai_ingredient_request((select (r->>'food_id')::bigint from t_ai where k = 'add'));
+insert into t_ai select 'add2', public.add_custom_candidate('20000000-0000-0000-0000-0000000000a1', 't재시도 메뉴');
 reset role;
-update public.foods set ai_tried_at = now() - interval '11 minutes' where name = 't분짜 특선';
+update public.foods set ai_status = 'failed', ai_tried_at = now() where name = 't재시도 메뉴';
 set local role authenticated;
-insert into t_ai select 'retry_late', public.ai_ingredient_request((select (r->>'food_id')::bigint from t_ai where k = 'add'));
+insert into t_ai select 'retry_soon', public.ai_ingredient_request((select (r->>'food_id')::bigint from t_ai where k = 'add2'));
+reset role;
+update public.foods set ai_tried_at = now() - interval '11 minutes' where name = 't재시도 메뉴';
+update public.ai_usage set calls = 0 where day = (now() at time zone 'Asia/Seoul')::date;  -- 앞 테스트가 상한을 채웠다
+set local role authenticated;
+insert into t_ai select 'retry_late', public.ai_ingredient_request((select (r->>'food_id')::bigint from t_ai where k = 'add2'));
 reset role;
 select is((select r->>'reason' from t_ai where k = 'retry_soon'), 'failed', '실패한 지 10분 안이면 다시 묻지 않는다');
 select is((select r->>'action' from t_ai where k = 'retry_late'), 'ask', '10분이 지나면 다시 묻는다 (0024)');
