@@ -72,7 +72,9 @@ export function useSession(sessionId: string) {
 
   const error = join.error ?? session.error;
   return {
-    session: session.data,
+    // 판이 닫혀 다시 읽기에 실패해도, 전에 읽은 모임으로 돌아갈 수 있게 마지막 값을 같이 준다
+    lastGroupId: session.data?.groupId ?? null,
+    session: session.error ? undefined : session.data,
     isLoading: join.isPending || (join.isSuccess && session.isPending),
     error,
     retry: () => (join.isError ? join.refetch() : session.refetch()),

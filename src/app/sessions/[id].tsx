@@ -44,7 +44,7 @@ export default function SessionScreen() {
   const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
   const sessionId = id ?? '';
-  const { session, isLoading, error, retry } = useSession(sessionId);
+  const { session, isLoading, error, retry, lastGroupId } = useSession(sessionId);
 
   // 이 화면에서 투표 단계를 본 적이 있으면, 결과가 오는 순간 원판을 돌린다
   const [sawVoting, setSawVoting] = useState(false);
@@ -69,13 +69,20 @@ export default function SessionScreen() {
 
   if (error || !session) {
     const notMember = error instanceof SessionError && error.code === 'not_member';
+    // 판을 연 사람이 판을 접었다(4-24). 실시간이나 4초 다시 읽기에서 판이 사라지면 바로 이 화면이 된다
+    const gone = error instanceof SessionError && error.code === 'session_not_found';
     return (
       <SafeAreaView className="flex-1 items-center justify-center gap-4 bg-background px-6">
         <Text className="text-lg font-bold text-text">
-          {notMember ? '이 모임 멤버가 아니에요' : sessionErrorMessage(error)}
+          {gone ? '판이 닫혔어요' : notMember ? '이 모임 멤버가 아니에요' : sessionErrorMessage(error)}
         </Text>
         <View className="w-full max-w-xs">
-          {notMember ? (
+          {gone ? (
+            <Button
+              label={lastGroupId ? '모임으로' : '홈으로'}
+              onPress={() => router.replace((lastGroupId ? `/groups/${lastGroupId}` : '/') as any)}
+            />
+          ) : notMember ? (
             <Button label="홈으로" onPress={() => router.replace('/')} />
           ) : (
             <Button label="다시 시도" variant="secondary" onPress={() => retry()} />

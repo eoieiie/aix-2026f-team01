@@ -74,12 +74,13 @@ function DexTile({ food, on, onPress }: { food: DexFood; on: boolean; onPress: (
       onPress={eaten ? onPress : undefined}
       disabled={!eaten}
       className={`w-[23.5%] items-center gap-1 rounded-2xl p-2 ${on ? 'border-2 border-primary bg-surface' : 'bg-surface'}`}>
-      <View className="aspect-square w-full items-center justify-center">
+      {/* 결과 화면 그림(FoodIllustration)과 같은 모양: 흰 원 안에 둥글게 자른 그림. 그림 배경(옅은 미색 네모)이 회색 칸 위에 드러나지 않는다 */}
+      <View className="aspect-square w-full items-center justify-center overflow-hidden rounded-full bg-on-primary">
         {food.imageUrl ? (
           <Image
             source={{ uri: food.imageUrl }}
-            style={{ width: '100%', height: '100%', opacity: eaten ? 1 : 0.18 }}
-            resizeMode="contain"
+            style={{ width: '92%', height: '92%', borderRadius: 999, opacity: eaten ? 1 : 0.18 }}
+            resizeMode="cover"
           />
         ) : null}
         {!eaten ? <Text className="absolute text-2xl font-bold text-muted">?</Text> : null}
