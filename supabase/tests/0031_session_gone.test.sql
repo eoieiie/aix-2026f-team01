@@ -4,7 +4,7 @@ create extension if not exists pgtap with schema extensions;
 select plan(3);
 insert into auth.users (id) values ('00000000-0000-0000-0000-0000000000b1');
 insert into public.groups (id, name, invite_code, created_by) values
-  ('20000000-0000-0000-0000-0000000000b1', '닫힘 시험', 'GONEAA', '00000000-0000-0000-0000-0000000000b1');
+  ('20000000-0000-0000-0000-0000000000b1', '닫힘 시험', 'GHNEAB', '00000000-0000-0000-0000-0000000000b1');
 insert into public.sessions (id, group_id, host_user_id) values
   ('30000000-0000-0000-0000-0000000000b1', '20000000-0000-0000-0000-0000000000b1', '00000000-0000-0000-0000-0000000000b1');
 select ok(public.session_exists('30000000-0000-0000-0000-0000000000b1'), '있는 판은 true');
