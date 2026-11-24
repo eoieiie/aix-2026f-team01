@@ -24,15 +24,18 @@ as $$
   )
 $$;
 
+-- 검사할 칸 이름은 트리거 인자로 받는다(표마다 칸이 달라 new.칸을 바로 쓰면 다른 표에서 컴파일 오류가 난다)
 create or replace function public.reject_blocked_words() returns trigger
 language plpgsql set search_path = ''
 as $$
+declare
+  v_row jsonb := to_jsonb(new);
 begin
-  if (tg_table_name = 'groups' and public.has_blocked_word(new.name))
-    or (tg_table_name in ('memberships', 'profiles') and public.has_blocked_word(new.display_name))
-    or (tg_table_name = 'candidates' and public.has_blocked_word(new.pitch))
-    or (tg_table_name = 'foods' and new.custom and public.has_blocked_word(new.name))
-  then
+  -- 음식은 직접 적은 것만 본다(기본 음식 목록은 팀이 넣는다)
+  if tg_table_name = 'foods' and not coalesce((v_row ->> 'custom')::boolean, false) then
+    return new;
+  end if;
+  if public.has_blocked_word(v_row ->> tg_argv[0]) then
     raise exception 'blocked_word';
   end if;
   return new;
@@ -41,19 +44,19 @@ $$;
 
 drop trigger if exists groups_blocked_words on public.groups;
 create trigger groups_blocked_words before insert or update of name on public.groups
-  for each row execute function public.reject_blocked_words();
+  for each row execute function public.reject_blocked_words('name');
 drop trigger if exists memberships_blocked_words on public.memberships;
 create trigger memberships_blocked_words before insert or update of display_name on public.memberships
-  for each row execute function public.reject_blocked_words();
+  for each row execute function public.reject_blocked_words('display_name');
 drop trigger if exists profiles_blocked_words on public.profiles;
 create trigger profiles_blocked_words before insert or update of display_name on public.profiles
-  for each row execute function public.reject_blocked_words();
+  for each row execute function public.reject_blocked_words('display_name');
 drop trigger if exists candidates_blocked_words on public.candidates;
 create trigger candidates_blocked_words before insert or update of pitch on public.candidates
-  for each row execute function public.reject_blocked_words();
+  for each row execute function public.reject_blocked_words('pitch');
 drop trigger if exists foods_blocked_words on public.foods;
 create trigger foods_blocked_words before insert or update of name on public.foods
-  for each row execute function public.reject_blocked_words();
+  for each row execute function public.reject_blocked_words('name');
 
 -- 2. 신고 ------------------------------------------------------------------
 -- 팀이 대시보드에서 보고 24시간 안에 처리한다(이용약관). 앱에서는 아무도 읽지 못한다(정책 없음).

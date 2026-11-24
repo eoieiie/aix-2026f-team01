@@ -1,4 +1,4 @@
-import { type ReactNode, useEffect, useState } from 'react';
+import { type ReactNode, useState } from 'react';
 import { Modal, Pressable, View } from 'react-native';
 
 import { Button } from '@/components/button';
@@ -80,17 +80,8 @@ export function ConfirmSheet({
   );
 }
 
-// 이름 하나를 적는 창 (내 이름, 모임 이름)
-export function NameSheet({
-  visible,
-  title,
-  initial,
-  maxLength,
-  busy = false,
-  error,
-  onSave,
-  onClose,
-}: {
+// 이름 하나를 적는 창 (내 이름, 모임 이름). 열릴 때마다 안쪽을 새로 그려 처음 값으로 시작한다
+type NameSheetProps = {
   visible: boolean;
   title: string;
   initial: string;
@@ -99,14 +90,21 @@ export function NameSheet({
   error?: string | null;
   onSave: (name: string) => void;
   onClose: () => void;
-}) {
+};
+
+export function NameSheet(props: NameSheetProps) {
+  return (
+    <Sheet visible={props.visible} onClose={props.onClose}>
+      {props.visible ? <NameSheetBody {...props} /> : null}
+    </Sheet>
+  );
+}
+
+function NameSheetBody({ title, initial, maxLength, busy = false, error, onSave, onClose }: NameSheetProps) {
   const [name, setName] = useState(initial);
-  useEffect(() => {
-    if (visible) setName(initial);
-  }, [visible, initial]);
   const ok = name.trim().length > 0 && name.trim() !== initial;
   return (
-    <Sheet visible={visible} onClose={onClose}>
+    <>
       <Text className="text-2xl font-bold tracking-tight text-text">{title}</Text>
       <TextField
         value={name}
@@ -125,6 +123,6 @@ export function NameSheet({
           <Button label="저장" onPress={() => onSave(name.trim())} disabled={!ok} loading={busy} />
         </View>
       </View>
-    </Sheet>
+    </>
   );
 }
