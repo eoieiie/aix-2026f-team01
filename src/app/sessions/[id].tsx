@@ -146,7 +146,7 @@ function Header({ session, onBack }: { session: SessionView; onBack: () => void 
         danger
         busy={cancel.isPending}
         error={cancel.error ? safetyErrorMessage(cancel.error) : null}
-        onConfirm={() => cancel.mutate(session.id, { onSuccess: () => { setFold(false); onBack(); } })}
+        onConfirm={() => cancel.mutateAsync(session.id).then(onBack).catch(() => undefined)}
         onClose={() => { cancel.reset(); setFold(false); }}
       />
       {/* 한 판의 세 단계. 누르는 것이 아니라서 버튼 모양 대신 "2 / 3 투표" 한 줄과 막대 세 칸으로 보인다.

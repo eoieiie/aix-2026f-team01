@@ -108,13 +108,12 @@ export function SettingsList({
         danger
         busy={safety.deleteAccount.isPending}
         error={safety.deleteAccount.error ? safetyErrorMessage(safety.deleteAccount.error) : null}
+        // 지우고 나면 목록을 다시 읽느라 이 화면이 사라질 수 있어 mutateAsync로 끝을 기다린 뒤 처음 화면으로 간다
         onConfirm={() =>
-          safety.deleteAccount.mutate(undefined, {
-            onSuccess: () => {
-              setSheet(null);
-              router.replace('/' as any);
-            },
-          })
+          safety.deleteAccount
+            .mutateAsync()
+            .then(() => router.replace('/' as any))
+            .catch(() => undefined)
         }
         onClose={close}
       />

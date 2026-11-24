@@ -67,13 +67,12 @@ export function GroupMenu({
         danger
         busy={leave.isPending}
         error={leave.error ? safetyErrorMessage(leave.error) : null}
+        // 나가면 모임 화면이 바로 "멤버가 아니에요"로 바뀌어 이 창이 사라질 수 있어 끝을 기다린 뒤 옮긴다
         onConfirm={() =>
-          leave.mutate(groupId, {
-            onSuccess: () => {
-              close();
-              onLeft();
-            },
-          })
+          leave
+            .mutateAsync(groupId)
+            .then(onLeft)
+            .catch(() => undefined)
         }
         onClose={close}
       />
