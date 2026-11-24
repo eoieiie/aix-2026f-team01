@@ -2,11 +2,11 @@ import { useFocusEffect, useRouter } from 'expo-router';
 import { useCallback, useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, View } from 'react-native';
 import { Text } from '@/components/text';
+import { FoodDex } from '@/components/food-dex';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { AccountSheet } from '@/components/account-sheet';
 import { Button } from '@/components/button';
-import { FoodDot } from '@/components/food-dot';
 import { Icon, type IconName } from '@/components/icon';
 import { ProfileSummaryCard } from '@/components/profile-summary-card';
 import colors from '@/constants/colors.json';
@@ -116,25 +116,8 @@ export default function ProfileScreen() {
           </View>
 
           {subTab === 'foods' ? (
-            stats.foods.length === 0 ? (
-              <View className="rounded-3xl bg-surface p-6">
-                <Text className="text-lg font-bold text-muted">아직 같이 먹은 기록이 없어요</Text>
-              </View>
-            ) : (
-              <View className="flex-row flex-wrap justify-between gap-y-2">
-                {stats.foods.map((f) => (
-                  <View
-                    key={f.foodId}
-                    className="min-h-14 w-[49%] flex-row items-center gap-2 rounded-3xl bg-surface py-2 pl-3 pr-4">
-                    <FoodDot foodId={f.foodId} size="sm" />
-                    <Text className="flex-1 text-base font-bold text-text">
-                      {f.name}
-                    </Text>
-                    <Text className="text-sm font-semibold text-muted">{f.mealCount}번</Text>
-                  </View>
-                ))}
-              </View>
-            )
+            // 4-25 음식 도감: 그림 카드 모음
+            <FoodDex />
           ) : stats.companions.length === 0 ? (
             <View className="rounded-3xl bg-surface p-6">
               <Text className="text-lg font-bold text-muted">아직 같이 먹은 밥 친구가 없어요</Text>
