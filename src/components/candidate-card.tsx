@@ -29,6 +29,8 @@ type CandidateCardProps = {
   eatenNote?: string | null;
   // 방금 올린 후보. 주황 테두리가 잠깐 보였다가 사라진다
   highlight?: boolean;
+  // 남이 쓴 어필이나 직접 적은 메뉴: 신고와 차단 (4-24)
+  onMore?: () => void;
 };
 
 // 후보 한 줄. 못 먹는 사람이 있는 후보는 이름 아래 한 줄로 알린다. 누가 원인인지는 데이터에도 없다 (4-9 익명)
@@ -42,6 +44,7 @@ export function CandidateCard({
   busy = false,
   eatenNote = null,
   highlight = false,
+  onMore,
 }: CandidateCardProps) {
   // 테두리는 JS로 흐려지게 한다(웹과 앱이 같게). 움직임 줄이기가 켜져 있으면 흐려지지 않고 바로 사라진다
   const [ring] = useState(() => new Animated.Value(0));
@@ -147,6 +150,15 @@ export function CandidateCard({
               <Icon name="check" color="primary" />
             ) : null}
           </View>
+        ) : null}
+        {onMore ? (
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={`${candidate.foodName} 신고 또는 차단`}
+            onPress={onMore}
+            className="h-11 w-11 items-center justify-center rounded-full bg-background active:opacity-70">
+            <Icon name="more" size={18} />
+          </Pressable>
         ) : null}
         {onRemove ? (
           <Pressable

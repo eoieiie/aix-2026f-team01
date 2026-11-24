@@ -6,6 +6,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Button } from '@/components/button';
 import { FoodDot } from '@/components/food-dot';
+import { GroupMenu } from '@/components/group-menu';
 import { GroupProfileCard } from '@/components/group-profile-card';
 import { HeadcountModal } from '@/components/headcount-modal';
 import { IconButton } from '@/components/icon';
@@ -140,8 +141,9 @@ export default function GroupScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-background">
-      <View className="flex-row items-center px-5 py-3">
+      <View className="flex-row items-center justify-between px-5 py-3">
         <IconButton name="back" label="홈으로" onPress={() => router.replace('/')} />
+        <GroupMenu groupId={group.id} name={group.name} isOwner={!!group.is_owner} onLeft={() => router.replace('/')} />
       </View>
 
       <ScrollView keyboardShouldPersistTaps="handled" automaticallyAdjustKeyboardInsets

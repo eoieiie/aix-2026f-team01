@@ -20,6 +20,10 @@ export interface Candidate {
   foodId: number;
   foodName: string;
   isMine: boolean;
+  // 올린 사람. 신고와 차단에 쓴다 (4-24)
+  proposedBy: string;
+  // 내가 차단한 사람이 올린 후보. 어필과 직접 적은 메뉴 이름을 가린다 (4-24)
+  blocked: boolean;
   pitch: string | null;
   vetoed: boolean;
   // vetoed: 이 판에 못 먹는 사람이 있다. 0010부터 빠지지 않고 표시만 한다
@@ -91,6 +95,8 @@ export const SESSION_ERROR_MESSAGES: Record<string, string> = {
   name_too_long: '메뉴 이름은 20자까지예요',
   not_all_voted: '아직 고르지 않은 사람이 있어요',
   bad_headcount: '인원은 1명부터 20명까지예요',
+  already_done: '이미 끝난 판이에요',
+  blocked_word: '쓸 수 없는 말이 있어요',
 };
 
 export class SessionError extends Error {
@@ -177,6 +183,13 @@ export async function getSession(
   const cantRes: any = await Promise.resolve(
     client.rpc('session_cant_eat', { p_session_id: sessionId })
   ).catch(() => null);
+  // 내가 차단한 사람 (4-24). 못 읽어도 판은 보인다
+  const blockRes: any = await Promise.resolve(
+    client.from('blocks').select('blocked').eq('blocker', userId)
+  ).catch(() => null);
+  const blockedIds = new Set<string>(
+    blockRes && !blockRes.error && Array.isArray(blockRes.data) ? blockRes.data.map((b: any) => b.blocked) : []
+  );
   const cantRows: { tag: string | null; food_name: string | null }[] =
     cantRes && !cantRes.error && Array.isArray(cantRes.data) ? cantRes.data : [];
   for (const res of [participantsRes, membersRes, candidatesRes, votesRes]) {
@@ -202,12 +215,15 @@ export async function getSession(
     .sort((a: any, b: any) => String(a.created_at).localeCompare(String(b.created_at)))
     .map((c: any) => ({
       foodId: c.food_id,
-      foodName: c.foods?.name ?? '',
+      foodName: blockedIds.has(c.proposed_by) && c.foods?.custom === true ? '가린 메뉴' : (c.foods?.name ?? ''),
       custom: c.foods?.custom === true,
       aiTags: Array.isArray(c.foods?.ai_tags) ? c.foods.ai_tags : [],
       aiNotes: c.foods?.ai_notes && typeof c.foods.ai_notes === 'object' ? c.foods.ai_notes : {},
       isMine: c.proposed_by === userId,
-      pitch: c.pitch,
+      proposedBy: c.proposed_by,
+      blocked: blockedIds.has(c.proposed_by),
+      // 차단한 사람이 쓴 어필은 내 화면에 보이지 않는다. 직접 적은 메뉴 이름은 화면에서 가린다
+      pitch: blockedIds.has(c.proposed_by) ? null : c.pitch,
       vetoed: c.vetoed,
     }));
 

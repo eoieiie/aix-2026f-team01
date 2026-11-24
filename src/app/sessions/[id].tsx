@@ -11,8 +11,11 @@ import { FoodSearch } from '@/components/food-search';
 import { HeadcountStepper } from '@/components/headcount-stepper';
 import { Icon, IconButton } from '@/components/icon';
 import { type Point, ResultMoment } from '@/components/result-moment';
+import { ReportSheet, type ReportTarget } from '@/components/report-sheet';
 import { Roulette } from '@/components/roulette';
+import { ConfirmSheet } from '@/components/sheets';
 import colors from '@/constants/colors.json';
+import { safetyErrorMessage, useSafety } from '@/hooks/use-safety';
 import { cantEatNotice } from '@/constants/restrictions';
 import {
   GROUP_FAVORITES_MAX,
@@ -120,6 +123,8 @@ const STEPS = [
 ] as const;
 
 function Header({ session, onBack }: { session: SessionView; onBack: () => void }) {
+  const [fold, setFold] = useState(false);
+  const { cancel } = useSafety();
   const current = STEPS.findIndex((step) => step.status === session.status);
   return (
     <View className="gap-4 px-5 pb-2 pt-3">
@@ -128,7 +133,22 @@ function Header({ session, onBack }: { session: SessionView; onBack: () => void 
         <Text className="flex-1 text-lg font-bold text-text" numberOfLines={2}>
           {session.groupName}
         </Text>
+        {/* 판을 연 사람은 끝나기 전 판을 접을 수 있다. 접은 판은 기록이 남지 않는다 (4-24) */}
+        {session.isHost && session.status !== 'done' ? (
+          <IconButton name="more" label="판 접기" onPress={() => setFold(true)} />
+        ) : null}
       </View>
+      <ConfirmSheet
+        visible={fold}
+        title="판을 접을까요?"
+        body="후보와 표가 모두 지워지고 기록이 남지 않아요"
+        confirmLabel="판 접기"
+        danger
+        busy={cancel.isPending}
+        error={cancel.error ? safetyErrorMessage(cancel.error) : null}
+        onConfirm={() => cancel.mutate(session.id, { onSuccess: () => { setFold(false); onBack(); } })}
+        onClose={() => { cancel.reset(); setFold(false); }}
+      />
       {/* 한 판의 세 단계. 누르는 것이 아니라서 버튼 모양 대신 "2 / 3 투표" 한 줄과 막대 세 칸으로 보인다.
           지나온 단계와 지금 단계는 검정, 남은 단계는 회색 (2026-11-16 병주 1안) */}
       <View
@@ -211,6 +231,7 @@ function CandidateStage({
 }) {
   const { foods } = useFoods();
   const { add, addCustom, pitch, remove, open } = useSessionActions(session.id);
+  const [report, setReport] = useState<ReportTarget | null>(null);
   // 4-20 식사 기록과 못 먹는 것. 참여자 수가 바뀌면 다시 읽는다
   const hints = useFoodHints(session.id, `${session.participants.length}`);
   const hintOf = new Map(hints.map((h) => [h.foodId, h]));
@@ -339,8 +360,21 @@ function CandidateStage({
                 eatenNote={eatenNote(hintOf.get(c.foodId)?.lastEatenAt ?? null, RECENT_EATEN_DAYS)}
                 onSavePitch={c.isMine ? (text) => pitch.mutate({ foodId: c.foodId, text }) : undefined}
                 onRemove={c.isMine ? () => remove.mutate(c.foodId) : undefined}
+                onMore={
+                  !c.isMine && !c.blocked && (c.pitch || c.custom)
+                    ? () =>
+                        setReport({
+                          kind: c.pitch ? 'pitch' : 'custom_food',
+                          groupId: session.groupId,
+                          sessionId: session.id,
+                          foodId: c.foodId,
+                          userId: c.proposedBy,
+                        })
+                    : undefined
+                }
               />
             ))}
+          <ReportSheet target={report} onClose={() => setReport(null)} />
         </View>
       </ScrollView>
 

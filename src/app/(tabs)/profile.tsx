@@ -7,8 +7,8 @@ import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
 import { AccountSheet } from '@/components/account-sheet';
 import { Button } from '@/components/button';
 import { FoodDot } from '@/components/food-dot';
-import { Icon, type IconName } from '@/components/icon';
 import { ProfileSummaryCard } from '@/components/profile-summary-card';
+import { SettingsList } from '@/components/settings-list';
 import colors from '@/constants/colors.json';
 import { TAB_BAR_SPACE } from '@/constants';
 import { authorityTitle, levelOf, typeLetters, useMyStats } from '@/hooks/use-stats';
@@ -158,18 +158,14 @@ export default function ProfileScreen() {
           )}
         </View>
 
-        {/* 설정 메뉴: 하나의 통합 그룹 카드로 정돈 */}
-        <View className="overflow-hidden rounded-3xl bg-surface">
-          <Row icon="close" label="못 먹는 음식 재설정" onPress={() => router.push('/restrictions' as any)} />
-          <View className="mx-5 h-[1px] bg-surface-strong" />
-          {letters ? (
-            <>
-              <Row icon="pencil" label="밥BTI 다시 만들기" onPress={toOnboarding} />
-              <View className="mx-5 h-[1px] bg-surface-strong" />
-            </>
-          ) : null}
-          <Row icon="person" label="다른 기기에서 이어 쓰기 (계정 연동)" onPress={() => setAccountVisible(true)} />
-        </View>
+        {/* 설정 (명세 4-24). 부품은 settings-list */}
+        <SettingsList
+          name={stats.profile.displayName ?? ''}
+          hasType={!!letters}
+          onRestrictions={() => router.push('/restrictions' as any)}
+          onOnboarding={toOnboarding}
+          onAccount={() => setAccountVisible(true)}
+        />
       </ScrollView>
       <AccountSheet visible={accountVisible} onClose={() => setAccountVisible(false)} />
     </SafeAreaView>
@@ -182,19 +178,5 @@ function Stat({ value, label }: { value: number; label: string }) {
       <Text className="text-3xl font-bold tracking-tight text-text">{value}</Text>
       <Text className="text-sm text-muted">{label}</Text>
     </View>
-  );
-}
-
-// 설정 줄. 그룹 카드 내부 행
-function Row({ icon, label, onPress }: { icon: IconName; label: string; onPress: () => void }) {
-  return (
-    <Pressable
-      accessibilityRole="button"
-      accessibilityLabel={label}
-      onPress={onPress}
-      className="h-14 flex-row items-center gap-3 px-5 active:bg-surface-strong/50">
-      <Icon name={icon} size={20} />
-      <Text className="text-base font-bold text-text">{label}</Text>
-    </Pressable>
   );
 }
