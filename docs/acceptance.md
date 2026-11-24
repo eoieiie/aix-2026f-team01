@@ -1,0 +1,32 @@
+# 완료 조건 / Acceptance criteria
+
+2026-11-21 씀 (eoieiie). 결과보고서 2.4(사용자 스토리와 완료 조건), 6.2(완료 조건 달성 여부)의 재료다. 4주차 활동지(`docs/week-04.md`)의 AC 표 형식(EARS 문장, 정상/실패 경로, 판정 방법)을 따른다.
+
+## 4주차 AC와 바뀐 이유
+
+4주차에 쓴 AC-1~3은 "킥보드 통합 플랫폼" 주제의 것이다. 9/30에 주제를 밥비티아이로 바꿨다. 킥보드는 사업자 위치·결제 API 제휴 없이는 시연할 수 없어서다(`docs/decisions.md` 2026-09-30). 아래는 밥비티아이 핵심 시나리오(모임 → 판 → 후보 → 투표 → 룰렛 → 결과) 기준으로 새로 쓴 것이다.
+
+## 판정 기준
+
+- "통과": 판정 방법에 적은 자동 테스트가 실제로 돌아 통과했다. jest는 2026-11-21 로컬 실행(19개 파일, 142개 통과), pgTAP(`supabase/tests/`)은 main `0e36628`의 GitHub Actions `db` 검사 통과로 확인했다
+- "부분": 서버 규칙은 자동 테스트로 통과했지만, 화면이나 바깥 서비스(실시간 도착, Gemini 실제 호출)는 사람이 한 번 확인한 기록만 있다
+- "미달성": 아직 안 된다
+
+## 표
+
+| # | 경로 | EARS 문장 | 판정 방법 | 결과 |
+|---|---|---|---|---|
+| AC-1 | 정상 | WHEN 초대받은 사람이 모임 QR이나 초대 링크로 들어와 이름을 적으면 THE 시스템은 SHALL 그 사람을 모임 멤버로 넣고, 진행 중인 판이 있으면 그 판을 돌려주고, 모임 화면의 다른 멤버에게 새로고침 없이 보인다 | `supabase/tests/0003_groups.test.sql`(join_group), `0004_realtime.test.sql`(memberships 구독), `src/api/invite.test.ts`, `src/components/qr-code.test.ts`. 다른 멤버 화면에 나타나는 것은 수동 시연(PR #86, 약 0.3초) | 부분 (서버·QR 통과, 실시간 화면은 수동) |
+| AC-2 | 정상 | WHEN 방장이 같이 먹을 사람을 체크하고 인당 표 수를 골라 판을 열면 THE 시스템은 SHALL 체크한 수를 인원수로, 고른 표 수를 그 판의 상한으로 저장한다 | `0010_headcount.test.sql`, `0019_session_options.test.sql`. 체크 창 화면은 수동 시연 | 통과 (서버). 체크 창 화면은 자동 테스트 없음 |
+| AC-3 | 정상 | WHEN 멤버가 목록에서 음식을 고르거나 목록에 없는 메뉴를 직접 적으면 THE 시스템은 SHALL 그 판의 후보로 올리고, 같은 이름은 한 번만 올린다 | `0009_custom_food.test.sql`, `src/api/sessions.test.ts`(직접 적은 메뉴 올리기, 음식 검색) | 통과 |
+| AC-4 | 정상 | WHEN 후보에 판 참여자 중 누군가 못 먹는 재료가 들어 있으면 THE 시스템은 SHALL 그 후보에 "못 먹는 사람이 있어요"를 표시하고, 누가 못 먹는지는 어디에도 남기지 않는다 | `0001_rules.test.sql`(원인이 된 사람 칸이 없다), `0011_soft_veto.test.sql` | 통과 |
+| AC-5 | 정상 | WHEN 목록에 없는 메뉴를 직접 적으면 THE 시스템은 SHALL 낱말 표 태그를 먼저 붙이고, AI가 추정한 재료를 더하기만 하며(빼지 않음), 그 판의 후보를 다시 판정한다 | `0022_ai_ingredients.test.sql`(9개 밖 값 버림, 더하기만, 다시 판정, 같은 이름 저장값), `src/api/ai-ingredients.test.ts`(보내는 본문은 메뉴 이름만). Gemini 실제 호출은 수동 확인(2026-11-21, 7.3초 안에 재료와 "못 먹는 사람이 있어요", PR #99) | 부분 (서버 규칙 통과, 실제 AI 호출은 수동) |
+| AC-6 | 실패 | IF AI가 답하지 않거나 깨진 답을 주거나 하루 상한을 넘으면 THEN THE 시스템은 SHALL 낱말 표 태그만으로 판을 계속하고, 실패한 메뉴는 10분 뒤에 다시 묻는다 | `0022_ai_ingredients.test.sql`(하루 상한을 넘으면 낱말 표만, 10분 안이면 다시 묻지 않음, 10분 뒤 다시 묻기), `src/api/ai-ingredients.test.ts`(깨진 답이면 태그 없음) | 통과 |
+| AC-7 | 실패 | IF 인당 표 수를 다 쓴 사람이 다른 후보를 찍으면 THEN THE 시스템은 SHALL 표를 거절하고 "표를 다 썼어요"를 보인다 | `0001_rules.test.sql`(세 번째 표 거절), `0019_session_options.test.sql`(1표 판 두 번째 메뉴 막힘), `src/api/sessions.test.ts`(vote_limit 문구) | 통과 |
+| AC-8 | 실패 | IF 인원수만큼 투표(아무거나 괜찮아요 포함)하지 않았는데 방장이 돌리면 THEN THE 시스템은 SHALL 돌리기를 거절한다 | `0010_headcount.test.sql`(2명 중 1명만 골랐으면 못 돌린다), `0011_soft_veto.test.sql` | 통과 |
+| AC-9 | 정상 | WHEN 방장이 룰렛을 돌리면 THE 시스템은 SHALL 표를 받은 후보 중에서 표 수에 비례해 하나를 뽑고, 판을 끝내고, 참여자 전원이 든 식사 기록을 남긴다 | `0001_rules.test.sql`(표 받은 후보 중에서만, 판 끝남, 식사 기록), `0019_session_options.test.sql`(무게는 표 수의 합), `src/api/sessions.test.ts`(rouletteSlices), `src/components/roulette.test.ts`(바늘 아래 조각이 서버 결과) | 통과 |
+| AC-10 | 정상 | WHEN 판이 끝나면 THE 시스템은 SHALL 그 메뉴를 파는 학교 앞 식당과 카페를 각각 3곳까지 제휴 먼저 보이고, 제휴 쿠폰은 판마다 같은 코드로 한 번만 주고, 가게를 누르면 카카오맵을 연다 | `0016_restaurants.test.sql`, `0020_cafes.test.sql`, `0021_partner_cafes.test.sql`, `src/api/restaurants.test.ts`(카카오맵 주소) | 통과 |
+| AC-11 | 정상 | WHEN 결과 카드에서 공유를 누르면 THE 시스템은 SHALL 카드 내용과 링크만 담고 못 먹는 것은 넣지 않는다 | `src/api/meals.test.ts`(공유 글에는 카드 내용과 링크만), `0008_meal_card.test.sql`. 폰 공유 창이 열리는 것은 수동 시연 | 통과 (공유 글 내용) |
+| AC-12 | 실패 | IF 모임 멤버가 아닌 사람이 모임이나 판을 열거나, 서버에 연결할 수 없으면 THEN THE 시스템은 SHALL 내용을 보이지 않고 각각 "이 모임 멤버가 아니에요", "연결할 수 없어요"와 다시 시도를 보인다 | `0002_access.test.sql`, `0003_groups.test.sql`(들어가기 전에는 모임이 안 보인다), `src/api/sessions.test.ts`(멤버 아님 문구, 서버 코드가 아닌 오류) | 통과 |
+
+결과: 12개 중 통과 10, 부분 2(AC-1 실시간 화면, AC-5 실제 AI 호출), 미달성 0. 부분인 두 곳은 12/2 시연에서 직접 보인다(`docs/demo.md` 장면 1, 3).
