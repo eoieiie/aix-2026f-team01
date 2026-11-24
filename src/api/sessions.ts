@@ -75,7 +75,7 @@ export interface VoteCount {
 export const SESSION_ERROR_MESSAGES: Record<string, string> = {
   not_signed_in: '로그인이 필요해요',
   not_member: '이 모임 멤버가 아니에요',
-  session_not_found: '판을 찾을 수 없어요',
+  session_not_found: '판이 닫혔어요',
   not_participant: '이 판에 아직 참여하지 않았어요',
   voting_started: '이미 투표가 시작됐어요',
   food_not_found: '음식을 찾을 수 없어요',
@@ -167,8 +167,13 @@ export async function getSession(
     .eq('id', sessionId)
     .maybeSingle();
   if (sessionError) throwSessionError(sessionError);
-  // 소속이 아니면 권한 때문에 판이 안 보인다 (4-8, 4-6)
-  if (!session) throw new SessionError('not_member');
+  // 판이 안 보이면 둘 중 하나다: 소속이 아니어서 권한 때문에 안 보이거나(4-8, 4-6), 판을 연 사람이 판을 접어 없어졌거나(4-24).
+  // 판이 있는지만 묻는 함수로 나눈다. 못 물으면 예전처럼 소속 아님으로 본다
+  if (!session) {
+    const exists: any = await Promise.resolve(client.rpc('session_exists', { p_session_id: sessionId })).catch(() => null);
+    if (exists && !exists.error && exists.data === false) throw new SessionError('session_not_found');
+    throw new SessionError('not_member');
+  }
 
   const [participantsRes, membersRes, candidatesRes, votesRes] = await Promise.all([
     client.from('session_participants').select('user_id, voted, joined_at').eq('session_id', sessionId),
