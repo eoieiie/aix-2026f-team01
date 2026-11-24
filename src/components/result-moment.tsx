@@ -4,6 +4,7 @@ import { Text } from '@/components/text';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Button } from '@/components/button';
+import { FoodIllustration } from '@/components/food-illustration';
 import { NearbyCafes } from '@/components/nearby-cafes';
 import { NearbyRestaurants } from '@/components/nearby-restaurants';
 import { Roulette } from '@/components/roulette';
@@ -141,6 +142,9 @@ export function ResultMoment({ session, from, onGroup, onCard }: ResultMomentPro
             <Text className="text-xl font-bold text-on-primary" numberOfLines={2}>
               {session.groupName}
             </Text>
+            {winnerId > 0 ? (
+              <FoodIllustration foodId={winnerId} size={160} name={winner} wrapClassName="mt-6" />
+            ) : null}
             <Text className="mt-8 text-xl font-bold text-on-primary">룰렛이 골랐어요</Text>
             <Text
               className={`mt-1 font-bold tracking-tight text-on-primary ${nameSizeClass(winner)}`}
