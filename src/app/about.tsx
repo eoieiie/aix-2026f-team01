@@ -1,8 +1,8 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useRouter } from 'expo-router';
 import Head from 'expo-router/head';
-import { type ReactNode, useRef, useState } from 'react';
-import { Linking, Pressable, ScrollView, useWindowDimensions, View } from 'react-native';
+import { type ReactNode, useEffect, useRef, useState } from 'react';
+import { Linking, Platform, Pressable, ScrollView, useWindowDimensions, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { AdBadge } from '@/components/ad-badge';
@@ -27,11 +27,24 @@ import type { Candidate } from '@/hooks/use-session';
 const WIDE_MIN = 1024;
 const MAIL = 'turkiyecivciv31@gmail.com';
 
-// 기본 음식 번호 (supabase/seed/0001_foods.sql 순서, 그림 파일 이름이 음식 번호다)
-const FOOD = { kimchiStew: 1, bulgogi: 7, kalguksu: 13, tteokbokki: 17, jjajang: 21, sushi: 25, cutlet: 26, pho: 37 } as const;
+// 기본 음식 번호 (실제 서버의 foods.id, 그림 파일 이름이 음식 번호다. 17은 김밥 그림이라 분식 가게 그림으로 쓴다)
+const FOOD = { kimchiStew: 1, bulgogi: 7, kalguksu: 13, bunsik: 17, jjajang: 21, sushi: 25, cutlet: 26, pho: 37 } as const;
 // 직접 적은 메뉴의 예시 번호. 그림이 없어 회색 동그라미로 보인다
 const CUSTOM_SAMPLE_ID = 9001;
 const PEOPLE = ['민준', '서연', '지호'];
+const DESCRIPTION = '오늘 뭐 먹지, 같이 정해요. 모임 사람들이 후보를 올리고 익명으로 투표한 뒤 룰렛으로 메뉴를 정해요.';
+
+// 웹은 한 장짜리 index.html이라 설명 meta가 이미 하나 있다. 소개 화면에 있는 동안만 그 값을 바꾸고 나가면 되돌린다
+function useWebDescription(text: string) {
+  useEffect(() => {
+    if (Platform.OS !== 'web' || typeof document === 'undefined') return;
+    const meta = document.querySelector('meta[name="description"]');
+    if (!meta) return;
+    const before = meta.getAttribute('content') ?? '';
+    meta.setAttribute('content', text);
+    return () => meta.setAttribute('content', before);
+  }, [text]);
+}
 
 // 예시 조각 전용 저장소. 앱의 저장소와 나눠서 예시 값이 앱 화면에 섞이지 않고, 서버에도 묻지 않는다
 function useSampleClient() {
@@ -70,6 +83,7 @@ function sample(foodId: number, foodName: string, extra: Partial<Candidate> = {}
 export default function AboutScreen() {
   const router = useRouter();
   const sampleClient = useSampleClient();
+  useWebDescription(DESCRIPTION);
   const { width } = useWindowDimensions();
   const wide = width >= WIDE_MIN;
   const scroll = useRef<ScrollView>(null);
@@ -83,7 +97,6 @@ export default function AboutScreen() {
     <SafeAreaView className="flex-1 bg-background">
       <Head>
         <title>밥비티아이 소개</title>
-        <meta name="description" content="오늘 뭐 먹지, 같이 정해요. 모임 사람들이 후보를 올리고 익명으로 투표한 뒤 룰렛으로 메뉴를 정해요." />
         <meta property="og:title" content="밥비티아이 소개" />
       </Head>
       <QueryClientProvider client={sampleClient}>
@@ -177,7 +190,10 @@ function Grid({ wide, children }: { wide: boolean; children: ReactNode }) {
 
 function Cell({ wide, children }: { wide: boolean; children: ReactNode }) {
   return (
-    <View className={`gap-4 rounded-2xl bg-surface ${wide ? 'p-8' : 'p-4'}`} style={wide ? { flexBasis: '48%', flexGrow: 1 } : undefined}>
+    // 노트북에서 옆 칸과 높이가 같아지면 남는 자리는 제목과 조각 사이에 둔다
+    <View
+      className={`gap-4 rounded-2xl bg-surface ${wide ? 'justify-between p-8' : 'p-4'}`}
+      style={wide ? { flexBasis: '48%', flexGrow: 1 } : undefined}>
       {children}
     </View>
   );
@@ -240,7 +256,9 @@ function Hero({ wide, onStart, onHow }: { wide: boolean; onStart: () => void; on
   const stage = (
     <View className={`gap-3 rounded-2xl bg-surface ${wide ? 'flex-1 p-8' : 'p-4'}`}>
       <GroupHead />
-      <VoteSample />
+      <Stage>
+        <VoteSample />
+      </Stage>
     </View>
   );
   return (
@@ -361,7 +379,7 @@ function FeatureHead({ kicker, title }: { kicker: string; title: string }) {
 function ShopSample() {
   return (
     <View className="flex-row items-start gap-3 rounded-2xl bg-surface p-4">
-      <FoodThumb foodId={FOOD.tteokbokki} />
+      <FoodThumb foodId={FOOD.bunsik} />
       <View className="flex-1 gap-1">
         <View className="flex-row flex-wrap items-center gap-2">
           <Text className="text-lg font-bold text-text">한양 분식</Text>
@@ -402,11 +420,16 @@ const STEPS = [
 
 function Steps({ wide }: { wide: boolean }) {
   const [at, setAt] = useState(0);
+  const piece = (
+    <View className={`justify-center rounded-2xl bg-surface ${wide ? 'flex-1 p-8' : 'p-4'}`} style={{ minHeight: 320 }}>
+      <StepPiece index={at} />
+    </View>
+  );
   const list = (
     <View className={`gap-2 ${wide ? 'flex-1' : ''}`}>
       {STEPS.map((s, i) => {
         const on = i === at;
-        return (
+        const row = (
           <Pressable
             key={s.title}
             accessibilityRole="tab"
@@ -421,15 +444,19 @@ function Steps({ wide }: { wide: boolean }) {
             </View>
           </Pressable>
         );
+        // 폰에서는 고른 단계 바로 아래에 화면 조각을 둔다
+        return on && !wide ? (
+          <View key={s.title} className="gap-2">
+            {row}
+            {piece}
+          </View>
+        ) : (
+          row
+        );
       })}
     </View>
   );
-  const piece = (
-    <View className={`justify-center rounded-2xl bg-surface ${wide ? 'flex-1 p-8' : 'p-4'}`} style={{ minHeight: 320 }}>
-      <StepPiece index={at} />
-    </View>
-  );
-  return <View className={wide ? 'flex-row items-stretch gap-8' : 'gap-4'}>{list}{piece}</View>;
+  return wide ? <View className="flex-row items-stretch gap-8">{list}{piece}</View> : list;
 }
 
 function StepPiece({ index }: { index: number }) {
