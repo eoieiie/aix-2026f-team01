@@ -149,9 +149,8 @@ describe('가게 목록과 상세 (4-26)', () => {
     // 짐작 메뉴로도 찾는다(0051). 일반 중국집의 짜장면은 짐작이라 상세에는 안 보이지만 찾으면 나온다
     const guessed = [shop({ id: 7, name: '보배반점', cuisine: 'chinese', menusGuess: ['짜장면', '짬뽕', '탕수육'] })];
     expect(filterShops(guessed, 'all', '짜장면').map((s) => s.id)).toEqual([7]);
-    // 결과 뒤 "더 보기": 메뉴 이름이 맞는 곳 다음 같은 종류(0048)
-    expect(filterShops(list, 'all', '칼국수', 'korean').map((s) => s.id)).toEqual([3]);
-    expect(filterShops(list, 'all', '짬뽕', 'cafe').map((s) => s.id)).toEqual([1, 2]);
+    // 결과 뒤 "더 보기"도 같은 함수로 센다: 메뉴 이름으로 찾은 가게만(같은 종류 전체가 아니다, 2026-11-25)
+    expect(filterShops(list, 'all', '칼국수')).toEqual([]);
   });
 
   it('이름 아래 한 줄은 값이 있는 것만 조각으로 준다(기호로 잇지 않는다)', () => {

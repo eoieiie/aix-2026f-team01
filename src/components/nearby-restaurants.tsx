@@ -59,13 +59,7 @@ export function NearbyRestaurants({
           ) : null}
         </View>
       ))}
-      <MoreShops
-        total={list[0].total}
-        shown={list.length}
-        menuName={list[0].menuName}
-        menuCuisine={list[0].menuCuisine}
-        onWhite={onPrimary}
-      />
+      <MoreShops shown={list.length} menuName={list[0].menuName} onWhite={onPrimary} />
       <Text className="text-xs text-muted">{OSM_CREDIT}</Text>
     </View>
   );

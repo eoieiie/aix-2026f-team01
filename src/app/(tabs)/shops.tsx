@@ -18,17 +18,15 @@ import { type Shop, type ShopKind, useMyCoupons, useShops } from '@/hooks/use-sh
 
 // 가게 탭 (4-26). 학교 앞 식당과 카페. 위에 종류 고르기(같은 폭 격자)와 찾기, 제휴 가게가 먼저 온다.
 // 칸마다 왼쪽 그림(가게 사진, 없으면 대표 메뉴 그림), 이름, 종류와 걸어서 몇 분, 제휴면 혜택 한 줄
-// 결과 뒤 "더 보기"(0048)는 q(메뉴 이름)와 cuisine(그 메뉴 종류), 또는 kind(카페)를 넘긴다.
-// 메뉴 이름으로 찾은 채로 열면, 이름을 고치기 전까지 같은 종류 가게도 같이 보인다(결과 칸과 같은 가게들)
+// 결과 뒤 "더 보기"(0048)는 q(메뉴 이름)나 kind(카페)를 넘긴다. 버튼의 숫자는 이 탭과 같은 filterShops로 센 수다
 export default function ShopsScreen() {
   const router = useRouter();
-  const params = useLocalSearchParams<{ q?: string; cuisine?: string; kind?: string; at?: string }>();
+  const params = useLocalSearchParams<{ q?: string; kind?: string; at?: string }>();
   const { shops, isLoading, isError, refetch } = useShops();
   const { coupons } = useMyCoupons();
   const [kind, setKind] = useState<ShopKind>('all');
   const [query, setQuery] = useState('');
   const [scope, setScope] = useState<'mine' | 'all' | null>(null);
-  const [menuHint, setMenuHint] = useState<{ q: string; cuisine: string } | null>(null);
   // 새 "더 보기"로 열릴 때만 한 번 채운다(그 뒤 사람이 고친 찾기와 종류는 그대로)
   const [seenAt, setSeenAt] = useState<string | undefined>(undefined);
   if (params.at && params.at !== seenAt) {
@@ -36,14 +34,13 @@ export default function ShopsScreen() {
     setScope(null);
     setKind(SHOP_KINDS.find((x) => x.key === params.kind)?.key ?? 'all');
     setQuery(params.q ?? '');
-    setMenuHint(params.q && params.cuisine ? { q: params.q, cuisine: params.cuisine } : null);
   }
   const council = useCouncilBenefits();
   const entries = scope ? council.benefits.filter((b) => b.college === (scope === 'mine' ? council.college : 'all')) : [];
   const shown = councilShopRows(entries, shops, kind, query);
   const list = useMemo(
-    () => filterShops(shops, kind, query, menuHint && menuHint.q === query ? menuHint.cuisine : null),
-    [shops, kind, query, menuHint]
+    () => filterShops(shops, kind, query),
+    [shops, kind, query]
   );
   const source = council.college === 'computing' && scope === 'mine'
     ? 'https://app.notion.com/p/2026-2feafc7e0f1880818885e3a0fbd85aab'
