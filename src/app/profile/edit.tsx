@@ -13,11 +13,9 @@ import { DISPLAY_NAME_MAX } from '@/constants';
 import colors from '@/constants/colors.json';
 import {
   type AvatarOption,
-  BUDGET_LEVELS,
   COLLEGES,
   CUISINES,
   EMPTY_PREFS,
-  MEAL_TIMES,
   type MyPrefs,
   SPICE_LEVELS,
   prefsPatch,
@@ -73,7 +71,8 @@ export default function ProfileEditScreen() {
       return;
     }
     try {
-      const patch = prefsPatch(base, current);
+      // 화면에 없는 항목은 기존 값과 같게 두어 저장 요청에 넣지 않는다.
+      const patch = prefsPatch(base, { ...current, budgetLevel: base.budgetLevel, mealTimes: base.mealTimes });
       if (patch) await save.mutateAsync(patch);
     } catch (e) {
       setError(prefsErrorMessage(e));
@@ -145,32 +144,6 @@ export default function ProfileEditScreen() {
                 label={s.label}
                 on={current.spiceLevel === s.value}
                 onPress={() => set({ spiceLevel: current.spiceLevel === s.value ? null : s.value })}
-              />
-            ))}
-          </View>
-        </Section>
-
-        <Section title="한 끼 예산">
-          <View className="flex-row gap-2">
-            {BUDGET_LEVELS.map((b) => (
-              <Chip
-                key={b.value}
-                label={b.label}
-                on={current.budgetLevel === b.value}
-                onPress={() => set({ budgetLevel: current.budgetLevel === b.value ? null : b.value })}
-              />
-            ))}
-          </View>
-        </Section>
-
-        <Section title="주로 같이 먹는 때">
-          <View className="flex-row gap-2">
-            {MEAL_TIMES.map((m) => (
-              <Chip
-                key={m.key}
-                label={m.label}
-                on={current.mealTimes.includes(m.key)}
-                onPress={() => set({ mealTimes: toggleIn(current.mealTimes, m.key, MEAL_TIMES.map((x) => x.key)) })}
               />
             ))}
           </View>
