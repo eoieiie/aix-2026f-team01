@@ -1,6 +1,7 @@
 import { useState } from 'react';
-import { Image, Pressable, View } from 'react-native';
+import { ActivityIndicator, Image, Pressable, View } from 'react-native';
 
+import colors from '@/constants/colors.json';
 import { FoodDot } from '@/components/food-dot';
 import { Text } from '@/components/text';
 import { dayLabel, dexProgress, type DexFood } from '@/constants/dex';
@@ -12,7 +13,12 @@ export function FoodDex() {
   const { dex, isLoading, isError, refetch } = useFoodDex();
   const [selected, setSelected] = useState<number | null>(null);
 
-  if (isLoading) return <View className="h-40 rounded-2xl bg-surface" />;
+  if (isLoading) return (
+    <View accessibilityLiveRegion="polite" className="min-h-20 flex-row items-center gap-3 rounded-2xl bg-surface p-4">
+      <ActivityIndicator color={colors.muted} />
+      <Text className="text-base text-muted">도감을 불러오는 중이에요</Text>
+    </View>
+  );
   if (isError || !dex) {
     return (
       <Pressable accessibilityRole="button" onPress={() => refetch()} className="min-h-11 rounded-2xl bg-surface p-6">
@@ -68,6 +74,8 @@ export function FoodDex() {
 
 function DexTile({ food, on, onPress }: { food: DexFood; on: boolean; onPress: () => void }) {
   const eaten = food.mealCount > 0;
+  const [failedUrl, setFailedUrl] = useState<string | null>(null);
+  const hasImage = food.imageUrl && failedUrl !== food.imageUrl;
   return (
     <Pressable
       accessibilityRole="button"
@@ -77,13 +85,14 @@ function DexTile({ food, on, onPress }: { food: DexFood; on: boolean; onPress: (
       className={`w-[23.5%] items-center gap-1 rounded-2xl p-2 ${on ? 'bg-surface-strong' : 'bg-surface'}`}>
       {/* 결과 화면 그림(FoodIllustration)과 같은 모양: 흰 원 안에 둥글게 자른 그림. 그림 배경(옅은 미색 네모)이 회색 칸 위에 드러나지 않는다 */}
       <View className="aspect-square w-full items-center justify-center overflow-hidden rounded-full bg-on-primary">
-        {food.imageUrl ? (
+        {hasImage ? (
           <Image
-            source={{ uri: food.imageUrl }}
+            source={{ uri: food.imageUrl ?? undefined }}
+            onError={() => setFailedUrl(food.imageUrl)}
             style={{ width: '92%', height: '92%', borderRadius: 999, opacity: eaten ? 1 : 0.18 }}
             resizeMode="cover"
           />
-        ) : null}
+        ) : eaten ? <FoodDot foodId={food.foodId} size="sm" /> : null}
         {!eaten ? <Text className="absolute text-2xl font-bold text-muted">?</Text> : null}
       </View>
       <Text className={`text-xs font-bold ${eaten ? 'text-text' : 'text-muted'}`} numberOfLines={1}>

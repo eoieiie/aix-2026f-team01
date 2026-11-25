@@ -8,6 +8,7 @@ import { Button } from '@/components/button';
 import { Icon, IconButton } from '@/components/icon';
 import { Sheet } from '@/components/sheets';
 import { Text } from '@/components/text';
+import { choiceSurface } from '@/components/choice-colors';
 import { TextField } from '@/components/text-field';
 import { DISPLAY_NAME_MAX } from '@/constants';
 import colors from '@/constants/colors.json';
@@ -195,7 +196,7 @@ function Chip({ label, on, onPress }: { label: string; on: boolean; onPress: () 
       accessibilityLabel={label}
       accessibilityState={{ selected: on }}
       onPress={onPress}
-      className={`h-11 flex-1 items-center justify-center rounded-xl px-1 active:opacity-70 ${on ? 'bg-ink' : 'bg-surface'}`}>
+      className={`h-11 flex-1 items-center justify-center rounded-xl px-1 active:opacity-70 ${on ? 'bg-ink' : 'bg-surface'}`} style={choiceSurface(on)}>
       <Text className={`text-sm font-bold ${on ? 'text-on-ink' : 'text-text'}`} numberOfLines={1}>
         {label}
       </Text>

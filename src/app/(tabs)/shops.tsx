@@ -8,6 +8,7 @@ import { Button } from '@/components/button';
 import { Icon } from '@/components/icon';
 import { ShopRow } from '@/components/shop-row';
 import { Text } from '@/components/text';
+import { choiceSurface } from '@/components/choice-colors';
 import { TextField } from '@/components/text-field';
 import { FOOD_NAME_MAX, SHOP_THUMB_SIZE, TAB_BAR_SPACE } from '@/constants';
 import { OSM_CREDIT } from '@/hooks/use-restaurants';
@@ -39,7 +40,7 @@ export default function ShopsScreen() {
                   accessibilityLabel={`${k.label} 가게만 보기`}
                   accessibilityState={{ selected: on }}
                   onPress={() => setKind(k.key)}
-                  className={`h-11 flex-1 items-center justify-center rounded-xl active:opacity-70 ${on ? 'bg-ink' : 'bg-surface'}`}>
+                  className={`h-11 flex-1 items-center justify-center rounded-xl active:opacity-70 ${on ? 'bg-ink' : 'bg-surface'}`} style={choiceSurface(on)}>
                   <Text className={`text-base font-bold ${on ? 'text-on-ink' : 'text-text'}`}>{k.label}</Text>
                 </Pressable>
               );

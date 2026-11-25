@@ -1,3 +1,4 @@
+import { choiceSurface } from '@/components/choice-colors';
 import { useState } from 'react';
 import { Modal, Pressable, ScrollView, View } from 'react-native';
 import { Text } from '@/components/text';
@@ -55,7 +56,7 @@ export function HeadcountModal({
       accessibilityRole="button"
       accessibilityState={{ selected: on }}
       onPress={onPress}
-      className={`h-12 flex-1 items-center justify-center rounded-xl ${on ? 'bg-ink' : 'bg-surface'} active:opacity-70`}>
+      className={`h-12 flex-1 items-center justify-center rounded-xl ${on ? 'bg-ink' : 'bg-surface'} active:opacity-70`} style={choiceSurface(on)}>
       <Text className={`text-base font-bold ${on ? 'text-on-ink' : 'text-text'}`}>{label}</Text>
     </Pressable>
   );
@@ -91,7 +92,7 @@ export function HeadcountModal({
                     accessibilityState={{ checked: on, disabled: me }}
                     disabled={me}
                     onPress={() => toggle(m.user_id)}
-                    className={`h-11 max-w-full flex-row items-center gap-1 rounded-full px-4 ${on ? 'bg-ink' : 'bg-surface'} active:opacity-70`}>
+                    className={`h-11 max-w-full flex-row items-center gap-1 rounded-full px-4 ${on ? 'bg-ink' : 'bg-surface'} active:opacity-70`} style={choiceSurface(on)}>
                     {on ? <Icon name="check" size={16} color="on-ink" /> : null}
                     <Text numberOfLines={1} className={`text-base font-bold ${on ? 'text-on-ink' : 'text-muted'}`}>
                       {m.display_name}
