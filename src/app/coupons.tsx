@@ -3,7 +3,7 @@ import { useMemo } from 'react';
 import { Pressable, ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { couponState, formatKoreanTime, splitCoupons } from '@/api/shops';
+import { couponState, formatKoreanTime, splitCoupons } from '@/hooks/use-shops';
 import { Button } from '@/components/button';
 import { CouponCode } from '@/components/coupon-code';
 import { IconButton } from '@/components/icon';

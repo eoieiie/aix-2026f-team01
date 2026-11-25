@@ -3,7 +3,7 @@ import { useMemo, useState } from 'react';
 import { FlatList, Pressable, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { filterShops, SHOP_KINDS, shopLine, splitCoupons } from '@/api/shops';
+import { filterShops, SHOP_KINDS, shopLine, splitCoupons } from '@/hooks/use-shops';
 import { Button } from '@/components/button';
 import { Icon } from '@/components/icon';
 import { ShopRow } from '@/components/shop-row';

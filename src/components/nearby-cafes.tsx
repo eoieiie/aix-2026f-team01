@@ -1,6 +1,6 @@
 import { View } from 'react-native';
 
-import { shopLine } from '@/api/shops';
+import { shopLine } from '@/hooks/use-shops';
 import { CouponSlot } from '@/components/coupon-slot';
 import { ShopRow } from '@/components/shop-row';
 import { Text } from '@/components/text';

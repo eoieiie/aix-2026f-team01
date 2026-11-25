@@ -1,6 +1,6 @@
 import { Pressable, View } from 'react-native';
 
-import { couponForSession } from '@/api/shops';
+import { couponForSession } from '@/hooks/use-shops';
 import { CouponCode } from '@/components/coupon-code';
 import { Text } from '@/components/text';
 import type { Coupon } from '@/hooks/use-shops';

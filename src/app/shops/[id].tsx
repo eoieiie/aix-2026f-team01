@@ -12,7 +12,7 @@ import {
   shopLine,
   shortAddress,
   telUrl,
-} from '@/api/shops';
+} from '@/hooks/use-shops';
 import { AdBadge } from '@/components/ad-badge';
 import { Button } from '@/components/button';
 import { CouponCode } from '@/components/coupon-code';

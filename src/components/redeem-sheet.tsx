@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { View } from 'react-native';
 
-import { couponErrorText } from '@/api/shops';
+import { couponErrorText } from '@/hooks/use-shops';
 import { Button } from '@/components/button';
 import { Sheet } from '@/components/sheets';
 import { Text, TextInput } from '@/components/text';

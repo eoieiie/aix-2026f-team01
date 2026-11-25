@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { Pressable, ScrollView, useWindowDimensions, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { formatKoreanTime, redeemRate } from '@/api/shops';
+import { formatKoreanTime, redeemRate } from '@/hooks/use-shops';
 import { BarLegend, Bars, DOW_LABELS, HOUR_LABELS, Panel, StatTile, TableRow } from '@/components/board-parts';
 import { Button } from '@/components/button';
 import { Text } from '@/components/text';

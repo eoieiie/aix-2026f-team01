@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Pressable, View } from 'react-native';
 
-import { couponState, formatKoreanTime, timeLeft } from '@/api/shops';
+import { couponState, formatKoreanTime, timeLeft } from '@/hooks/use-shops';
 import { RedeemSheet } from '@/components/redeem-sheet';
 import { Text } from '@/components/text';
 import type { Coupon } from '@/hooks/use-shops';

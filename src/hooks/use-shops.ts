@@ -10,6 +10,26 @@ import {
   redeemCoupon,
 } from '@/api/shops';
 
+// 화면이 쓰는 계산 함수. 화면은 src/api를 직접 부르지 않는다
+export {
+  couponErrorText,
+  couponForSession,
+  couponForShop,
+  couponState,
+  filterShops,
+  formatKoreanTime,
+  formatOpeningHours,
+  kakaoRouteUrl,
+  naverMapUrl,
+  redeemRate,
+  SHOP_KINDS,
+  shopLine,
+  shortAddress,
+  splitCoupons,
+  telUrl,
+  timeLeft,
+} from '@/api/shops';
+
 export type { AdminBoard, Coupon, CouponState, OwnerBoard, Shop, ShopDetail, ShopKind } from '@/api/shops';
 
 // 가게 목록 (4-26). 동네는 서버가 내 최근 모임으로 정한다. 판 결과의 식당 줄도 이 목록에서 그림을 찾는다
