@@ -5,7 +5,7 @@ import { Text, TextInput } from '@/components/text';
 import { FoodThumb } from '@/components/food-thumb';
 import { Icon } from '@/components/icon';
 import { PITCH_MAX } from '@/constants';
-import { INGREDIENT_TAGS } from '@/constants/restrictions';
+import { INGREDIENT_TAGS, maybeLine } from '@/constants/restrictions';
 import colors from '@/constants/colors.json';
 import type { Candidate } from '@/hooks/use-session';
 
@@ -15,6 +15,9 @@ const VETOED_TEXT = '못 먹는 사람이 있어요';
 // (2026-11-25 병주 "재료 확인 필요* 문구로 바꾸기, 추정 재료 다 띄우지 않기")
 const AI_LINE = '재료 확인 필요*';
 const AI_FOOTNOTE = '* AI가 메뉴 이름으로 추정했어요. 가게마다 다를 수 있어요';
+// 0044 가게 이름처럼 메뉴 이름이 아니면 태그 없이 이 한 줄만
+const NOT_MENU_TEXT = '메뉴 이름을 적으면 재료를 알려 줘요';
+const VARIES_TEXT = '가게마다 달라요';
 const TAG_LABEL: Record<string, string> = Object.fromEntries(INGREDIENT_TAGS.map((t) => [t.code, t.label]));
 
 type CandidateCardProps = {
@@ -34,6 +37,9 @@ type CandidateCardProps = {
   highlight?: boolean;
   // 남이 쓴 어필이나 직접 적은 메뉴: 신고와 차단 (4-24)
   onMore?: () => void;
+  // 0044 사람 확인(내가 직접 적은 메뉴): 맞아요와 재료 더하기만. 빼기는 없다
+  onConfirmAi?: () => void;
+  onAddTag?: (tag: string) => void;
 };
 
 // 후보 한 칸. 왼쪽에 음식 그림, 못 먹는 사람이 있는 후보는 이름 아래 한 줄로 알린다. 누가 원인인지는 데이터에도 없다 (4-9 익명)
@@ -48,6 +54,8 @@ export function CandidateCard({
   eatenNote = null,
   highlight = false,
   onMore,
+  onConfirmAi,
+  onAddTag,
 }: CandidateCardProps) {
   // 테두리는 JS로 흐려지게 한다(웹과 앱이 같게). 움직임 줄이기가 켜져 있으면 흐려지지 않고 바로 사라진다
   const [ring] = useState(() => new Animated.Value(0));
@@ -80,6 +88,11 @@ export function CandidateCard({
   const aiTags = candidate.aiTags ?? [];
   const aiLabels = aiTags.map((t) => TAG_LABEL[t] ?? t);
   const [aiOpen, setAiOpen] = useState(false);
+  const [addOpen, setAddOpen] = useState(false);
+  // 확실 경고가 없을 때만 약한 표시. AI만 추정한 재료가 이 판 누군가의 못 먹는 것에 걸린다 (0044)
+  const maybe = !vetoed ? maybeLine(candidate.maybeTags ?? []) : null;
+  const notMenu = candidate.custom && candidate.aiStatus === 'not_menu';
+  const askCheck = !!onConfirmAi && candidate.isMine && candidate.custom && candidate.aiStatus === 'done' && !candidate.aiChecked;
 
   // 그림(56)과 오른쪽 동그라미(44)는 첫 줄에 붙인다. 글이 한 줄이면 그림 가운데에 오고, 길어지면 아래로만 늘어난다 (11/21 실기기)
   const head = (
@@ -96,6 +109,8 @@ export function CandidateCard({
           ) : null}
         </View>
         {vetoed ? <Text className="text-sm font-semibold text-danger">{VETOED_TEXT}</Text> : null}
+        {maybe ? <Text className="text-sm font-semibold text-muted">{maybe}</Text> : null}
+        {notMenu ? <Text className="text-sm text-muted">{NOT_MENU_TEXT}</Text> : null}
         {eatenNote ? <Text className="text-sm text-muted">{eatenNote}</Text> : null}
         {candidate.pitch && !onSavePitch ? <Text className="text-sm text-muted">{candidate.pitch}</Text> : null}
       </View>
@@ -142,7 +157,7 @@ export function CandidateCard({
   // 4-22 AI가 추정해 더한 재료. 접힌 채로는 한 줄만, 누르면 재료마다 이유 한 줄. 누가 못 먹는지는 보이지 않는다.
   // 투표 카드에서도 볼 수 있게 "고르기" 버튼 밖에 따로 둔다 (버튼 안에 버튼을 두지 않는다, WCAG 4.1.2)
   const aiLine =
-    aiTags.length > 0 ? (
+    aiTags.length > 0 && !askCheck ? (
       <Pressable
         accessibilityRole="button"
         accessibilityLabel={`${candidate.foodName} 재료 확인 필요, AI가 추정한 재료 ${aiLabels.join(', ')}`}
@@ -156,6 +171,7 @@ export function CandidateCard({
               <Text key={t} className="text-sm leading-5 text-muted">
                 <Text className="font-bold text-text">{TAG_LABEL[t] ?? t}</Text>{' '}
                 {candidate.aiNotes?.[t] ?? '흔히 들어가는 재료예요'}
+                {candidate.aiBasis?.[t] === 'varies' ? ` (${VARIES_TEXT})` : ''}
               </Text>
             ))}
             <Text className="text-xs text-muted">{AI_FOOTNOTE}</Text>
@@ -163,6 +179,56 @@ export function CandidateCard({
         ) : null}
       </Pressable>
     ) : null;
+
+  // 0044 사람 확인(11팀). 올린 사람에게 AI가 찾은 재료를 보이고 "맞아요"와 "재료 더하기"만 받는다. 두 단추는 같은 폭
+  const sure = candidate.sureTags ?? [];
+  const checkBox = askCheck ? (
+    <View className="gap-3 rounded-lg bg-background p-3">
+      <View className="gap-1">
+        <Text className="text-sm font-bold text-text">AI가 찾은 재료</Text>
+        <Text className="text-sm text-muted">{aiLabels.length > 0 ? aiLabels.join(', ') : '찾은 재료가 없어요'}</Text>
+      </View>
+      <View className="flex-row gap-2">
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={`${candidate.foodName} AI 재료 맞아요`}
+          disabled={busy}
+          onPress={onConfirmAi}
+          className="h-11 flex-1 items-center justify-center rounded-lg bg-ink active:opacity-80 disabled:opacity-50">
+          <Text className="text-base font-bold text-on-ink">맞아요</Text>
+        </Pressable>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={`${candidate.foodName} 재료 더하기`}
+          accessibilityState={{ expanded: addOpen }}
+          disabled={busy}
+          onPress={() => setAddOpen((v) => !v)}
+          className="h-11 flex-1 items-center justify-center rounded-lg bg-surface active:opacity-80 disabled:opacity-50">
+          <Text className="text-base font-bold text-text">재료 더하기</Text>
+        </Pressable>
+      </View>
+      {addOpen ? (
+        <View className="-m-1 flex-row flex-wrap">
+          {INGREDIENT_TAGS.map((t) => {
+            const on = sure.includes(t.code);
+            return (
+              <View key={t.code} className="w-1/3 p-1">
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel={`${t.label} 더하기`}
+                  accessibilityState={{ selected: on, disabled: on || busy }}
+                  disabled={on || busy}
+                  onPress={() => onAddTag?.(t.code)}
+                  className={`h-11 items-center justify-center rounded-lg active:opacity-70 ${on ? 'bg-ink' : 'bg-surface'}`}>
+                  <Text className={`text-sm font-bold ${on ? 'text-on-ink' : 'text-text'}`}>{t.label}</Text>
+                </Pressable>
+              </View>
+            );
+          })}
+        </View>
+      ) : null}
+    </View>
+  ) : null;
 
   // 카드는 옅은 면 하나. 모서리 16, 안 여백 16 (docs/design.md "프레즐 규칙 그대로")
   const box = 'gap-3 rounded-2xl bg-surface p-4';
@@ -174,7 +240,7 @@ export function CandidateCard({
         <Pressable
           accessibilityRole="button"
           accessibilityState={{ selected: voted, disabled: busy }}
-          accessibilityLabel={`${candidate.foodName}${aiTags.length > 0 ? ', 재료 확인 필요' : ''} ${voted ? '고른 것 취소' : '고르기'}`}
+          accessibilityLabel={`${candidate.foodName}${vetoed ? `, ${VETOED_TEXT}` : maybe ? `, ${maybe}` : ''}${aiTags.length > 0 ? ', 재료 확인 필요' : ''} ${voted ? '고른 것 취소' : '고르기'}`}
           disabled={busy}
           onPress={onVote}
           className={`${aiLine ? '-mx-4 -mt-4 px-4 pt-4' : '-m-4 p-4'} active:opacity-80`}>
@@ -189,6 +255,7 @@ export function CandidateCard({
     <View className={box}>
       {head}
       {aiLine}
+      {checkBox}
 
       {onSavePitch ? (
         <View className="flex-row items-center gap-2">

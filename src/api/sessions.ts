@@ -29,9 +29,19 @@ export interface Candidate {
   // vetoed: 이 판에 못 먹는 사람이 있다. 0010부터 빠지지 않고 표시만 한다
   // 목록에 없어서 이름을 직접 적어 올린 메뉴 (4-9). 재료는 이름으로 짐작했다
   custom: boolean;
-  // 4-22 AI가 추정해 더한 재료 태그와 태그별 이유 한 줄. 누가 못 먹는지는 없다
+  // 4-22 AI만 추정한 재료(확실 태그에 없는 것)와 태그별 이유 한 줄. 누가 못 먹는지는 없다
   aiTags: string[];
   aiNotes: Record<string, string>;
+  // 0044 태그마다 기본 레시피(recipe)인지 가게마다 다른지(varies)
+  aiBasis: Record<string, 'recipe' | 'varies'>;
+  // 0044 AI 상태. not_menu: 가게 이름처럼 메뉴 이름이 아니라 태그를 붙이지 않았다
+  aiStatus: string | null;
+  // 0044 약한 표시: AI만 추정한 재료 중 이 판 누군가의 못 먹는 것에 걸리는 것 ("OO 들어갈 수 있어요")
+  maybeTags: string[];
+  // 확실한 재료 태그(기본 메뉴, 낱말 표, 사람이 더한 것). 재료 더하기에서 이미 있는 것을 보인다
+  sureTags: string[];
+  // 올린 사람이 AI 재료를 확인했다(맞아요)
+  aiChecked: boolean;
 }
 
 export interface SessionView {
@@ -97,7 +107,25 @@ export const SESSION_ERROR_MESSAGES: Record<string, string> = {
   bad_headcount: '인원은 1명부터 20명까지예요',
   already_done: '이미 끝난 판이에요',
   blocked_word: '쓸 수 없는 말이 있어요',
+  not_proposer: '메뉴를 올린 사람만 할 수 있어요',
+  bad_tag: '고를 수 없는 재료예요',
 };
+
+// 후보 한 줄의 재료 칸 (0044 두 단계). AI 태그는 확실 태그에 없는 것만 남긴다
+export function aiFields(c: any) {
+  const sure: string[] = Array.isArray(c.foods?.tags) ? c.foods.tags : [];
+  const ai: string[] = Array.isArray(c.foods?.ai_tags) ? c.foods.ai_tags : [];
+  const obj = (v: unknown) => (v && typeof v === 'object' && !Array.isArray(v) ? (v as Record<string, any>) : {});
+  return {
+    aiTags: ai.filter((t) => !sure.includes(t)),
+    aiNotes: obj(c.foods?.ai_notes) as Record<string, string>,
+    aiBasis: obj(c.foods?.ai_basis) as Record<string, 'recipe' | 'varies'>,
+    aiStatus: typeof c.foods?.ai_status === 'string' ? c.foods.ai_status : null,
+    maybeTags: Array.isArray(c.maybe_tags) ? (c.maybe_tags as string[]) : [],
+    sureTags: sure,
+    aiChecked: !!c.ai_checked_at,
+  };
+}
 
 export class SessionError extends Error {
   constructor(public readonly code: string) {
@@ -180,7 +208,7 @@ export async function getSession(
     client.from('memberships').select('user_id, display_name').eq('group_id', session.group_id),
     client
       .from('candidates')
-      .select('food_id, proposed_by, pitch, vetoed, created_at, foods ( * )')
+      .select('food_id, proposed_by, pitch, vetoed, maybe_tags, ai_checked_at, created_at, foods ( * )')
       .eq('session_id', sessionId),
     client.from('votes').select('food_id, weight').eq('session_id', sessionId),
   ]);
@@ -222,8 +250,7 @@ export async function getSession(
       foodId: c.food_id,
       foodName: blockedIds.has(c.proposed_by) && c.foods?.custom === true ? '가린 메뉴' : (c.foods?.name ?? ''),
       custom: c.foods?.custom === true,
-      aiTags: Array.isArray(c.foods?.ai_tags) ? c.foods.ai_tags : [],
-      aiNotes: c.foods?.ai_notes && typeof c.foods.ai_notes === 'object' ? c.foods.ai_notes : {},
+      ...aiFields(c),
       isMine: c.proposed_by === userId,
       proposedBy: c.proposed_by,
       blocked: blockedIds.has(c.proposed_by),
@@ -299,6 +326,23 @@ export function requestAiIngredients(foodId: number, client: Client = getSupabas
   } catch {
     // 무시
   }
+}
+
+// 0044 사람 확인: 내가 직접 적은 메뉴의 AI 재료가 맞다. 기록만 남고 단계는 그대로다
+export async function confirmCustomFood(sessionId: string, foodId: number, client: Client = getSupabase()) {
+  const { error } = await client.rpc('confirm_custom_food', { p_session_id: sessionId, p_food_id: foodId });
+  if (error) throwSessionError(error);
+}
+
+// 0044 사람 확인: 재료 더하기. 더한 재료는 확실 단계("못 먹는 사람이 있어요")로 간다. 빼기는 없다
+export async function addCustomFoodTag(
+  sessionId: string,
+  foodId: number,
+  tag: string,
+  client: Client = getSupabase()
+) {
+  const { error } = await client.rpc('add_custom_food_tag', { p_session_id: sessionId, p_food_id: foodId, p_tag: tag });
+  if (error) throwSessionError(error);
 }
 
 // 내가 올린 후보의 어필. 빈 글이면 지운다 (4-9)
