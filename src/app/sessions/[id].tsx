@@ -9,6 +9,7 @@ import { Button } from '@/components/button';
 import { CandidateCard } from '@/components/candidate-card';
 import { FoodSearch } from '@/components/food-search';
 import { HeadcountStepper } from '@/components/headcount-stepper';
+import { VoteRestaurants } from '@/components/nearby-restaurants';
 import { Icon, IconButton } from '@/components/icon';
 import { type Point, ResultMoment } from '@/components/result-moment';
 import { ReportSheet, type ReportTarget } from '@/components/report-sheet';
@@ -491,6 +492,12 @@ function VotingStage({ session }: { session: SessionView }) {
             </Text>
           </Pressable>
         </View>
+
+        {/* 후보 음식에 맞는 학교 앞 식당 3곳. 보이기만 하고 투표와 룰렛 확률은 그대로다 (4-21) */}
+        <VoteRestaurants
+          sessionId={session.id}
+          candidateKey={session.candidates.map((c) => c.foodId).join(',')}
+        />
       </ScrollView>
 
       <BottomBar>
