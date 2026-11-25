@@ -60,8 +60,6 @@ export interface ShopDetail extends Shop {
   phone: string | null;
   // 오픈스트리트맵 표기 그대로. 화면은 formatOpeningHours로 바꿔 보인다
   openingHours: string | null;
-  // 영업 신고 연도(공공데이터 인허가일)
-  licensedYear: number | null;
   photos: { url: string; credit: string | null }[];
   // 쿠폰을 쓰고 다녀간 팀 수. 5팀이 안 되면 서버가 주지 않는다
   visits: number | null;
@@ -129,21 +127,21 @@ export async function getShop(
     address: str(r.address),
     phone: str(r.phone),
     openingHours: str(r.opening_hours),
-    licensedYear: num(r.licensed_year),
     photos,
     visits: num(r.visits),
   };
 }
 
 // 종류와 검색어로 거른다. 검색어는 가게 이름과 대표 메뉴에서 찾는다(띄어쓰기와 대소문자는 보지 않는다)
-export function filterShops(list: readonly Shop[], kind: ShopKind, query: string): Shop[] {
+// alsoCuisine: 결과 뒤 "더 보기"로 메뉴 이름을 찾은 채 열었을 때 그 메뉴 종류(0048). 이름이나 메뉴가 맞는 곳이 먼저, 그다음 같은 종류
+export function filterShops(list: readonly Shop[], kind: ShopKind, query: string, alsoCuisine: string | null = null): Shop[] {
   const q = query.replace(/\s+/g, '').toLowerCase();
-  return list.filter((s) => {
-    if (kind === 'partner' ? !s.partner : kind !== 'all' && s.cuisine !== kind) return false;
-    if (q === '') return true;
-    const hay = [s.name, ...s.menus].map((t) => t.replace(/\s+/g, '').toLowerCase());
-    return hay.some((t) => t.includes(q));
-  });
+  const byText = (s: Shop) => [s.name, ...s.menus].map((t) => t.replace(/\s+/g, '').toLowerCase()).some((t) => t.includes(q));
+  const inKind = list.filter((s) => !(kind === 'partner' ? !s.partner : kind !== 'all' && s.cuisine !== kind));
+  if (q === '') return inKind;
+  const hits = inKind.filter(byText);
+  if (!alsoCuisine) return hits;
+  return [...hits, ...inKind.filter((s) => !byText(s) && s.cuisine === alsoCuisine)];
 }
 
 // 이름 아래 한 줄의 조각들: 종류, 걸어서 몇 분, 영업 중 중 값이 있는 것만.

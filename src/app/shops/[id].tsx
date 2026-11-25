@@ -123,9 +123,8 @@ function ShopBody({ shop }: { shop: ShopDetail }) {
         ) : null}
         {hours ? <InfoRow icon="clock">{hours.join('\n')}</InfoRow> : null}
         {shop.menus.length > 0 ? <InfoRow label="대표 메뉴">{shop.menus.join(', ')}</InfoRow> : null}
-        {shop.licensedYear ? <InfoRow label="영업 신고">{`${shop.licensedYear}년`}</InfoRow> : null}
         {shop.visits ? <InfoRow label="밥BTI">{`모임 ${shop.visits}팀이 쿠폰을 쓰고 다녀갔어요`}</InfoRow> : null}
-        {!address && !shop.phone && !hours && shop.menus.length === 0 && !shop.licensedYear ? (
+        {!address && !shop.phone && !hours && shop.menus.length === 0 ? (
           <Text className="text-base text-muted">아직 모은 정보가 없어요</Text>
         ) : null}
       </View>

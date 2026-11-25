@@ -1,6 +1,7 @@
 import { View } from 'react-native';
 
 import { CouponSlot } from '@/components/coupon-slot';
+import { MoreShops } from '@/components/more-shops';
 import { ShopRow } from '@/components/shop-row';
 import { Text } from '@/components/text';
 import { SHOP_ROW_THUMB_SIZE } from '@/constants';
@@ -18,6 +19,8 @@ import { type Shop, useMyCoupons, useShops } from '@/hooks/use-shops';
 // 맞는 가게가 없거나 불러오지 못하면 칸을 그리지 않는다.
 // 줄은 왼쪽 그림(가게 사진, 없으면 대표 메뉴 그림), 이름과 "광고", 한 줄 정보. 누르면 가게 상세로 간다 (4-26).
 // 제휴 식당은 이름 바로 옆에 "광고"(공정위 추천·보증 심사지침: 경제적 이해관계는 추천 가까이)
+// 순서는 서버가 정한다(0048): 쿠폰 가게, 내 단과대나 총학생회의 학생회 제휴, 정문에서 가까운 순.
+// 학생회 제휴는 우리와 돈 관계가 없어 "광고" 없이 회색 표시와 혜택 첫 줄만(말줄임)
 
 // 결과 뒤 "이 메뉴 파는 학교 앞" 최대 3곳. 쿠폰은 끝난 판에서만 받는다.
 // onPrimary: 결과 순간(주황 바탕) 위에 흰 카드로. 주황은 화면 바탕 하나만 쓴다
@@ -56,6 +59,13 @@ export function NearbyRestaurants({
           ) : null}
         </View>
       ))}
+      <MoreShops
+        total={list[0].total}
+        shown={list.length}
+        menuName={list[0].menuName}
+        menuCuisine={list[0].menuCuisine}
+        onWhite={onPrimary}
+      />
       <Text className="text-xs text-muted">{OSM_CREDIT}</Text>
     </View>
   );
@@ -88,6 +98,7 @@ function RestaurantRow({ r, shop, onSurface }: { r: NearbyRestaurant; shop: Shop
       name={r.name}
       partner={r.partner}
       info={restaurantInfo(r)}
+      benefit={r.partner ? null : r.councilText}
       photoUrl={shop?.photoUrl ?? r.photoUrl}
       thumbUrl={shop?.thumbUrl ?? null}
       cuisine={r.cuisine}

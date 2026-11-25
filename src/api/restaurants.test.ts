@@ -1,4 +1,4 @@
-import { getSessionRestaurants, kakaoMapUrl, type NearbyRestaurant, pickForMe, restaurantInfo } from './restaurants';
+import { getSessionCafes, getSessionRestaurants, kakaoMapUrl, type NearbyRestaurant, pickForMe, restaurantInfo } from './restaurants';
 
 // PR #78 본문의 돌려주는 값 표 모양으로 만든 가짜 식당. 실제 가게가 아니다
 function fake(over: Partial<NearbyRestaurant> & { id: number }): NearbyRestaurant {
@@ -16,6 +16,11 @@ function fake(over: Partial<NearbyRestaurant> & { id: number }): NearbyRestauran
     openNow: null,
     teamCount: 0,
     photoUrl: null,
+    councilCollege: null,
+    councilText: null,
+    total: 0,
+    menuName: null,
+    menuCuisine: null,
     ...over,
   };
 }
@@ -43,6 +48,16 @@ describe('restaurantInfo (4-21)', () => {
 });
 
 describe('pickForMe (4-21 투표 화면 추천 칸)', () => {
+  it('쿠폰 가게, 내 학생회 제휴, 나머지 순(0048). 닫은 곳은 먼저 오지 않는다', () => {
+    const list = [
+      fake({ id: 1, match: 'menu', foodId: 10 }),
+      fake({ id: 2, councilCollege: 'computing', councilText: '음료 1개' }),
+      fake({ id: 3, partner: true, couponText: '만두' }),
+      fake({ id: 4, councilCollege: 'all', openNow: false }),
+    ];
+    expect(pickForMe(list, noTaste, 4).map((r) => r.id)).toEqual([3, 2, 1, 4]);
+  });
+
   it('네 글자가 없으면 서버 순서대로 3곳', () => {
     const list = [1, 2, 3, 4, 5, 6].map((id) => fake({ id }));
     expect(pickForMe(list, noTaste).map((r) => r.id)).toEqual([1, 2, 3]);
@@ -153,6 +168,11 @@ describe('getSessionRestaurants', () => {
       openNow: true,
       teamCount: 2,
       photoUrl: 'https://example.supabase.co/storage/v1/object/public/restaurant-photos/a.jpg',
+      councilCollege: null,
+      councilText: null,
+      total: 2,
+      menuName: null,
+      menuCuisine: null,
     });
     expect(list[1].partner).toBe(false);
     expect(list[1].couponText).toBeNull();
@@ -207,5 +227,31 @@ describe('좌표와 카카오맵 주소', () => {
     expect(kakaoMapUrl({ name: '이모네', lat: null, lng: null })).toBe(
       `https://map.kakao.com/link/search/${encodeURIComponent('안산 이모네')}`
     );
+  });
+});
+
+describe('학생회 제휴와 더 보기 칸 (0048)', () => {
+  it('학생회 제휴와 혜택 첫 줄, 맞는 가게 수, 메뉴 이름을 읽는다. 학생회 제휴는 광고가 아니다', async () => {
+    const rpc = jest.fn().mockResolvedValue({
+      data: [
+        { id: 1, name: '쿠폰집', cuisine: 'chinese', partner: true, coupon_text: '만두', match: 'cuisine', lat: 1, lng: 1,
+          council_college: null, council_text: null, total_count: 16, menu_name: '짜장면', menu_cuisine: 'chinese' },
+        { id: 2, name: '도야짬뽕', cuisine: 'chinese', partner: false, coupon_text: null, match: 'cuisine', lat: 1, lng: 1,
+          council_college: 'computing', council_text: ' 인원수만큼 만두 제공 ', total_count: 16, menu_name: '짜장면', menu_cuisine: 'chinese' },
+      ],
+      error: null,
+    });
+    const [a, b] = await getSessionRestaurants('s1', { rpc } as any);
+    expect(a).toMatchObject({ partner: true, councilCollege: null, total: 16, menuName: '짜장면', menuCuisine: 'chinese' });
+    expect(b).toMatchObject({ partner: false, councilCollege: 'computing', councilText: '인원수만큼 만두 제공' });
+  });
+
+  it('0048 전의 서버는 학생회 칸이 없고 맞는 가게 수는 받은 줄 수', async () => {
+    const rpc = jest.fn().mockResolvedValue({
+      data: [{ id: 1, name: '가', partner: false, coupon_text: null, lat: 1, lng: 1 }],
+      error: null,
+    });
+    const [c] = await getSessionCafes('s1', { rpc } as any);
+    expect(c).toMatchObject({ councilCollege: null, councilText: null, total: 1 });
   });
 });
