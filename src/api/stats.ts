@@ -83,6 +83,13 @@ export function levelOf(totalMeals: number): { level: number; toNext: number } {
   return { level: n, toNext: ((n + 1) * (n + 2)) / 2 - t };
 }
 
+// 레벨 막대: 이번 레벨에서 채운 비율(0~1). 레벨 n에서 n+1까지는 n+1끼가 든다 (4-27)
+export function levelProgress(totalMeals: number): { level: number; toNext: number; ratio: number } {
+  const { level, toNext } = levelOf(totalMeals);
+  const span = level + 1;
+  return { level, toNext, ratio: Math.min(1, Math.max(0, (span - toNext) / span)) };
+}
+
 // 같은 음식을 3번 이상 먹었으면 "OO 권위자". 가장 많이 먹은 것, 같으면 food_id가 작은 것 (4-15)
 export function authorityTitle(foods: FoodCount[]): string | null {
   const top = foods

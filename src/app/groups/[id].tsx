@@ -5,26 +5,27 @@ import { Text } from '@/components/text';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Button } from '@/components/button';
-import { FoodDot } from '@/components/food-dot';
+import { GroupMenu } from '@/components/group-menu';
 import { GroupProfileCard } from '@/components/group-profile-card';
+import { MealTimeline } from '@/components/meal-timeline';
 import { HeadcountModal } from '@/components/headcount-modal';
 import { IconButton } from '@/components/icon';
 import { InviteCard } from '@/components/invite-card';
 import colors from '@/constants/colors.json';
 import {
   Member,
-  RecentMeal,
   type SessionOptions,
   useGroupDetail,
   useGroupMembersLive,
   useStartSession,
 } from '@/hooks/use-groups';
 
-// 멤버 동그라미 색. 홈 모임 카드의 사람 동그라미와 같은 순서
+// 멤버 동그라미 색. 사람 동그라미에는 주황을 쓰지 않는다. 회색 네 단계를 돌려 쓴다 (docs/design.md 1절, "프레즐 규칙 그대로" 색)
 const MEMBER_COLORS = [
-  { bg: 'bg-food-1', text: 'text-on-primary' },
-  { bg: 'bg-food-7', text: 'text-on-primary' },
-  { bg: 'bg-food-3', text: 'text-text' },
+  { bg: 'bg-food-8', text: 'text-on-ink' },
+  { bg: 'bg-food-2', text: 'text-on-ink' },
+  { bg: 'bg-food-4', text: 'text-text' },
+  { bg: 'bg-food-6', text: 'text-text' },
 ] as const;
 
 export default function GroupScreen() {
@@ -140,14 +141,15 @@ export default function GroupScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-background">
-      <View className="flex-row items-center px-5 py-3">
+      <View className="flex-row items-center justify-between px-4 py-3">
         <IconButton name="back" label="홈으로" onPress={() => router.replace('/')} />
+        <GroupMenu groupId={group.id} name={group.name} isOwner={!!group.is_owner} onLeft={() => router.replace('/')} />
       </View>
 
       <ScrollView keyboardShouldPersistTaps="handled" automaticallyAdjustKeyboardInsets
         className="flex-1"
         showsVerticalScrollIndicator={false}
-        contentContainerClassName="gap-8 px-5 pb-36 pt-2"
+        contentContainerClassName="gap-8 px-4 pb-36 pt-2"
       >
         {/* 모임 이름과 멤버 이름 동그라미 (spec.md 4-6) */}
         <View className="gap-4">
@@ -161,14 +163,14 @@ export default function GroupScreen() {
                 <View key={member.user_id} className="items-center gap-2">
                   <View>
                     <View
-                      className={`h-14 w-14 items-center justify-center rounded-full ${color.bg}`}>
+                      className={`h-11 w-11 items-center justify-center rounded-full ${color.bg}`}>
                       <Text className={`text-lg font-bold ${color.text}`}>
                         {Array.from(member.display_name)[0] ?? ''}
                       </Text>
                     </View>
                     {fresh.has(member.user_id) ? <NewRing /> : null}
                   </View>
-                  <Text className="max-w-16 text-sm font-semibold text-text" numberOfLines={1}>
+                  <Text className="max-w-14 text-sm font-semibold text-text" numberOfLines={1}>
                     {member.display_name}
                   </Text>
                 </View>
@@ -183,32 +185,8 @@ export default function GroupScreen() {
         {/* 최근 식사 5개 (spec.md 4-6) */}
         <View className="gap-3">
           <Text className="text-2xl font-bold tracking-tight text-text">최근에 먹은 것</Text>
-          {group.recent_meals.length === 0 ? (
-            <View className="rounded-3xl bg-surface p-6">
-              <Text className="text-lg font-bold text-muted">아직 기록이 없어요</Text>
-            </View>
-          ) : (
-            <View className="gap-4 rounded-3xl bg-surface p-5">
-              {group.recent_meals.map((meal: RecentMeal) => (
-                // 한 줄을 누르면 그 식사의 결과 카드 (4-17)
-                <Pressable
-                  key={meal.id}
-                  accessibilityRole="button"
-                  accessibilityLabel={`${meal.food_name} 결과 카드`}
-                  onPress={() => router.push(`/meals/${meal.id}` as any)}
-                  className="min-h-11 flex-row items-center gap-3 active:opacity-70">
-                  <FoodDot foodId={meal.food_id} size="md" name={meal.food_name} />
-                  <Text className="flex-1 text-lg font-bold text-text">{meal.food_name}</Text>
-                  <Text className="text-sm text-muted">
-                    {new Date(meal.eaten_at).toLocaleDateString('ko-KR', {
-                      month: 'long',
-                      day: 'numeric',
-                    })}
-                  </Text>
-                </Pressable>
-              ))}
-            </View>
-          )}
+          {/* 4-25 월별 타임라인. 이번 달 한 줄, 더 보기 */}
+          <MealTimeline groupId={group.id} />
         </View>
 
         {/* 모임 프로필 카드 (spec.md 4-16). 실패하면 카드 자리에만 문구가 나온다 */}
@@ -216,7 +194,7 @@ export default function GroupScreen() {
       </ScrollView>
 
       {/* 하단 고정 버튼. 진행 중인 판이 있으면 "진행 중인 판으로" (spec.md 4-6) */}
-      <View className="absolute bottom-0 left-0 right-0 bg-background px-5 pb-8 pt-3">
+      <View className="absolute bottom-0 left-0 right-0 bg-background px-4 pb-8 pt-3">
         <View>
           <Button
             label={hasOpenSession ? '진행 중인 판으로' : '오늘 뭐 먹지'}

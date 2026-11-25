@@ -1,64 +1,57 @@
-import { Linking, Platform, Pressable, View } from 'react-native';
-import { Text } from '@/components/text';
+import { View } from 'react-native';
 
-import { CouponCode } from '@/components/coupon-code';
-import { Icon } from '@/components/icon';
-import { kakaoMapUrl, useClaimCoupon, useSessionCafes } from '@/hooks/use-restaurants';
+import { shopLine } from '@/hooks/use-shops';
+import { CouponSlot } from '@/components/coupon-slot';
+import { ShopRow } from '@/components/shop-row';
+import { Text } from '@/components/text';
+import { SHOP_ROW_THUMB_SIZE } from '@/constants';
+import { useClaimCoupon, useSessionCafes } from '@/hooks/use-restaurants';
+import { useMyCoupons, useShops } from '@/hooks/use-shops';
 
 // 먹고 나서 카페 최대 3곳 (spec.md 4-23). "이 메뉴 파는 학교 앞" 바로 아래. 카페가 없거나 불러오지 못하면 칸을 그리지 않는다.
-// 제휴 카페는 이름 바로 옆 "광고"와 쿠폰(식당과 같은 claim_coupon). 줄을 누르면 카카오맵
+// 제휴 카페는 이름 바로 옆 "광고"와 쿠폰(식당과 같은 claim_coupon). 줄을 누르면 가게 상세로 간다 (4-26)
 export function NearbyCafes({ sessionId, onPrimary = false }: { sessionId: string | null; onPrimary?: boolean }) {
   const list = useSessionCafes(sessionId);
   const claim = useClaimCoupon(sessionId ?? '');
+  const { shops } = useShops();
+  const { coupons } = useMyCoupons();
   if (!sessionId || list.length === 0) return null;
+  const byId = new Map(shops.map((s) => [s.id, s]));
 
   return (
-    <View className={`gap-4 rounded-3xl p-5 ${onPrimary ? 'bg-on-primary' : 'bg-surface'}`}>
+    <View className={`gap-3 rounded-2xl p-4 ${onPrimary ? 'bg-on-primary' : 'bg-surface'}`}>
       <Text className="text-lg font-bold text-text">먹고 나서 카페</Text>
-      {list.map((c) => (
-        <View key={c.id} className="gap-2">
-          <Pressable
-            accessibilityRole="link"
-            accessibilityLabel={`${c.name} 카카오맵에서 보기`}
-            onPress={() => openMap(kakaoMapUrl(c))}
-            className="min-h-11 flex-row items-center gap-3 active:opacity-70">
-            <View className="flex-1 flex-row items-center gap-2">
-              <Text className="shrink text-base font-bold text-text">{c.name}</Text>
-              {c.partner ? (
-                <View accessibilityLabel="광고" className="rounded-md border border-muted px-1.5">
-                  <Text className="text-xs font-bold text-muted">광고</Text>
-                </View>
-              ) : null}
-            </View>
-            <Icon name="pin" size={22} color="muted" />
-          </Pressable>
-          {c.partner && c.couponText ? (
-            c.myCode ? (
-              <CouponCode code={c.myCode} shop={c.name} benefit={c.couponText} />
-            ) : (
-              <View className="flex-row items-center gap-3">
-                <Text className="flex-1 text-sm text-text">{c.couponText}</Text>
-                <Pressable
-                  accessibilityRole="button"
-                  accessibilityLabel={`${c.name} 쿠폰 받기`}
-                  disabled={claim.isPending}
-                  onPress={() => claim.mutate(c.id)}
-                  className="h-11 items-center justify-center rounded-xl bg-ink px-4 active:opacity-80 disabled:opacity-50">
-                  <Text className="text-sm font-bold text-on-ink">쿠폰 받기</Text>
-                </Pressable>
-              </View>
-            )
-          ) : null}
-        </View>
-      ))}
+      {list.map((c) => {
+        const shop = byId.get(c.id);
+        return (
+          <View key={c.id} className="gap-2">
+            <ShopRow
+              id={c.id}
+              name={c.name}
+              partner={c.partner}
+              info={shop ? shopLine(shop) : '카페'}
+              photoUrl={shop?.photoUrl ?? null}
+              thumbUrl={shop?.thumbUrl ?? null}
+              cuisine="cafe"
+              thumbSize={SHOP_ROW_THUMB_SIZE}
+              onSurface={!onPrimary}
+            />
+            {c.partner && c.couponText ? (
+              <CouponSlot
+                sessionId={sessionId}
+                shopId={c.id}
+                shopName={c.name}
+                benefit={c.couponText}
+                myCode={c.myCode}
+                coupons={coupons}
+                busy={claim.isPending}
+                onClaim={() => claim.mutate(c.id)}
+                onWhite={onPrimary}
+              />
+            ) : null}
+          </View>
+        );
+      })}
     </View>
   );
-}
-
-function openMap(url: string) {
-  if (Platform.OS === 'web' && typeof window !== 'undefined') {
-    window.open(url, '_blank', 'noopener');
-    return;
-  }
-  Linking.openURL(url).catch(() => {});
 }

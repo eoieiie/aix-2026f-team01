@@ -7,6 +7,8 @@ import {
   type TextProps,
 } from 'react-native';
 
+import { webChoiceTextColor } from '@/components/choice-colors';
+
 // 모든 글자를 Pretendard로 (docs/design.md 글꼴, 2026-11-19).
 // 앱은 빌드 때 넣은 Pretendard(400, 600, 700, 800)를 이름 하나와 굵기(font-bold 등)로 고른다 (app.json expo-font).
 // 웹은 public/index.html의 Pretendard 웹 글꼴을 쓰고, 받기 전에는 시스템 글꼴로 먼저 그린다.
@@ -18,8 +20,8 @@ export const FONT_FAMILY =
 
 const base = { fontFamily: FONT_FAMILY };
 
-export const Text = forwardRef<RNText, TextProps>(function Text({ style, ...rest }, ref) {
-  return <RNText ref={ref} style={[base, style]} {...rest} />;
+export const Text = forwardRef<RNText, TextProps & { className?: string }>(function Text({ className, style, ...rest }, ref) {
+  return <RNText ref={ref} className={className} style={[base, Platform.OS === 'web' ? webChoiceTextColor(className) : undefined, style]} {...rest} />;
 });
 
 export const TextInput = forwardRef<RNTextInput, TextInputProps>(function TextInput(

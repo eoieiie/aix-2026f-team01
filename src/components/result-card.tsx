@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Animated, Easing, Platform, View } from 'react-native';
 import { Text } from '@/components/text';
 
+import { FoodIllustration } from '@/components/food-illustration';
 import { PersonDots } from '@/components/person-dots';
 import { useReduceMotion } from '@/hooks/use-reduce-motion';
 import { mealDateLabel, monthCuisineLine, togetherLines, type MealCard } from '@/hooks/use-meal';
@@ -52,6 +53,9 @@ export function ResultCard({ card }: { card: MealCard }) {
           </Text>
           <Text className="text-xl font-bold text-on-primary">{mealDateLabel(card.eatenAt)}</Text>
         </View>
+
+        {/* 메뉴 그림이 있으면 음식 이름 위 오른쪽에 둥글게 (0025). 없으면 지금 모양 그대로 */}
+        <FoodIllustration foodId={card.foodId} size={112} name={card.foodName} wrapClassName="items-end" />
 
         <View className="gap-2">
           <Text

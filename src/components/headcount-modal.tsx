@@ -1,3 +1,4 @@
+import { choiceSurface } from '@/components/choice-colors';
 import { useState } from 'react';
 import { Modal, Pressable, ScrollView, View } from 'react-native';
 import { Text } from '@/components/text';
@@ -55,7 +56,7 @@ export function HeadcountModal({
       accessibilityRole="button"
       accessibilityState={{ selected: on }}
       onPress={onPress}
-      className={`h-12 flex-1 items-center justify-center rounded-xl ${on ? 'bg-ink' : 'bg-surface'} active:opacity-70`}>
+      className={`h-12 flex-1 items-center justify-center rounded-xl ${on ? 'bg-ink' : 'bg-surface'} active:opacity-70`} style={choiceSurface(on)}>
       <Text className={`text-base font-bold ${on ? 'text-on-ink' : 'text-text'}`}>{label}</Text>
     </Pressable>
   );
@@ -74,8 +75,8 @@ export function HeadcountModal({
 
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
-      <View className="flex-1 items-center justify-center bg-black/40 px-5">
-        <View className="max-h-full w-full max-w-sm rounded-3xl bg-background">
+      <View className="flex-1 items-center justify-center bg-black/40 px-4">
+        <View className="max-h-full w-full max-w-[440px] rounded-3xl bg-background">
           <ScrollView keyboardShouldPersistTaps="handled" automaticallyAdjustKeyboardInsets contentContainerClassName="gap-6 p-6">
             <Text className="text-3xl font-bold tracking-tight text-text">같이 먹을 사람</Text>
 
@@ -91,7 +92,7 @@ export function HeadcountModal({
                     accessibilityState={{ checked: on, disabled: me }}
                     disabled={me}
                     onPress={() => toggle(m.user_id)}
-                    className={`h-11 max-w-full flex-row items-center gap-1 rounded-full px-4 ${on ? 'bg-ink' : 'bg-surface'} active:opacity-70`}>
+                    className={`h-11 max-w-full flex-row items-center gap-1 rounded-full px-4 ${on ? 'bg-ink' : 'bg-surface'} active:opacity-70`} style={choiceSurface(on)}>
                     {on ? <Icon name="check" size={16} color="on-ink" /> : null}
                     <Text numberOfLines={1} className={`text-base font-bold ${on ? 'text-on-ink' : 'text-muted'}`}>
                       {m.display_name}

@@ -1,3 +1,4 @@
+import { choiceSurface } from '@/components/choice-colors';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { type ReactNode, useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, View } from 'react-native';
@@ -9,10 +10,14 @@ import { Button } from '@/components/button';
 import { CandidateCard } from '@/components/candidate-card';
 import { FoodSearch } from '@/components/food-search';
 import { HeadcountStepper } from '@/components/headcount-stepper';
+import { VoteRestaurants } from '@/components/nearby-restaurants';
 import { Icon, IconButton } from '@/components/icon';
 import { type Point, ResultMoment } from '@/components/result-moment';
+import { ReportSheet, type ReportTarget } from '@/components/report-sheet';
 import { Roulette } from '@/components/roulette';
+import { ConfirmSheet } from '@/components/sheets';
 import colors from '@/constants/colors.json';
+import { safetyErrorMessage, useSafety } from '@/hooks/use-safety';
 import { cantEatNotice } from '@/constants/restrictions';
 import {
   GROUP_FAVORITES_MAX,
@@ -41,7 +46,7 @@ export default function SessionScreen() {
   const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
   const sessionId = id ?? '';
-  const { session, isLoading, error, retry } = useSession(sessionId);
+  const { session, isLoading, error, retry, lastGroupId } = useSession(sessionId);
 
   // 이 화면에서 투표 단계를 본 적이 있으면, 결과가 오는 순간 원판을 돌린다
   const [sawVoting, setSawVoting] = useState(false);
@@ -66,13 +71,20 @@ export default function SessionScreen() {
 
   if (error || !session) {
     const notMember = error instanceof SessionError && error.code === 'not_member';
+    // 판을 연 사람이 판을 접었다(4-24). 실시간이나 4초 다시 읽기에서 판이 사라지면 바로 이 화면이 된다
+    const gone = error instanceof SessionError && error.code === 'session_not_found';
     return (
       <SafeAreaView className="flex-1 items-center justify-center gap-4 bg-background px-6">
         <Text className="text-lg font-bold text-text">
-          {notMember ? '이 모임 멤버가 아니에요' : sessionErrorMessage(error)}
+          {gone ? '판이 닫혔어요' : notMember ? '이 모임 멤버가 아니에요' : sessionErrorMessage(error)}
         </Text>
         <View className="w-full max-w-xs">
-          {notMember ? (
+          {gone ? (
+            <Button
+              label={lastGroupId ? '모임으로' : '홈으로'}
+              onPress={() => router.replace((lastGroupId ? `/groups/${lastGroupId}` : '/') as any)}
+            />
+          ) : notMember ? (
             <Button label="홈으로" onPress={() => router.replace('/')} />
           ) : (
             <Button label="다시 시도" variant="secondary" onPress={() => retry()} />
@@ -120,15 +132,32 @@ const STEPS = [
 ] as const;
 
 function Header({ session, onBack }: { session: SessionView; onBack: () => void }) {
+  const [fold, setFold] = useState(false);
+  const { cancel } = useSafety();
   const current = STEPS.findIndex((step) => step.status === session.status);
   return (
-    <View className="gap-4 px-5 pb-2 pt-3">
+    <View className="gap-4 px-4 pb-2 pt-3">
       <View className="flex-row items-center gap-3">
         <IconButton name="back" label="모임으로" onPress={onBack} />
         <Text className="flex-1 text-lg font-bold text-text" numberOfLines={2}>
           {session.groupName}
         </Text>
+        {/* 판을 연 사람은 끝나기 전 판을 접을 수 있다. 접은 판은 기록이 남지 않는다 (4-24) */}
+        {session.isHost && session.status !== 'done' ? (
+          <IconButton name="more" label="판 접기" onPress={() => setFold(true)} />
+        ) : null}
       </View>
+      <ConfirmSheet
+        visible={fold}
+        title="판을 접을까요?"
+        body="후보와 표가 모두 지워지고 기록이 남지 않아요"
+        confirmLabel="판 접기"
+        danger
+        busy={cancel.isPending}
+        error={cancel.error ? safetyErrorMessage(cancel.error) : null}
+        onConfirm={() => cancel.mutateAsync(session.id).then(onBack).catch(() => undefined)}
+        onClose={() => { cancel.reset(); setFold(false); }}
+      />
       {/* 한 판의 세 단계. 누르는 것이 아니라서 버튼 모양 대신 "2 / 3 투표" 한 줄과 막대 세 칸으로 보인다.
           지나온 단계와 지금 단계는 검정, 남은 단계는 회색 (2026-11-16 병주 1안) */}
       <View
@@ -211,6 +240,7 @@ function CandidateStage({
 }) {
   const { foods } = useFoods();
   const { add, addCustom, pitch, remove, open } = useSessionActions(session.id);
+  const [report, setReport] = useState<ReportTarget | null>(null);
   // 4-20 식사 기록과 못 먹는 것. 참여자 수가 바뀌면 다시 읽는다
   const hints = useFoodHints(session.id, `${session.participants.length}`);
   const hintOf = new Map(hints.map((h) => [h.foodId, h]));
@@ -276,7 +306,7 @@ function CandidateStage({
         onScroll={(e) => (scrollY.current = e.nativeEvent.contentOffset.y)}
         scrollEventThrottle={64}
         onLayout={(e: LayoutChangeEvent) => (viewH.current = e.nativeEvent.layout.height)}
-        contentContainerClassName="gap-4 px-5 pb-40 pt-2">
+        contentContainerClassName="gap-4 px-4 pb-40 pt-2">
         <View className="flex-row items-end justify-between">
           <Text className="flex-1 text-2xl font-bold tracking-tight text-text">뭐 먹고 싶어요?</Text>
           <Pressable
@@ -339,8 +369,21 @@ function CandidateStage({
                 eatenNote={eatenNote(hintOf.get(c.foodId)?.lastEatenAt ?? null, RECENT_EATEN_DAYS)}
                 onSavePitch={c.isMine ? (text) => pitch.mutate({ foodId: c.foodId, text }) : undefined}
                 onRemove={c.isMine ? () => remove.mutate(c.foodId) : undefined}
+                onMore={
+                  !c.isMine && !c.blocked && (c.pitch || c.custom)
+                    ? () =>
+                        setReport({
+                          kind: c.pitch ? 'pitch' : 'custom_food',
+                          groupId: session.groupId,
+                          sessionId: session.id,
+                          foodId: c.foodId,
+                          userId: c.proposedBy,
+                        })
+                    : undefined
+                }
               />
             ))}
+          <ReportSheet target={report} onClose={() => setReport(null)} />
         </View>
       </ScrollView>
 
@@ -385,7 +428,7 @@ function VotingStage({ session }: { session: SessionView }) {
 
   return (
     <View className="flex-1">
-      <ScrollView keyboardShouldPersistTaps="handled" automaticallyAdjustKeyboardInsets contentContainerClassName="gap-5 px-5 pb-40 pt-2">
+      <ScrollView keyboardShouldPersistTaps="handled" automaticallyAdjustKeyboardInsets contentContainerClassName="gap-4 px-4 pb-40 pt-2">
         <View className="gap-1">
           <Text className="text-3xl font-bold tracking-tight text-text">골라 주세요</Text>
           {/* 몇 개까지인지는 아래 "내 표 0/2"가 보인다 */}
@@ -408,7 +451,7 @@ function VotingStage({ session }: { session: SessionView }) {
 
         {/* 이 판 후보에 걸리는 못 먹는 것. 빼지 않고 알린다. 누가 적었는지는 없다 (0010) */}
         {notice.length > 0 ? (
-          <View accessibilityRole="alert" className="gap-1 rounded-3xl bg-ink p-5">
+          <View accessibilityRole="alert" className="gap-1 rounded-2xl bg-ink p-4">
             {notice.map((line) => (
               <Text key={line} className="text-lg font-bold text-on-ink">
                 {line}
@@ -443,13 +486,19 @@ function VotingStage({ session }: { session: SessionView }) {
             onPress={() => anyOk.mutate()}
             className={`h-14 flex-row items-center justify-center gap-2 rounded-2xl active:opacity-80 ${
               session.myAnyOk ? 'bg-ink' : 'bg-surface'
-            }`}>
+            }`} style={choiceSurface(session.myAnyOk)}>
             {session.myAnyOk ? <Icon name="check" color="on-ink" /> : null}
             <Text className={`text-lg font-bold ${session.myAnyOk ? 'text-on-ink' : 'text-text'}`}>
               아무거나 괜찮아요
             </Text>
           </Pressable>
         </View>
+
+        {/* 후보 음식에 맞는 학교 앞 식당 3곳. 보이기만 하고 투표와 룰렛 확률은 그대로다 (4-21) */}
+        <VoteRestaurants
+          sessionId={session.id}
+          candidateKey={session.candidates.map((c) => c.foodId).join(',')}
+        />
       </ScrollView>
 
       <BottomBar>
@@ -520,7 +569,7 @@ function ResultStage({
 
   return (
     <View className="flex-1">
-      <ScrollView keyboardShouldPersistTaps="handled" automaticallyAdjustKeyboardInsets contentContainerClassName="items-center gap-6 px-5 pb-40 pt-4">
+      <ScrollView keyboardShouldPersistTaps="handled" automaticallyAdjustKeyboardInsets contentContainerClassName="items-center gap-6 px-4 pb-40 pt-4">
         {error ? (
           <Text className="text-sm text-danger">{sessionErrorMessage(error)}</Text>
         ) : slices.length > 0 && session.decidedFoodId !== null ? (
@@ -550,7 +599,7 @@ function BottomBar({ children }: { children: ReactNode }) {
   const insets = useSafeAreaInsets();
   return (
     <View
-      className="absolute bottom-0 left-0 right-0 gap-2 bg-background px-5 pt-3"
+      className="absolute bottom-0 left-0 right-0 gap-2 bg-background px-4 pt-3"
       style={{ paddingBottom: insets.bottom + 16 }}>
       {children}
     </View>
