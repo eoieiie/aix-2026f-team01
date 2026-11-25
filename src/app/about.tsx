@@ -34,16 +34,17 @@ const CUSTOM_SAMPLE_ID = 9001;
 const PEOPLE = ['민준', '서연', '지호'];
 const DESCRIPTION = '오늘 뭐 먹지, 같이 정해요. 모임 사람들이 후보를 올리고 익명으로 투표한 뒤 룰렛으로 메뉴를 정해요.';
 
-// 웹은 한 장짜리 index.html이라 설명 meta가 이미 하나 있다. 소개 화면에 있는 동안만 그 값을 바꾸고 나가면 되돌린다
-function useWebDescription(text: string) {
+// 웹은 한 장짜리 index.html이라 설명과 og 제목 meta가 이미 하나씩 있다. 새로 붙이면 같은 meta가 둘이 되므로
+// 소개 화면에 있는 동안만 그 값을 바꾸고 나가면 되돌린다
+function useWebMeta(selector: string, text: string) {
   useEffect(() => {
     if (Platform.OS !== 'web' || typeof document === 'undefined') return;
-    const meta = document.querySelector('meta[name="description"]');
+    const meta = document.querySelector(selector);
     if (!meta) return;
     const before = meta.getAttribute('content') ?? '';
     meta.setAttribute('content', text);
     return () => meta.setAttribute('content', before);
-  }, [text]);
+  }, [selector, text]);
 }
 
 // 예시 조각 전용 저장소. 앱의 저장소와 나눠서 예시 값이 앱 화면에 섞이지 않고, 서버에도 묻지 않는다
@@ -83,7 +84,9 @@ function sample(foodId: number, foodName: string, extra: Partial<Candidate> = {}
 export default function AboutScreen() {
   const router = useRouter();
   const sampleClient = useSampleClient();
-  useWebDescription(DESCRIPTION);
+  useWebMeta('meta[name="description"]', DESCRIPTION);
+  useWebMeta('meta[property="og:title"]', '밥비티아이 소개');
+  useWebMeta('meta[property="og:description"]', DESCRIPTION);
   const { width } = useWindowDimensions();
   const wide = width >= WIDE_MIN;
   const scroll = useRef<ScrollView>(null);
@@ -97,7 +100,6 @@ export default function AboutScreen() {
     <SafeAreaView className="flex-1 bg-background">
       <Head>
         <title>밥비티아이 소개</title>
-        <meta property="og:title" content="밥비티아이 소개" />
       </Head>
       <QueryClientProvider client={sampleClient}>
         <ScrollView ref={scroll} contentContainerClassName="items-center pb-16">
