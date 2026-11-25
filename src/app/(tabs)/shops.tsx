@@ -117,7 +117,7 @@ export default function ShopsScreen() {
         ) : (
           <FlatList<Shop | CouncilBenefit>
             data={scope ? shown : list}
-            keyExtractor={(item) => String(item.id)}
+            keyExtractor={(item) => `${'shop_name' in item ? 'council' : 'shop'}-${item.id}`}
             renderItem={({ item }) => 'shop_name' in item ? (
               <View className="min-h-20 flex-row gap-3 rounded-2xl bg-surface p-4">
                 {item.shop_name ? <ShopThumb name={item.shop_name} cuisine={null} photoUrl={null} thumbUrl={null} size={56} onSurface /> : null}

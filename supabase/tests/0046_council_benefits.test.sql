@@ -1,6 +1,6 @@
 begin;
 select plan(9);
-select has_table('public', 'council_benefits');
+select has_table('public', 'council_benefits', '학생회 제휴 표가 있다');
 select ok(not has_table_privilege('anon', 'public.council_benefits', 'SELECT'), '로그인 전에는 읽지 못한다');
 select ok(has_table_privilege('authenticated', 'public.council_benefits', 'SELECT'), '로그인하면 읽을 수 있다');
 select ok(not has_table_privilege('authenticated', 'public.council_benefits', 'INSERT'), '추가할 수 없다');
