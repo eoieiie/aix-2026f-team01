@@ -1,7 +1,7 @@
 -- 프로필 꾸미기, 취향, 맞춤 채우기 (0036, 명세 4-27)
 begin;
 create extension if not exists pgtap with schema extensions;
-select plan(20);
+select plan(22);
 
 -- 노트북과 CI에는 그림 파일 이름이 비어 있을 수 있어 여기서 채운다(0026은 씨앗보다 먼저 돈다)
 update public.foods set image_path = id || '.webp' where not custom;
@@ -100,12 +100,14 @@ select is((select count(*)::int from public.session_fill_picks('20000000-0000-00
   join public.foods f on f.id = p.food_id where 'pork' = any (f.tags)), 0,
   '못 먹는 사람이 있는 메뉴는 취향 점수가 높아도 나오지 않는다');
 
--- 계정을 지우면 아바타, 단과대, 취향도 같이 지워진다
+-- 화면에서 더는 받지 않는 항목도 이미 저장됐다면 계정을 지울 때 같이 지워진다.
 select set_config('request.jwt.claims', '{"sub":"00000000-0000-0000-0000-0000000000b1","role":"authenticated"}', true);
+select is(public.my_prefs() -> 'budget_level', '2'::jsonb, '삭제 전에 과거 예산 값이 저장돼 있다');
+select is(public.my_prefs() -> 'meal_times', '["lunch"]'::jsonb, '삭제 전에 과거 식사 때 값이 저장돼 있다');
 select public.delete_my_account();
 reset role;
 select is((select count(*)::int from public.profiles where user_id = '00000000-0000-0000-0000-0000000000b1'), 0,
-  '계정 삭제 뒤 프로필 줄(아바타, 단과대, 취향)이 남지 않는다');
+  '계정 삭제 뒤 과거 예산과 식사 때를 포함한 프로필 줄이 남지 않는다');
 
 select * from finish();
 rollback;
