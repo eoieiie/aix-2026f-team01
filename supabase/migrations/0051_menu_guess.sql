@@ -4,7 +4,7 @@
 -- 예: 대홍훠궈샤브샤브(중국식)에 짜장면 짬뽕 탕수육.
 -- 1. menus_guess 칸을 더하고, menus에서 가게 이름(별칭 포함)에 근거가 없는 메뉴를 menus_guess로 옮긴다.
 --    짐작 메뉴의 음식 종류가 가게의 지금 종류와 다르면 버린다(종류를 고친 가게에 남은 짐작).
--- 2. 가게 상세의 대표 메뉴와 가게 그림(shop_thumb_food)은 menus만 쓴다(함수는 그대로, 칸만 바뀐다).
+-- 2. 가게 상세의 대표 메뉴와 가게 그림(shop_thumb_food)은 menus만 쓴다. 그림의 이름 낱말에서 업종 낱말(반점 등)은 뺀다.
 -- 3. 가게 탭 찾기는 menus와 menus_guess를 둘 다 본다(shop_list가 menus_guess를 준다).
 -- 4. 결과 순서의 (1) 메뉴 일치는 menus만, 짐작만 맞으면 (2) 일반 가게.
 -- 예시 동네(zz_test)의 발표용 가게는 건드리지 않는다. 여러 번 돌려도 같다.
@@ -49,6 +49,34 @@ set menus = s.menus,
 from public.restaurants x
 cross join lateral public.shop_split_menus(x.name, x.cuisine, x.menus) s
 where x.id = r.id and r.area <> 'zz_test' and cardinality(s.menus) < cardinality(coalesce(r.menus, '{}'));
+
+-- 가게 그림(0040)도 짐작을 쓰지 않는다. 대표 메뉴(menus) → 대표 메뉴 낱말 → 이름에 든 음식 이름 → 이름 낱말 순은 그대로 두고,
+-- 마지막 "이름 낱말"에서 가게 종류를 말할 뿐인 낱말(반점, 중화, 홍콩, 분식, 경양식, 정육, 고기, 돼지, 찌개, 덮밥, 솥밥, 보리밥, 비빔)은
+-- 업태 짐작과 같아서 쓰지 않는다(예: 보배반점에 짜장면 그림, 족발덮밥집에 규동 그림). 못 찾으면 화면이 수저 아이콘을 그린다
+create or replace function public.shop_thumb_food(p_name text, p_menus text[], p_cuisine text)
+returns bigint
+language sql stable set search_path = ''
+as $$
+  with ok as (
+    select f.id, f.name from public.foods f where f.image_path is not null and not f.custom
+  )
+  select case when p_cuisine = 'cafe' then
+    (select ok.id from ok
+     where ok.name = '샌드위치' and (strpos(p_name, '토스트') > 0 or strpos(p_name, '샌드위치') > 0)
+     order by ok.id limit 1)
+  else coalesce(
+    (select ok.id from ok join unnest(p_menus) with ordinality as m (name, ord) on m.name = ok.name
+     order by m.ord, ok.id limit 1),
+    (select ok.id from ok join unnest(p_menus) with ordinality as m (name, ord) on ok.name = public.shop_food_word(m.name)
+     order by m.ord, ok.id limit 1),
+    (select ok.id from ok where strpos(p_name, ok.name) > 0
+     order by char_length(ok.name) desc, ok.id limit 1),
+    (select ok.id from ok where ok.name = public.shop_food_word(p_name)
+       and not exists (select 1 from unnest(array['반점', '중화', '홍콩', '분식', '경양식', '정육', '고기', '돼지', '찌개',
+         '덮밥', '솥밥', '보리밥', '비빔']) as w where strpos(coalesce(p_name, ''), w) > 0)
+     order by ok.id limit 1)
+  ) end
+$$;
 
 -- 가게 목록. 0040과 같고 찾기용 menus_guess를 더 준다
 drop function if exists public.shop_list();
@@ -188,5 +216,6 @@ $$;
 
 
 revoke execute on function public.shop_menu_evidence(text, text), public.shop_split_menus(text, text, text[]),
+  public.shop_thumb_food(text, text[], text),
   public.shop_list(), public.session_restaurants(uuid) from public, anon, authenticated;
 grant execute on function public.shop_list(), public.session_restaurants(uuid) to authenticated;

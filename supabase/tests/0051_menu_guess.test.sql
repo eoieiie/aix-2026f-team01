@@ -1,7 +1,7 @@
 -- 업태 짐작 메뉴는 menus_guess로 (명세 4-21, 4-26, 0051)
 begin;
 create extension if not exists pgtap with schema extensions;
-select plan(17);
+select plan(19);
 
 -- 마이그레이션이 옮긴 실제 가게(0017 자료)
 select is((select menus from public.restaurants where source_id = 'localdata/5550000-101-2004-00136'), '{}'::text[],
@@ -59,6 +59,8 @@ select is((select tier from t_d where name = '대홍훠궈샤브샤브'), 3, '�
 select is((select d -> 'menus' from t_x), '[]'::jsonb, '가게 상세의 대표 메뉴에는 짐작이 나오지 않는다');
 select is((select thumb_food_id from t_l where name = '대홍훠궈샤브샤브'), null::bigint, '가게 그림도 짐작 메뉴로 고르지 않는다');
 select is((select menus_guess from t_l where name = '보배반점'), array['짜장면', '짬뽕', '탕수육'], '가게 목록은 찾기용 짐작을 같이 준다');
+select is(public.shop_thumb_food('보배반점 안산한양대에리카점', '{}', 'chinese'), null::bigint, '반점 같은 업종 낱말로 그림을 고르지 않는다');
+select is((select name from public.foods where id = public.shop_thumb_food('대학통닭', '{}', 'western')), '치킨', '음식을 말하는 이름 낱말(통닭)은 그대로');
 select ok(not has_function_privilege('authenticated', 'public.shop_split_menus(text, text, text[])', 'execute'), '나누기 함수는 앱에서 부르지 못한다');
 
 select * from finish();
