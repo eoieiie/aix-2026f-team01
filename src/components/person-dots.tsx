@@ -20,7 +20,11 @@ type PersonDotsProps = {
 export function PersonDots({ names, userIds, ringClass = 'border-surface', size = 30 }: PersonDotsProps) {
   const shown = names.slice(0, PERSON_DOTS_MAX);
   const rest = names.length - shown.length;
-  const ring = `rounded-full border-2 ${ringClass}`;
+  const ring = {
+    'border-surface': 'rounded-full border-2 border-surface',
+    'border-primary': 'rounded-full border-2 border-primary',
+    'border-background': 'rounded-full border-2 border-background',
+  }[ringClass];
 
   return (
     <View className="flex-row" accessibilityLabel={`${names.length}명`}>

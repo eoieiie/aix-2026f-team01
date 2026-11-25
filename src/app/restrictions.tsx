@@ -77,11 +77,11 @@ export default function RestrictionsScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-background" edges={['top']}>
-      <View className="flex-row px-5 pb-2 pt-3">
+      <View className="flex-row px-4 pb-2 pt-3">
         <IconButton name="back" label="뒤로" onPress={close} />
       </View>
 
-      <ScrollView keyboardShouldPersistTaps="handled" automaticallyAdjustKeyboardInsets contentContainerClassName="gap-8 px-5 pb-48 pt-2">
+      <ScrollView keyboardShouldPersistTaps="handled" automaticallyAdjustKeyboardInsets contentContainerClassName="gap-8 px-4 pb-48 pt-2">
         {/* 설명은 처음 온 사람이 꼭 알아야 하는 한 줄만 (docs/design.md 4절 1번) */}
         <View className="gap-1">
           <Text className="text-3xl font-bold tracking-tight text-text">못 먹는 것</Text>
@@ -144,7 +144,7 @@ export default function RestrictionsScreen() {
       </ScrollView>
 
       <View
-        className="absolute bottom-0 left-0 right-0 gap-2 bg-background px-5 pt-3"
+        className="absolute bottom-0 left-0 right-0 gap-2 bg-background px-4 pt-3"
         style={{ paddingBottom: insets.bottom + 16 }}>
         <Button label="저장" onPress={onSave} loading={isPending} />
         {saveError ? (
@@ -169,7 +169,7 @@ function TagSection({
   return (
     <View className="gap-3">
       <Text className="text-base font-bold text-text">{title}</Text>
-      {/* 태그는 글 길이와 상관없이 같은 폭으로 한 줄에 넷. 고른 태그는 주황으로 꽉 채운다 (docs/design.md 4절 2번, 4번) */}
+      {/* 태그는 글 길이와 상관없이 같은 폭으로 한 줄에 넷. 고른 태그는 검정으로 꽉 채운다. 주황은 아래 저장 단추 하나뿐 (docs/design.md 4절 2번, "프레즐 규칙 그대로" 색) */}
       <View className="-mx-1 flex-row flex-wrap">
         {tags.map((tag) => {
           const on = chosen.has(`tag:${tag.code}`);
@@ -181,10 +181,10 @@ function TagSection({
                 accessibilityLabel={tag.label}
                 onPress={() => onToggle(tag.code)}
                 className={`h-12 items-center justify-center rounded-full active:opacity-70 ${
-                  on ? 'bg-primary' : 'bg-surface'
+                  on ? 'bg-ink' : 'bg-surface'
                 }`}>
                 <Text
-                  className="text-sm font-bold text-text"
+                  className={`text-sm font-bold ${on ? 'text-on-ink' : 'text-text'}`}
                   numberOfLines={1}>
                   {tag.label}
                 </Text>

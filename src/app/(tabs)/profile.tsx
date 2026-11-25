@@ -47,7 +47,7 @@ export default function ProfileScreen() {
 
   if (isError || !stats) {
     return (
-      <SafeAreaView className="flex-1 items-center justify-center gap-4 bg-background px-6">
+      <SafeAreaView className="flex-1 items-center justify-center gap-4 bg-background px-4">
         <Text className="text-lg font-bold text-text">프로필을 불러올 수 없어요</Text>
         <View className="w-full max-w-xs">
           <Button label="다시 시도" variant="secondary" onPress={() => refetch()} />
@@ -98,28 +98,30 @@ export default function ProfileScreen() {
           <View className="flex-row rounded-2xl bg-surface p-1">
             <Pressable
               accessibilityRole="button"
+              accessibilityState={{ selected: subTab === 'foods' }}
               accessibilityLabel={`음식 도감 ${stats.foods.length}개`}
               onPress={() => setSubTab('foods')}
-              className={`flex-1 items-center justify-center rounded-xl py-3 active:opacity-80 ${
-                subTab === 'foods' ? 'bg-background' : ''
+              className={`flex-1 items-center justify-center min-h-11 rounded-lg py-2 active:opacity-80 ${
+                subTab === 'foods' ? 'bg-ink' : ''
               }`}>
               <Text
                 className={`text-base font-bold ${
-                  subTab === 'foods' ? 'text-text font-bold' : 'text-muted'
+                  subTab === 'foods' ? 'text-on-ink' : 'text-muted'
                 }`}>
                 음식 도감 ({stats.foods.length})
               </Text>
             </Pressable>
             <Pressable
               accessibilityRole="button"
+              accessibilityState={{ selected: subTab === 'companions' }}
               accessibilityLabel={`밥 친구 랭킹 ${stats.companions.length}명`}
               onPress={() => setSubTab('companions')}
-              className={`flex-1 items-center justify-center rounded-xl py-3 active:opacity-80 ${
-                subTab === 'companions' ? 'bg-background' : ''
+              className={`flex-1 items-center justify-center min-h-11 rounded-lg py-2 active:opacity-80 ${
+                subTab === 'companions' ? 'bg-ink' : ''
               }`}>
               <Text
                 className={`text-base font-bold ${
-                  subTab === 'companions' ? 'text-text font-bold' : 'text-muted'
+                  subTab === 'companions' ? 'text-on-ink' : 'text-muted'
                 }`}>
                 밥 친구 랭킹 ({stats.companions.length})
               </Text>

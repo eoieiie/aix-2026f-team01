@@ -23,6 +23,23 @@ const files = SCREEN_DIRS.flatMap(screenFiles).map((file) => ({
   text: fs.readFileSync(file, 'utf8'),
 }));
 
+// 다른 가지에서 고치는 중인 화면이다. "프레즐 규칙 그대로" 검사 세 개에서 잠깐 뺀다.
+// 통일 점검 PR에서 이 목록을 비운다. 여기에 새 파일을 더하지 말고 화면을 규칙에 맞춘다
+const NOT_YET = [
+  'src/app/(tabs)/_layout.tsx',
+  'src/app/(tabs)/shops.tsx',
+  'src/app/shops/',
+  'src/app/coupons.tsx',
+  'src/app/owner/',
+  'src/app/admin/',
+  'src/app/dev/',
+  'src/components/nearby-restaurants.tsx',
+  'src/components/nearby-cafes.tsx',
+  'src/components/coupon-code.tsx',
+  'src/components/legal-page.tsx',
+];
+const checked = files.filter(({ file }) => !NOT_YET.some((prefix) => file.startsWith(prefix)));
+
 describe('디자인 규칙', () => {
   it('화면 파일에 색 코드를 직접 쓰지 않는다. tailwind.config.js의 색 이름만 쓴다', () => {
     // '#fff'처럼 따옴표로 감싼 값과 bg-[#fff]처럼 className 안에 대괄호로 넣은 값을 모두 잡는다
@@ -50,6 +67,58 @@ describe('디자인 규칙', () => {
       return !(hue >= 15 && hue <= 35);
     });
     expect(offPalette).toEqual([]);
+  });
+
+  // ---- 프레즐 규칙 그대로 (docs/design.md, 2026-11-25) ----
+
+  it('간격은 눈금(4, 8, 12, 16, 24, 32)만 쓴다', () => {
+    // Tailwind 숫자 1칸은 4px이다. 0.5(2px)는 같은 종류 줄 사이에만 쓴다. px-5(20), gap-5, px-7, -1.5, -2.5, 대괄호 값은 눈금 밖이다
+    const ON_GRID = new Set(['0', 'px', '0.5', '1', '2', '3', '4', '6', '8']);
+    const spacing =
+      /(?<![\w-])-?(gap|gap-x|gap-y|space-x|space-y|p|px|py|pt|pb|pl|pr|m|mx|my|mt|mb|ml|mr)-(\[[^\]]+\]|\d+(?:\.\d+)?|px)(?![\w.-])/g;
+    // 굴러가는 화면 끝을 비우는 자리(떠 있는 단추 줄이나 탭 막대 높이만큼)는 묶음 사이 간격이 아니라 자리다. pb-10 이상과 pt-16만 뺀다
+    const isClearance = (prop, value) => (prop === 'pb' && Number(value) >= 10) || (prop === 'pt' && value === '16');
+    const found = checked.flatMap(({ file, text }) => {
+      const bad = new Set();
+      for (const [whole, prop, value] of text.matchAll(spacing)) {
+        if (!ON_GRID.has(value) && !isClearance(prop, value)) bad.add(whole);
+      }
+      return bad.size > 0 ? [`${file}: ${[...bad].join(' ')}`] : [];
+    });
+    expect(found).toEqual([]);
+  });
+
+  it('주황 면은 파일 하나에 한 곳까지다. 룰렛 결과 순간과 결과 카드만 예외', () => {
+    // 주황은 포인트로만 쓴다: 주 단추 하나나 상태 알약 하나. 고른 상태는 검정(bg-ink)으로 보인다
+    const ORANGE_OK = ['src/components/result-moment.tsx', 'src/components/result-card.tsx'];
+    const area = /\bbg-primary(?:-soft)?\b|backgroundColor:\s*colors(?:\.primary\b|\[['"]primary(?:-soft)?['"]\])/g;
+    const found = checked
+      .filter(({ file }) => !ORANGE_OK.includes(file))
+      .map(({ file, text }) => ({ file, count: (text.match(area) || []).length }))
+      .filter(({ count }) => count > 1)
+      .map(({ file, count }) => `${file}: 주황 면 ${count}곳`);
+    expect(found).toEqual([]);
+  });
+
+  it('상자를 테두리로 그리지 않는다. 옅은 면으로 나눈다', () => {
+    // 허용하는 선: 한쪽 구분선(border-b 등), 겹친 동그라미 사이의 바탕색 고리, 잠깐 보이는 주황 선(상태)
+    const BORDER_OK = {
+      'src/components/text-field.tsx': '쓰는 중인 입력칸의 검정 선 (상태 표시)',
+      'src/components/roulette.tsx': '바늘 삼각형을 테두리로 그린다',
+    };
+    const boxWidth = /(?<![\w-])border(?:-(?:\d+|\[[^\]]+\]))?(?![\w-])/;
+    const ringColor = /(?<![\w-])border-(?:surface|background|primary|on-primary|transparent)(?![\w-])/;
+    const styleLine = /borderColor:\s*colors(?:\.(?:muted|text|ink)\b|\[['"](?:muted|text|ink|surface-strong)['"]\])/;
+    const found = checked
+      .filter(({ file }) => !(file in BORDER_OK))
+      .flatMap(({ file, text }) =>
+        text
+          .split('\n')
+          .flatMap((line, i) =>
+            (boxWidth.test(line) && !ringColor.test(line)) || styleLine.test(line) ? [`${file}:${i + 1}`] : []
+          )
+      );
+    expect(found).toEqual([]);
   });
 
   it('음식 색 동그라미가 쓰는 색은 모두 tailwind.config.js 토큰에 있다', () => {

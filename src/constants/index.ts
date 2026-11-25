@@ -32,6 +32,9 @@ export const QUICK_FILL_COUNT = 3;
 export const TAB_BAR_HEIGHT = 64;
 export const TAB_BAR_SPACE = 112;
 
+// 4-21 투표 화면 추천 칸. 서버가 주는 최대 6곳 중 내 취향으로 고르는 수
+export const VOTE_RESTAURANTS_SHOWN = 3;
+
 // 4-6, 4-12 먹을 인원수. 이 수만큼 골라야 방장이 돌릴 수 있다. 서버 0009와 같은 범위
 export const HEADCOUNT_MIN = 1;
 export const HEADCOUNT_MAX = 20;

@@ -9,8 +9,8 @@ import { TextField } from '@/components/text-field';
 export function Sheet({ visible, onClose, children }: { visible: boolean; onClose: () => void; children: ReactNode }) {
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
-      <View className="flex-1 items-center justify-center bg-black/40 px-5">
-        <View className="w-full max-w-sm gap-6 rounded-3xl bg-background p-6">{children}</View>
+      <View className="flex-1 items-center justify-center bg-black/40 px-4">
+        <View className="w-full max-w-[440px] gap-6 rounded-3xl bg-background p-6">{children}</View>
       </View>
     </Modal>
   );
@@ -23,7 +23,7 @@ export function ChoiceRow({ label, onPress, danger = false }: { label: string; o
       accessibilityRole="button"
       accessibilityLabel={label}
       onPress={onPress}
-      className="h-14 justify-center rounded-2xl bg-surface px-5 active:opacity-70">
+      className="h-14 justify-center rounded-2xl bg-surface px-4 active:opacity-70">
       <Text className={`text-base font-bold ${danger ? 'text-danger' : 'text-text'}`}>{label}</Text>
     </Pressable>
   );

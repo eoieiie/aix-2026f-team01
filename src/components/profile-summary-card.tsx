@@ -84,7 +84,7 @@ export function ProfileSummaryCard({
       </View>
 
       {nextAvatar ? (
-        <View className="flex-row items-center gap-3 rounded-lg bg-background p-3">
+        <View className="flex-row items-center min-h-[72px] gap-3 rounded-xl bg-background p-4">
           <View style={{ opacity: 0.4 }}>
             <Avatar name={nextAvatar.name} foodId={nextAvatar.foodId} size={44} />
           </View>
