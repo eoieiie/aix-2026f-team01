@@ -45,6 +45,7 @@ export function SettingsList({
         <Row icon="person" label="다른 기기에서 이어 쓰기" onPress={onAccount} />
       </Group>
       <Group>
+        <Row label="밥BTI 소개" onPress={() => router.push('/about' as any)} />
         <Row label="차단한 사람" onPress={() => setSheet('blocks')} />
         <Row label="개인정보 처리방침" onPress={() => router.push('/privacy' as any)} />
         <Row label="이용약관" onPress={() => router.push('/terms' as any)} />
