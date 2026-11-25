@@ -1,4 +1,5 @@
 import { LegalPage } from '@/components/legal-page';
+import { SUPPORT_MAIL, supportMailUrl } from '@/lib/support-mail';
 
 // 문의 (명세 4-24). 앱스토어 지원 주소
 export default function SupportScreen() {
@@ -6,7 +7,7 @@ export default function SupportScreen() {
     <LegalPage
       title="문의하기"
       sections={[
-        { title: '메일', lines: ['turkiyecivciv31@gmail.com'] },
+        { title: '메일', lines: [], link: { label: SUPPORT_MAIL, href: supportMailUrl() } },
         {
           title: '자주 묻는 것',
           lines: [

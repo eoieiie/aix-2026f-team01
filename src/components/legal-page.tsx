@@ -1,11 +1,11 @@
-import { useRouter } from 'expo-router';
+import { Link, useRouter } from 'expo-router';
 import { ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { IconButton } from '@/components/icon';
 import { Text } from '@/components/text';
 
-export type LegalSection = { title: string; lines: string[] };
+export type LegalSection = { title: string; lines: string[]; link?: { label: string; href: `mailto:${string}` } };
 
 // 개인정보 처리방침, 이용약관, 문의 (명세 4-24). 웹 주소로도 열린다(앱스토어 제출용)
 export function LegalPage({ title, updated, sections }: { title: string; updated?: string; sections: LegalSection[] }) {
@@ -27,6 +27,11 @@ export function LegalPage({ title, updated, sections }: { title: string; updated
         {sections.map((s) => (
           <View key={s.title} className="gap-2">
             <Text className="text-lg font-bold text-text">{s.title}</Text>
+            {s.link ? (
+              <Link href={s.link.href} className="min-h-11 py-3 text-base font-bold text-text underline">
+                {s.link.label}
+              </Link>
+            ) : null}
             {s.lines.map((l, i) => (
               <Text key={i} className="text-base leading-6 text-text">
                 {l}
