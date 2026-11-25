@@ -44,10 +44,10 @@ export default function HomeScreen() {
             </View>
           )}
           <View className="flex-1 gap-1">
-            <Text className="text-xl font-bold tracking-tight text-text" numberOfLines={2}>
+            <Text className="text-xl font-bold tracking-tight text-text">
               {item.name}
             </Text>
-            <Text className="text-sm text-muted" numberOfLines={1}>
+            <Text className="text-sm text-muted">
               {item.recent_foods.length > 0
                 ? item.recent_foods.map((food) => food.food_name).join(', ')
                 : '아직 같이 먹은 기록이 없어요'}

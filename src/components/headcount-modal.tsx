@@ -93,9 +93,9 @@ export function HeadcountModal({
                     accessibilityState={{ checked: on, disabled: me }}
                     disabled={me}
                     onPress={() => toggle(m.user_id)}
-                    className={`h-11 max-w-full flex-row items-center gap-1 rounded-full px-4 ${on ? 'bg-ink' : 'bg-surface'} active:opacity-70`} style={choiceSurface(on)}>
+                    className={`min-h-11 max-w-full flex-row items-center gap-1 rounded-full px-4 py-2 ${on ? 'bg-ink' : 'bg-surface'} active:opacity-70`} style={choiceSurface(on)}>
                     {on ? <Icon name="check" size={16} color="on-ink" /> : null}
-                    <Text numberOfLines={1} className={`text-base font-bold ${on ? 'text-on-ink' : 'text-muted'}`}>
+                    <Text className={`text-base font-bold ${on ? 'text-on-ink' : 'text-muted'}`}>
                       {m.display_name}
                     </Text>
                   </Pressable>

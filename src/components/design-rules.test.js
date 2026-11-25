@@ -102,6 +102,22 @@ describe('디자인 규칙', () => {
     expect(found).toEqual([]);
   });
 
+  it('글자를 말줄임으로 자르지 않는다. numberOfLines, ellipsizeMode, adjustsFontSizeToFit을 쓰지 않고 줄바꿈한다 (병주, 2026-11-25)', () => {
+    const textDirs = ['../app', '.'].map((dir) => path.join(__dirname, dir));
+    const cut = /\b(numberOfLines|ellipsizeMode|adjustsFontSizeToFit)\b/;
+    const found = textDirs
+      .flatMap(screenFiles)
+      .flatMap((file) =>
+        fs
+          .readFileSync(file, 'utf8')
+          .split('\n')
+          .map((line, i) => ({ line: line.replace(/\s\/\/\s.*$/, ''), i }))
+          .filter(({ line }) => !/^\s*(\/\/|\*|\/\*|\{\/\*)/.test(line) && cut.test(line))
+          .map(({ i }) => `${path.relative(path.join(__dirname, '../..'), file)}:${i + 1}`)
+      );
+    expect(found).toEqual([]);
+  });
+
   it('화면에 보이는 글을 가운뎃점(·) 같은 기호로 잇지 않는다. 조각을 간격 8로 떨어뜨린다(TextPieces)', () => {
     // 화면 파일과 화면 글을 만드는 src/api, src/hooks, src/constants를 본다. 주석 줄과 줄 끝 주석은 뺀다 (2026-11-25)
     const textDirs = ['../app', '.', '../api', '../hooks', '../constants'].map((dir) => path.join(__dirname, dir));

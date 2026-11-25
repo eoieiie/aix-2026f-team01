@@ -41,6 +41,7 @@ import {
   useVoteCounts,
   votingReady,
 } from '@/hooks/use-session';
+import { FadeEdge } from '@/components/fade-edge';
 
 // 판 화면 (spec.md 4-8 ~ 4-13, 7절 /sessions/{판 id}). 판 상태에 따라 후보 → 투표 → 룰렛 결과로 바뀐다
 export default function SessionScreen() {
@@ -140,7 +141,7 @@ function Header({ session, onBack }: { session: SessionView; onBack: () => void 
     <View className="gap-4 px-4 pb-2 pt-3">
       <View className="flex-row items-center gap-3">
         <IconButton name="back" label="모임으로" onPress={onBack} />
-        <Text className="flex-1 text-lg font-bold text-text" numberOfLines={2}>
+        <Text className="flex-1 text-lg font-bold text-text">
           {session.groupName}
         </Text>
         {/* 판을 연 사람은 끝나기 전 판을 접을 수 있다. 접은 판은 기록이 남지 않는다 (4-24) */}
@@ -201,9 +202,8 @@ function Participants({ session }: { session: SessionView }) {
             <View
               key={p.userId}
               accessibilityLabel={`${p.displayName}${on ? ' 투표함' : ''}`}
-              className={`h-9 max-w-36 flex-row items-center rounded-full px-3 ${on ? 'bg-text' : 'bg-surface-strong'}`}>
+              className={`min-h-9 max-w-36 flex-row items-center rounded-full px-3 py-1 ${on ? 'bg-text' : 'bg-surface-strong'}`}>
               <Text
-                numberOfLines={1}
                 className={`text-sm font-bold ${on ? 'text-on-primary' : 'text-text'}`}>
                 {p.displayName}
               </Text>
@@ -610,6 +610,8 @@ function BottomBar({ children }: { children: ReactNode }) {
     <View
       className="absolute bottom-0 left-0 right-0 gap-2 bg-background px-4 pt-3"
       style={{ paddingBottom: insets.bottom + 16 }}>
+      {/* 위로 흰색이 옅어지는 띠: 목록 끝이 버튼 띠에 칼로 자른 듯 걸리지 않게 (2026-11-25) */}
+      <FadeEdge color={colors.background} edge="above" />
       {children}
     </View>
   );

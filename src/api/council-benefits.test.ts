@@ -1,4 +1,4 @@
-import { benefitLine, councilMapLinks, councilShopRows, type CouncilBenefit } from './council-benefits';
+import { benefitLines, councilMapLinks, councilShopRows, type CouncilBenefit } from './council-benefits';
 import type { Shop } from './shops';
 
 const entry = (id: number, name: string, restaurant: number | null): CouncilBenefit => ({
@@ -27,16 +27,16 @@ it('지도 검색에는 가게 이름과 지역을 안전하게 넣는다', () =
   });
 });
 
-describe('benefitLine (0050)', () => {
-  it('여러 줄을 띄어쓰기로 잇고 줄 앞 번호와 줄표를 뗀다', () => {
-    expect(benefitLine('음료 5개 이상 구매 시\n1. 아메리카노 s 사이즈 1개 증정\nor\n2. 아이스크림 토핑 증정')).toBe(
-      '음료 5개 이상 구매 시 아메리카노 s 사이즈 1개 증정 or 아이스크림 토핑 증정'
-    );
-    expect(benefitLine('- 커피 10% 할인\n\n2) 디저트 500원 할인')).toBe('커피 10% 할인 디저트 500원 할인');
+describe('benefitLines (2026-11-25)', () => {
+  it('항목마다 한 줄, 번호와 줄표를 떼고 괄호 안내 줄은 뺀다. or는 다음 항목 앞에', () => {
+    expect(
+      benefitLines('음료 5개 이상 구매 시\n1. 아메리카노 s 사이즈 1개 증정\nor\n2. 아이스크림 토핑 증정\n(아메리카노 s 사이즈와 마카롱 제외)')
+    ).toEqual(['음료 5개 이상 구매 시', '아메리카노 s 사이즈 1개 증정', 'or 아이스크림 토핑 증정']);
+    expect(benefitLines('(여름 한정)\n- 커피 10% 할인\n\n2) 디저트 500원 할인\n(중복 불가)')).toEqual(['커피 10% 할인', '디저트 500원 할인']);
   });
 
-  it('비었거나 없으면 null', () => {
-    expect(benefitLine(null)).toBeNull();
-    expect(benefitLine(' \n ')).toBeNull();
+  it('비었거나 없으면 빈 목록', () => {
+    expect(benefitLines(null)).toEqual([]);
+    expect(benefitLines(' \n ')).toEqual([]);
   });
 });

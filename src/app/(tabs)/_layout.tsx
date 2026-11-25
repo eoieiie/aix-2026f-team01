@@ -2,7 +2,9 @@ import { Tabs } from 'expo-router';
 import { Pressable, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { FadeEdge } from '@/components/fade-edge';
 import { Icon, type IconName } from '@/components/icon';
+import colors from '@/constants/colors.json';
 import { TAB_BAR_HEIGHT } from '@/constants';
 
 // 하단 탭 (4-15, 4-26). 홈, 가게, 프로필에서만 보인다. 모임, 판 화면은 탭 밖이라 탭이 없다.
@@ -23,13 +25,14 @@ export default function TabLayout() {
   );
 }
 
-// 화면 아래에 붙은 흰 막대. 탭은 같은 폭으로 나눈다. 위쪽 옅은 선 하나로 목록과 나눈다(간격으로 나눌 수 없는 자리)
+// 화면 아래에 붙은 흰 막대. 탭은 같은 폭으로 나눈다. 목록 끝이 막대에 칼로 자른 듯 걸리지 않게 선 대신 바로 위에 흰색으로 옅어지는 띠(2026-11-25)
 function TabBar({ state, navigation }: { state: any; navigation: any }) {
   const insets = useSafeAreaInsets();
   return (
     <View
-      className="absolute bottom-0 left-0 right-0 border-t border-surface bg-background"
+      className="absolute bottom-0 left-0 right-0 bg-background"
       style={{ paddingBottom: insets.bottom }}>
+      <FadeEdge color={colors.background} edge="above" height={32} />
       <View className="flex-row" style={{ height: TAB_BAR_HEIGHT }}>
         {state.routes.map((route: any, i: number) => {
           const tab = TABS.find((t) => t.name === route.name);

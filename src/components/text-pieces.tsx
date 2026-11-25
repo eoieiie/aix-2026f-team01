@@ -16,7 +16,7 @@ export function TextPieces({
   return (
     <View accessible accessibilityLabel={shown.join(', ')} className="flex-row flex-wrap gap-x-2">
       {shown.map((p, i) => (
-        <Text key={`${i}-${p}`} className={className} numberOfLines={1}>
+        <Text key={`${i}-${p}`} className={className}>
           {p}
         </Text>
       ))}

@@ -12,6 +12,7 @@ import {
 } from '@/api/shops';
 
 // 화면이 쓰는 계산 함수. 화면은 src/api를 직접 부르지 않는다
+export { shortShopName } from '@/api/shop-name';
 export {
   couponErrorText,
   cuisineLabel,

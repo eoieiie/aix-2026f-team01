@@ -25,16 +25,24 @@ export function councilBadge(college: CouncilBenefit['college']) {
   return `${collegeLabel(college)} 제휴`;
 }
 
-// 혜택 원문을 한 줄로 (4-29, 0050). 줄마다 앞 번호("1.", "2)", "-", "•")를 떼고 빈 줄은 버리고 띄어쓰기로 잇는다.
-// 넘치면 화면이 말줄임한다. 가게 탭 목록, 결과 뒤 가게와 카페 줄이 모두 이것을 쓴다(ShopRow)
-export function benefitLine(text: string | null | undefined): string | null {
-  if (!text) return null;
-  const line = text
-    .split(/\r?\n/)
-    .map((l) => l.trim().replace(/^(?:\d+\s*[.)]|[-\u2022\u00B7*])\s*/, '').trim())
-    .filter((l) => l !== '')
-    .join(' ');
-  return line === '' ? null : line;
+// 혜택 원문을 목록과 결과 줄에 보일 줄들로 (4-29, 2026-11-25 병주 "저렇게 잘리는 부분 없으면 좋겠음").
+// 말줄임 없이 항목마다 한 줄: 줄 앞 번호("1.", "2)", "-")를 떼고, 빈 줄과 괄호만 있는 안내 줄("(중복 불가)")은 뺀다.
+// "or"만 있는 줄은 다음 항목 앞에 붙인다. 가게 상세는 원문 전부를 보인다(CouncilRecord)
+export function benefitLines(text: string | null | undefined): string[] {
+  if (!text) return [];
+  const out: string[] = [];
+  let joiner = '';
+  for (const raw of text.split(/\r?\n/)) {
+    const l = raw.trim().replace(/^(?:\d+\s*[.)]|[-\u2022\u00B7*])\s*/, '').trim();
+    if (l === '' || /^\(.*\)$/.test(l)) continue;
+    if (/^(or|또는)$/i.test(l)) {
+      joiner = l + ' ';
+      continue;
+    }
+    out.push(joiner + l);
+    joiner = '';
+  }
+  return out;
 }
 
 export async function getCouncilBenefits(college: CollegeKey | null): Promise<CouncilBenefit[]> {
