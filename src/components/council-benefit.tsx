@@ -12,12 +12,11 @@ export function CouncilBadge({ college }: { college: CouncilBenefit['college'] }
   );
 }
 
-export function CouncilRecord({ entry, showName = false }: { entry: CouncilBenefit; showName?: boolean }) {
+export function CouncilRecord({ entry, showBadge = false }: { entry: CouncilBenefit; showBadge?: boolean }) {
   const [, month, day] = entry.checked_on.split('-');
   return (
     <View className="gap-2">
-      {showName ? <Text className="text-base font-bold text-text">{entry.shop_name ?? entry.council_name}</Text> : null}
-      {entry.shop_name ? <CouncilBadge college={entry.college} /> : null}
+      {showBadge ? <CouncilBadge college={entry.college} /> : null}
       {entry.benefit ? <Text className="text-base text-text">{entry.benefit}</Text> : null}
       {entry.conditions && !entry.benefit?.includes(entry.conditions) ? <Text className="text-sm text-muted">{`조건: ${entry.conditions}`}</Text> : null}
       {entry.period ? <Text className="text-sm text-muted">{`기간: ${entry.period}`}</Text> : null}

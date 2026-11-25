@@ -83,7 +83,7 @@ function ShopBody({ shop }: { shop: ShopDetail }) {
       {council.length ? (
         <View className="gap-4 rounded-2xl bg-surface p-4">
           <Text className="text-lg font-bold text-text">학생회 제휴 혜택</Text>
-          {council.map((entry) => <CouncilRecord key={entry.id} entry={entry} />)}
+          {council.map((entry) => <CouncilRecord key={entry.id} entry={entry} showBadge={new Set(council.map((b) => b.college)).size > 1} />)}
         </View>
       ) : null}
 

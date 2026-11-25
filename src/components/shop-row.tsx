@@ -21,6 +21,8 @@ export function ShopRow({
   cuisine,
   thumbSize,
   card = false,
+  hideCouncilBadge = false,
+  onOpen,
   onSurface = true,
 }: {
   id: number;
@@ -35,17 +37,19 @@ export function ShopRow({
   thumbSize: number;
   // 혼자 서는 카드면 회색 면과 안 여백을 준다. 카드 안의 줄이면 면 없이 그린다
   card?: boolean;
+  hideCouncilBadge?: boolean;
+  onOpen?: () => void;
   // 줄이 놓인 바탕이 회색 면이면 true(그림 칸을 흰색으로), 흰 바탕이면 false(그림 칸을 회색으로)
   onSurface?: boolean;
 }) {
   const router = useRouter();
   const { benefits } = useCouncilBenefits();
-  const colleges = [...new Set(benefits.filter((b) => b.restaurant_id === id).map((b) => b.college))];
+  const colleges = hideCouncilBadge ? [] : [...new Set(benefits.filter((b) => b.restaurant_id === id).map((b) => b.college))];
   return (
     <Pressable
       accessibilityRole="link"
       accessibilityLabel={`${name}${partner ? ', 광고' : ''}${colleges.map((c) => `, ${councilBadge(c)}`).join('')}, 가게 정보 보기`}
-      onPress={() => router.push(`/shops/${id}` as any)}
+      onPress={onOpen ?? (() => router.push(`/shops/${id}` as any))}
       className={`flex-row items-center gap-3 active:opacity-70 ${card ? 'rounded-2xl bg-surface p-4' : 'py-2'}`}>
       <ShopThumb name={name} photoUrl={photoUrl} thumbUrl={thumbUrl} cuisine={cuisine} size={thumbSize} onSurface={onSurface} />
       <View className="flex-1 gap-1">
@@ -55,7 +59,7 @@ export function ShopRow({
           </Text>
           {partner ? <AdBadge /> : null}
         </View>
-        <TextPieces pieces={info} />
+        {info.length ? <TextPieces pieces={info} /> : null}
         {colleges.length ? <View className="flex-row flex-wrap gap-1">{colleges.map((c) => <CouncilBadge key={c} college={c} />)}</View> : null}
         {benefit ? (
           <Text className="text-sm font-semibold text-text" numberOfLines={1}>

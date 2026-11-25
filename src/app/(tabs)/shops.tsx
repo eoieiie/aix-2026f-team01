@@ -1,12 +1,10 @@
 import { useRouter } from 'expo-router';
 import { useMemo, useState } from 'react';
-import { FlatList, Pressable, View } from 'react-native';
+import { FlatList, Linking, Pressable, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { filterShops, SHOP_KINDS, shopLine, splitCoupons } from '@/hooks/use-shops';
-import { CouncilRecord } from '@/components/council-benefit';
-import { ShopThumb } from '@/components/shop-thumb';
-import { useCouncilBenefits, type CouncilBenefit } from '@/hooks/use-council-benefits';
+import { councilShopRows, useCouncilBenefits } from '@/hooks/use-council-benefits';
 import { Button } from '@/components/button';
 import { Icon } from '@/components/icon';
 import { ShopRow } from '@/components/shop-row';
@@ -14,6 +12,7 @@ import { Text } from '@/components/text';
 import { choiceSurface } from '@/components/choice-colors';
 import { TextField } from '@/components/text-field';
 import { FOOD_NAME_MAX, SHOP_THUMB_SIZE, TAB_BAR_SPACE } from '@/constants';
+import { collegeLabel } from '@/constants/prefs';
 import { OSM_CREDIT } from '@/hooks/use-restaurants';
 import { type Shop, type ShopKind, useMyCoupons, useShops } from '@/hooks/use-shops';
 
@@ -28,14 +27,18 @@ export default function ShopsScreen() {
   const [scope, setScope] = useState<'mine' | 'all' | null>(null);
   const council = useCouncilBenefits();
   const entries = scope ? council.benefits.filter((b) => b.college === (scope === 'mine' ? council.college : 'all')) : [];
-  const shown = entries.filter((b) => (b.shop_name ?? b.council_name).toLowerCase().includes(query.trim().toLowerCase()));
+  const shown = councilShopRows(entries, shops, kind, query);
   const list = useMemo(() => filterShops(shops, kind, query), [shops, kind, query]);
+  const source = council.college === 'computing' && scope === 'mine'
+    ? 'https://app.notion.com/p/2026-2feafc7e0f1880818885e3a0fbd85aab'
+    : entries[0]?.source_url;
+  const councilName = scope === 'all' ? '총학생회' : council.college === 'computing' ? '소융대 학생회' : collegeLabel(council.college);
   const readyCount = useMemo(() => splitCoupons(coupons, new Date()).ready.length, [coupons]);
 
   const header = (
     <View className="gap-4 pb-4">
       <View className="flex-row gap-2">
-        {(['mine', 'all'] as const).map((key) => (
+        {(['mine', 'all'] as const).filter((key) => key === 'mine' || council.benefits.some((b) => b.college === 'all')).map((key) => (
           <Pressable
             key={key}
             accessibilityRole="button"
@@ -46,7 +49,6 @@ export default function ShopsScreen() {
                 return;
               }
               setScope(scope === key ? null : key);
-              setQuery('');
             }}
             className={`min-h-11 flex-1 items-center justify-center rounded-xl active:opacity-70 ${scope === key ? 'bg-ink' : 'bg-surface'}`}
             style={choiceSurface(scope === key)}>
@@ -56,7 +58,6 @@ export default function ShopsScreen() {
           </Pressable>
         ))}
       </View>
-      {!scope ? <>
       {/* 같은 역할은 같은 크기: 네 칸 두 줄 격자, 높이 44. 고른 칸만 검정 */}
       <View className="gap-2">
         {[SHOP_KINDS.slice(0, 4), SHOP_KINDS.slice(4)].map((row, i) => (
@@ -78,7 +79,6 @@ export default function ShopsScreen() {
           </View>
         ))}
       </View>
-      </> : null}
       <TextField
         value={query}
         onChangeText={setQuery}
@@ -115,21 +115,24 @@ export default function ShopsScreen() {
             <Button label="다시 시도" variant="secondary" onPress={() => refetch()} />
           </View>
         ) : (
-          <FlatList<Shop | CouncilBenefit>
+          <FlatList<Shop | ReturnType<typeof councilShopRows>[number]>
             data={scope ? shown : list}
-            keyExtractor={(item) => `${'shop_name' in item ? 'council' : 'shop'}-${item.id}`}
-            renderItem={({ item }) => 'shop_name' in item ? (
-              <View className="min-h-20 flex-row gap-3 rounded-2xl bg-surface p-4">
-                {item.shop_name ? <ShopThumb name={item.shop_name} cuisine={null} photoUrl={null} thumbUrl={null} size={56} onSurface /> : null}
-                <View className="flex-1">
-                  <CouncilRecord entry={item} showName />
-                  {item.restaurant_id ? (
-                    <Pressable accessibilityRole="link" className="min-h-11 justify-center" onPress={() => router.push(`/shops/${item.restaurant_id}`)}>
-                      <Text className="text-sm font-bold text-text">가게 상세 보기</Text>
-                    </Pressable>
-                  ) : null}
-                </View>
-              </View>
+            keyExtractor={(item) => 'entry' in item ? `council-${item.entry.id}` : `shop-${item.id}`}
+            renderItem={({ item }) => 'entry' in item ? (
+              <ShopRow
+                id={item.shop?.id ?? 0}
+                name={item.entry.shop_name ?? item.entry.council_name}
+                partner={item.shop?.partner ?? false}
+                info={[]}
+                benefit={item.entry.benefit}
+                photoUrl={item.shop?.photoUrl ?? null}
+                thumbUrl={item.shop?.thumbUrl ?? null}
+                cuisine={item.shop?.cuisine ?? null}
+                thumbSize={56}
+                hideCouncilBadge
+                onOpen={() => router.push(item.shop ? `/shops/${item.shop.id}` : `/council-benefits/${item.entry.id}`)}
+                card
+              />
             ) : (
               <ShopRow
                 id={item.id}
@@ -148,7 +151,7 @@ export default function ShopsScreen() {
             ListHeaderComponent={header}
             ListEmptyComponent={
               <View className="items-center gap-4 rounded-2xl bg-surface p-6">
-                <Text className="text-lg font-bold text-text">{scope && council.isFetching ? '제휴를 불러오는 중' : scope && council.isError ? '제휴를 불러올 수 없어요' : '찾는 가게가 없어요'}</Text>
+                <Text className="text-lg font-bold text-text">{scope && council.isFetching ? '제휴를 불러오는 중' : scope && council.isError ? '제휴를 불러올 수 없어요' : scope && entries.length === 0 ? `아직 ${councilName ?? '내 단과대'} 제휴 목록이 없어요` : '찾는 가게가 없어요'}</Text>
                 <Button
                   label="전체 보기"
                   variant="secondary"
@@ -157,11 +160,16 @@ export default function ShopsScreen() {
                     setScope(null);
                     setKind('all');
                     setQuery('');
+                    setQuery('');
                   }}
                 />
               </View>
             }
-            ListFooterComponent={!scope && list.length > 0 ? <Text className="pt-4 text-xs text-muted">{OSM_CREDIT}</Text> : null}
+            ListFooterComponent={scope && source && shown.length ? (
+              <Pressable accessibilityRole="link" onPress={() => { void Linking.openURL(source).catch(() => {}); }} className="min-h-11 justify-center">
+                <Text className="text-xs text-muted">{councilName} 공지 기준, 출처 보기{entries[0]?.status === 'list_only' ? ' (11/19 기준 목록)' : ''}</Text>
+              </Pressable>
+            ) : !scope && list.length > 0 ? <Text className="pt-4 text-xs text-muted">{OSM_CREDIT}</Text> : null}
             keyboardShouldPersistTaps="handled"
             showsVerticalScrollIndicator={false}
             contentContainerStyle={{ paddingBottom: TAB_BAR_SPACE }}

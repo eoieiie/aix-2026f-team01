@@ -1,5 +1,7 @@
 import { collegeLabel, type CollegeKey } from '@/constants/prefs';
 import { getSupabase } from './supabase';
+import type { Shop, ShopKind } from './shops';
+
 
 export type CouncilBenefit = {
   id: number;
@@ -32,4 +34,25 @@ export async function getCouncilBenefits(college: CollegeKey | null): Promise<Co
     .order('id');
   if (error) throw error;
   return data ?? [];
+}
+
+// 연결된 가게는 가까운 순서로, 지도 좌표나 연결이 없는 곳은 그 뒤로 보낸다.
+export function councilShopRows(entries: readonly CouncilBenefit[], shops: readonly Shop[], kind: ShopKind, query: string) {
+  const byId = new Map(shops.map((shop) => [shop.id, shop]));
+  const clean = (text: string) => text.replace(/\s+/g, '').toLowerCase();
+  const q = clean(query);
+  const distance = (shop?: Shop) => shop?.lat == null || shop.lng == null
+    ? Infinity
+    : Math.hypot(shop.lat - 37.2998, (shop.lng - 126.8369) * Math.cos(37.2998 * Math.PI / 180));
+  return entries
+    .map((entry) => ({ entry, shop: byId.get(entry.restaurant_id ?? 0) }))
+    .filter(({ entry, shop }) =>
+      (kind === 'all' || (shop && (kind === 'partner' ? shop.partner : kind === shop.cuisine))) &&
+      [entry.shop_name ?? '', shop?.name ?? '', ...(shop?.menus ?? [])].some((name) => clean(name).includes(q)))
+    .sort((a, b) => Number(!a.shop) - Number(!b.shop) || distance(a.shop) - distance(b.shop) || a.entry.id - b.entry.id);
+}
+
+export function councilMapLinks(name: string, location: string | null) {
+  const query = encodeURIComponent(location ? `${name} ${location}` : `안산 ${name}`);
+  return { naver: `https://map.naver.com/p/search/${query}`, kakao: `https://map.kakao.com/?q=${query}` };
 }
