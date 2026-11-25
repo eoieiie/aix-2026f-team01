@@ -17,6 +17,7 @@ export const SAFETY_ERROR_MESSAGES: Record<string, string> = {
   name_taken: '모임에 같은 이름이 있어요',
   cannot_block_self: '나는 차단할 수 없어요',
   report_target_not_found: '신고할 글을 찾을 수 없어요',
+  too_many_reports: '오늘은 신고를 더 받을 수 없어요',
 };
 
 export class SafetyError extends Error {

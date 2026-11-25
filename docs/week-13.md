@@ -22,9 +22,9 @@
 
 ## 비밀 정보 처리 / Secret handling
 
-- [ ] 환경변수 분리 Env vars
-- [ ] .gitignore
-- [ ] 커밋 이력에 키 없음 No key in history
+- [x] 환경변수 분리 Env vars (`.env`, 이름만 `.env.example`. AI 키는 Supabase Secrets에만)
+- [x] .gitignore (`.env`, `*.p8`, `*.jks`, `*.pem`, `*.key`)
+- [x] 커밋 이력에 키 없음 No key in history (2026-11-25, 모든 브랜치 405개 커밋과 배포된 웹 번들을 패턴으로 찾음. 웹 번들에는 공개용 `anon` 키만. [`docs/security.md`](security.md) 2절 5번)
 
 ## 타 팀원 PC에서 README만으로 실행 / Ran elsewhere using README only
 

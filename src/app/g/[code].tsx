@@ -55,14 +55,16 @@ export default function InviteScreen() {
   }
 
   if (error || !invite) {
-    const notFound = inviteErrorCode(error) === 'group_not_found';
+    const errCode = inviteErrorCode(error);
+    const notFound = errCode === 'group_not_found';
+    const tooMany = errCode === 'too_many_tries';
     return (
       <SafeAreaView className="flex-1 items-center justify-center gap-4 bg-background px-6">
         <Text className="text-lg font-bold text-text">
-          {notFound ? '모임을 찾을 수 없어요' : '연결할 수 없어요'}
+          {notFound ? '모임을 찾을 수 없어요' : tooMany ? '잠시 뒤에 다시 해 주세요' : '연결할 수 없어요'}
         </Text>
         <View className="w-full max-w-xs">
-          {notFound ? (
+          {notFound || tooMany ? (
             <Button label="홈으로" onPress={() => router.replace('/')} />
           ) : (
             <Button label="다시 시도" variant="secondary" onPress={() => refetch()} loading={retrying} />
