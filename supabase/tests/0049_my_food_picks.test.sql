@@ -63,7 +63,7 @@ reset role;
 update public.meals set eaten_at = now() - interval '15 days' where id = '30000000-0000-0000-0000-000000004901';
 insert into public.candidates (session_id, food_id, proposed_by)
 select '20000000-0000-0000-0000-000000004901', id, '00000000-0000-0000-0000-000000004901' from public.foods where name = 'zz_mypick_투표';
-insert into public.restrictions (user_id, tag, kind) values ('00000000-0000-0000-0000-000000004901', 'seafood', 'allergy');
+insert into public.restrictions (user_id, tag) values ('00000000-0000-0000-0000-000000004901', 'seafood');
 update public.foods set tags = '{seafood}' where name = 'zz_mypick_결과';
 set local role authenticated;
 select ok(exists (select 1 from public.my_food_picks('20000000-0000-0000-0000-000000004901') where name = 'zz_mypick_식사'), '15일 전 식사는 최근 식사로 미루지 않는다');
