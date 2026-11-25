@@ -1,7 +1,10 @@
 import { VOTE_RESTAURANTS_SHOWN } from '@/constants';
 
 import type { Client } from './groups';
+import type { CouncilBenefit } from './council-benefits';
 import { getSupabase } from './supabase';
+
+type CouncilCollege = CouncilBenefit['college'];
 
 // 학교 앞 식당 (spec.md 4-21). 결과 뒤(0015)와 투표 화면 추천 칸(0016).
 // 보이기만 하고 투표와 룰렛 확률에는 쓰지 않는다
@@ -31,6 +34,14 @@ export interface NearbyRestaurant {
   teamCount: number;
   // 제휴 식당이 직접 준 사진
   photoUrl: string | null;
+  // 아래부터 0048. 내 단과대나 총학생회의 학생회 제휴(돈 관계가 없어 "광고"가 아니다)와 그 혜택 첫 줄
+  councilCollege: CouncilCollege | null;
+  councilText: string | null;
+  // 이 판에 맞는 가게 수. 보인 곳보다 많으면 "더 보기"
+  total: number;
+  // 끝난 판의 메뉴 이름과 종류. "더 보기"로 가게 탭을 이 이름으로 찾은 채 연다
+  menuName: string | null;
+  menuCuisine: string | null;
 }
 
 export async function getSessionRestaurants(
@@ -71,7 +82,18 @@ export async function getSessionRestaurants(
     teamCount: typeof r.team_count === 'number' ? r.team_count : 0,
     // 사진은 제휴 식당에만 (서버도 막지만 화면에서 한 번 더)
     photoUrl: r.partner && typeof r.photo_url === 'string' ? r.photo_url : null,
+    ...councilOf(r),
+    total: typeof r.total_count === 'number' ? r.total_count : rows.length,
+    menuName: typeof r.menu_name === 'string' ? r.menu_name : null,
+    menuCuisine: typeof r.menu_cuisine === 'string' ? r.menu_cuisine : null,
   }));
+}
+
+// 학생회 제휴 칸 (0048). 0048 전의 서버는 주지 않아 null
+function councilOf(r: any): { councilCollege: CouncilCollege | null; councilText: string | null } {
+  const college = typeof r.council_college === 'string' ? (r.council_college as CouncilCollege) : null;
+  const text = typeof r.council_text === 'string' && r.council_text.trim() !== '' ? r.council_text.trim() : null;
+  return { councilCollege: college, councilText: college ? text : null };
 }
 
 // 제휴이면서 혜택 문구가 있는가 (0040). 문구가 없는 제휴는 보통 가게처럼 보인다
@@ -87,7 +109,7 @@ export function kakaoMapUrl(r: Pick<NearbyRestaurant, 'name' | 'lat' | 'lng'>): 
   return `https://map.kakao.com/link/search/${encodeURIComponent('안산 ' + r.name)}`;
 }
 
-// 먹고 나서 카페 (spec.md 4-23, 0020). 제휴가 먼저, 나머지는 정문에서 가까운 순으로 서버가 3곳까지 준다
+// 먹고 나서 카페 (spec.md 4-23, 0020, 0048). 쿠폰 카페, 내 학생회 제휴 카페, 정문에서 가까운 순으로 서버가 3곳까지 준다
 export interface NearbyCafe {
   id: number;
   name: string;
@@ -96,12 +118,16 @@ export interface NearbyCafe {
   myCode: string | null;
   lat: number | null;
   lng: number | null;
+  councilCollege: CouncilCollege | null;
+  councilText: string | null;
+  total: number;
 }
 
 export async function getSessionCafes(sessionId: string, client: Client = getSupabase()): Promise<NearbyCafe[]> {
   const { data, error } = await client.rpc('session_cafes', { p_session_id: sessionId });
   if (error) throw error;
-  return ((data as any[]) ?? []).map((r) => ({
+  const rows = (data as any[]) ?? [];
+  return rows.map((r) => ({
     id: r.id,
     name: r.name,
     partner: offer(r),
@@ -109,6 +135,8 @@ export async function getSessionCafes(sessionId: string, client: Client = getSup
     myCode: r.my_code ?? null,
     lat: typeof r.lat === 'number' ? r.lat : null,
     lng: typeof r.lng === 'number' ? r.lng : null,
+    ...councilOf(r),
+    total: typeof r.total_count === 'number' ? r.total_count : rows.length,
   }));
 }
 
@@ -163,8 +191,8 @@ export interface Taste {
   eatenFoodIds: ReadonlySet<number>;
 }
 
-// 투표 화면 추천 칸 (4-21). 서버가 준 최대 6곳(순서: 메뉴 맞음 → 같은 종류, 같은 조건이면 제휴)에서 3곳.
-// 제휴 식당이 먼저 온다(#53 11/19 병주 요청, 이름 옆 "광고"는 숨기지 않는다). 지금 닫은 제휴는 먼저 오지 않는다.
+// 투표 화면 추천 칸 (4-21). 서버가 준 최대 6곳(0048 순서: 쿠폰 가게, 내 학생회 제휴, 메뉴 맞음, 가까운 순)에서 3곳.
+// 쿠폰 가게가 먼저(#53 11/19 병주 요청, 이름 옆 "광고"는 숨기지 않는다), 그다음 내 학생회 제휴. 지금 닫은 곳은 먼저 오지 않는다.
 // 그 안에서는 내 취향 점수 순: 메뉴가 맞으면 +2. 한식↔외국음식 축과 종류가 맞으면 +1.
 // 탐험이면 안 먹어 본 음식, 반복이면 먹어 본 음식에 +1. 지금 닫았으면 -3. 점수가 같으면 서버 순서
 export function pickForMe(
@@ -181,7 +209,8 @@ export function pickForMe(
     if (r.openNow === false) s -= 3;
     return s;
   };
-  const first = (r: NearbyRestaurant) => (r.partner && r.openNow !== false ? 1 : 0);
+  const first = (r: NearbyRestaurant) =>
+    r.openNow === false ? 0 : r.partner ? 2 : r.councilCollege !== null ? 1 : 0;
   return list
     .map((r, i) => ({ r, i, p: first(r), s: score(r) }))
     .sort((a, b) => b.p - a.p || b.s - a.s || a.i - b.i)

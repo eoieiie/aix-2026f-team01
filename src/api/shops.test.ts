@@ -117,7 +117,7 @@ describe('가게 목록과 상세 (4-26)', () => {
     expect(shopPhotoUrl('', '341/1.jpg')).toBeNull();
   });
 
-  it('상세는 사진 여러 장과 영업 신고 연도, 5팀이 넘을 때만 오는 다녀간 팀 수를 읽는다', async () => {
+  it('상세는 사진 여러 장과 5팀이 넘을 때만 오는 다녀간 팀 수를 읽고, 영업 신고 연도는 화면에 쓰지 않는다', async () => {
     const { client, calls } = rpcClient({
       id: 7, name: '한양 분식', cuisine: 'korean', partner: true, coupon_text: '음료 한 캔',
       address: '경기도 안산시 상록구 한양대학로 55 (사동)', phone: '031-400-0000', opening_hours: 'Mo-Fr 10:00-20:00',
@@ -129,7 +129,8 @@ describe('가게 목록과 상세 (4-26)', () => {
     expect(calls[0]).toEqual({ name: 'shop_detail', args: { p_restaurant_id: 7 } });
     expect(d.photos).toEqual([{ url: `${BASE}/storage/v1/object/public/shop-photos/7/1.jpg`, credit: '사장님 제공' }]);
     expect(d.photoUrl).toBe(d.photos[0].url);
-    expect(d).toMatchObject({ licensedYear: 2015, visits: null, phone: '031-400-0000', openNow: false });
+    expect(d).toMatchObject({ visits: null, phone: '031-400-0000', openNow: false });
+    expect(d).not.toHaveProperty('licensedYear');
   });
 
   it('종류와 검색어로 거른다. 검색은 이름과 대표 메뉴에서, 띄어쓰기를 보지 않는다', () => {
@@ -144,6 +145,9 @@ describe('가게 목록과 상세 (4-26)', () => {
     expect(filterShops(list, 'all', '북경반점').map((s) => s.id)).toEqual([1]);
     expect(filterShops(list, 'all', ' 짬뽕 ').map((s) => s.id)).toEqual([1]);
     expect(filterShops(list, 'korean', '짬뽕')).toEqual([]);
+    // 결과 뒤 "더 보기": 메뉴 이름이 맞는 곳 다음 같은 종류(0048)
+    expect(filterShops(list, 'all', '칼국수', 'korean').map((s) => s.id)).toEqual([3]);
+    expect(filterShops(list, 'all', '짬뽕', 'cafe').map((s) => s.id)).toEqual([1, 2]);
   });
 
   it('이름 아래 한 줄은 값이 있는 것만 조각으로 준다(기호로 잇지 않는다)', () => {
