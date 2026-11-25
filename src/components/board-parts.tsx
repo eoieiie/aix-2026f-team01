@@ -51,11 +51,19 @@ export function Bars({ back, front, labels }: { back: number[]; front: number[];
           </View>
         ))}
       </View>
-      <View className="flex-row gap-1">
+      {/* 시간대 막대는 칸이 좁아 "12시"가 잘린다. 이름을 칸 양옆으로 16씩 넘쳐 그리게 해서 가운데에 맞춘다 */}
+      <View className="h-4 flex-row gap-1">
         {labels.map((l, i) => (
-          <Text key={i} className="flex-1 text-center text-xs text-muted" numberOfLines={1}>
-            {l}
-          </Text>
+          <View key={i} className="flex-1">
+            {l ? (
+              <Text
+                className="text-center text-xs text-muted"
+                numberOfLines={1}
+                style={{ position: 'absolute', left: -16, right: -16 }}>
+                {l}
+              </Text>
+            ) : null}
+          </View>
         ))}
       </View>
     </View>

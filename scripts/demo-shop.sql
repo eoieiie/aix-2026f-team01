@@ -44,7 +44,7 @@ with plan (n, food, people, days_ago, hour, used) as (values
 s as (
   insert into public.sessions (id, group_id, host_user_id, status, decided_food_id, decided_at, created_at)
   select ('00000000-0000-4000-8000-99000000020' || n)::uuid, '00000000-0000-4000-8000-990000000100',
-    '00000000-0000-4000-8000-990000000001', 'done', food,
+    ('00000000-0000-4000-8000-99000000000' || least(n, people))::uuid, 'done', food,
     date_trunc('day', now() at time zone 'Asia/Seoul') at time zone 'Asia/Seoul' - make_interval(days => days_ago) + make_interval(hours => hour),
     date_trunc('day', now() at time zone 'Asia/Seoul') at time zone 'Asia/Seoul' - make_interval(days => days_ago) + make_interval(hours => hour) - interval '10 minutes'
   from plan
