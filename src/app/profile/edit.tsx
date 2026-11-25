@@ -1,5 +1,5 @@
-import { useRouter } from 'expo-router';
-import { useState } from 'react';
+import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useRef, useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, View } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -31,6 +31,9 @@ import { safetyErrorMessage, useSafety } from '@/hooks/use-safety';
 // 고른 상태는 검정 면, 주황은 아래 "저장" 하나
 export default function ProfileEditScreen() {
   const router = useRouter();
+  const { section } = useLocalSearchParams<{ section?: string }>();
+  const scroll = useRef<ScrollView>(null);
+  const jumped = useRef(false);
   const insets = useSafeAreaInsets();
   const profile = useMyProfile();
   const { prefs, isLoading } = useMyPrefs();
@@ -88,6 +91,7 @@ export default function ProfileEditScreen() {
         <IconButton name="back" label="뒤로" onPress={close} />
       </View>
       <ScrollView
+        ref={scroll}
         keyboardShouldPersistTaps="handled"
         automaticallyAdjustKeyboardInsets
         contentContainerClassName="gap-8 px-4 pt-2"
@@ -113,6 +117,13 @@ export default function ProfileEditScreen() {
 
         <TextField label="이름" value={name} onChangeText={setNameDraft} maxLength={DISPLAY_NAME_MAX} />
 
+        <View onLayout={({ nativeEvent }) => {
+          if (section === 'college' && !jumped.current) {
+            jumped.current = true;
+            const y = nativeEvent.layout.y;
+            requestAnimationFrame(() => scroll.current?.scrollTo({ y, animated: false }));
+          }
+        }}>
         <Section title="단과대">
           {pairs([{ key: null, label: '말하지 않기' }, ...COLLEGES]).map((row, i) => (
             <View key={i} className="flex-row gap-2">
@@ -123,6 +134,8 @@ export default function ProfileEditScreen() {
             </View>
           ))}
         </Section>
+
+        </View>
 
         <Section title="좋아하는 종류">
           <View className="flex-row gap-2">
