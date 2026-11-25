@@ -1,15 +1,14 @@
 import Constants from 'expo-constants';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
-import { Linking, Pressable, View } from 'react-native';
+import { Pressable, View } from 'react-native';
 
 import { Icon, type IconName } from '@/components/icon';
 import { ConfirmSheet, NameSheet, Sheet } from '@/components/sheets';
 import { Button } from '@/components/button';
 import { Text } from '@/components/text';
 import { useMyBlocks, useSafety, safetyErrorMessage } from '@/hooks/use-safety';
-
-const SUPPORT_MAIL = 'turkiyecivciv31@gmail.com';
+import { useWebInstall } from '@/hooks/use-web-install';
 
 // 내 프로필 아래 설정 (명세 4-24). 같은 역할 같은 크기(높이 56), 주황은 쓰지 않고 삭제만 danger 글자
 export function SettingsList({
@@ -27,6 +26,7 @@ export function SettingsList({
 }) {
   const router = useRouter();
   const safety = useSafety();
+  const install = useWebInstall();
   const [sheet, setSheet] = useState<null | 'name' | 'blocks' | 'delete1' | 'delete2'>(null);
   const blocks = useMyBlocks(sheet === 'blocks');
   const close = () => {
@@ -49,7 +49,8 @@ export function SettingsList({
         <Row label="차단한 사람" onPress={() => setSheet('blocks')} />
         <Row label="개인정보 처리방침" onPress={() => router.push('/privacy' as any)} />
         <Row label="이용약관" onPress={() => router.push('/terms' as any)} />
-        <Row label="문의하기" onPress={() => Linking.openURL(`mailto:${SUPPORT_MAIL}?subject=${encodeURIComponent('밥비티아이 문의')}`)} />
+        <Row label="문의하기" onPress={() => router.push('/support' as any)} />
+        {install ? <Row label="앱으로 설치" onPress={install} /> : null}
       </Group>
       <Group>
         <Row label="계정 삭제" danger onPress={() => setSheet('delete1')} />

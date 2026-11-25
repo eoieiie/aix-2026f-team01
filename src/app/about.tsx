@@ -17,6 +17,7 @@ import { Text } from '@/components/text';
 import { TextPieces } from '@/components/text-pieces';
 import { baseFoodImageMap } from '@/hooks/use-food-images';
 import { AVATARS_KEY } from '@/hooks/use-prefs';
+import { SUPPORT_MAIL } from '@/lib/support-mail';
 import type { Candidate } from '@/hooks/use-session';
 
 // 밥BTI 소개 (명세 4-30). 로그인 없이 열리고, 열기만 해서는 익명 계정이 생기지 않는다(AuthGate의 공개 주소).
@@ -25,7 +26,6 @@ import type { Candidate } from '@/hooks/use-session';
 // 주황은 첫 줄의 "같이" 한 곳. 단추는 검정과 회색이다 (docs/design.md "프레즐 규칙 그대로" 8절)
 
 const WIDE_MIN = 1024;
-const MAIL = 'turkiyecivciv31@gmail.com';
 
 // 기본 음식 번호 (실제 서버의 foods.id, 그림 파일 이름이 음식 번호다. 17은 김밥 그림이라 분식 가게 그림으로 쓴다)
 const FOOD = { kimchiStew: 1, bulgogi: 7, kalguksu: 13, bunsik: 17, jjajang: 21, sushi: 25, cutlet: 26, pho: 37 } as const;
@@ -91,7 +91,7 @@ export default function AboutScreen() {
 
   const start = () => router.replace('/' as any);
   const mail = (subject: string) =>
-    Linking.openURL(`mailto:${MAIL}?subject=${encodeURIComponent(subject)}`).catch(() => undefined);
+    Linking.openURL(`mailto:${SUPPORT_MAIL}?subject=${encodeURIComponent(subject)}`).catch(() => undefined);
 
   return (
     <SafeAreaView className="flex-1 bg-background">
