@@ -9,6 +9,7 @@ import { Button } from '@/components/button';
 import { CandidateCard } from '@/components/candidate-card';
 import { FoodSearch } from '@/components/food-search';
 import { HeadcountStepper } from '@/components/headcount-stepper';
+import { VoteRestaurants } from '@/components/nearby-restaurants';
 import { Icon, IconButton } from '@/components/icon';
 import { type Point, ResultMoment } from '@/components/result-moment';
 import { ReportSheet, type ReportTarget } from '@/components/report-sheet';
@@ -134,7 +135,7 @@ function Header({ session, onBack }: { session: SessionView; onBack: () => void 
   const { cancel } = useSafety();
   const current = STEPS.findIndex((step) => step.status === session.status);
   return (
-    <View className="gap-4 px-5 pb-2 pt-3">
+    <View className="gap-4 px-4 pb-2 pt-3">
       <View className="flex-row items-center gap-3">
         <IconButton name="back" label="모임으로" onPress={onBack} />
         <Text className="flex-1 text-lg font-bold text-text" numberOfLines={2}>
@@ -304,7 +305,7 @@ function CandidateStage({
         onScroll={(e) => (scrollY.current = e.nativeEvent.contentOffset.y)}
         scrollEventThrottle={64}
         onLayout={(e: LayoutChangeEvent) => (viewH.current = e.nativeEvent.layout.height)}
-        contentContainerClassName="gap-4 px-5 pb-40 pt-2">
+        contentContainerClassName="gap-4 px-4 pb-40 pt-2">
         <View className="flex-row items-end justify-between">
           <Text className="flex-1 text-2xl font-bold tracking-tight text-text">뭐 먹고 싶어요?</Text>
           <Pressable
@@ -426,7 +427,7 @@ function VotingStage({ session }: { session: SessionView }) {
 
   return (
     <View className="flex-1">
-      <ScrollView keyboardShouldPersistTaps="handled" automaticallyAdjustKeyboardInsets contentContainerClassName="gap-5 px-5 pb-40 pt-2">
+      <ScrollView keyboardShouldPersistTaps="handled" automaticallyAdjustKeyboardInsets contentContainerClassName="gap-4 px-4 pb-40 pt-2">
         <View className="gap-1">
           <Text className="text-3xl font-bold tracking-tight text-text">골라 주세요</Text>
           {/* 몇 개까지인지는 아래 "내 표 0/2"가 보인다 */}
@@ -449,7 +450,7 @@ function VotingStage({ session }: { session: SessionView }) {
 
         {/* 이 판 후보에 걸리는 못 먹는 것. 빼지 않고 알린다. 누가 적었는지는 없다 (0010) */}
         {notice.length > 0 ? (
-          <View accessibilityRole="alert" className="gap-1 rounded-3xl bg-ink p-5">
+          <View accessibilityRole="alert" className="gap-1 rounded-2xl bg-ink p-4">
             {notice.map((line) => (
               <Text key={line} className="text-lg font-bold text-on-ink">
                 {line}
@@ -491,6 +492,12 @@ function VotingStage({ session }: { session: SessionView }) {
             </Text>
           </Pressable>
         </View>
+
+        {/* 후보 음식에 맞는 학교 앞 식당 3곳. 보이기만 하고 투표와 룰렛 확률은 그대로다 (4-21) */}
+        <VoteRestaurants
+          sessionId={session.id}
+          candidateKey={session.candidates.map((c) => c.foodId).join(',')}
+        />
       </ScrollView>
 
       <BottomBar>
@@ -561,7 +568,7 @@ function ResultStage({
 
   return (
     <View className="flex-1">
-      <ScrollView keyboardShouldPersistTaps="handled" automaticallyAdjustKeyboardInsets contentContainerClassName="items-center gap-6 px-5 pb-40 pt-4">
+      <ScrollView keyboardShouldPersistTaps="handled" automaticallyAdjustKeyboardInsets contentContainerClassName="items-center gap-6 px-4 pb-40 pt-4">
         {error ? (
           <Text className="text-sm text-danger">{sessionErrorMessage(error)}</Text>
         ) : slices.length > 0 && session.decidedFoodId !== null ? (
@@ -591,7 +598,7 @@ function BottomBar({ children }: { children: ReactNode }) {
   const insets = useSafeAreaInsets();
   return (
     <View
-      className="absolute bottom-0 left-0 right-0 gap-2 bg-background px-5 pt-3"
+      className="absolute bottom-0 left-0 right-0 gap-2 bg-background px-4 pt-3"
       style={{ paddingBottom: insets.bottom + 16 }}>
       {children}
     </View>

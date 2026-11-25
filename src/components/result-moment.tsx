@@ -139,7 +139,7 @@ export function ResultMoment({ session, from, onGroup, onCard }: ResultMomentPro
           ],
         }}>
         <SafeAreaView className="flex-1">
-          <ScrollView keyboardShouldPersistTaps="handled" automaticallyAdjustKeyboardInsets contentContainerClassName="px-7 pb-6 pt-6">
+          <ScrollView keyboardShouldPersistTaps="handled" automaticallyAdjustKeyboardInsets contentContainerClassName="px-6 pb-6 pt-6">
             <Text className="text-xl font-bold text-on-primary" numberOfLines={2}>
               {session.groupName}
             </Text>
@@ -160,7 +160,7 @@ export function ResultMoment({ session, from, onGroup, onCard }: ResultMomentPro
               </Text>
             ) : null}
             {slices.length > 0 ? (
-              <View className="mt-10 items-center">
+              <View className="mt-8 items-center">
                 <Roulette
                   slices={slices}
                   resultFoodId={winnerId}
@@ -173,12 +173,12 @@ export function ResultMoment({ session, from, onGroup, onCard }: ResultMomentPro
             ) : null}
             {/* 결과 뒤에만 학교 앞 식당 (4-21). 투표와 룰렛에는 쓰지 않는다 */}
             <View className="mt-8 gap-4">
-              <NearbyRestaurants sessionId={session.id} foodName={winner} onPrimary />
+              <NearbyRestaurants sessionId={session.id} onPrimary />
               <NearbyCafes sessionId={session.id} onPrimary />
             </View>
           </ScrollView>
           {/* 같은 역할의 버튼 둘은 같은 크기로 나란히. 결과 카드가 다음 할 일이라 흰 버튼, 모임으로는 회색 */}
-          <View className="flex-row gap-2 px-7 pb-4">
+          <View className="flex-row gap-2 px-6 pb-4">
             <View className="flex-1">
               <Button label="모임으로" variant="secondary" onPress={onGroup} />
             </View>
