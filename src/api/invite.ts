@@ -21,6 +21,8 @@ export const INVITE_ERROR_MESSAGES: Record<string, string> = {
   group_not_found: '모임을 찾을 수 없어요',
   name_taken: '이미 있는 이름이에요',
   blocked_word: '쓸 수 없는 말이 있어요',
+  // 0042: 틀린 코드를 1시간에 20번 넘게 넣으면 잠시 막는다(초대 코드 추측 막기)
+  too_many_tries: '잠시 뒤에 다시 해 주세요',
 };
 
 export class InviteError extends Error {
@@ -72,7 +74,8 @@ export async function joinGroup(
   });
   if (error) throwServerError(error);
   const row = data?.[0];
-  if (!row) throw new Error('join_group 응답이 비어 있다');
+  // 0042부터 없는 코드는 오류 대신 빈 결과로 온다(틀린 기록이 되돌려지지 않게)
+  if (!row) throw new InviteError('group_not_found');
   return { groupId: row.group_id, openSessionId: row.open_session_id ?? null };
 }
 

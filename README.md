@@ -32,6 +32,7 @@
 ## 3. 실행 방법 / How to Run
 Node 버전은 `.nvmrc`를 따른다 (`nvm use`).
 수업 제출용 오프라인 가게 전처리와 재료 평가 실행법은 [파이썬 안내](python/README.md)에 있다.
+키는 `.env`에만 두고 커밋하지 않는다. 13주차 보안 점검(권한, 남용 막기, 비밀 키, AI 함수, 개인정보)과 남은 위험은 [`docs/security.md`](docs/security.md)에 있다.
 
 ```bash
 npm install

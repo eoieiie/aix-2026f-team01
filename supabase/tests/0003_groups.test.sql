@@ -53,11 +53,11 @@ select results_eq(
   $$ select name, is_member from public.get_group_by_code(lower((select invite_code from t_group))) $$,
   $$ values ('점심팟'::text, false) $$,
   '코드로 모임 이름을 본다. 소문자로 적어도 된다');
-select throws_ok($$ select * from public.get_group_by_code('ZZZZZZ') $$, 'P0001', 'group_not_found', '없는 코드');
+select is((select count(*)::int from public.get_group_by_code('ZZZZZZ')), 0, '없는 코드는 빈 결과 (0042: 틀린 기록이 되돌려지지 않게)');
 select throws_ok(
   $$ select * from public.join_group((select invite_code from t_group), '하나') $$,
   'P0001', 'name_taken', '같은 모임에 같은 이름이 있으면 거절');
-select throws_ok($$ select * from public.join_group('ZZZZZZ', '둘') $$, 'P0001', 'group_not_found', '없는 코드로는 들어갈 수 없다');
+select is((select count(*)::int from public.join_group('ZZZZZZ', '둘')), 0, '없는 코드로는 들어갈 수 없다 (빈 결과)');
 select is(
   (select open_session_id from public.join_group((select invite_code from t_group), '둘')),
   null::uuid, '진행 중인 판이 없으면 open_session_id는 null');

@@ -52,6 +52,20 @@ describe('getInviteInfo (spec.md 4-5)', () => {
     expect(err.message).toBe('모임을 찾을 수 없어요');
   });
 
+  it('없는 코드는 빈 결과로 와도 "모임을 찾을 수 없어요" (0042)', async () => {
+    const { client } = fakeClient({ rpcData: [] });
+    const err = await getInviteInfo('ZZZZZZ', client).catch((e) => e);
+    expect(err).toBeInstanceOf(InviteError);
+    expect(err.code).toBe('group_not_found');
+  });
+
+  it('틀린 코드를 너무 많이 넣으면 "잠시 뒤에 다시 해 주세요" (0042)', async () => {
+    const { client } = fakeClient({ rpcError: { message: 'too_many_tries' } });
+    const err = await getInviteInfo('ZZZZZZ', client).catch((e) => e);
+    expect(err).toBeInstanceOf(InviteError);
+    expect(err.message).toBe('잠시 뒤에 다시 해 주세요');
+  });
+
   it('문구가 없는 오류(네트워크 등)는 InviteError로 바꾸지 않는다 (화면은 다시 시도 버튼)', async () => {
     const { client } = fakeClient({ rpcError: { message: 'TypeError: Failed to fetch' } });
     const err = await getInviteInfo('AB3K9P', client).catch((e) => e);
@@ -77,6 +91,13 @@ describe('joinGroup (spec.md 4-5)', () => {
       groupId: 'g1',
       openSessionId: null,
     });
+  });
+
+  it('없는 코드로 들어가면 빈 결과가 와도 "모임을 찾을 수 없어요" (0042)', async () => {
+    const { client } = fakeClient({ rpcData: [] });
+    const err = await joinGroup('ZZZZZZ', '둘', client).catch((e) => e);
+    expect(err).toBeInstanceOf(InviteError);
+    expect(err.code).toBe('group_not_found');
   });
 
   it('같은 이름이 있으면 "이미 있는 이름이에요"', async () => {
