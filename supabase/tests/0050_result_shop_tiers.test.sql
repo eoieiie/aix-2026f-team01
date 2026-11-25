@@ -5,15 +5,16 @@ select plan(14);
 
 insert into auth.users (id) values ('00000000-0000-0000-0000-000000005001');
 insert into public.profiles (user_id, display_name, college) values ('00000000-0000-0000-0000-000000005001', '소융', 'computing');
--- 시험용 동네(zz_t50). 짜장면 판. 대표 메뉴 "짜장면, 짬뽕, 탕수육"은 0017처럼 업태로 채운 모양
+-- 시험용 동네(zz_t50). 짜장면 판. 0051부터 대홍훠궈샤브샤브의 업태 짐작은 menus_guess에 있다(아래 update)
 insert into public.restaurants (area, name, cuisine, menus, lat, lng, partner, coupon_text, source_id) values
-  ('zz_t50', '대홍훠궈샤브샤브', 'chinese', '{짜장면,짬뽕,탕수육}', 37.3000, 126.8369, false, null, 'z50/1'),
+  ('zz_t50', '대홍훠궈샤브샤브', 'chinese', '{}', 37.3000, 126.8369, false, null, 'z50/1'),
   ('zz_t50', '보배반점', 'chinese', '{짜장면,짬뽕,탕수육}', 37.3030, 126.8369, false, null, 'z50/2'),
   ('zz_t50', '도야짬뽕', 'chinese', '{짬뽕}', 37.3001, 126.8369, false, null, 'z50/3'),
   ('zz_t50', '북경', 'chinese', '{}', 37.3005, 126.8369, false, null, 'z50/4'),
   ('zz_t50', '교동짬뽕', 'chinese', '{짬뽕,짜장면,탕수육}', 37.3040, 126.8369, false, null, 'z50/5'),
   ('zz_t50', '쿠폰 중국집', 'chinese', '{}', 37.3080, 126.8369, true, '밥BTI 보여 주면 만두', 'z50/6'),
   ('zz_t50', '홍성마라미방', 'chinese', '{마라탕}', 37.2999, 126.8369, false, null, 'z50/7');
+update public.restaurants set menus_guess = '{짜장면,짬뽕,탕수육}' where source_id = 'z50/1';
 insert into public.council_benefits (college, council_name, shop_name, restaurant_id, benefit, source_url, checked_on, status, source_key, show_in_app)
 select 'computing', '시험', v.shop, r.id, v.benefit, 'https://example.com', current_date, 'notice', v.k, true
 from (values

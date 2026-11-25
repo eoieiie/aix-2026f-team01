@@ -49,6 +49,7 @@ function shop(over: Partial<Shop> & { id: number }): Shop {
     lat: null,
     lng: null,
     menus: [],
+    menusGuess: [],
     ...over,
   };
 }
@@ -145,6 +146,9 @@ describe('가게 목록과 상세 (4-26)', () => {
     expect(filterShops(list, 'all', '북경반점').map((s) => s.id)).toEqual([1]);
     expect(filterShops(list, 'all', ' 짬뽕 ').map((s) => s.id)).toEqual([1]);
     expect(filterShops(list, 'korean', '짬뽕')).toEqual([]);
+    // 짐작 메뉴로도 찾는다(0051). 일반 중국집의 짜장면은 짐작이라 상세에는 안 보이지만 찾으면 나온다
+    const guessed = [shop({ id: 7, name: '보배반점', cuisine: 'chinese', menusGuess: ['짜장면', '짬뽕', '탕수육'] })];
+    expect(filterShops(guessed, 'all', '짜장면').map((s) => s.id)).toEqual([7]);
     // 결과 뒤 "더 보기": 메뉴 이름이 맞는 곳 다음 같은 종류(0048)
     expect(filterShops(list, 'all', '칼국수', 'korean').map((s) => s.id)).toEqual([3]);
     expect(filterShops(list, 'all', '짬뽕', 'cafe').map((s) => s.id)).toEqual([1, 2]);

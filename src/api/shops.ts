@@ -52,7 +52,10 @@ export interface Shop {
   thumbUrl: string | null;
   lat: number | null;
   lng: number | null;
+  // 대표 메뉴: 가게 이름에 근거가 있는 것만(0051). 가게 상세 "대표 메뉴"와 그림이 쓴다
   menus: string[];
+  // 업태로 짐작한 흔한 메뉴(0051, 예: 중국집의 짜장면). 사실처럼 보이지 않고 찾기에만 쓴다. 상세는 주지 않아 빈 목록
+  menusGuess: string[];
 }
 
 export interface ShopDetail extends Shop {
@@ -98,9 +101,12 @@ function toShop(r: any, base: string): Shop {
     thumbUrl: foodThumbUrl(base, r.thumb_image),
     lat: num(r.lat),
     lng: num(r.lng),
-    menus: Array.isArray(r.menus) ? r.menus.filter((m: unknown) => typeof m === 'string') : [],
+    menus: texts(r.menus),
+    menusGuess: texts(r.menus_guess),
   };
 }
+
+const texts = (v: unknown): string[] => (Array.isArray(v) ? v.filter((m: unknown): m is string => typeof m === 'string') : []);
 
 const supabaseBase = () => process.env.EXPO_PUBLIC_SUPABASE_URL ?? '';
 
@@ -132,11 +138,11 @@ export async function getShop(
   };
 }
 
-// 종류와 검색어로 거른다. 검색어는 가게 이름과 대표 메뉴에서 찾는다(띄어쓰기와 대소문자는 보지 않는다)
+// 종류와 검색어로 거른다. 검색어는 가게 이름, 대표 메뉴, 짐작 메뉴(0051)에서 찾는다(띄어쓰기와 대소문자는 보지 않는다)
 // alsoCuisine: 결과 뒤 "더 보기"로 메뉴 이름을 찾은 채 열었을 때 그 메뉴 종류(0048). 이름이나 메뉴가 맞는 곳이 먼저, 그다음 같은 종류
 export function filterShops(list: readonly Shop[], kind: ShopKind, query: string, alsoCuisine: string | null = null): Shop[] {
   const q = query.replace(/\s+/g, '').toLowerCase();
-  const byText = (s: Shop) => [s.name, ...s.menus].map((t) => t.replace(/\s+/g, '').toLowerCase()).some((t) => t.includes(q));
+  const byText = (s: Shop) => [s.name, ...s.menus, ...s.menusGuess].map((t) => t.replace(/\s+/g, '').toLowerCase()).some((t) => t.includes(q));
   const inKind = list.filter((s) => !(kind === 'partner' ? !s.partner : kind !== 'all' && s.cuisine !== kind));
   if (q === '') return inKind;
   const hits = inKind.filter(byText);
