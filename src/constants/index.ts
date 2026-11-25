@@ -28,12 +28,24 @@ export const RECENT_EATEN_DAYS = 14;
 export const GROUP_FAVORITES_MAX = 3;
 export const QUICK_FILL_COUNT = 3;
 
-// 4-15 하단 탭(#41). 떠 있는 알약 높이와 아래 여백. 탭 화면은 목록 아래를 이만큼 비운다
+// 4-15 하단 탭(#41, 4-26). 아래에 붙은 막대 높이와, 탭 화면이 목록 아래를 비우는 높이(막대 + 홈 표시줄)
 export const TAB_BAR_HEIGHT = 64;
 export const TAB_BAR_SPACE = 112;
 
 // 4-21 투표 화면 추천 칸. 서버가 주는 최대 6곳 중 내 취향으로 고르는 수
 export const VOTE_RESTAURANTS_SHOWN = 3;
+
+// 4-26 가게 탭. 목록 칸 왼쪽 그림 크기, 판 결과의 식당 줄 그림 크기
+export const SHOP_THUMB_SIZE = 72;
+export const SHOP_ROW_THUMB_SIZE = 56;
+
+// 4-27 쿠폰. 받은 뒤 쓸 수 있는 시간, 가게 비밀번호 자릿수와 틀릴 수 있는 횟수. 서버 0033 coupon_rule과 같은 값
+export const COUPON_VALID_HOURS = 24;
+export const STAFF_PIN_LENGTH = 4;
+export const PIN_MAX_TRIES = 5;
+
+// 4-28 가게 통계에서 시간대와 메뉴 분포, "다녀간 팀"을 보이는 최소 팀 수. 서버 0033 coupon_rule과 같은 값
+export const SHOP_STATS_MIN = 5;
 
 // 4-6, 4-12 먹을 인원수. 이 수만큼 골라야 방장이 돌릴 수 있다. 서버 0009와 같은 범위
 export const HEADCOUNT_MIN = 1;

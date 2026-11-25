@@ -18,10 +18,25 @@ update public.restaurants
 set partner = false, coupon_text = null
 where id = 0;  -- ← 끌 가게 id
 
--- 4. 사진: 식당 사진 버킷(PR #78, 0016)이 생기면 restaurant-photos 버킷에 올리고 그 공개 주소를 photo_url에 넣는다
--- update public.restaurants set photo_url = '<버킷 공개 주소>' where id = 0;
+-- 4. 사진: scripts/shop-photos.md의 3단계를 따른다(shop-photos 버킷과 shop_photos 표, 0032)
 
--- 5. 쿠폰을 몇 판에서 받았는지 (사장님께 보여 줄 숫자)
+-- 6. 직원 확인 비밀번호와 사장님 현황 주소 만들기 (4-27, 4-28, 0033)
+--    staff_pin: 직원이 쿠폰을 확인할 때 넣는 숫자 4자리. 비워 두면(null) 확인 창 한 번으로 쓴다
+--    owner_token: 사장님 현황 주소의 열쇠. 48자 무작위. 다시 돌리면 같은 값이 그대로 남는다(바꾸려면 7번)
+insert into public.shop_private (restaurant_id, staff_pin, owner_token)
+values (0, '1234', encode(extensions.gen_random_bytes(24), 'hex'))  -- ← 가게 id와 사장님이 정한 4자리
+on conflict (restaurant_id) do update set staff_pin = excluded.staff_pin, updated_at = now();
+
+--    사장님께 드릴 주소. 카톡으로 사장님 한 분께만 보낸다(주소를 아는 사람은 그 가게 숫자를 본다)
+select 'https://babti.expo.app/owner/' || owner_token as 사장님_주소
+from public.shop_private where restaurant_id = 0;
+
+-- 7. 주소가 새어 나갔을 때: 토큰을 새로 만든다. 예전 주소는 바로 안 열린다
+update public.shop_private
+set owner_token = encode(extensions.gen_random_bytes(24), 'hex'), updated_at = now()
+where restaurant_id = 0;
+
+-- 5. 쿠폰을 몇 판에서 받았는지 (자세한 것은 scripts/coupon-stats.sql)
 select r.name, count(distinct c.session_id) as 판, count(*) as 사람
 from public.coupon_claims c join public.restaurants r on r.id = c.restaurant_id
 group by r.name order by 판 desc;

@@ -5,16 +5,17 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Icon, type IconName } from '@/components/icon';
 import { TAB_BAR_HEIGHT } from '@/constants';
 
-// 하단 탭 (4-15, #41). 홈과 프로필에서만 보인다. 모임, 판 화면은 탭 밖이라 탭이 없다.
-// 떠 있는 주황 알약에 아이콘만. 지금 화면은 흰 동그라미 안 검정 아이콘, 나머지는 흰 아이콘 (2026-11-16 재곤 제안, 병주 결정)
+// 하단 탭 (4-15, 4-26). 홈, 가게, 프로필에서만 보인다. 모임, 판 화면은 탭 밖이라 탭이 없다.
+// 흰 바탕에 회색 아이콘, 지금 화면만 주황 아이콘. 주황 알약은 뺐다 (2026-11-25 병주 "주황색이 너무 많은데, 포인트컬러로 남기면 좋아")
 const TABS: { name: string; icon: IconName; label: string }[] = [
   { name: 'index', icon: 'home', label: '홈' },
+  { name: 'shops', icon: 'shop', label: '가게' },
   { name: 'profile', icon: 'person', label: '내 프로필' },
 ];
 
 export default function TabLayout() {
   return (
-    <Tabs screenOptions={{ headerShown: false }} tabBar={(props) => <PillTabBar {...props} />}>
+    <Tabs screenOptions={{ headerShown: false }} tabBar={(props) => <TabBar {...props} />}>
       {TABS.map((t) => (
         <Tabs.Screen key={t.name} name={t.name} options={{ title: t.label }} />
       ))}
@@ -22,14 +23,14 @@ export default function TabLayout() {
   );
 }
 
-function PillTabBar({ state, navigation }: { state: any; navigation: any }) {
+// 화면 아래에 붙은 흰 막대. 탭은 같은 폭으로 나눈다. 위쪽 옅은 선 하나로 목록과 나눈다(간격으로 나눌 수 없는 자리)
+function TabBar({ state, navigation }: { state: any; navigation: any }) {
   const insets = useSafeAreaInsets();
   return (
     <View
-      pointerEvents="box-none"
-      className="absolute bottom-0 left-0 right-0 items-center"
-      style={{ paddingBottom: insets.bottom + 16 }}>
-      <View className="flex-row gap-2 rounded-full bg-primary p-2" style={{ height: TAB_BAR_HEIGHT }}>
+      className="absolute bottom-0 left-0 right-0 border-t border-surface bg-background"
+      style={{ paddingBottom: insets.bottom }}>
+      <View className="flex-row" style={{ height: TAB_BAR_HEIGHT }}>
         {state.routes.map((route: any, i: number) => {
           const tab = TABS.find((t) => t.name === route.name);
           if (!tab) return null;
@@ -43,8 +44,8 @@ function PillTabBar({ state, navigation }: { state: any; navigation: any }) {
               onPress={() => {
                 if (!on) navigation.navigate(route.name);
               }}
-              className={`h-12 w-16 items-center justify-center rounded-full active:opacity-70 ${on ? 'bg-on-primary' : ''}`}>
-              <Icon name={tab.icon} size={24} color={on ? 'text' : 'on-primary'} />
+              className="flex-1 items-center justify-center active:opacity-70">
+              <Icon name={tab.icon} size={26} color={on ? 'primary' : 'muted'} />
             </Pressable>
           );
         })}

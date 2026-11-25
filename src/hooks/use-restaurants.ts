@@ -66,6 +66,8 @@ export function useClaimCoupon(sessionId: string) {
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ['session-restaurants', sessionId] });
       queryClient.invalidateQueries({ queryKey: ['session-cafes', sessionId] });
+      // 쿠폰함과 쿠폰 칸의 "직원 확인"이 바로 붙게 (4-27)
+      queryClient.invalidateQueries({ queryKey: ['my-coupons'] });
     },
   });
 }

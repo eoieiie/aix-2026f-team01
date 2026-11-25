@@ -26,16 +26,7 @@ const files = SCREEN_DIRS.flatMap(screenFiles).map((file) => ({
 // 다른 가지에서 고치는 중인 화면이다. "프레즐 규칙 그대로" 검사 세 개에서 잠깐 뺀다.
 // 통일 점검 PR에서 이 목록을 비운다. 여기에 새 파일을 더하지 말고 화면을 규칙에 맞춘다
 const NOT_YET = [
-  'src/app/(tabs)/_layout.tsx',
-  'src/app/(tabs)/shops.tsx',
-  'src/app/shops/',
-  'src/app/coupons.tsx',
-  'src/app/owner/',
-  'src/app/admin/',
   'src/app/dev/',
-  'src/components/nearby-restaurants.tsx',
-  'src/components/nearby-cafes.tsx',
-  'src/components/coupon-code.tsx',
   'src/components/legal-page.tsx',
 ];
 const checked = files.filter(({ file }) => !NOT_YET.some((prefix) => file.startsWith(prefix)));
