@@ -3,6 +3,9 @@ begin;
 create extension if not exists pgtap with schema extensions;
 select plan(17);
 
+-- CI의 빈 DB에는 음식 그림 파일 이름이 없다(0026은 실제 서버용). 이 테스트에서 쓰는 음식에만 넣는다
+update public.foods set image_path = id || '.webp'
+where not custom and image_path is null and name in ('감자탕', '돼지국밥', '김치찌개', '샌드위치');
 insert into auth.users (id) values ('00000000-0000-0000-0000-000000004001');
 insert into public.restaurants (area, name, cuisine, menus, lat, lng, partner, coupon_text, source_id) values
   ('zz_t40', '원조 뼈해장국', 'korean', '{}', 37.3000, 126.8370, false, null, 't40/1'),
