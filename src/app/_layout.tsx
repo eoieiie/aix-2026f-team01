@@ -11,9 +11,9 @@ import { AuthGate } from '@/components/auth-gate';
 
 export default function RootLayout() {
   const [queryClient] = useState(() => new QueryClient());
-  // 쿠폰 현황판(운영자, 사장님)은 노트북에서 넓게 본다 (4-28). 나머지 화면은 폭 480 안에 그린다
+  // 쿠폰 현황판(운영자, 사장님)과 소개 화면은 노트북에서 넓게 본다 (4-28, 4-30). 나머지 화면은 폭 480 안에 그린다
   const pathname = usePathname();
-  const wide = pathname.startsWith('/admin') || pathname.startsWith('/owner');
+  const wide = pathname.startsWith('/admin') || pathname.startsWith('/owner') || pathname === '/about';
 
   return (
     <QueryClientProvider client={queryClient}>
