@@ -7,8 +7,9 @@ import { couponState, formatKoreanTime, splitCoupons } from '@/hooks/use-shops';
 import { Button } from '@/components/button';
 import { CouponCode } from '@/components/coupon-code';
 import { IconButton } from '@/components/icon';
+import { ShopThumb } from '@/components/shop-thumb';
 import { Text } from '@/components/text';
-import { type Coupon, useMyCoupons } from '@/hooks/use-shops';
+import { type Coupon, useMyCoupons, useShop } from '@/hooks/use-shops';
 
 // 쿠폰함 (4-27). 지금 쓸 수 있는 쿠폰은 코드와 "직원 확인"까지, 지난 쿠폰은 한 줄씩
 export default function CouponsScreen() {
@@ -33,7 +34,7 @@ export default function CouponsScreen() {
             <Button label="다시 시도" variant="secondary" onPress={() => refetch()} />
           </View>
         ) : ready.length === 0 ? (
-          <View className="items-center gap-4 rounded-2xl bg-surface p-6">
+          <View className="items-center gap-4 rounded-2xl bg-surface p-4">
             <Text className="text-xl font-bold tracking-tight text-text">쓸 수 있는 쿠폰이 없어요</Text>
             <Button label="가게 보러 가기" className="self-center px-8" onPress={() => router.replace('/(tabs)/shops' as any)} />
           </View>
@@ -62,6 +63,7 @@ export default function CouponsScreen() {
 
 // 지난 쿠폰 한 줄: 가게 이름, 혜택, 쓴 때나 지난 까닭. 누르면 그 가게로 간다
 function PastRow({ coupon, onPress }: { coupon: Coupon; onPress: () => void }) {
+  const { data: shop } = useShop(coupon.restaurantId);
   const state = couponState(coupon, new Date());
   const status =
     state === 'used'
@@ -74,10 +76,14 @@ function PastRow({ coupon, onPress }: { coupon: Coupon; onPress: () => void }) {
       accessibilityRole="link"
       accessibilityLabel={`${coupon.shopName}, ${coupon.benefit}, ${status}`}
       onPress={onPress}
-      className="gap-1 rounded-2xl bg-surface p-4 active:opacity-70">
-      <Text className="text-base font-bold text-text">{coupon.shopName}</Text>
-      <Text className="text-sm text-text">{coupon.benefit}</Text>
-      <Text className="text-xs font-semibold text-muted">{status}</Text>
+      className="min-h-20 flex-row items-center gap-3 rounded-2xl bg-surface p-4 active:opacity-70">
+      <ShopThumb name={coupon.shopName} photoUrl={shop?.photoUrl ?? null} thumbUrl={shop?.thumbUrl ?? null}
+        cuisine={shop?.cuisine ?? null} size={56} />
+      <View className="flex-1 gap-1">
+        <Text className="text-base font-bold text-text">{coupon.shopName}</Text>
+        <Text className="text-sm text-text">{coupon.benefit}</Text>
+        <Text className="text-xs font-semibold text-muted">{status}</Text>
+      </View>
     </Pressable>
   );
 }

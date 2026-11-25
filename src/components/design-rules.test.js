@@ -23,13 +23,6 @@ const files = SCREEN_DIRS.flatMap(screenFiles).map((file) => ({
   text: fs.readFileSync(file, 'utf8'),
 }));
 
-// 다른 가지에서 고치는 중인 화면이다. "프레즐 규칙 그대로" 검사 세 개에서 잠깐 뺀다.
-// 통일 점검 PR에서 이 목록을 비운다. 여기에 새 파일을 더하지 말고 화면을 규칙에 맞춘다
-const NOT_YET = [
-  'src/app/dev/',
-  'src/components/legal-page.tsx',
-];
-const checked = files.filter(({ file }) => !NOT_YET.some((prefix) => file.startsWith(prefix)));
 
 describe('디자인 규칙', () => {
   it('화면 파일에 색 코드를 직접 쓰지 않는다. tailwind.config.js의 색 이름만 쓴다', () => {
@@ -69,7 +62,7 @@ describe('디자인 규칙', () => {
       /(?<![\w-])-?(gap|gap-x|gap-y|space-x|space-y|p|px|py|pt|pb|pl|pr|m|mx|my|mt|mb|ml|mr)-(\[[^\]]+\]|\d+(?:\.\d+)?|px)(?![\w.-])/g;
     // 굴러가는 화면 끝을 비우는 자리(떠 있는 단추 줄이나 탭 막대 높이만큼)는 묶음 사이 간격이 아니라 자리다. pb-10 이상과 pt-16만 뺀다
     const isClearance = (prop, value) => (prop === 'pb' && Number(value) >= 10) || (prop === 'pt' && value === '16');
-    const found = checked.flatMap(({ file, text }) => {
+    const found = files.flatMap(({ file, text }) => {
       const bad = new Set();
       for (const [whole, prop, value] of text.matchAll(spacing)) {
         if (!ON_GRID.has(value) && !isClearance(prop, value)) bad.add(whole);
@@ -83,7 +76,7 @@ describe('디자인 규칙', () => {
     // 주황은 포인트로만 쓴다: 주 단추 하나나 상태 알약 하나. 고른 상태는 검정(bg-ink)으로 보인다
     const ORANGE_OK = ['src/components/result-moment.tsx', 'src/components/result-card.tsx'];
     const area = /\bbg-primary(?:-soft)?\b|backgroundColor:\s*colors(?:\.primary\b|\[['"]primary(?:-soft)?['"]\])/g;
-    const found = checked
+    const found = files
       .filter(({ file }) => !ORANGE_OK.includes(file))
       .map(({ file, text }) => ({ file, count: (text.match(area) || []).length }))
       .filter(({ count }) => count > 1)
@@ -93,21 +86,18 @@ describe('디자인 규칙', () => {
 
   it('상자를 테두리로 그리지 않는다. 옅은 면으로 나눈다', () => {
     // 허용하는 선: 한쪽 구분선(border-b 등), 겹친 동그라미 사이의 바탕색 고리, 잠깐 보이는 주황 선(상태)
-    const BORDER_OK = {
-      'src/components/text-field.tsx': '쓰는 중인 입력칸의 검정 선 (상태 표시)',
-      'src/components/roulette.tsx': '바늘 삼각형을 테두리로 그린다',
-    };
     const boxWidth = /(?<![\w-])border(?:-(?:\d+|\[[^\]]+\]))?(?![\w-])/;
     const ringColor = /(?<![\w-])border-(?:surface|background|primary|on-primary|transparent)(?![\w-])/;
     const styleLine = /borderColor:\s*colors(?:\.(?:muted|text|ink)\b|\[['"](?:muted|text|ink|surface-strong)['"]\])/;
-    const found = checked
-      .filter(({ file }) => !(file in BORDER_OK))
+    const found = files
       .flatMap(({ file, text }) =>
         text
           .split('\n')
-          .flatMap((line, i) =>
-            (boxWidth.test(line) && !ringColor.test(line)) || styleLine.test(line) ? [`${file}:${i + 1}`] : []
-          )
+          .flatMap((line, i) => {
+            // 입력 초점선은 상자 장식이 아니다. 파일 전체가 아닌 이 클래스 선언만 허용한다.
+            if (file === 'src/components/text-field.tsx' && /rounded-2xl border-2 bg-surface/.test(line) && (text.split('\n')[i + 1] ?? '').includes("focused ? 'border-ink' : 'border-surface'")) return [];
+            return (boxWidth.test(line) && !ringColor.test(line)) || styleLine.test(line) ? [`${file}:${i + 1}`] : [];
+          })
       );
     expect(found).toEqual([]);
   });
