@@ -1,0 +1,280 @@
+{
+  "version": 0.6,
+  "generator": "Overpass API 0.7.62.11 87bfad18",
+  "osm3s": {
+    "timestamp_osm_base": "2026-11-16T00:55:57Z",
+    "copyright": "The data included in this document is from www.openstreetmap.org. The data is made available under ODbL."
+  },
+  "elements": [
+    {
+      "type": "node",
+      "id": 4629296699,
+      "lat": 37.2971681,
+      "lon": 126.8483608,
+      "tags": {
+        "name": "페리카나",
+        "cuisine": "chicken"
+      }
+    },
+    {
+      "type": "node",
+      "id": 5087674523,
+      "lat": 37.3010652,
+      "lon": 126.8393899,
+      "tags": {
+        "name:ko": "피자스쿨",
+        "name": "피자스쿨",
+        "cuisine": "italian"
+      }
+    },
+    {
+      "type": "node",
+      "id": 8431229417,
+      "lat": 37.3013792,
+      "lon": 126.8383726,
+      "tags": {
+        "name": "남월",
+        "cuisine": "vietnamese"
+      }
+    },
+    {
+      "type": "node",
+      "id": 8431229418,
+      "lat": 37.3029306,
+      "lon": 126.839149,
+      "tags": {
+        "name": "최고집 칼국수"
+      }
+    },
+    {
+      "type": "node",
+      "id": 8440212275,
+      "lat": 37.294174,
+      "lon": 126.8426769,
+      "tags": {
+        "name": "통돼지볶음찌개",
+        "cuisine": "korean"
+      }
+    },
+    {
+      "type": "node",
+      "id": 8440212302,
+      "lat": 37.2940912,
+      "lon": 126.8445537,
+      "tags": {
+        "name": "우리옥 (목포뻘낙지)",
+        "cuisine": "korean"
+      }
+    },
+    {
+      "type": "node",
+      "id": 8440212306,
+      "lat": 37.2940418,
+      "lon": 126.8433976,
+      "tags": {
+        "name": "용대리황태촌",
+        "cuisine": "korean"
+      }
+    },
+    {
+      "type": "node",
+      "id": 8440212310,
+      "lat": 37.3038747,
+      "lon": 126.843724,
+      "tags": {
+        "name": "영덕해물탕",
+        "cuisine": "korean"
+      }
+    },
+    {
+      "type": "node",
+      "id": 8440212315,
+      "lat": 37.2942399,
+      "lon": 126.844028,
+      "tags": {
+        "name": "어담추어매운탕",
+        "cuisine": "korean"
+      }
+    },
+    {
+      "type": "node",
+      "id": 8440221430,
+      "lat": 37.2940548,
+      "lon": 126.8440551,
+      "tags": {
+        "name": "댕이골낙지마을",
+        "cuisine": "korean"
+      }
+    },
+    {
+      "type": "node",
+      "id": 8440221433,
+      "lat": 37.2942527,
+      "lon": 126.8443106,
+      "tags": {
+        "name": "대부흑염소",
+        "cuisine": "korean"
+      }
+    },
+    {
+      "type": "node",
+      "id": 8440221445,
+      "lat": 37.293845,
+      "lon": 126.843726,
+      "tags": {
+        "name": "구곡산장",
+        "cuisine": "korean"
+      }
+    },
+    {
+      "type": "node",
+      "id": 8440228536,
+      "lat": 37.290787,
+      "lon": 126.829853,
+      "tags": {
+        "name": "상록한정식",
+        "cuisine": "korean"
+      }
+    },
+    {
+      "type": "node",
+      "id": 8440228538,
+      "lat": 37.2938218,
+      "lon": 126.8443666,
+      "tags": {
+        "name": "산골송어",
+        "cuisine": "korean"
+      }
+    },
+    {
+      "type": "node",
+      "id": 8440228543,
+      "lat": 37.2938327,
+      "lon": 126.8434503,
+      "tags": {
+        "name": "별장보쌈칼국수",
+        "cuisine": "korean"
+      }
+    },
+    {
+      "type": "node",
+      "id": 8440228547,
+      "lat": 37.2937581,
+      "lon": 126.8429996,
+      "tags": {
+        "name": "무교뻘낙지",
+        "cuisine": "korean"
+      }
+    },
+    {
+      "type": "node",
+      "id": 9093011773,
+      "lat": 37.3029587,
+      "lon": 126.8393201,
+      "tags": {
+        "name": "참치바라기",
+        "cuisine": "korean"
+      }
+    },
+    {
+      "type": "node",
+      "id": 9093011774,
+      "lat": 37.3010889,
+      "lon": 126.838603,
+      "tags": {
+        "name": "앤의식탁",
+        "cuisine": "international"
+      }
+    },
+    {
+      "type": "node",
+      "id": 9093016164,
+      "lat": 37.30026,
+      "lon": 126.8402915,
+      "tags": {
+        "name": "에비수",
+        "cuisine": "japanese"
+      }
+    },
+    {
+      "type": "node",
+      "id": 9093016169,
+      "lat": 37.2915391,
+      "lon": 126.8298529,
+      "tags": {
+        "name": "상록한정식",
+        "cuisine": "korean"
+      }
+    },
+    {
+      "type": "node",
+      "id": 9093016535,
+      "lat": 37.3015045,
+      "lon": 126.8398252,
+      "tags": {
+        "name": "투파인드피터한양대점",
+        "cuisine": "international"
+      }
+    },
+    {
+      "type": "node",
+      "id": 9093016549,
+      "lat": 37.2944409,
+      "lon": 126.8425988,
+      "tags": {
+        "name": "삼수갑산",
+        "cuisine": "korean"
+      }
+    },
+    {
+      "type": "node",
+      "id": 12690791889,
+      "lat": 37.2997663,
+      "lon": 126.8385095,
+      "tags": {
+        "name": "도스마스",
+        "cuisine": "mexican"
+      }
+    },
+    {
+      "type": "node",
+      "id": 12690793441,
+      "lat": 37.30024,
+      "lon": 126.8392894,
+      "tags": {
+        "name": "밀플랜비 한양대에리카점",
+        "cuisine": "mexican"
+      }
+    },
+    {
+      "type": "node",
+      "id": 12851077437,
+      "lat": 37.2911899,
+      "lon": 126.8361814,
+      "tags": {
+        "name": "이모네",
+        "cuisine": "korean"
+      }
+    },
+    {
+      "type": "node",
+      "id": 12851077440,
+      "lat": 37.3011005,
+      "lon": 126.8374271,
+      "tags": {
+        "name": "카바레식당",
+        "cuisine": "indian"
+      }
+    },
+    {
+      "type": "node",
+      "id": 12851077441,
+      "lat": 37.2984916,
+      "lon": 126.8386436,
+      "tags": {
+        "name": "행복한짬뽕",
+        "cuisine": "chinese"
+      }
+    }
+  ]
+}
