@@ -35,6 +35,7 @@ import {
   quickFillPicks,
   useFoodHints,
   useFoods,
+  useMyFoodPicks,
   useSession,
   useSessionActions,
   useVoteCounts,
@@ -279,6 +280,7 @@ function CandidateStage({
   const freshTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [fresh, setFresh] = useState<number | null>(null);
   const idsKey = candidateIds.join(',');
+  const myPicks = useMyFoodPicks(session.id, `${session.participants.length}:${idsKey}`);
   useEffect(() => {
     const prev = seen.current;
     seen.current = new Set(candidateIds);
@@ -319,6 +321,16 @@ function CandidateStage({
           </Pressable>
         </View>
 
+        <FoodSearch
+          foods={searchFoods}
+          myPicks={myPicks}
+          excludeIds={candidateIds}
+          onPick={(food) => add.mutate(food.id)}
+          onCustom={(name) => addCustom.mutate(name)}
+          disabled={busy}
+          error={actionError ? sessionErrorMessage(actionError) : null}
+        />
+
         {/* 다 같이 딱히 먹고 싶은 게 없을 때 (#44 인터뷰 세 명, 설문 76.9%). 앱이 정하지 않고 후보만 채운다. 정하는 건 투표와 룰렛 (4-20) */}
         {session.candidates.length === 0 && hints.length > 0 ? (
           <Button
@@ -349,15 +361,6 @@ function CandidateStage({
             </View>
           </View>
         ) : null}
-
-        <FoodSearch
-          foods={searchFoods}
-          excludeIds={session.candidates.map((c) => c.foodId)}
-          onPick={(food) => add.mutate(food.id)}
-          onCustom={(name) => addCustom.mutate(name)}
-          disabled={busy}
-          error={actionError ? sessionErrorMessage(actionError) : null}
-        />
 
         <View className="gap-2" onLayout={(e: LayoutChangeEvent) => (listY.current = e.nativeEvent.layout.y)}>
           <Text className="text-lg font-bold text-text">후보 {session.candidates.length}개</Text>

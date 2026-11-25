@@ -160,6 +160,13 @@ export async function listFoods(client: Client = getSupabase()): Promise<Food[]>
   return (data ?? []).filter((f: any) => f.custom !== true).map((f: any) => ({ id: f.id, name: f.name }));
 }
 
+// 4-27 개인 추천. 순서는 내 기록과 못 먹는 것에 따라 서버가 정한다.
+export async function getMyFoodPicks(sessionId: string, client: Client = getSupabase()): Promise<Food[]> {
+  const { data, error } = await client.rpc('my_food_picks', { p_session_id: sessionId });
+  if (error) throwSessionError(error);
+  return (data ?? []).map((row: { food_id: number; name: string }) => ({ id: row.food_id, name: row.name }));
+}
+
 // 이름 일부로 찾는다. 이미 올라간 음식은 빼고 최대 limit개 (4-9)
 export function searchFoods(
   foods: Food[],
