@@ -16,7 +16,7 @@ insert into public.restaurants (area, name, cuisine, menus, partner, coupon_text
 insert into public.shop_private (restaurant_id, staff_pin, owner_token) values
   ((select id from public.restaurants where source_id = 'c/1'), '4821', repeat('a', 40));
 insert into public.groups (id, name, invite_code, created_by, area) values
-  ('10000000-0000-0000-0000-000000003301', '쿠폰 모임', 'TESTC1', '00000000-0000-0000-0000-000000003301', 'c_test');
+  ('10000000-0000-0000-0000-000000003301', '쿠폰 모임', 'TESTC2', '00000000-0000-0000-0000-000000003301', 'c_test');
 insert into public.memberships (group_id, user_id, display_name) values
   ('10000000-0000-0000-0000-000000003301', '00000000-0000-0000-0000-000000003301', '하나'),
   ('10000000-0000-0000-0000-000000003301', '00000000-0000-0000-0000-000000003302', '둘');

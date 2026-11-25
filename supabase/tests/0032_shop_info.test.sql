@@ -19,7 +19,7 @@ insert into public.shop_photos (restaurant_id, path, sort, credit) values
   ((select id from public.restaurants where source_id = 's/1'), 's1/2.jpg', 1, '밥BTI 팀 촬영'),
   ((select id from public.restaurants where source_id = 's/1'), 's1/1.jpg', 0, '사장님 제공');
 insert into public.groups (id, name, invite_code, created_by, area) values
-  ('10000000-0000-0000-0000-000000003201', '가게 모임', 'TESTS1', '00000000-0000-0000-0000-000000003201', 'zz_test');
+  ('10000000-0000-0000-0000-000000003201', '가게 모임', 'TESTS2', '00000000-0000-0000-0000-000000003201', 'zz_test');
 insert into public.memberships (group_id, user_id, display_name) values
   ('10000000-0000-0000-0000-000000003201', '00000000-0000-0000-0000-000000003201', '하나');
 
@@ -39,7 +39,8 @@ grant all on t_d to authenticated;
 
 select set_config('request.jwt.claims', '{"sub":"00000000-0000-0000-0000-000000003201","role":"authenticated"}', true);
 set local role authenticated;
-insert into t_s select * from public.shop_list();
+-- 990001은 scripts/demo-shop.sql의 발표용 예시 가게(같은 zz_test 동네). 실제 서버에서 돌려도 같게 뺀다
+insert into t_s select * from public.shop_list() where id <> 990001;
 insert into t_d select public.shop_detail((select id from public.restaurants where source_id = 's/1'));
 select throws_ok($$ insert into public.shop_photos (restaurant_id, path) values (1, 'x/1.jpg') $$,
   '42501', null, '앱 사용자는 사진을 올리지 못한다');

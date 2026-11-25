@@ -21,7 +21,7 @@ insert into public.shop_private (restaurant_id, staff_pin, owner_token) values
   ((select id from public.restaurants where source_id = 'b/1'), null, repeat('b', 40)),
   ((select id from public.restaurants where source_id = 'b/2'), null, repeat('c', 40));
 insert into public.groups (id, name, invite_code, created_by, area) values
-  ('10000000-0000-0000-0000-000000003401', '현황 모임', 'TESTB1', '00000000-0000-0000-0000-000000003402', 'b_test');
+  ('10000000-0000-0000-0000-000000003401', '현황 모임', 'TESTB2', '00000000-0000-0000-0000-000000003402', 'b_test');
 insert into public.memberships (group_id, user_id, display_name) values
   ('10000000-0000-0000-0000-000000003401', '00000000-0000-0000-0000-000000003402', '손님하나'),
   ('10000000-0000-0000-0000-000000003401', '00000000-0000-0000-0000-000000003403', '손님둘');
