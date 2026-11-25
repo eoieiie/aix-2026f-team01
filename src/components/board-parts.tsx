@@ -58,8 +58,7 @@ export function Bars({ back, front, labels }: { back: number[]; front: number[];
             {l ? (
               <Text
                 className="text-center text-xs text-muted"
-                numberOfLines={1}
-                style={{ position: 'absolute', left: -16, right: -16 }}>
+                style={{ position: 'absolute', left: -16, right: -16, maxWidth: 999 }}>
                 {l}
               </Text>
             ) : null}
