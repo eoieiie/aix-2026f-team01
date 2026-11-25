@@ -25,6 +25,18 @@ export function councilBadge(college: CouncilBenefit['college']) {
   return `${collegeLabel(college)} 제휴`;
 }
 
+// 혜택 원문을 한 줄로 (4-29, 0050). 줄마다 앞 번호("1.", "2)", "-", "•")를 떼고 빈 줄은 버리고 띄어쓰기로 잇는다.
+// 넘치면 화면이 말줄임한다. 가게 탭 목록, 결과 뒤 가게와 카페 줄이 모두 이것을 쓴다(ShopRow)
+export function benefitLine(text: string | null | undefined): string | null {
+  if (!text) return null;
+  const line = text
+    .split(/\r?\n/)
+    .map((l) => l.trim().replace(/^(?:\d+\s*[.)]|[-\u2022\u00B7*])\s*/, '').trim())
+    .filter((l) => l !== '')
+    .join(' ');
+  return line === '' ? null : line;
+}
+
 export async function getCouncilBenefits(college: CollegeKey | null): Promise<CouncilBenefit[]> {
   const { data, error } = await getSupabase()
     .from('council_benefits')

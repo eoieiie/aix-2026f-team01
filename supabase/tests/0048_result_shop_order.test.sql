@@ -19,7 +19,8 @@ insert into public.restaurants (area, name, cuisine, menus, lat, lng, partner, c
   ('zz_t48', '총학 제휴집', 'chinese', '{}', 37.3060, 126.8369, false, null, 'z48/3'),
   ('zz_t48', '공대 제휴집', 'chinese', '{}', 37.3000, 126.8369, false, null, 'z48/4'),
   ('zz_t48', '가까운 중국집', 'chinese', '{}', 37.2999, 126.8369, false, null, 'z48/5'),
-  ('zz_t48', 'z48짜장 전문', 'chinese', '{}', 37.3030, 126.8369, false, null, 'z48/6'),
+  -- 이름에 메뉴가 있는 가게는 0050부터 맨 위 묶음이라 0050 시험에서 본다
+  ('zz_t48x', 'z48짜장 전문', 'chinese', '{}', 37.3030, 126.8369, false, null, 'z48/6'),
   ('zz_t48', '카페 쿠폰', 'cafe', '{}', 37.3090, 126.8369, true, '아메리카노 500원 할인', 'z48/c1'),
   ('zz_t48', '카페 소융 제휴', 'cafe', '{}', 37.3080, 126.8369, true, null, 'z48/c2'),
   ('zz_t48', '카페 가까움', 'cafe', '{}', 37.2999, 126.8369, false, null, 'z48/c3'),
@@ -53,17 +54,17 @@ grant all on t_a, t_c to authenticated;
 set local role authenticated;
 select set_config('request.jwt.claims', '{"sub":"00000000-0000-0000-0000-000000004801","role":"authenticated"}', true);
 insert into t_a (id, name, cuisine, partner, coupon_text, match, my_code, food_id, walk_minutes, open_now, team_count, photo_url,
-  council_college, council_text, total_count, menu_name, menu_cuisine, who)
+  council_college, council_text, total_count, menu_name, menu_cuisine, tier, who)
   select *, 'computing' from public.session_restaurants('20000000-0000-0000-0000-000000004801');
 insert into t_c (id, name, partner, coupon_text, my_code, lat, lng, council_college, council_text, total_count)
   select * from public.session_cafes('20000000-0000-0000-0000-000000004801');
 select set_config('request.jwt.claims', '{"sub":"00000000-0000-0000-0000-000000004802","role":"authenticated"}', true);
 insert into t_a (id, name, cuisine, partner, coupon_text, match, my_code, food_id, walk_minutes, open_now, team_count, photo_url,
-  council_college, council_text, total_count, menu_name, menu_cuisine, who)
+  council_college, council_text, total_count, menu_name, menu_cuisine, tier, who)
   select *, 'eng' from public.session_restaurants('20000000-0000-0000-0000-000000004801');
 select set_config('request.jwt.claims', '{"sub":"00000000-0000-0000-0000-000000004803","role":"authenticated"}', true);
 insert into t_a (id, name, cuisine, partner, coupon_text, match, my_code, food_id, walk_minutes, open_now, team_count, photo_url,
-  council_college, council_text, total_count, menu_name, menu_cuisine, who)
+  council_college, council_text, total_count, menu_name, menu_cuisine, tier, who)
   select *, 'none' from public.session_restaurants('20000000-0000-0000-0000-000000004801');
 select ok(not has_function_privilege('authenticated', 'public.my_council_pick(bigint, text)', 'execute'),
   '남의 단과대로 학생회 제휴를 고르는 함수는 앱에서 부르지 못한다');
@@ -75,10 +76,10 @@ select results_eq($$ select name from t_a where who = 'computing' order by pos $
   '쿠폰 가게가 맨 위, 그다음 내 학생회 제휴가 가까운 순(앱에 숨긴 학생회 행은 쓰지 않는다)');
 select is((select partner from t_a where who = 'computing' and name = '소융 제휴집'), false, '학생회 제휴는 "광고"가 아니다');
 select is((select council_college from t_a where who = 'computing' and name = '소융 제휴집'), 'computing', '어느 학생회 제휴인지 온다');
-select is((select council_text from t_a where who = 'computing' and name = '소융 제휴집'), '인원수만큼 만두',
-  '혜택은 첫 줄만(괄호만 있는 줄과 앞 번호는 뗀다)');
+select is((select council_text from t_a where who = 'computing' and name = '소융 제휴집'), E'(여름 한정)\n1. 인원수만큼 만두\n2. 음료 1개',
+  '혜택은 원문 그대로(0050부터, 한 줄로 잇기는 화면이 한다)');
 select is((select council_college from t_a where who = 'computing' and name = '총학 제휴집'), 'all', '총학생회 제휴도 온다');
-select is((select max(total_count) from t_a where who = 'computing'), 6, '맞는 가게 수가 같이 와서 "더 보기"를 그린다');
+select is((select max(total_count) from t_a where who = 'computing'), 5, '맞는 가게 수가 같이 와서 "더 보기"를 그린다');
 select is((select max(menu_name) from t_a where who = 'computing'), 'z48짜장', '"더 보기"에 쓸 메뉴 이름이 온다');
 select is((select max(menu_cuisine) from t_a where who = 'computing'), 'chinese', '메뉴 종류도 온다');
 select is((select coupon_text from t_a where who = 'computing' and name = '쿠폰집'), '밥BTI 보여 주면 만두', '쿠폰 가게는 쿠폰 문구 그대로');
@@ -94,16 +95,16 @@ select is((select count(*)::int from t_a where who = 'computing' and council_col
 
 -- 단과대를 말하지 않은 사람: 총학생회 제휴만
 select results_eq($$ select name from t_a where who = 'none' order by pos $$,
-  $$ values ('쿠폰집'::text), ('총학 제휴집'::text), ('z48짜장 전문'::text) $$,
-  '단과대가 없으면 총학생회 제휴만 위로, 그다음 이름에 메뉴가 있는 곳(가까운 집보다 먼저)');
-select is((select match from t_a where who = 'none' and name = 'z48짜장 전문'), 'menu', '이름에 메뉴가 있으면 메뉴가 맞는 곳');
+  $$ values ('쿠폰집'::text), ('총학 제휴집'::text), ('가까운 중국집'::text) $$,
+  '단과대가 없으면 총학생회 제휴만 위로, 나머지는 가까운 순(앱에 숨긴 학생회 행은 쓰지 않는다)');
+select is((select match from t_a where who = 'none' and name = '가까운 중국집'), 'cuisine', '종류만 맞으면 cuisine');
 
 -- 카페도 같은 순서
 select results_eq($$ select name from t_c order by pos $$,
   $$ values ('카페 쿠폰'::text), ('카페 소융 제휴'::text), ('카페 가까움'::text) $$,
   '카페도 쿠폰 카페, 학생회 제휴, 가까운 순');
 select is((select partner from t_c where name = '카페 소융 제휴'), false, '혜택 문구 없는 제휴 카페는 "광고"가 아니다');
-select is((select council_text from t_c where name = '카페 소융 제휴'), '음료 500원 할인', '카페도 학생회 혜택 첫 줄이 온다');
+select is((select council_text from t_c where name = '카페 소융 제휴'), '음료 500원 할인', '카페도 학생회 혜택이 온다');
 select is((select max(total_count) from t_c), 4, '카페 수도 온다');
 
 -- 첫 줄 뽑기와 함수 설정

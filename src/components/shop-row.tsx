@@ -3,12 +3,13 @@ import { Pressable, View } from 'react-native';
 
 import { AdBadge } from '@/components/ad-badge';
 import { CouncilBadge } from '@/components/council-benefit';
-import { councilBadge, useCouncilBenefits } from '@/hooks/use-council-benefits';
+import { benefitLine, councilBadge, useCouncilBenefits } from '@/hooks/use-council-benefits';
 import { ShopThumb } from '@/components/shop-thumb';
 import { Text } from '@/components/text';
 import { TextPieces } from '@/components/text-pieces';
 
-// 가게 한 줄 (4-26). 왼쪽 그림, 이름과 "광고"(혜택이 있는 제휴만), 그 아래 한 줄 정보와 제휴 혜택. 누르면 가게 상세로 간다.
+// 가게 한 줄 (4-26). 왼쪽 그림, 이름 바로 옆에 "광고"(혜택이 있는 제휴만)와 학생회 제휴 표시(같은 역할, 같은 자리와 크기),
+// 그 아래 한 줄 정보와 혜택 한 줄(benefitLine, 말줄임). 이름이 길면 이름이 말줄임되고 표시는 남는다. 누르면 가게 상세로 간다.
 // 가게 탭 목록(그림 72, 회색 카드)과 판 결과의 식당·카페 줄(그림 56, 카드 안 줄)이 같이 쓴다
 export function ShopRow({
   id,
@@ -44,6 +45,7 @@ export function ShopRow({
 }) {
   const router = useRouter();
   const { benefits } = useCouncilBenefits();
+  const line = benefitLine(benefit);
   const colleges = hideCouncilBadge ? [] : [...new Set(benefits.filter((b) => b.restaurant_id === id).map((b) => b.college))];
   return (
     <Pressable
@@ -58,12 +60,12 @@ export function ShopRow({
             {name}
           </Text>
           {partner ? <AdBadge /> : null}
+          {colleges.map((c) => <CouncilBadge key={c} college={c} inline />)}
         </View>
         {info.length ? <TextPieces pieces={info} /> : null}
-        {colleges.length ? <View className="flex-row flex-wrap gap-1">{colleges.map((c) => <CouncilBadge key={c} college={c} />)}</View> : null}
-        {benefit ? (
+        {line ? (
           <Text className="text-sm font-semibold text-text" numberOfLines={1}>
-            {benefit}
+            {line}
           </Text>
         ) : null}
       </View>

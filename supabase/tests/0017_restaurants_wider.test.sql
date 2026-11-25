@@ -83,11 +83,11 @@ reset role;
 
 -- (1) 투표 단계: 후보 전체 기준, 최대 6곳
 select is((select count(*)::int from t_v), 6, '끝나지 않은 판은 후보 기준으로 최대 6곳');
--- 0048부터 쿠폰 가게가 먼저, 그 안팎에서 이름이나 대표 메뉴가 맞는 곳이 먼저
+-- 0050부터 메뉴가 맞는 묶음이 먼저, 묶음 안에서 쿠폰 가게
 select is((select array_agg(name order by name) from (select name from t_v where pos <= 2) x),
-  array['양식당 제휴', '한식당 제휴'], '쿠폰 가게(혜택 문구가 있는 제휴)가 먼저');
+  array['대표메뉴집', '할매 w국수'], '어느 후보든 이름이나 대표 메뉴가 맞는 곳이 먼저');
 select is((select array_agg(name order by name) from (select name from t_v where pos in (3, 4)) x),
-  array['대표메뉴집', '할매 w국수'], '그다음은 어느 후보든 이름이나 대표 메뉴가 맞는 곳');
+  array['양식당 제휴', '한식당 제휴'], '그다음은 같은 종류, 그 안에서 쿠폰 가게가 위로');
 select ok(not exists (select 1 from t_v where name = '일식당'), '후보와 종류가 다른 식당은 안 나온다');
 select is((select food_id from t_v where name = '할매 w국수'), (select id from public.foods where name = 'w국수'),
   '메뉴가 맞으면 food_id는 맞은 후보 (못 먹는 사람이 있는 후보도 기준에 든다)');
