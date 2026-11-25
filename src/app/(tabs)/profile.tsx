@@ -144,7 +144,7 @@ export default function ProfileScreen() {
               {stats.companions.map((c) => (
                 <View key={c.userId} className="flex-row items-center gap-3 rounded-2xl bg-surface p-4">
                   <Avatar name={c.displayName} userId={c.userId} size={44} />
-                  <Text className="flex-1 text-lg font-bold text-text" numberOfLines={1}>
+                  <Text className="flex-1 text-lg font-bold text-text">
                     {c.displayName}
                   </Text>
                   <Text className="text-sm font-semibold text-muted">{c.mealCount}번</Text>

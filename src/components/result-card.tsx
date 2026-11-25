@@ -48,7 +48,7 @@ export function ResultCard({ card }: { card: MealCard }) {
         <View className="absolute -bottom-6 -right-6 h-28 w-28 rounded-full bg-on-primary opacity-15" />
 
         <View className="flex-row items-center justify-between gap-3">
-          <Text className="flex-1 text-xl font-bold text-on-primary" numberOfLines={2}>
+          <Text className="flex-1 text-xl font-bold text-on-primary">
             {card.groupName}
           </Text>
           <Text className="text-xl font-bold text-on-primary">{mealDateLabel(card.eatenAt)}</Text>
@@ -59,9 +59,7 @@ export function ResultCard({ card }: { card: MealCard }) {
 
         <View className="gap-2">
           <Text
-            className={`font-bold tracking-tight text-on-primary ${nameSize}`}
-            numberOfLines={2}
-            adjustsFontSizeToFit>
+            className={`font-bold tracking-tight text-on-primary ${nameSize}`}>
             {card.foodName}
           </Text>
           <Text className="text-xl font-bold text-on-primary">

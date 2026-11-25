@@ -40,11 +40,11 @@ export function ProfileSummaryCard({
       <View className="flex-row items-center gap-3">
         <Avatar name={name} foodId={avatarFoodId} size={44} />
         <View className="flex-1 gap-1">
-          <Text className="text-xl font-bold tracking-tight text-text" numberOfLines={1}>
+          <Text className="text-xl font-bold tracking-tight text-text">
             {name}
           </Text>
           {handle || title ? (
-            <Text className="text-sm text-muted" numberOfLines={1}>
+            <Text className="text-sm text-muted">
               {handle ? `@${handle}` : title}
             </Text>
           ) : null}
@@ -90,7 +90,7 @@ export function ProfileSummaryCard({
           </View>
           <View className="flex-1 gap-1">
             <Text className="text-sm font-bold text-text">레벨 {nextAvatar.unlockLevel}에 열려요</Text>
-            <Text className="text-sm text-muted" numberOfLines={1}>
+            <Text className="text-sm text-muted">
               {nextAvatar.name} 아바타
             </Text>
           </View>

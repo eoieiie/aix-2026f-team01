@@ -73,8 +73,8 @@ export function SettingsList({
             <Text className="text-base text-muted">{blocks.isLoading ? '불러오는 중' : '차단한 사람이 없어요'}</Text>
           ) : (
             (blocks.data ?? []).map((b) => (
-              <View key={b.userId} className="h-14 flex-row items-center gap-3 rounded-2xl bg-surface pl-4 pr-2">
-                <Text className="flex-1 text-base font-bold text-text" numberOfLines={1}>
+              <View key={b.userId} className="min-h-14 flex-row items-center gap-3 rounded-2xl bg-surface py-2 pl-4 pr-2">
+                <Text className="flex-1 text-base font-bold text-text">
                   {b.displayName ?? '알 수 없는 사람'}
                 </Text>
                 <Pressable

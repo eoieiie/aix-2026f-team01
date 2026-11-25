@@ -145,8 +145,7 @@ function InviteQr({
           </View>
           <View className="flex-1 items-center justify-center gap-6 pb-12">
             <Text
-              className="text-center text-3xl font-bold tracking-tight text-text"
-              numberOfLines={2}>
+              className="text-center text-3xl font-bold tracking-tight text-text">
               {groupName}
             </Text>
             <QrCode value={inviteUrl} size={size} />

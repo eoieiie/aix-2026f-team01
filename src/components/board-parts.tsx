@@ -95,7 +95,6 @@ export function TableRow({ cells, flex, head = false }: { cells: (string | numbe
       {cells.map((c, i) => (
         <Text
           key={i}
-          numberOfLines={1}
           style={{ flex: flex[i] ?? 1 }}
           className={head ? 'text-xs font-semibold text-muted' : i === 0 ? 'text-base font-bold text-text' : 'text-base text-text'}>
           {c}

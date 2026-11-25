@@ -11,6 +11,7 @@ import {
   naverMapUrl,
   shopLine,
   shortAddress,
+  shortShopName,
   telUrl,
 } from '@/hooks/use-shops';
 import { AdBadge } from '@/components/ad-badge';
@@ -72,8 +73,9 @@ function ShopBody({ shop }: { shop: ShopDetail }) {
       <Hero shop={shop} />
 
       <View className="gap-2">
-        <View className="flex-row items-center gap-2">
-          <Text className="shrink text-3xl font-bold tracking-tight text-text">{shop.name}</Text>
+        {/* 제목은 지점 꼬리를 뗀 이름(shortShopName). 지도 링크와 찾기는 원래 이름 */}
+        <View className="flex-row flex-wrap items-center gap-2">
+          <Text className="text-3xl font-bold tracking-tight text-text">{shortShopName(shop.name)}</Text>
           {shop.partner ? <AdBadge /> : null}
         </View>
         {council.length ? <View className="flex-row flex-wrap gap-1">{[...new Set(council.map((b) => b.college))].map((c) => <CouncilBadge key={c} college={c} />)}</View> : null}

@@ -95,7 +95,7 @@ function DexTile({ food, on, onPress }: { food: DexFood; on: boolean; onPress: (
         ) : eaten ? <FoodDot foodId={food.foodId} size="sm" /> : null}
         {!eaten ? <Text className="absolute text-2xl font-bold text-muted">?</Text> : null}
       </View>
-      <Text className={`text-xs font-bold ${eaten ? 'text-text' : 'text-muted'}`} numberOfLines={1}>
+      <Text className={`text-xs font-bold ${eaten ? 'text-text' : 'text-muted'}`}>
         {eaten ? food.name : '???'}
       </Text>
       {eaten ? <Text className="text-xs font-semibold text-muted">{food.mealCount}번</Text> : null}

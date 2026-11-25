@@ -59,7 +59,7 @@ function MealRow({ meal, onPress }: { meal: TimelineMeal; onPress: () => void })
       className="flex-row items-center gap-3 rounded-2xl bg-surface p-4 active:opacity-70">
       <FoodThumb foodId={meal.foodId} size="sm" imageUrl={meal.imageUrl} />
       <View className="flex-1 gap-1">
-        <Text className="text-lg font-bold text-text" numberOfLines={1}>
+        <Text className="text-lg font-bold text-text">
           {meal.foodName}
         </Text>
         <Text className="text-sm text-muted">{dayLabel(meal.eatenAt)}</Text>

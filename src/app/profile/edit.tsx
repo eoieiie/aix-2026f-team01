@@ -209,8 +209,8 @@ function Chip({ label, on, onPress }: { label: string; on: boolean; onPress: () 
       accessibilityLabel={label}
       accessibilityState={{ selected: on }}
       onPress={onPress}
-      className={`h-11 flex-1 items-center justify-center rounded-xl px-1 active:opacity-70 ${on ? 'bg-ink' : 'bg-surface'}`} style={choiceSurface(on)}>
-      <Text className={`text-sm font-bold ${on ? 'text-on-ink' : 'text-text'}`} numberOfLines={1}>
+      className={`min-h-11 flex-1 items-center justify-center rounded-xl px-1 py-2 active:opacity-70 ${on ? 'bg-ink' : 'bg-surface'}`} style={choiceSurface(on)}>
+      <Text className={`text-sm font-bold ${on ? 'text-on-ink' : 'text-text'}`}>
         {label}
       </Text>
     </Pressable>
@@ -265,7 +265,7 @@ function AvatarPicker({
                         <Icon name="check" size={14} color="on-ink" />
                       </View>
                     ) : null}
-                    <Text className={`text-xs font-bold ${locked ? 'text-muted' : 'text-text'}`} numberOfLines={1}>
+                    <Text className={`text-xs font-bold ${locked ? 'text-muted' : 'text-text'}`}>
                       {locked ? `레벨 ${o?.unlockLevel}` : label}
                     </Text>
                   </Pressable>
