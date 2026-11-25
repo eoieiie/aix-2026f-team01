@@ -321,7 +321,15 @@ export function splitCoupons(list: readonly Coupon[], now: Date): { ready: Coupo
 // 이 가게에서 지금 내가 가진 쿠폰: 쓸 수 있는 것이 먼저, 없으면 오늘(최근 24시간) 받아서 이미 쓴 것
 export function couponForShop(list: readonly Coupon[], restaurantId: number, now: Date): Coupon | null {
   const mine = list.filter((c) => c.restaurantId === restaurantId && new Date(c.expiresAt).getTime() > now.getTime());
-  return mine.find((c) => couponState(c, now) === 'ready') ?? mine[0] ?? null;
+  const ready = mine.find((c) => couponState(c, now) === 'ready');
+  if (ready) return ready;
+  // 다 쓴 쿠폰은 오늘(한국 날짜) 가게 화면에서 받은 것만 보인다. 판에서 받아 쓴 쿠폰은 가게 화면의 "쿠폰 받기"를 막지 않는다
+  const today = koreanDay(now.toISOString());
+  return mine.find((c) => c.source === 'shop' && koreanDay(c.claimedAt) === today) ?? null;
+}
+
+function koreanDay(iso: string): string {
+  return new Date(new Date(iso).getTime() + 9 * 3600_000).toISOString().slice(0, 10);
 }
 
 // 판 결과에서 받은 쿠폰 찾기(식당 줄과 카페 줄이 쓴다)

@@ -204,6 +204,9 @@ describe('쿠폰함과 직원 확인 (4-27)', () => {
     expect(couponForShop([used], 7, now)?.id).toBe('used');
     expect(couponForShop([old], 7, now)).toBeNull();
     expect(couponForShop([ready], 8, now)).toBeNull();
+    // 판에서 받아 쓴 쿠폰은 가게 화면에서 새로 받는 것을 막지 않는다
+    const sessionUsed = coupon({ id: 'su', restaurantId: 7, source: 'session', sessionId: 'S1', redeemedAt: '2026-11-25T04:00:00Z' });
+    expect(couponForShop([sessionUsed], 7, now)).toBeNull();
   });
 
   it('판 결과의 쿠폰은 판과 가게로 찾는다', () => {
