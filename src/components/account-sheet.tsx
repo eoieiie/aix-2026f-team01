@@ -37,7 +37,7 @@ export function AccountSheet({ visible, onClose }: { visible: boolean; onClose: 
 
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={close}>
-      <View className="flex-1 items-center justify-center bg-black/40 px-5">
+      <View className="flex-1 items-center justify-center bg-black/40 px-4">
         <View className="w-full max-w-sm gap-6 rounded-3xl bg-background p-6">
           {loginId ? (
             <>
@@ -81,8 +81,8 @@ export function AccountSheet({ visible, onClose }: { visible: boolean; onClose: 
                         claim.reset();
                         signIn.reset();
                       }}
-                      className={`h-11 flex-1 items-center justify-center rounded-xl ${on ? 'bg-primary' : 'bg-surface'}`}>
-                      <Text className={`text-base font-bold ${on ? 'text-on-primary' : 'text-muted'}`}>{label}</Text>
+                      className={`h-11 flex-1 items-center justify-center rounded-xl ${on ? 'bg-ink' : 'bg-surface'}`}>
+                      <Text className={`text-base font-bold ${on ? 'text-on-ink' : 'text-muted'}`}>{label}</Text>
                     </Pressable>
                   );
                 })}

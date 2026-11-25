@@ -15,6 +15,8 @@ export interface Group {
   last_visited_at: string;
   // 홈 모임 카드에 보이는 것 (docs/design.md 1절). 멤버 이름은 들어온 순서
   members: string[];
+  // members와 같은 순서의 사람 id. PersonDots의 userIds로 넘기면 아바타가 보인다 (4-27)
+  member_ids?: string[];
   recent_foods: { food_id: number; food_name: string }[];
   has_open_session: boolean;
 }
@@ -133,7 +135,7 @@ export async function createGroup(
 // sessions는 meals를 거쳐서도 groups와 이어져서, 어느 관계로 붙일지 외래 키 이름을 적는다
 const MY_GROUPS_SELECT =
   'group_id, joined_at, groups ( id, name, invite_code, created_at, ' +
-  'members:memberships ( display_name, joined_at ), ' +
+  'members:memberships ( user_id, display_name, joined_at ), ' +
   'sessions!sessions_group_id_fkey ( status ), ' +
   'meals ( food_id, eaten_at, foods ( name ) ) )';
 
@@ -169,6 +171,7 @@ export async function getMyGroups(client: Client = getSupabase()): Promise<Group
         created_at: g.created_at,
         last_visited_at: visitedAt,
         members: members.map((m: any) => m.display_name),
+        member_ids: members.map((m: any) => m.user_id),
         recent_foods: meals.slice(0, HOME_RECENT_FOODS).map((m: any) => ({
           food_id: m.food_id,
           food_name: m.foods?.name ?? '식사',

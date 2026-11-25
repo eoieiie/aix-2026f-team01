@@ -5,7 +5,7 @@ import {
   addCandidate,
   addCustomCandidate,
   castVote,
-  getFoodHints,
+  getFoodHintsWithPicks,
   getSession,
   getVoteCounts,
   joinSession,
@@ -88,11 +88,12 @@ export function useFoods() {
 }
 
 // 4-20 음식마다 못 먹는 사람이 있는지, 이 모임이 언제 먹었는지. 사람이 들어오거나 못 먹는 것이 바뀌면 다시 읽는다.
+// 4-27 판 참여자 취향으로 서버가 고른 채우기 순서도 같이 온다(취향 자체는 오지 않는다).
 // 못 불러오면 빈 목록이고 판은 그대로 진행한다
 export function useFoodHints(sessionId: string, key: string) {
   const query = useQuery({
     queryKey: ['session-food-hints', sessionId, key],
-    queryFn: () => getFoodHints(sessionId),
+    queryFn: () => getFoodHintsWithPicks(sessionId),
     enabled: !!sessionId,
     retry: false,
     staleTime: 60_000,

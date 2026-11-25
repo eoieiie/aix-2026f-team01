@@ -1,4 +1,12 @@
-import { daysAgoKST, eatenNote, groupFavorites, quickFillPicks, type FoodHint } from './sessions';
+import {
+  daysAgoKST,
+  eatenNote,
+  getFillPicks,
+  groupFavorites,
+  quickFillPicks,
+  withFillRanks,
+  type FoodHint,
+} from './sessions';
 
 // 4-20 식사 기록을 판에 다시 쓰기
 const now = new Date('2026-11-12T03:00:00Z'); // 한국 시간 11/12 12:00
@@ -51,5 +59,29 @@ describe('quickFillPicks', () => {
     const hints = [h(1, 1, '2026-11-11T03:00:00Z'), h(2, 0, null), h(3, 1, '2026-10-01T03:00:00Z')];
     const picks = quickFillPicks(hints, [], 2, 14, () => 0.5, now);
     expect(picks.sort()).toEqual([2, 3]);
+  });
+});
+
+// 4-27 맞춤 채우기. 순서는 서버(0036 session_fill_picks)가 정하고 앱은 그대로 따른다
+describe('맞춤 채우기', () => {
+  it('서버가 고른 순서가 있으면 그 순서가 먼저다. 모자라면 예전 규칙으로 채운다', () => {
+    const hints = withFillRanks([h(1, 0, null), h(2, 0, null), h(3, 0, null), h(4, 0, null)], [3, 1]);
+    expect(quickFillPicks(hints, [], 3, 14, () => 0, now).slice(0, 2)).toEqual([3, 1]);
+    expect(quickFillPicks(hints, [], 3, 14, () => 0, now)).toHaveLength(3);
+  });
+  it('서버가 골랐어도 못 먹는 사람이 있거나 이미 후보면 고르지 않는다', () => {
+    const hints = withFillRanks([h(1, 0, null, true), h(2, 0, null), h(3, 0, null), h(4, 0, null)], [1, 2, 3]);
+    expect(quickFillPicks(hints, [2], 2, 14, () => 0, now)).toEqual([3, 4]);
+  });
+  it('아무도 취향을 안 적었으면(0줄) 힌트를 그대로 둔다', () => {
+    const hints = [h(1, 0, null), h(2, 0, null)];
+    expect(withFillRanks(hints, [])).toBe(hints);
+  });
+  it('추천을 못 받으면 빈 목록(판은 그대로 진행한다)', async () => {
+    const fail = { rpc: jest.fn(async () => ({ data: null, error: { message: 'not_member' } })) } as any;
+    expect(await getFillPicks('s1', fail)).toEqual([]);
+    const ok = { rpc: jest.fn(async () => ({ data: [{ food_id: 9, rank: 2 }, { food_id: 4, rank: 1 }], error: null })) } as any;
+    expect(await getFillPicks('s1', ok)).toEqual([4, 9]);
+    expect(ok.rpc).toHaveBeenCalledWith('session_fill_picks', { p_session_id: 's1' });
   });
 });

@@ -1,4 +1,4 @@
-import { authorityTitle, levelOf, typeLetters } from './stats';
+import { authorityTitle, levelOf, levelProgress, typeLetters } from './stats';
 
 describe('levelOf (4-15 삼각수 레벨)', () => {
   it.each([
@@ -11,6 +11,18 @@ describe('levelOf (4-15 삼각수 레벨)', () => {
     [10, 4, 5],
   ])('%i끼면 레벨 %i, 다음 레벨까지 %i끼', (meals, level, toNext) => {
     expect(levelOf(meals)).toEqual({ level, toNext });
+  });
+});
+
+describe('levelProgress (4-27 레벨 막대)', () => {
+  it.each([
+    [0, 0],
+    [1, 0],
+    [2, 0.5],
+    [3, 0],
+    [5, 2 / 3],
+  ])('%i끼면 이번 레벨에서 %f만큼 찼다', (meals, ratio) => {
+    expect(levelProgress(meals).ratio).toBeCloseTo(ratio);
   });
 });
 
