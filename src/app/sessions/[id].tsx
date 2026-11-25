@@ -1,3 +1,4 @@
+import { choiceSurface } from '@/components/choice-colors';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { type ReactNode, useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, View } from 'react-native';
@@ -485,7 +486,7 @@ function VotingStage({ session }: { session: SessionView }) {
             onPress={() => anyOk.mutate()}
             className={`h-14 flex-row items-center justify-center gap-2 rounded-2xl active:opacity-80 ${
               session.myAnyOk ? 'bg-ink' : 'bg-surface'
-            }`}>
+            }`} style={choiceSurface(session.myAnyOk)}>
             {session.myAnyOk ? <Icon name="check" color="on-ink" /> : null}
             <Text className={`text-lg font-bold ${session.myAnyOk ? 'text-on-ink' : 'text-text'}`}>
               아무거나 괜찮아요

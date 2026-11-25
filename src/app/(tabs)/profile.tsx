@@ -2,6 +2,7 @@ import { useFocusEffect, useRouter } from 'expo-router';
 import { useCallback, useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, View } from 'react-native';
 import { Text } from '@/components/text';
+import { choiceSurface } from '@/components/choice-colors';
 import { FoodDex } from '@/components/food-dex';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -101,6 +102,7 @@ export default function ProfileScreen() {
               accessibilityState={{ selected: subTab === 'foods' }}
               accessibilityLabel={`음식 도감 ${stats.foods.length}개`}
               onPress={() => setSubTab('foods')}
+              style={choiceSurface(subTab === 'foods', 'transparent')}
               className={`flex-1 items-center justify-center min-h-11 rounded-lg py-2 active:opacity-80 ${
                 subTab === 'foods' ? 'bg-ink' : ''
               }`}>
@@ -116,6 +118,7 @@ export default function ProfileScreen() {
               accessibilityState={{ selected: subTab === 'companions' }}
               accessibilityLabel={`밥 친구 랭킹 ${stats.companions.length}명`}
               onPress={() => setSubTab('companions')}
+              style={choiceSurface(subTab === 'companions', 'transparent')}
               className={`flex-1 items-center justify-center min-h-11 rounded-lg py-2 active:opacity-80 ${
                 subTab === 'companions' ? 'bg-ink' : ''
               }`}>

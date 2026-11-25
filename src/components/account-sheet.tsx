@@ -1,3 +1,4 @@
+import { choiceSurface } from '@/components/choice-colors';
 import { useState } from 'react';
 import { Modal, Pressable, View } from 'react-native';
 import { Text } from '@/components/text';
@@ -81,7 +82,7 @@ export function AccountSheet({ visible, onClose }: { visible: boolean; onClose: 
                         claim.reset();
                         signIn.reset();
                       }}
-                      className={`h-12 flex-1 items-center justify-center rounded-lg ${on ? 'bg-ink' : 'bg-surface'}`}>
+                      className={`h-12 flex-1 items-center justify-center rounded-lg ${on ? 'bg-ink' : 'bg-surface'}`} style={choiceSurface(on)}>
                       <Text className={`text-base font-bold ${on ? 'text-on-ink' : 'text-muted'}`}>{label}</Text>
                     </Pressable>
                   );

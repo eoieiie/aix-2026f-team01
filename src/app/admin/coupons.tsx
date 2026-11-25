@@ -7,6 +7,7 @@ import { formatKoreanTime, redeemRate } from '@/hooks/use-shops';
 import { BarLegend, Bars, DOW_LABELS, HOUR_LABELS, Panel, StatTile, TableRow } from '@/components/board-parts';
 import { Button } from '@/components/button';
 import { Text } from '@/components/text';
+import { choiceSurface } from '@/components/choice-colors';
 import { useMyProfile } from '@/hooks/use-profile';
 import { type AdminBoard, type CollegeRow, useAdminBoard, useAdminColleges } from '@/hooks/use-shops';
 
@@ -44,7 +45,7 @@ export default function AdminCouponsScreen() {
                 accessibilityLabel={`최근 ${d}일 보기`}
                 accessibilityState={{ selected: d === days }}
                 onPress={() => setDays(d)}
-                className={`h-11 w-24 items-center justify-center rounded-xl active:opacity-70 ${d === days ? 'bg-ink' : 'bg-surface'}`}>
+                className={`h-11 w-24 items-center justify-center rounded-xl active:opacity-70 ${d === days ? 'bg-ink' : 'bg-surface'}`} style={choiceSurface(d === days)}>
                 <Text className={`text-base font-bold ${d === days ? 'text-on-ink' : 'text-text'}`}>{`${d}일`}</Text>
               </Pressable>
             ))}

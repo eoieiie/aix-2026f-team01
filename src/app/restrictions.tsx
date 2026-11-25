@@ -1,3 +1,4 @@
+import { choiceSurface } from '@/components/choice-colors';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, View } from 'react-native';
@@ -182,7 +183,7 @@ function TagSection({
                 onPress={() => onToggle(tag.code)}
                 className={`h-12 items-center justify-center rounded-full active:opacity-70 ${
                   on ? 'bg-ink' : 'bg-surface'
-                }`}>
+                }`} style={choiceSurface(on)}>
                 <Text
                   className={`text-sm font-bold ${on ? 'text-on-ink' : 'text-text'}`}
                   numberOfLines={1}>
