@@ -15,6 +15,8 @@ import {
 } from '@/hooks/use-shops';
 import { AdBadge } from '@/components/ad-badge';
 import { Button } from '@/components/button';
+import { CouncilBadge, CouncilRecord } from '@/components/council-benefit';
+import { useCouncilBenefits } from '@/hooks/use-council-benefits';
 import { CouponCode } from '@/components/coupon-code';
 import { Icon, IconButton, type IconName } from '@/components/icon';
 import { ShopThumb } from '@/components/shop-thumb';
@@ -58,6 +60,7 @@ export default function ShopScreen() {
 function ShopBody({ shop }: { shop: ShopDetail }) {
   const { coupons } = useMyCoupons();
   const claim = useClaimShopCoupon();
+  const council = useCouncilBenefits().benefits.filter((b) => b.restaurant_id === shop.id);
   const [claimError, setClaimError] = useState<string | null>(null);
   const coupon = couponForShop(coupons, shop.id, new Date());
   const hours = formatOpeningHours(shop.openingHours);
@@ -73,8 +76,16 @@ function ShopBody({ shop }: { shop: ShopDetail }) {
           <Text className="shrink text-3xl font-bold tracking-tight text-text">{shop.name}</Text>
           {shop.partner ? <AdBadge /> : null}
         </View>
+        {council.length ? <View className="flex-row flex-wrap gap-1">{[...new Set(council.map((b) => b.college))].map((c) => <CouncilBadge key={c} college={c} />)}</View> : null}
         <TextPieces pieces={line} className="text-base text-muted" />
       </View>
+
+      {council.length ? (
+        <View className="gap-4 rounded-2xl bg-surface p-4">
+          <Text className="text-lg font-bold text-text">학생회 제휴 혜택</Text>
+          {council.map((entry) => <CouncilRecord key={entry.id} entry={entry} />)}
+        </View>
+      ) : null}
 
       {shop.partner && shop.couponText ? (
         <View className="gap-3 rounded-2xl bg-surface p-4">

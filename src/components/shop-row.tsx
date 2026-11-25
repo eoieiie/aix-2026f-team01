@@ -2,6 +2,8 @@ import { useRouter } from 'expo-router';
 import { Pressable, View } from 'react-native';
 
 import { AdBadge } from '@/components/ad-badge';
+import { CouncilBadge } from '@/components/council-benefit';
+import { councilBadge, useCouncilBenefits } from '@/hooks/use-council-benefits';
 import { ShopThumb } from '@/components/shop-thumb';
 import { Text } from '@/components/text';
 import { TextPieces } from '@/components/text-pieces';
@@ -37,10 +39,12 @@ export function ShopRow({
   onSurface?: boolean;
 }) {
   const router = useRouter();
+  const { benefits } = useCouncilBenefits();
+  const colleges = [...new Set(benefits.filter((b) => b.restaurant_id === id).map((b) => b.college))];
   return (
     <Pressable
       accessibilityRole="link"
-      accessibilityLabel={`${name}${partner ? ', 광고' : ''}, 가게 정보 보기`}
+      accessibilityLabel={`${name}${partner ? ', 광고' : ''}${colleges.map((c) => `, ${councilBadge(c)}`).join('')}, 가게 정보 보기`}
       onPress={() => router.push(`/shops/${id}` as any)}
       className={`flex-row items-center gap-3 active:opacity-70 ${card ? 'rounded-2xl bg-surface p-4' : 'py-2'}`}>
       <ShopThumb name={name} photoUrl={photoUrl} thumbUrl={thumbUrl} cuisine={cuisine} size={thumbSize} onSurface={onSurface} />
@@ -52,6 +56,7 @@ export function ShopRow({
           {partner ? <AdBadge /> : null}
         </View>
         <TextPieces pieces={info} />
+        {colleges.length ? <View className="flex-row flex-wrap gap-1">{colleges.map((c) => <CouncilBadge key={c} college={c} />)}</View> : null}
         {benefit ? (
           <Text className="text-sm font-semibold text-text" numberOfLines={1}>
             {benefit}

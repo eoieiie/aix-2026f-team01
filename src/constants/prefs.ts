@@ -1,7 +1,7 @@
 // 프로필 꾸미기와 취향 (명세 4-27). 고를 수 있는 값은 서버 0036(pref_cuisines, pref_colleges, pref_meal_times)과 같아야 한다.
 // 전부 선택 항목이고, 안 골라도 앱은 그대로 쓸 수 있다
 
-// 한양대 ERICA 단과대 10곳 (hanyang.ac.kr/erica, 2026-11-25 확인)
+// 한양대 ERICA 단과대 10곳 (goerica.hanyang.ac.kr/admission/html/campus/major.asp, 2026-11-25 확인)
 export const COLLEGES = [
   { key: 'eng', label: '공학대학' },
   { key: 'computing', label: '소프트웨어융합대학' },
