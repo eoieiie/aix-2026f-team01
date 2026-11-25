@@ -1,5 +1,5 @@
-import { Link, useRouter } from 'expo-router';
-import { ScrollView, View } from 'react-native';
+import { useRouter } from 'expo-router';
+import { Linking, Platform, Pressable, ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { IconButton } from '@/components/icon';
@@ -28,9 +28,7 @@ export function LegalPage({ title, updated, sections }: { title: string; updated
           <View key={s.title} className="gap-2">
             <Text className="text-lg font-bold text-text">{s.title}</Text>
             {s.link ? (
-              <Link href={s.link.href} className="min-h-11 py-3 text-base font-bold text-text underline">
-                {s.link.label}
-              </Link>
+              <MailLink {...s.link} />
             ) : null}
             {s.lines.map((l, i) => (
               <Text key={i} className="text-base leading-6 text-text">
@@ -41,5 +39,17 @@ export function LegalPage({ title, updated, sections }: { title: string; updated
         ))}
       </ScrollView>
     </SafeAreaView>
+  );
+}
+
+function MailLink({ href, label }: NonNullable<LegalSection['link']>) {
+  // 웹에서는 브라우저가 메일 주소로 직접 연결하고, 앱에서는 운영체제에 맡긴다.
+  const action = Platform.OS === 'web'
+    ? { href }
+    : { onPress: () => void Linking.openURL(href).catch(() => undefined) };
+  return (
+    <Pressable accessibilityRole="link" {...action} className="min-h-11 justify-center active:opacity-70">
+      <Text className="text-base font-bold text-text underline">{label}</Text>
+    </Pressable>
   );
 }
