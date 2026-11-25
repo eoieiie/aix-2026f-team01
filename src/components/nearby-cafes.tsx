@@ -54,7 +54,7 @@ export function NearbyCafes({ sessionId, onPrimary = false }: { sessionId: strin
           </View>
         );
       })}
-      <MoreShops total={list[0].total} shown={list.length} kind="cafe" onWhite={onPrimary} />
+      <MoreShops shown={list.length} kind="cafe" onWhite={onPrimary} />
     </View>
   );
 }

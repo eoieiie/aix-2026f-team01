@@ -139,15 +139,12 @@ export async function getShop(
 }
 
 // 종류와 검색어로 거른다. 검색어는 가게 이름, 대표 메뉴, 짐작 메뉴(0051)에서 찾는다(띄어쓰기와 대소문자는 보지 않는다)
-// alsoCuisine: 결과 뒤 "더 보기"로 메뉴 이름을 찾은 채 열었을 때 그 메뉴 종류(0048). 이름이나 메뉴가 맞는 곳이 먼저, 그다음 같은 종류
-export function filterShops(list: readonly Shop[], kind: ShopKind, query: string, alsoCuisine: string | null = null): Shop[] {
+export function filterShops(list: readonly Shop[], kind: ShopKind, query: string): Shop[] {
   const q = query.replace(/\s+/g, '').toLowerCase();
   const byText = (s: Shop) => [s.name, ...s.menus, ...s.menusGuess].map((t) => t.replace(/\s+/g, '').toLowerCase()).some((t) => t.includes(q));
   const inKind = list.filter((s) => !(kind === 'partner' ? !s.partner : kind !== 'all' && s.cuisine !== kind));
   if (q === '') return inKind;
-  const hits = inKind.filter(byText);
-  if (!alsoCuisine) return hits;
-  return [...hits, ...inKind.filter((s) => !byText(s) && s.cuisine === alsoCuisine)];
+  return inKind.filter(byText);
 }
 
 // 이름 아래 한 줄의 조각들: 종류, 걸어서 몇 분, 영업 중 중 값이 있는 것만.
