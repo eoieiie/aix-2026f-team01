@@ -60,7 +60,7 @@ select is((select d -> 'menus' from t_x), '[]'::jsonb, '가게 상세의 대표 
 select is((select thumb_food_id from t_l where name = '대홍훠궈샤브샤브'), null::bigint, '가게 그림도 짐작 메뉴로 고르지 않는다');
 select is((select menus_guess from t_l where name = '보배반점'), array['짜장면', '짬뽕', '탕수육'], '가게 목록은 찾기용 짐작을 같이 준다');
 -- 그림 경로가 없는 로컬 DB에서도 그림 함수가 음식을 고를 수 있게(되돌림)
-update public.foods set image_path = coalesce(image_path, 'zz_t51.webp') where name in ('짜장면', '치킨') and not custom;
+update public.foods set image_path = coalesce(image_path, id || '.webp') where name in ('짜장면', '치킨') and not custom;
 select is(public.shop_thumb_food('보배반점 안산한양대에리카점', '{}', 'chinese'), null::bigint, '반점 같은 업종 낱말로 그림을 고르지 않는다');
 select is((select name from public.foods where id = public.shop_thumb_food('대학통닭', '{}', 'western')), '치킨', '음식을 말하는 이름 낱말(통닭)은 그대로');
 select ok(not has_function_privilege('authenticated', 'public.shop_split_menus(text, text, text[])', 'execute'), '나누기 함수는 앱에서 부르지 못한다');
