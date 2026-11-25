@@ -22,7 +22,7 @@ interface InviteCardProps {
   groupName: string;
 }
 
-// 검은 초대 카드. 코드 아래에 같은 크기의 버튼 둘: 링크 복사(단톡방에 보낼 때), QR(옆 사람이 폰 카메라로 찍을 때)
+// 검은 초대 카드(2026-11-25 주황 면에서 검정으로 되돌림). 코드 아래에 같은 크기의 버튼 둘: 링크 복사(단톡방에 보낼 때), QR(옆 사람이 폰 카메라로 찍을 때)
 // 화면의 주황은 아래 시작 버튼 하나라서, 초대 카드는 색 대신 명암으로 눈에 띄게 한다 (spec.md 7절)
 export function InviteCard({ inviteCode, groupName }: InviteCardProps) {
   const [copied, setCopied] = useState(false);
@@ -57,10 +57,10 @@ export function InviteCard({ inviteCode, groupName }: InviteCardProps) {
   };
 
   return (
-    <View className="w-full gap-4 rounded-3xl bg-primary p-5">
+    <View className="w-full gap-4 rounded-2xl bg-ink p-4">
       <View className="gap-1">
-        <Text className="text-xl font-bold text-on-primary">초대 코드</Text>
-        <Text className="text-4xl font-bold tracking-widest text-on-primary">{inviteCode}</Text>
+        <Text className="text-xl font-bold text-on-ink">초대 코드</Text>
+        <Text className="text-4xl font-bold tracking-widest text-on-ink">{inviteCode}</Text>
       </View>
 
       <View className="flex-row gap-2">
@@ -75,7 +75,7 @@ export function InviteCard({ inviteCode, groupName }: InviteCardProps) {
 
       {/* 복사가 안 되면 링크 글자를 보여줘서 직접 복사하게 한다 (spec.md 4-4) */}
       {copyFailed ? (
-        <View className="gap-1 rounded-2xl bg-background p-3">
+        <View className="gap-1 rounded-lg bg-background p-3">
           <Text className="text-sm text-muted">아래 링크를 길게 눌러 복사해 주세요</Text>
           <Text selectable className="select-all text-sm font-semibold text-text">
             {inviteUrl}
@@ -111,7 +111,7 @@ function CardButton({
       accessibilityRole="button"
       accessibilityLabel={accessibilityLabel}
       onPress={onPress}
-      className="h-12 flex-1 flex-row items-center justify-center gap-2 rounded-2xl bg-background active:opacity-80">
+      className="h-12 flex-1 flex-row items-center justify-center gap-2 rounded-lg bg-background active:opacity-80">
       <Icon name={icon} size={20} />
       <Text className="text-base font-bold text-text">{label}</Text>
     </Pressable>
@@ -134,12 +134,12 @@ function InviteQr({
   inviteUrl: string;
 }) {
   const { width } = useWindowDimensions();
-  const size = Math.min(Math.min(width, 480) - 40, 360);
+  const size = Math.min(Math.min(width, 480) - 32, 360);
 
   return (
     <Modal visible={visible} animationType="fade" onRequestClose={onClose}>
       <SafeAreaView className="flex-1 items-center bg-background">
-        <View className="w-full max-w-[480px] flex-1 px-5 pt-3">
+        <View className="w-full max-w-[480px] flex-1 px-4 pt-3">
           <View className="h-12 flex-row items-center justify-end">
             <IconButton name="close" label="닫기" onPress={onClose} />
           </View>

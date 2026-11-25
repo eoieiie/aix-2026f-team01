@@ -1,6 +1,7 @@
 import type { Client } from './groups';
 import { FOOD_IMAGE_BUCKET } from './food-images';
 import { getSupabase } from './supabase';
+import { collegeLabel } from '@/constants/prefs';
 
 // 가게 탭과 가게 상세(spec.md 4-26), 쿠폰함과 직원 확인(4-27), 쿠폰 현황판(4-28).
 // 가게 정보는 공공데이터와 오픈스트리트맵, 사진은 사장님이 주거나 팀이 찍은 것만 쓴다
@@ -399,6 +400,23 @@ const ints = (v: unknown, n: number): number[] =>
 const totals = (t: any): BoardTotals => ({ claimed: int(t?.claimed), redeemed: int(t?.redeemed), people: int(t?.people) });
 
 // 운영자 현황판. 운영자가 아니면 서버가 not_admin을 던진다
+// 운영자 현황판의 단과대별 쓴 쿠폰 (4-28, 0035). 5명 미만인 단과대와 고르지 않은 사람은 서버가 'other'(기타)로 묶는다
+export type CollegeRow = { label: string; users: number; redeemed: number };
+
+export function toCollegeRows(rows: readonly { college: string; users: number; redeemed: number }[]): CollegeRow[] {
+  return rows.map((r) => ({
+    label: r.college === 'other' ? '기타' : (collegeLabel(r.college) ?? '기타'),
+    users: int(r.users),
+    redeemed: int(r.redeemed),
+  }));
+}
+
+export async function getAdminColleges(days: number, area: string | null, client: Client = getSupabase()): Promise<CollegeRow[]> {
+  const { data, error } = await client.rpc('admin_coupon_colleges', { p_days: days, p_area: area });
+  if (error) throw error;
+  return toCollegeRows((data ?? []) as any[]);
+}
+
 export async function getAdminBoard(
   days: number,
   area: string | null,

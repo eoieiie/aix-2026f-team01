@@ -42,16 +42,16 @@ export function SettingsList({
         <Row icon="pencil" label="내 이름 바꾸기" onPress={() => setSheet('name')} />
         <Row icon="close" label="못 먹는 음식" onPress={onRestrictions} />
         {hasType ? <Row icon="refresh" label="밥BTI 다시 만들기" onPress={onOnboarding} /> : null}
-        <Row icon="person" label="다른 기기에서 이어 쓰기" onPress={onAccount} last />
+        <Row icon="person" label="다른 기기에서 이어 쓰기" onPress={onAccount} />
       </Group>
       <Group>
         <Row label="차단한 사람" onPress={() => setSheet('blocks')} />
         <Row label="개인정보 처리방침" onPress={() => router.push('/privacy' as any)} />
         <Row label="이용약관" onPress={() => router.push('/terms' as any)} />
-        <Row label="문의하기" onPress={() => Linking.openURL(`mailto:${SUPPORT_MAIL}?subject=${encodeURIComponent('밥비티아이 문의')}`)} last />
+        <Row label="문의하기" onPress={() => Linking.openURL(`mailto:${SUPPORT_MAIL}?subject=${encodeURIComponent('밥비티아이 문의')}`)} />
       </Group>
       <Group>
-        <Row label="계정 삭제" danger onPress={() => setSheet('delete1')} last />
+        <Row label="계정 삭제" danger onPress={() => setSheet('delete1')} />
       </Group>
       {version ? <Text className="px-1 text-sm text-muted">버전 {version}</Text> : null}
 
@@ -73,7 +73,7 @@ export function SettingsList({
             <Text className="text-base text-muted">{blocks.isLoading ? '불러오는 중' : '차단한 사람이 없어요'}</Text>
           ) : (
             (blocks.data ?? []).map((b) => (
-              <View key={b.userId} className="h-14 flex-row items-center gap-3 rounded-2xl bg-surface pl-5 pr-2">
+              <View key={b.userId} className="h-14 flex-row items-center gap-3 rounded-2xl bg-surface pl-4 pr-2">
                 <Text className="flex-1 text-base font-bold text-text" numberOfLines={1}>
                   {b.displayName ?? '알 수 없는 사람'}
                 </Text>
@@ -122,7 +122,7 @@ export function SettingsList({
 }
 
 function Group({ children }: { children: React.ReactNode }) {
-  return <View className="overflow-hidden rounded-3xl bg-surface">{children}</View>;
+  return <View className="overflow-hidden rounded-2xl bg-surface">{children}</View>;
 }
 
 function Row({
@@ -130,20 +130,18 @@ function Row({
   label,
   onPress,
   danger = false,
-  last = false,
 }: {
   icon?: IconName;
   label: string;
   onPress: () => void;
   danger?: boolean;
-  last?: boolean;
 }) {
   return (
     <Pressable
       accessibilityRole="button"
       accessibilityLabel={label}
       onPress={onPress}
-      className={`h-14 flex-row items-center gap-3 px-5 active:bg-surface-strong ${last ? '' : 'border-b border-surface-strong'}`}>
+      className="h-14 flex-row items-center gap-3 px-4 active:bg-surface-strong">
       {icon ? <Icon name={icon} size={20} /> : null}
       <Text className={`text-base font-bold ${danger ? 'text-danger' : 'text-text'}`}>{label}</Text>
     </Pressable>

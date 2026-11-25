@@ -9,6 +9,7 @@ import {
   couponErrorText,
   couponForSession,
   couponForShop,
+  toCollegeRows,
   couponState,
   filterShops,
   formatKoreanTime,
@@ -303,5 +304,14 @@ describe('쿠폰 현황판 (4-28)', () => {
       total: { claimed: 3, redeemed: 2, people: 6 },
       minTeams: 5, hourClaimed: null, hourRedeemed: null, menus: null,
     });
+  });
+});
+
+describe('단과대별 쓴 쿠폰', () => {
+  it('단과대 이름으로 바꾸고 묶인 칸은 기타로 보인다', () => {
+    expect(toCollegeRows([{ college: 'computing', users: 5, redeemed: 7 }, { college: 'other', users: 2, redeemed: 2 }])).toEqual([
+      { label: '소프트웨어융합대학', users: 5, redeemed: 7 },
+      { label: '기타', users: 2, redeemed: 2 },
+    ]);
   });
 });

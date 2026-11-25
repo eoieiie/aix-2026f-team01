@@ -20,11 +20,12 @@ import {
   useStartSession,
 } from '@/hooks/use-groups';
 
-// 멤버 동그라미 색. 홈 모임 카드의 사람 동그라미와 같은 순서
+// 멤버 동그라미 색. 사람 동그라미에는 주황을 쓰지 않는다. 회색 네 단계를 돌려 쓴다 (docs/design.md 1절, "프레즐 규칙 그대로" 색)
 const MEMBER_COLORS = [
-  { bg: 'bg-food-1', text: 'text-on-primary' },
-  { bg: 'bg-food-7', text: 'text-on-primary' },
-  { bg: 'bg-food-3', text: 'text-text' },
+  { bg: 'bg-food-8', text: 'text-on-ink' },
+  { bg: 'bg-food-2', text: 'text-on-ink' },
+  { bg: 'bg-food-4', text: 'text-text' },
+  { bg: 'bg-food-6', text: 'text-text' },
 ] as const;
 
 export default function GroupScreen() {
@@ -140,7 +141,7 @@ export default function GroupScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-background">
-      <View className="flex-row items-center justify-between px-5 py-3">
+      <View className="flex-row items-center justify-between px-4 py-3">
         <IconButton name="back" label="홈으로" onPress={() => router.replace('/')} />
         <GroupMenu groupId={group.id} name={group.name} isOwner={!!group.is_owner} onLeft={() => router.replace('/')} />
       </View>
@@ -148,7 +149,7 @@ export default function GroupScreen() {
       <ScrollView keyboardShouldPersistTaps="handled" automaticallyAdjustKeyboardInsets
         className="flex-1"
         showsVerticalScrollIndicator={false}
-        contentContainerClassName="gap-8 px-5 pb-36 pt-2"
+        contentContainerClassName="gap-8 px-4 pb-36 pt-2"
       >
         {/* 모임 이름과 멤버 이름 동그라미 (spec.md 4-6) */}
         <View className="gap-4">
@@ -162,14 +163,14 @@ export default function GroupScreen() {
                 <View key={member.user_id} className="items-center gap-2">
                   <View>
                     <View
-                      className={`h-14 w-14 items-center justify-center rounded-full ${color.bg}`}>
+                      className={`h-11 w-11 items-center justify-center rounded-full ${color.bg}`}>
                       <Text className={`text-lg font-bold ${color.text}`}>
                         {Array.from(member.display_name)[0] ?? ''}
                       </Text>
                     </View>
                     {fresh.has(member.user_id) ? <NewRing /> : null}
                   </View>
-                  <Text className="max-w-16 text-sm font-semibold text-text" numberOfLines={1}>
+                  <Text className="max-w-14 text-sm font-semibold text-text" numberOfLines={1}>
                     {member.display_name}
                   </Text>
                 </View>
@@ -193,7 +194,7 @@ export default function GroupScreen() {
       </ScrollView>
 
       {/* 하단 고정 버튼. 진행 중인 판이 있으면 "진행 중인 판으로" (spec.md 4-6) */}
-      <View className="absolute bottom-0 left-0 right-0 bg-background px-5 pb-8 pt-3">
+      <View className="absolute bottom-0 left-0 right-0 bg-background px-4 pb-8 pt-3">
         <View>
           <Button
             label={hasOpenSession ? '진행 중인 판으로' : '오늘 뭐 먹지'}

@@ -74,8 +74,8 @@ export function HeadcountModal({
 
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
-      <View className="flex-1 items-center justify-center bg-black/40 px-5">
-        <View className="max-h-full w-full max-w-sm rounded-3xl bg-background">
+      <View className="flex-1 items-center justify-center bg-black/40 px-4">
+        <View className="max-h-full w-full max-w-[440px] rounded-3xl bg-background">
           <ScrollView keyboardShouldPersistTaps="handled" automaticallyAdjustKeyboardInsets contentContainerClassName="gap-6 p-6">
             <Text className="text-3xl font-bold tracking-tight text-text">같이 먹을 사람</Text>
 

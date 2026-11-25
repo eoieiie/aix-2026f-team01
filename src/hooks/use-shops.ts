@@ -3,6 +3,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   claimShopCoupon,
   getAdminBoard,
+  getAdminColleges,
   getMyCoupons,
   getOwnerBoard,
   getShop,
@@ -30,7 +31,7 @@ export {
   timeLeft,
 } from '@/api/shops';
 
-export type { AdminBoard, Coupon, CouponState, OwnerBoard, Shop, ShopDetail, ShopKind } from '@/api/shops';
+export type { AdminBoard, CollegeRow, Coupon, CouponState, OwnerBoard, Shop, ShopDetail, ShopKind } from '@/api/shops';
 
 // 가게 목록 (4-26). 동네는 서버가 내 최근 모임으로 정한다. 판 결과의 식당 줄도 이 목록에서 그림을 찾는다
 export function useShops() {
@@ -79,6 +80,15 @@ export function useAdminBoard(days: number, area: string | null) {
   return useQuery({
     queryKey: ['admin-coupon-board', days, area],
     queryFn: () => getAdminBoard(days, area),
+    retry: false,
+    refetchInterval: 30_000,
+  });
+}
+
+export function useAdminColleges(days: number, area: string | null) {
+  return useQuery({
+    queryKey: ['admin-coupon-colleges', days, area],
+    queryFn: () => getAdminColleges(days, area),
     retry: false,
     refetchInterval: 30_000,
   });

@@ -105,11 +105,11 @@ export default function InviteScreen() {
   return (
     <SafeAreaView className="flex-1 bg-background">
       <KeyboardSafe>
-      <View className="flex-1 justify-center gap-8 px-5">
+      <View className="flex-1 justify-center gap-8 px-4">
         {/* 초대받은 모임 카드. 이름표 한 줄과 모임 이름만 둔다 (설명 줄은 버튼과 입력칸이 대신한다) */}
-        <View className="gap-3 rounded-3xl bg-primary p-6">
-          <Text className="text-xl font-bold text-on-primary">초대받은 모임</Text>
-          <Text className="text-5xl font-extrabold leading-tight tracking-tight text-on-primary">
+        <View className="gap-2 rounded-2xl bg-surface p-4">
+          <Text className="text-base font-bold text-muted">초대받은 모임</Text>
+          <Text className="text-5xl font-extrabold leading-tight tracking-tight text-text">
             {invite.groupName}
           </Text>
         </View>

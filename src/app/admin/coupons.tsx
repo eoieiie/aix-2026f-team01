@@ -8,7 +8,7 @@ import { BarLegend, Bars, DOW_LABELS, HOUR_LABELS, Panel, StatTile, TableRow } f
 import { Button } from '@/components/button';
 import { Text } from '@/components/text';
 import { useMyProfile } from '@/hooks/use-profile';
-import { type AdminBoard, useAdminBoard } from '@/hooks/use-shops';
+import { type AdminBoard, type CollegeRow, useAdminBoard, useAdminColleges } from '@/hooks/use-shops';
 
 const PERIODS = [7, 30, 90];
 const WIDE_MIN = 960;
@@ -21,6 +21,7 @@ export default function AdminCouponsScreen() {
   const area = typeof rawArea === 'string' && /^[a-z_]{2,20}$/.test(rawArea) ? rawArea : null;
   const [days, setDays] = useState(30);
   const board = useAdminBoard(days, area);
+  const colleges = useAdminColleges(days, area);
   const profile = useMyProfile();
   const notAdmin = String((board.error as { message?: string } | null)?.message ?? '').includes('not_admin');
 
@@ -67,14 +68,14 @@ export default function AdminCouponsScreen() {
             <Button label="다시 시도" variant="secondary" onPress={() => board.refetch()} />
           </View>
         ) : (
-          <BoardBody board={board.data} />
+          <BoardBody board={board.data} colleges={colleges.data ?? []} />
         )}
       </ScrollView>
     </SafeAreaView>
   );
 }
 
-function BoardBody({ board }: { board: AdminBoard }) {
+function BoardBody({ board, colleges }: { board: AdminBoard; colleges: CollegeRow[] }) {
   const { width } = useWindowDimensions();
   const wide = width >= WIDE_MIN;
   const rate = redeemRate(board.totals);
@@ -91,6 +92,19 @@ function BoardBody({ board }: { board: AdminBoard }) {
             cells={[s.name, s.claimed, s.redeemed, s.people, when(s.lastRedeemedAt)]}
             flex={[3, 1, 1, 1, 3]}
           />
+        ))}
+      </View>
+    </Panel>
+  );
+
+  // 단과대별 합계만. 5명 미만인 단과대는 서버가 "기타"로 묶는다. 사장님 화면에는 없다
+  const collegePanel = (
+    <Panel title="단과대별 쓴 쿠폰" note="5명 미만은 기타">
+      <View className="gap-1">
+        <TableRow head cells={['단과대', '사람', '쓴 쿠폰']} flex={[3, 1, 1]} />
+        {colleges.length === 0 ? <Text className="px-3 text-base text-muted">아직 쓴 쿠폰이 없어요</Text> : null}
+        {colleges.map((c) => (
+          <TableRow key={c.label} cells={[c.label, c.users, c.redeemed]} flex={[3, 1, 1]} />
         ))}
       </View>
     </Panel>
@@ -119,12 +133,16 @@ function BoardBody({ board }: { board: AdminBoard }) {
 
       {wide ? (
         <View className="flex-row items-start gap-4">
-          <View style={{ flex: 3 }}>{shops}</View>
+          <View className="gap-4" style={{ flex: 3 }}>
+            {shops}
+            {collegePanel}
+          </View>
           <View style={{ flex: 2 }}>{charts}</View>
         </View>
       ) : (
         <View className="gap-4">
           {shops}
+          {collegePanel}
           {charts}
         </View>
       )}
