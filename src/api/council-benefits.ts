@@ -28,7 +28,7 @@ export async function getCouncilBenefits(college: CollegeKey | null): Promise<Co
     .from('council_benefits')
     .select('id,college,council_name,shop_name,restaurant_id,benefit,conditions,period,location,source_url,checked_on,status')
     .in('college', college ? [college, 'all'] : ['all'])
-    .neq('status', 'closed')
+    .eq('show_in_app', true)
     .order('id');
   if (error) throw error;
   return data ?? [];
