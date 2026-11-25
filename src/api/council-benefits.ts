@@ -60,7 +60,7 @@ export function councilShopRows(entries: readonly CouncilBenefit[], shops: reado
     .map((entry) => ({ entry, shop: byId.get(entry.restaurant_id ?? 0) }))
     .filter(({ entry, shop }) =>
       (kind === 'all' || (shop && (kind === 'partner' ? shop.partner : kind === shop.cuisine))) &&
-      [entry.shop_name ?? '', shop?.name ?? '', ...(shop?.menus ?? [])].some((name) => clean(name).includes(q)))
+      [entry.shop_name ?? '', shop?.name ?? '', ...(shop?.menus ?? []), ...(shop?.menusGuess ?? [])].some((name) => clean(name).includes(q)))
     .sort((a, b) => Number(!a.shop) - Number(!b.shop) || distance(a.shop) - distance(b.shop) || a.entry.id - b.entry.id);
 }
 

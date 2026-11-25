@@ -8,7 +8,7 @@ const entry = (id: number, name: string, restaurant: number | null): CouncilBene
 });
 const shop = (id: number, cuisine: string, lat: number): Shop => ({
   id, name: '가게', cuisine, lat, lng: 126.8369, partner: false, couponText: null,
-  walkMinutes: null, openNow: null, photoUrl: null, thumbUrl: null, menus: ['커피'],
+  walkMinutes: null, openNow: null, photoUrl: null, thumbUrl: null, menus: ['커피'], menusGuess: [],
 });
 const rows = [entry(1, '미연결 식당', null), entry(2, '먼 식당', 2), entry(3, '가까운 카페', 3)];
 const shops = [shop(2, 'korean', 37.31), shop(3, 'cafe', 37.3)];

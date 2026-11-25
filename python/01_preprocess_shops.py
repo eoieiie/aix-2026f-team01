@@ -218,7 +218,19 @@ CUISINE_BY_CATEGORY = {
     "외국음식전문점(인도,태국등)": "asian",
 }
 # 가게 이름에 든 낱말 → 기본 음식 이름. 기본 음식 이름이 그대로 들어 있는 경우는 따로 본다
-MENU_ALIASES = [("스시", "초밥"), ("버거", "햄버거"), ("파스타", "토마토 파스타"), ("마라", "마라탕"), ("국밥", "돼지국밥")]
+MENU_ALIASES = [("스시", "초밥"), ("버거", "햄버거"), ("파스타", "토마토 파스타"), ("마라", "마라탕"), ("국밥", "돼지국밥"),
+                ("핏짜", "피자"), ("부찌", "부대찌개"), ("삼겹", "삼겹살"), ("제육", "제육볶음")]
+# 서버가 사람 확인으로 종류를 고친 가게 (0040, 0041). 업태와 실제 가게가 다르다(예: 파앤피파스타하우스는 업태 중국식, 실제 양식)
+KIND_FIXES = {
+    "localdata/5550000-101-2002-00145": "korean",    # 원조감자탕 일미집
+    "localdata/5550000-101-2023-00114": "chinese",   # 도야짬뽕
+    "localdata/5550000-101-2021-00079": "chinese",   # 홍성마라미방
+    "localdata/5550000-101-2006-00273": "chinese",   # 홍성마라미방
+    "localdata/5550000-101-2007-00311": "chinese",   # 탕화쿵푸마라탕
+    "localdata/5550000-101-2007-00271": "western",   # 파앤피파스타하우스
+    "localdata/5550000-101-2010-00034": "japanese",  # 오빈라멘
+    "node/8431229418": "korean",                     # 최고집 칼국수(오픈스트리트맵 태그 없음)
+}
 # 업태로 흔한 메뉴
 MENUS_BY_CATEGORY = {
     "중국식": ["짜장면", "짬뽕", "탕수육"],
@@ -228,20 +240,23 @@ MENUS_BY_CATEGORY = {
 }
 
 
-def guess_menus(name, category, default_foods):
-    """대표 메뉴를 짐작한다. 공공데이터에는 메뉴가 없다.
+def guess_menus(name, cuisine, common, default_foods):
+    """대표 메뉴(이름에 근거)와 짐작 메뉴(업태나 오픈스트리트맵 태그로 흔한 메뉴)를 따로 낸다 (서버 0051과 같은 규칙).
 
-    순서: 가게 이름에 든 기본 음식 이름 → 이름에 든 낱말(별칭) → 업태로 흔한 메뉴. 겹치면 한 번만.
-    예: "예산닭갈비.감자탕" → 닭갈비, 감자탕 / 분식 "엄지꼬마김밥" → 김밥, 떡볶이, 라면
+    공공데이터에는 메뉴가 없다. 이름에 든 기본 음식 이름과 별칭 낱말만 대표 메뉴(menus)로 보인다.
+    업태로 흔한 메뉴는 짐작(menus_guess)이라 앱이 찾기와 순서에만 쓰고 가게 상세나 그림에는 쓰지 않는다.
+    짐작 메뉴의 음식 종류가 가게 종류와 다르면 버린다.
+    예: "예산닭갈비.감자탕" → 닭갈비, 감자탕 / 짐작 없음, 분식 "엄지꼬마김밥" → 김밥 / 짐작 떡볶이, 라면,
+        중국식 "대홍훠궈샤브샤브(한양대점)" → 없음 / 짐작 짜장면, 짬뽕, 탕수육
     """
-    menus = [food for food in default_foods if food in name]
+    bare = name.replace(" ", "")
+    menus = [food for food in default_foods if food.replace(" ", "") in bare]
     for word, food in MENU_ALIASES:
         if word in name and food not in menus:
             menus.append(food)
-    for food in MENUS_BY_CATEGORY.get(category, []):
-        if food not in menus:
-            menus.append(food)
-    return menus
+    guess = [food for food in common
+             if food not in menus and default_foods.get(food, cuisine) == cuisine]
+    return menus, guess
 
 
 # 오픈스트리트맵 cuisine 태그 → (종류, 대표 메뉴) (0015)
@@ -291,26 +306,30 @@ def build_restaurants(general, default_foods):
     out = []
     for r in public:
         category = r["업태구분명"]
+        cuisine = KIND_FIXES.get("localdata/" + r["관리번호"], CUISINE_BY_CATEGORY.get(category, ""))
+        menus, guess = guess_menus(r["사업장명"], cuisine, MENUS_BY_CATEGORY.get(category, []), default_foods)
         out.append({
             "source_id": "localdata/" + r["관리번호"], "name": r["사업장명"],
-            "cuisine": CUISINE_BY_CATEGORY.get(category, ""),
-            "menus": guess_menus(r["사업장명"], category, default_foods),
+            "cuisine": cuisine, "menus": menus, "menus_guess": guess,
             "lat": r["lat"], "lng": r["lng"], "distance_m": round(r["dist"]), "walk_min": walk_minutes(r["dist"]),
             "category": category, "source": "공공데이터 일반음식점",
         })
     for o in osm:
-        cuisine, menus = OSM_CUISINE.get(o["tags"].get("cuisine"), ("", []))
+        cuisine, common = OSM_CUISINE.get(o["tags"].get("cuisine"), ("", []))
+        cuisine = KIND_FIXES.get(o["source_id"], cuisine)
+        menus, guess = guess_menus(o["name"], cuisine, common, default_foods)
         out.append({
-            "source_id": o["source_id"], "name": o["name"], "cuisine": cuisine, "menus": list(menus),
+            "source_id": o["source_id"], "name": o["name"], "cuisine": cuisine, "menus": menus, "menus_guess": guess,
             "lat": o["lat"], "lng": o["lng"], "distance_m": round(o["dist"]), "walk_min": walk_minutes(o["dist"]),
             "category": "", "source": "오픈스트리트맵",
         })
 
     kinds = Counter(x["cuisine"] or "모름" for x in out if x["source"] != "오픈스트리트맵")
-    with_menu = sum(1 for x in out if x["source"] != "오픈스트리트맵" and x["menus"])
+    with_menu = sum(1 for x in out if x["menus"])
+    with_guess = sum(1 for x in out if x["menus_guess"])
     print("[식당] 종류와 대표 메뉴 채우기")
     print("  공공데이터 %d곳의 종류: %s" % (len(public), ", ".join("%s %d" % kv for kv in kinds.most_common())))
-    print("  대표 메뉴를 짐작한 곳 %d곳, 종류로만 맞는 곳 %d곳" % (with_menu, len(public) - with_menu))
+    print("  이름에 근거가 있는 대표 메뉴 %d곳, 업태나 태그로 짐작한 메뉴 %d곳 (식당 %d곳 중)" % (with_menu, with_guess, len(out)))
     print("  식당 합계                     %4d곳  (공공데이터 %d + 오픈스트리트맵 %d)" % (len(out), len(public), len(osm)))
     return sorted(out, key=lambda x: (x["distance_m"], x["source_id"]))
 
@@ -446,8 +465,9 @@ def compare_with_server(restaurants, cafes, general):
             diffs.append("서버에 없음: %s (%s)" % (x["name"], sid))
             continue
         is_cafe = "registered_name" in x
-        want = (s["name"], s["cuisine"], s["menus"])
-        got = (x["name"], "cafe" if is_cafe else x["cuisine"], "" if is_cafe else "|".join(x["menus"]))
+        want = (s["name"], s["cuisine"], s["menus"], s["menus_guess"])
+        got = (x["name"], "cafe" if is_cafe else x["cuisine"], "" if is_cafe else "|".join(x["menus"]),
+               "" if is_cafe else "|".join(x["menus_guess"]))
         moved = haversine_m(float(s["lat"]), float(s["lng"]), x["lat"], x["lng"])
         if want == got and moved < 0.5:
             same += 1
@@ -459,7 +479,7 @@ def compare_with_server(restaurants, cafes, general):
             why = "11/25 일반음식점 영업 중 추출본에 없다. 빠진 이유는 확인하지 못했다" if sid not in raw_ids and sid.startswith(
                 "localdata/5550000-101") else "이 코드의 규칙으로는 고르지 않았다"
             diffs.append("이 코드에 없음: %s (%s)  %s" % (s["name"], sid, why))
-    print("  이름, 종류, 대표 메뉴가 같고 위치 차이가 0.5m 미만인 곳 %d곳 / 다른 곳 %d곳" % (same, len(diffs)))
+    print("  이름, 종류, 대표 메뉴, 짐작 메뉴가 같고 위치 차이가 0.5m 미만인 곳 %d곳 / 다른 곳 %d곳" % (same, len(diffs)))
     for line in diffs:
         print("   - " + line)
     return same, len(diffs)
@@ -480,7 +500,8 @@ def write_csv(name, rows, columns):
 
 def main():
     general = read_csv("general_restaurants_sadong.csv")
-    default_foods = [r["name"] for r in read_csv("default_foods.csv")]
+    # 기본 음식 이름 → 종류 (짐작 메뉴가 가게 종류와 맞는지 볼 때)
+    default_foods = {r["name"]: r["cuisine"] for r in read_csv("default_foods.csv")}
 
     restaurants = build_restaurants(general, default_foods)
     cafes = build_cafes(general, default_foods)
@@ -488,7 +509,7 @@ def main():
 
     print("[내보내기]")
     write_csv("restaurants.csv", restaurants, [
-        "source_id", "name", "cuisine", "menus", "lat", "lng", "distance_m", "walk_min",
+        "source_id", "name", "cuisine", "menus", "menus_guess", "lat", "lng", "distance_m", "walk_min",
         "category", "source"])
     write_csv("cafes.csv", cafes, [
         "source_id", "name", "registered_name", "lat", "lng", "distance_m", "walk_min", "source", "visit"])
