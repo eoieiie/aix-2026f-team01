@@ -4,10 +4,12 @@ import { Icon } from '@/components/icon';
 import { Text } from '@/components/text';
 import { councilBadge, type CouncilBenefit } from '@/hooks/use-council-benefits';
 
-export function CouncilBadge({ college }: { college: CouncilBenefit['college'] }) {
+// inline: 이름 바로 옆(줄의 가운데 맞춤을 따른다). 아니면 세로 묶음 안에서 왼쪽에 붙는다
+export function CouncilBadge({ college, inline = false }: { college: CouncilBenefit['college']; inline?: boolean }) {
   return (
-    <View className="self-start rounded-lg bg-surface-strong px-2 py-1">
-      <Text className="text-xs font-semibold text-muted">{councilBadge(college)}</Text>
+    // "광고"(AdBadge)와 같은 역할이라 같은 크기와 모양
+    <View className={`shrink-0 rounded-lg bg-surface-strong px-2 ${inline ? '' : 'self-start'}`}>
+      <Text className="text-xs font-bold text-muted">{councilBadge(college)}</Text>
     </View>
   );
 }

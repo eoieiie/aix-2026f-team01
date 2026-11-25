@@ -6,7 +6,7 @@ import { Text } from '@/components/text';
 // 테두리 대신 회색 면으로 그린다 (docs/design.md 상자는 면으로)
 export function AdBadge() {
   return (
-    <View accessibilityLabel="광고" className="rounded-lg bg-surface-strong px-2">
+    <View accessibilityLabel="광고" className="shrink-0 rounded-lg bg-surface-strong px-2">
       <Text className="text-xs font-bold text-muted">광고</Text>
     </View>
   );

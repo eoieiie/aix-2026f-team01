@@ -42,6 +42,8 @@ export interface NearbyRestaurant {
   // 끝난 판의 메뉴 이름과 종류. "더 보기"로 가게 탭을 이 이름으로 찾은 채 연다
   menuName: string | null;
   menuCuisine: string | null;
+  // 묶음(0050): 1 메뉴가 맞는 가게, 2 같은 종류 일반 가게, 3 다른 음식 전문점. 0050 전 서버는 match로 1이나 2
+  tier: number;
 }
 
 export async function getSessionRestaurants(
@@ -86,6 +88,7 @@ export async function getSessionRestaurants(
     total: typeof r.total_count === 'number' ? r.total_count : rows.length,
     menuName: typeof r.menu_name === 'string' ? r.menu_name : null,
     menuCuisine: typeof r.menu_cuisine === 'string' ? r.menu_cuisine : null,
+    tier: typeof r.tier === 'number' ? r.tier : r.match === 'menu' ? 1 : 2,
   }));
 }
 
@@ -191,8 +194,8 @@ export interface Taste {
   eatenFoodIds: ReadonlySet<number>;
 }
 
-// 투표 화면 추천 칸 (4-21). 서버가 준 최대 6곳(0048 순서: 쿠폰 가게, 내 학생회 제휴, 메뉴 맞음, 가까운 순)에서 3곳.
-// 쿠폰 가게가 먼저(#53 11/19 병주 요청, 이름 옆 "광고"는 숨기지 않는다), 그다음 내 학생회 제휴. 지금 닫은 곳은 먼저 오지 않는다.
+// 투표 화면 추천 칸 (4-21). 서버가 준 최대 6곳(0050 순서: 묶음 메뉴 맞음 → 같은 종류 → 전문점, 묶음 안에서 쿠폰 가게, 내 학생회 제휴, 가까운 순)에서 3곳.
+// 묶음이 먼저이고, 묶음 안에서 쿠폰 가게(#53 11/19 병주 요청, "광고"는 숨기지 않는다), 내 학생회 제휴. 지금 닫은 곳은 먼저 오지 않는다.
 // 그 안에서는 내 취향 점수 순: 메뉴가 맞으면 +2. 한식↔외국음식 축과 종류가 맞으면 +1.
 // 탐험이면 안 먹어 본 음식, 반복이면 먹어 본 음식에 +1. 지금 닫았으면 -3. 점수가 같으면 서버 순서
 export function pickForMe(
@@ -213,7 +216,7 @@ export function pickForMe(
     r.openNow === false ? 0 : r.partner ? 2 : r.councilCollege !== null ? 1 : 0;
   return list
     .map((r, i) => ({ r, i, p: first(r), s: score(r) }))
-    .sort((a, b) => b.p - a.p || b.s - a.s || a.i - b.i)
+    .sort((a, b) => a.r.tier - b.r.tier || b.p - a.p || b.s - a.s || a.i - b.i)
     .slice(0, count)
     .map((x) => x.r);
 }

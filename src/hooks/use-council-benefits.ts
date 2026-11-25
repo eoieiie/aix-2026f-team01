@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { getCouncilBenefits } from '@/api/council-benefits';
 import { useMyPrefs } from '@/hooks/use-prefs';
 
-export { councilBadge, councilMapLinks, councilShopRows } from '@/api/council-benefits';
+export { benefitLine, councilBadge, councilMapLinks, councilShopRows } from '@/api/council-benefits';
 export type { CouncilBenefit } from '@/api/council-benefits';
 
 export function useCouncilBenefits() {

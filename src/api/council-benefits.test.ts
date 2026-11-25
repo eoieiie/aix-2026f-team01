@@ -1,4 +1,4 @@
-import { councilMapLinks, councilShopRows, type CouncilBenefit } from './council-benefits';
+import { benefitLine, councilMapLinks, councilShopRows, type CouncilBenefit } from './council-benefits';
 import type { Shop } from './shops';
 
 const entry = (id: number, name: string, restaurant: number | null): CouncilBenefit => ({
@@ -24,5 +24,19 @@ it('지도 검색에는 가게 이름과 지역을 안전하게 넣는다', () =
   expect(councilMapLinks('가게 & 카페', null)).toEqual({
     naver: `https://map.naver.com/p/search/${encodeURIComponent('안산 가게 & 카페')}`,
     kakao: `https://map.kakao.com/?q=${encodeURIComponent('안산 가게 & 카페')}`,
+  });
+});
+
+describe('benefitLine (0050)', () => {
+  it('여러 줄을 띄어쓰기로 잇고 줄 앞 번호와 줄표를 뗀다', () => {
+    expect(benefitLine('음료 5개 이상 구매 시\n1. 아메리카노 s 사이즈 1개 증정\nor\n2. 아이스크림 토핑 증정')).toBe(
+      '음료 5개 이상 구매 시 아메리카노 s 사이즈 1개 증정 or 아이스크림 토핑 증정'
+    );
+    expect(benefitLine('- 커피 10% 할인\n\n2) 디저트 500원 할인')).toBe('커피 10% 할인 디저트 500원 할인');
+  });
+
+  it('비었거나 없으면 null', () => {
+    expect(benefitLine(null)).toBeNull();
+    expect(benefitLine(' \n ')).toBeNull();
   });
 });

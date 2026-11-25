@@ -21,6 +21,7 @@ function fake(over: Partial<NearbyRestaurant> & { id: number }): NearbyRestauran
     total: 0,
     menuName: null,
     menuCuisine: null,
+    tier: over.match === 'menu' ? 1 : 2,
     ...over,
   };
 }
@@ -48,9 +49,19 @@ describe('restaurantInfo (4-21)', () => {
 });
 
 describe('pickForMe (4-21 투표 화면 추천 칸)', () => {
-  it('쿠폰 가게, 내 학생회 제휴, 나머지 순(0048). 닫은 곳은 먼저 오지 않는다', () => {
+  it('묶음이 먼저: 메뉴 맞음, 같은 종류, 전문점. 학생회 제휴 전문점도 일반 가게 뒤로(0050)', () => {
     const list = [
-      fake({ id: 1, match: 'menu', foodId: 10 }),
+      fake({ id: 1, tier: 3, councilCollege: 'computing', councilText: '음료' }),
+      fake({ id: 2, tier: 2 }),
+      fake({ id: 3, tier: 1, match: 'menu', foodId: 10 }),
+      fake({ id: 4, tier: 2, partner: true, couponText: '만두' }),
+    ];
+    expect(pickForMe(list, noTaste, 4).map((r) => r.id)).toEqual([3, 4, 2, 1]);
+  });
+
+  it('같은 묶음 안에서는 쿠폰 가게, 내 학생회 제휴, 나머지 순(0048). 닫은 곳은 먼저 오지 않는다', () => {
+    const list = [
+      fake({ id: 1, match: 'menu', foodId: 10, tier: 2 }),
       fake({ id: 2, councilCollege: 'computing', councilText: '음료 1개' }),
       fake({ id: 3, partner: true, couponText: '만두' }),
       fake({ id: 4, councilCollege: 'all', openNow: false }),
@@ -88,8 +99,8 @@ describe('pickForMe (4-21 투표 화면 추천 칸)', () => {
     expect(pickForMe(list, repeater, 1)[0].id).toBe(1);
   });
 
-  it('지금 닫은 곳은 뒤로', () => {
-    const list = [fake({ id: 1, match: 'menu', foodId: 10, openNow: false }), fake({ id: 2 })];
+  it('지금 닫은 곳은 같은 묶음 안에서 뒤로', () => {
+    const list = [fake({ id: 1, match: 'menu', foodId: 10, openNow: false }), fake({ id: 2, match: 'menu', foodId: 11 })];
     expect(pickForMe(list, noTaste).map((r) => r.id)).toEqual([2, 1]);
   });
 
@@ -173,6 +184,7 @@ describe('getSessionRestaurants', () => {
       total: 2,
       menuName: null,
       menuCuisine: null,
+      tier: 2,
     });
     expect(list[1].partner).toBe(false);
     expect(list[1].couponText).toBeNull();
