@@ -8,6 +8,7 @@ import {
   castVote,
   confirmCustomFood,
   getFoodHintsWithPicks,
+  getMyFoodPicks,
   getSession,
   getVoteCounts,
   joinSession,
@@ -20,6 +21,7 @@ import {
   spinRoulette,
   subscribeSession,
 } from '@/api/sessions';
+import { useAnonymousAuth } from '@/hooks/use-anonymous-auth';
 
 export type {
   CantEat,
@@ -97,6 +99,19 @@ export function useFoodHints(sessionId: string, key: string) {
     queryKey: ['session-food-hints', sessionId, key],
     queryFn: () => getFoodHintsWithPicks(sessionId),
     enabled: !!sessionId,
+    retry: false,
+    staleTime: 60_000,
+  });
+  return query.data ?? [];
+}
+
+// 같은 판이라도 다른 계정의 추천은 캐시에서 재사용하지 않는다.
+export function useMyFoodPicks(sessionId: string, key: string) {
+  const { userId } = useAnonymousAuth();
+  const query = useQuery({
+    queryKey: ['my-food-picks', userId, sessionId, key],
+    queryFn: () => getMyFoodPicks(sessionId),
+    enabled: !!userId && !!sessionId,
     retry: false,
     staleTime: 60_000,
   });
