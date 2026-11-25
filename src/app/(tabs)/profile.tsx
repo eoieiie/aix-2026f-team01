@@ -6,25 +6,33 @@ import { FoodDex } from '@/components/food-dex';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { AccountSheet } from '@/components/account-sheet';
+import { Avatar } from '@/components/avatar';
 import { Button } from '@/components/button';
-import { ProfileSummaryCard } from '@/components/profile-summary-card';
+import { CardButton, ProfileSummaryCard } from '@/components/profile-summary-card';
 import { SettingsList } from '@/components/settings-list';
 import colors from '@/constants/colors.json';
 import { TAB_BAR_SPACE } from '@/constants';
-import { authorityTitle, levelOf, typeLetters, useMyStats } from '@/hooks/use-stats';
+import { nextAvatarUnlock } from '@/constants/prefs';
+import { useAvatarOptions, useMyPrefs } from '@/hooks/use-prefs';
+import { authorityTitle, levelProgress, typeLetters, useMyStats } from '@/hooks/use-stats';
 
-// 내 프로필 탭 (4-15, #41). 네 글자, 레벨과 숫자, 먹어본 음식 도감, 같이 먹은 사람, 그리고 설정 줄
+// 내 프로필 탭 (4-15, 4-27, #41). 아바타와 이름, 네 글자, 레벨 막대, 숫자, 먹어본 음식 도감, 같이 먹은 사람, 그리고 설정 줄
 export default function ProfileScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const { stats, isLoading, isError, refetch } = useMyStats();
+  // 아바타와 취향은 못 받아도 탭은 그대로 보인다
+  const { prefs, refetch: refetchPrefs } = useMyPrefs();
+  const { options, refetch: refetchOptions } = useAvatarOptions();
   const [accountVisible, setAccountVisible] = useState(false);
   const [subTab, setSubTab] = useState<'foods' | 'companions'>('foods');
 
-  // 못 먹는 것이나 온보딩에서 돌아오면 다시 읽는다
+  // 못 먹는 것, 온보딩, 프로필 고치기에서 돌아오면 다시 읽는다
   useFocusEffect(
     useCallback(() => {
       refetch();
+      refetchPrefs();
+      refetchOptions();
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
   );
@@ -32,14 +40,14 @@ export default function ProfileScreen() {
   if (isLoading) {
     return (
       <SafeAreaView className="flex-1 items-center justify-center bg-background">
-        <ActivityIndicator color={colors.primary} accessibilityLabel="프로필을 불러오는 중" />
+        <ActivityIndicator color={colors.text} accessibilityLabel="프로필을 불러오는 중" />
       </SafeAreaView>
     );
   }
 
   if (isError || !stats) {
     return (
-      <SafeAreaView className="flex-1 items-center justify-center gap-4 bg-background px-6">
+      <SafeAreaView className="flex-1 items-center justify-center gap-4 bg-background px-4">
         <Text className="text-lg font-bold text-text">프로필을 불러올 수 없어요</Text>
         <View className="w-full max-w-xs">
           <Button label="다시 시도" variant="secondary" onPress={() => refetch()} />
@@ -49,14 +57,15 @@ export default function ProfileScreen() {
   }
 
   const total = stats.foods.reduce((s, f) => s + f.mealCount, 0);
-  const { level, toNext } = levelOf(total);
+  const { level, toNext, ratio } = levelProgress(total);
+  const next = nextAvatarUnlock(options);
   const letters = stats.profile.axes ? typeLetters(stats.profile.axes, stats.profile.quizAnswers) : null;
   const toOnboarding = () => router.push('/onboarding?from=profile' as any);
 
   return (
     <SafeAreaView className="flex-1 bg-background" edges={['top']}>
       <ScrollView keyboardShouldPersistTaps="handled" automaticallyAdjustKeyboardInsets
-        contentContainerClassName="gap-8 px-5 pt-3"
+        contentContainerClassName="gap-8 px-4 pt-3"
         // 아래 안전 영역(홈 막대) 위에 탭이 떠 있으니 그만큼 더 비운다. 아이폰에서 마지막 설정 줄이 탭에 가렸다(11/20 실기기)
         contentContainerStyle={{ paddingBottom: TAB_BAR_SPACE + insets.bottom }}
         showsVerticalScrollIndicator={false}>
@@ -71,9 +80,11 @@ export default function ProfileScreen() {
           title={authorityTitle(stats.foods)}
           level={level}
           toNext={toNext}
-          action={
-            letters ? null : <Button label="내 네 글자 만들기" variant="inverse" onPress={toOnboarding} />
-          }
+          progress={ratio}
+          avatarFoodId={prefs?.avatarFoodId ?? null}
+          nextAvatar={next ? { foodId: next.foodId, name: next.name, unlockLevel: next.unlockLevel } : null}
+          onEdit={() => router.push('/profile/edit' as any)}
+          action={<CardButton label="내 네 글자 만들기" onPress={toOnboarding} />}
         />
 
         <View className="flex-row gap-2">
@@ -84,31 +95,33 @@ export default function ProfileScreen() {
 
         {/* 기록 탭: 음식 도감과 밥 친구 랭킹을 세그먼트 탭으로 전환 */}
         <View className="gap-3">
-          <View className="flex-row rounded-2xl bg-surface p-1.5">
+          <View className="flex-row rounded-2xl bg-surface p-1">
             <Pressable
               accessibilityRole="button"
+              accessibilityState={{ selected: subTab === 'foods' }}
               accessibilityLabel={`음식 도감 ${stats.foods.length}개`}
               onPress={() => setSubTab('foods')}
-              className={`flex-1 items-center justify-center rounded-xl py-3 active:opacity-80 ${
-                subTab === 'foods' ? 'bg-background' : ''
+              className={`flex-1 items-center justify-center min-h-11 rounded-lg py-2 active:opacity-80 ${
+                subTab === 'foods' ? 'bg-ink' : ''
               }`}>
               <Text
                 className={`text-base font-bold ${
-                  subTab === 'foods' ? 'text-text font-bold' : 'text-muted'
+                  subTab === 'foods' ? 'text-on-ink' : 'text-muted'
                 }`}>
                 음식 도감 ({stats.foods.length})
               </Text>
             </Pressable>
             <Pressable
               accessibilityRole="button"
+              accessibilityState={{ selected: subTab === 'companions' }}
               accessibilityLabel={`밥 친구 랭킹 ${stats.companions.length}명`}
               onPress={() => setSubTab('companions')}
-              className={`flex-1 items-center justify-center rounded-xl py-3 active:opacity-80 ${
-                subTab === 'companions' ? 'bg-background' : ''
+              className={`flex-1 items-center justify-center min-h-11 rounded-lg py-2 active:opacity-80 ${
+                subTab === 'companions' ? 'bg-ink' : ''
               }`}>
               <Text
                 className={`text-base font-bold ${
-                  subTab === 'companions' ? 'text-text font-bold' : 'text-muted'
+                  subTab === 'companions' ? 'text-on-ink' : 'text-muted'
                 }`}>
                 밥 친구 랭킹 ({stats.companions.length})
               </Text>
@@ -119,18 +132,15 @@ export default function ProfileScreen() {
             // 4-25 음식 도감: 그림 카드 모음
             <FoodDex />
           ) : stats.companions.length === 0 ? (
-            <View className="rounded-3xl bg-surface p-6">
-              <Text className="text-lg font-bold text-muted">아직 같이 먹은 밥 친구가 없어요</Text>
+            <View className="rounded-2xl bg-surface p-4">
+              <Text className="text-base font-bold text-muted">아직 같이 먹은 밥 친구가 없어요</Text>
             </View>
           ) : (
-            <View className="gap-3 rounded-3xl bg-surface p-4">
+            // 사람 한 줄: 왼쪽 아바타 44, 안 여백 16 (얇은 칸을 쓰지 않는다)
+            <View className="gap-2">
               {stats.companions.map((c) => (
-                <View key={c.userId} className="flex-row items-center gap-3">
-                  <View className="h-10 w-10 items-center justify-center rounded-full bg-primary">
-                    <Text className="text-xl font-bold text-on-primary">
-                      {Array.from(c.displayName)[0] ?? ''}
-                    </Text>
-                  </View>
+                <View key={c.userId} className="flex-row items-center gap-3 rounded-2xl bg-surface p-4">
+                  <Avatar name={c.displayName} userId={c.userId} size={44} />
                   <Text className="flex-1 text-lg font-bold text-text" numberOfLines={1}>
                     {c.displayName}
                   </Text>
@@ -157,7 +167,7 @@ export default function ProfileScreen() {
 
 function Stat({ value, label }: { value: number; label: string }) {
   return (
-    <View className="flex-1 gap-1 rounded-3xl bg-surface p-4">
+    <View className="flex-1 gap-1 rounded-2xl bg-surface p-4">
       <Text className="text-3xl font-bold tracking-tight text-text">{value}</Text>
       <Text className="text-sm text-muted">{label}</Text>
     </View>
