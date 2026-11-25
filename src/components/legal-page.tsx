@@ -12,14 +12,14 @@ export function LegalPage({ title, updated, sections }: { title: string; updated
   const router = useRouter();
   return (
     <SafeAreaView className="flex-1 bg-background">
-      <View className="flex-row items-center px-5 py-3">
+      <View className="flex-row items-center px-4 py-3">
         <IconButton
           name="back"
           label="뒤로"
           onPress={() => (router.canGoBack() ? router.back() : router.replace('/' as any))}
         />
       </View>
-      <ScrollView contentContainerClassName="gap-6 px-5 pb-16 pt-2">
+      <ScrollView contentContainerClassName="gap-6 px-4 pb-16 pt-2">
         <View className="gap-1">
           <Text className="text-3xl font-bold tracking-tight text-text">{title}</Text>
           {updated ? <Text className="text-sm text-muted">{updated}</Text> : null}
