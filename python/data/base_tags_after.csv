@@ -1,0 +1,41 @@
+id,name,sure_tags,soft_tags
+B1,김치찌개,pork seafood spicy,
+B2,된장찌개,seafood,
+B3,부대찌개,pork spicy wheat,beef dairy seafood
+B4,순두부찌개,egg seafood spicy,
+B5,김치볶음밥,egg seafood spicy,pork
+B6,비빔밥,egg spicy,beef
+B7,불고기,beef,
+B8,제육볶음,pork spicy,
+B9,삼겹살,pork,
+B10,닭갈비,chicken spicy,
+B11,삼계탕,chicken,
+B12,물냉면,beef egg wheat,
+B13,칼국수,seafood wheat,
+B14,돼지국밥,pork,
+B15,설렁탕,beef wheat,
+B16,떡볶이,seafood spicy wheat,egg
+B17,김밥,egg pork seafood wheat,
+B18,콩국수,wheat,
+B19,감자탕,pork spicy,
+B20,라면,beef egg seafood spicy wheat,
+B21,짜장면,pork wheat,
+B22,짬뽕,pork seafood spicy wheat,
+B23,탕수육,pork,wheat
+B24,마라탕,beef nuts spicy,wheat
+B25,초밥,seafood,egg
+B26,돈까스,egg pork wheat,
+B27,우동,seafood wheat,
+B28,라멘,egg pork wheat,
+B29,규동,beef,seafood
+B30,피자,dairy wheat,pork
+B31,토마토 파스타,wheat,dairy
+B32,크림 파스타,dairy wheat,pork
+B33,햄버거,beef egg wheat,dairy
+B34,치킨,chicken wheat,
+B35,샐러드,,dairy egg
+B36,샌드위치,dairy egg wheat,pork
+B37,쌀국수,beef seafood,
+B38,팟타이,egg nuts seafood,
+B39,인도 커리,dairy,chicken spicy wheat
+B40,케밥,chicken wheat,dairy

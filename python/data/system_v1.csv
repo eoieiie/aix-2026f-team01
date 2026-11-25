@@ -1,0 +1,41 @@
+id,name,rule_tags,ai_tags,merged_tags,ai_status
+M01,찌개찌개,,beef egg pork seafood spicy wheat,beef egg pork seafood spicy wheat,done
+M02,빵,wheat,dairy egg wheat,dairy egg wheat,done
+M03,떼드떼,,dairy pork wheat,dairy pork wheat,done
+M04,보배반점,,egg pork seafood spicy wheat,egg pork seafood spicy wheat,done
+M05,병천순대,pork,beef pork spicy wheat,beef pork spicy wheat,done
+M06,쥬시 모찌,,dairy wheat,dairy wheat,done
+M07,백소정,,beef chicken dairy egg pork seafood spicy wheat,beef chicken dairy egg pork seafood spicy wheat,done
+M08,메가커피 케이크,,dairy egg nuts wheat,dairy egg nuts wheat,done
+M09,분짜,,chicken nuts pork seafood spicy wheat,chicken nuts pork seafood spicy wheat,done
+M10,말레이시아 나시레막,,beef chicken egg nuts seafood spicy,beef chicken egg nuts seafood spicy,done
+M11,나시고랭,,chicken egg pork seafood spicy wheat,chicken egg pork seafood spicy wheat,done
+M12,반미,,beef chicken dairy egg pork wheat,beef chicken dairy egg pork wheat,done
+M13,훠궈,,beef chicken egg nuts pork seafood spicy wheat,beef chicken egg nuts pork seafood spicy wheat,done
+M14,포케,seafood,egg nuts seafood spicy wheat,egg nuts seafood spicy wheat,done
+M15,타코,,beef chicken dairy pork seafood spicy wheat,beef chicken dairy pork seafood spicy wheat,done
+M16,부리토,,beef chicken dairy pork spicy wheat,beef chicken dairy pork spicy wheat,done
+M17,똠얌꿍,,chicken dairy seafood spicy wheat,chicken dairy seafood spicy wheat,done
+M18,팟카파오,,,,failed
+M19,샤와르마,,,,failed
+M20,팔라펠,,dairy wheat,dairy wheat,done
+M21,비리야니,,beef chicken dairy egg nuts seafood spicy,beef chicken dairy egg nuts seafood spicy,done
+M22,퀘사디아,,beef chicken dairy egg pork seafood spicy wheat,beef chicken dairy egg pork seafood spicy wheat,done
+M23,카오팟,,chicken egg pork seafood wheat,chicken egg pork seafood wheat,done
+M24,잡채,,beef egg pork seafood spicy wheat,beef egg pork seafood spicy wheat,done
+M25,순대국,pork,pork spicy wheat,pork spicy wheat,done
+M26,마파두부,,beef pork seafood spicy wheat,beef pork seafood spicy wheat,done
+M27,충무김밥,egg pork seafood wheat,seafood spicy,egg pork seafood spicy wheat,done
+M28,쫄면,wheat,egg pork seafood spicy wheat,egg pork seafood spicy wheat,done
+M29,잔치국수,wheat,egg seafood spicy wheat,egg seafood spicy wheat,done
+M30,해장국,,beef pork seafood spicy,beef pork seafood spicy,done
+M31,계란찜,egg,dairy egg seafood,dairy egg seafood,done
+M32,부추전,,egg seafood wheat,egg seafood wheat,done
+M33,콩나물국밥,,beef egg pork seafood spicy wheat,beef egg pork seafood spicy wheat,done
+M34,떡국,,beef egg pork seafood wheat,beef egg pork seafood wheat,done
+M35,후무스 플레이트,,chicken nuts spicy wheat,chicken nuts spicy wheat,done
+M36,샥슈카,,dairy egg pork spicy wheat,dairy egg pork spicy wheat,done
+M37,비건 두부덮밥,,spicy wheat,spicy wheat,done
+M38,병아리콩 카레,,,,failed
+M39,템페 볶음밥,,,,failed
+M40,아사이볼,,dairy nuts wheat,dairy nuts wheat,done
