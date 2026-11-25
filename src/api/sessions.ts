@@ -20,11 +20,18 @@ export interface Candidate {
   foodId: number;
   foodName: string;
   isMine: boolean;
+  // 올린 사람. 신고와 차단에 쓴다 (4-24)
+  proposedBy: string;
+  // 내가 차단한 사람이 올린 후보. 어필과 직접 적은 메뉴 이름을 가린다 (4-24)
+  blocked: boolean;
   pitch: string | null;
   vetoed: boolean;
   // vetoed: 이 판에 못 먹는 사람이 있다. 0010부터 빠지지 않고 표시만 한다
   // 목록에 없어서 이름을 직접 적어 올린 메뉴 (4-9). 재료는 이름으로 짐작했다
   custom: boolean;
+  // 4-22 AI가 추정해 더한 재료 태그와 태그별 이유 한 줄. 누가 못 먹는지는 없다
+  aiTags: string[];
+  aiNotes: Record<string, string>;
 }
 
 export interface SessionView {
@@ -68,7 +75,7 @@ export interface VoteCount {
 export const SESSION_ERROR_MESSAGES: Record<string, string> = {
   not_signed_in: '로그인이 필요해요',
   not_member: '이 모임 멤버가 아니에요',
-  session_not_found: '판을 찾을 수 없어요',
+  session_not_found: '판이 닫혔어요',
   not_participant: '이 판에 아직 참여하지 않았어요',
   voting_started: '이미 투표가 시작됐어요',
   food_not_found: '음식을 찾을 수 없어요',
@@ -88,6 +95,8 @@ export const SESSION_ERROR_MESSAGES: Record<string, string> = {
   name_too_long: '메뉴 이름은 20자까지예요',
   not_all_voted: '아직 고르지 않은 사람이 있어요',
   bad_headcount: '인원은 1명부터 20명까지예요',
+  already_done: '이미 끝난 판이에요',
+  blocked_word: '쓸 수 없는 말이 있어요',
 };
 
 export class SessionError extends Error {
@@ -158,8 +167,13 @@ export async function getSession(
     .eq('id', sessionId)
     .maybeSingle();
   if (sessionError) throwSessionError(sessionError);
-  // 소속이 아니면 권한 때문에 판이 안 보인다 (4-8, 4-6)
-  if (!session) throw new SessionError('not_member');
+  // 판이 안 보이면 둘 중 하나다: 소속이 아니어서 권한 때문에 안 보이거나(4-8, 4-6), 판을 연 사람이 판을 접어 없어졌거나(4-24).
+  // 판이 있는지만 묻는 함수로 나눈다. 못 물으면 예전처럼 소속 아님으로 본다
+  if (!session) {
+    const exists: any = await Promise.resolve(client.rpc('session_exists', { p_session_id: sessionId })).catch(() => null);
+    if (exists && !exists.error && exists.data === false) throw new SessionError('session_not_found');
+    throw new SessionError('not_member');
+  }
 
   const [participantsRes, membersRes, candidatesRes, votesRes] = await Promise.all([
     client.from('session_participants').select('user_id, voted, joined_at').eq('session_id', sessionId),
@@ -174,6 +188,13 @@ export async function getSession(
   const cantRes: any = await Promise.resolve(
     client.rpc('session_cant_eat', { p_session_id: sessionId })
   ).catch(() => null);
+  // 내가 차단한 사람 (4-24). 못 읽어도 판은 보인다
+  const blockRes: any = await Promise.resolve(
+    client.from('blocks').select('blocked').eq('blocker', userId)
+  ).catch(() => null);
+  const blockedIds = new Set<string>(
+    blockRes && !blockRes.error && Array.isArray(blockRes.data) ? blockRes.data.map((b: any) => b.blocked) : []
+  );
   const cantRows: { tag: string | null; food_name: string | null }[] =
     cantRes && !cantRes.error && Array.isArray(cantRes.data) ? cantRes.data : [];
   for (const res of [participantsRes, membersRes, candidatesRes, votesRes]) {
@@ -199,10 +220,15 @@ export async function getSession(
     .sort((a: any, b: any) => String(a.created_at).localeCompare(String(b.created_at)))
     .map((c: any) => ({
       foodId: c.food_id,
-      foodName: c.foods?.name ?? '',
+      foodName: blockedIds.has(c.proposed_by) && c.foods?.custom === true ? '가린 메뉴' : (c.foods?.name ?? ''),
       custom: c.foods?.custom === true,
+      aiTags: Array.isArray(c.foods?.ai_tags) ? c.foods.ai_tags : [],
+      aiNotes: c.foods?.ai_notes && typeof c.foods.ai_notes === 'object' ? c.foods.ai_notes : {},
       isMine: c.proposed_by === userId,
-      pitch: c.pitch,
+      proposedBy: c.proposed_by,
+      blocked: blockedIds.has(c.proposed_by),
+      // 차단한 사람이 쓴 어필은 내 화면에 보이지 않는다. 직접 적은 메뉴 이름은 화면에서 가린다
+      pitch: blockedIds.has(c.proposed_by) ? null : c.pitch,
       vetoed: c.vetoed,
     }));
 
@@ -258,7 +284,21 @@ export async function addCustomCandidate(
     p_name: name,
   });
   if (error) throwSessionError(error);
+  const foodId = (data as { food_id?: number } | null)?.food_id;
+  if (foodId) requestAiIngredients(foodId, client);
   return Boolean((data as { vetoed?: boolean } | null)?.vetoed);
+}
+
+// 4-22 직접 적은 메뉴의 재료를 AI에게 묻게 한다. 기다리지 않는다. 답이 오면 서버가 재료를 더하고
+// 후보 판정을 다시 해서 판 화면이 실시간으로 바뀐다. 실패해도 낱말 표 태그로 그대로 간다
+export function requestAiIngredients(foodId: number, client: Client = getSupabase()): void {
+  try {
+    Promise.resolve((client as any).functions?.invoke?.('guess-ingredients', { body: { food_id: foodId } })).catch(
+      () => undefined
+    );
+  } catch {
+    // 무시
+  }
 }
 
 // 내가 올린 후보의 어필. 빈 글이면 지운다 (4-9)

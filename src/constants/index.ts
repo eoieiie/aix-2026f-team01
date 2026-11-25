@@ -16,6 +16,8 @@ export const RECENT_MEALS_LIMIT = 5;
 export const FOOD_SEARCH_LIMIT = 6;
 // 목록에 없는 메뉴를 직접 적을 때 이름 길이 (4-9)
 export const FOOD_NAME_MAX = 20;
+// 4-22 AI 재료 추정 하루 호출 상한. 넘으면 낱말 표만 쓴다(서버 0023)
+export const AI_DAILY_MAX = 200;
 export const PITCH_MAX = 60;
 
 // 4-11

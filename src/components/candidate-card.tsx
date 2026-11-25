@@ -5,12 +5,14 @@ import { Text, TextInput } from '@/components/text';
 import { FoodDot } from '@/components/food-dot';
 import { Icon } from '@/components/icon';
 import { PITCH_MAX } from '@/constants';
+import { INGREDIENT_TAGS } from '@/constants/restrictions';
 import colors from '@/constants/colors.json';
 import type { Candidate } from '@/hooks/use-session';
 
 // 0010부터 빠지지 않고 표시만 한다. 찍을 수 있다
 // 고른(주황) 카드 안의 작은 줄은 검정 글자. 주황 위 흰 작은 글자는 4.5:1이 안 된다 (#80)
 const VETOED_TEXT = '못 먹는 사람이 있어요';
+const TAG_LABEL: Record<string, string> = Object.fromEntries(INGREDIENT_TAGS.map((t) => [t.code, t.label]));
 
 type CandidateCardProps = {
   candidate: Candidate;
@@ -27,6 +29,8 @@ type CandidateCardProps = {
   eatenNote?: string | null;
   // 방금 올린 후보. 주황 테두리가 잠깐 보였다가 사라진다
   highlight?: boolean;
+  // 남이 쓴 어필이나 직접 적은 메뉴: 신고와 차단 (4-24)
+  onMore?: () => void;
 };
 
 // 후보 한 줄. 못 먹는 사람이 있는 후보는 이름 아래 한 줄로 알린다. 누가 원인인지는 데이터에도 없다 (4-9 익명)
@@ -40,6 +44,7 @@ export function CandidateCard({
   busy = false,
   eatenNote = null,
   highlight = false,
+  onMore,
 }: CandidateCardProps) {
   // 테두리는 JS로 흐려지게 한다(웹과 앱이 같게). 움직임 줄이기가 켜져 있으면 흐려지지 않고 바로 사라진다
   const [ring] = useState(() => new Animated.Value(0));
@@ -69,10 +74,13 @@ export function CandidateCard({
   const [pitch, setPitch] = useState(candidate.pitch ?? '');
   const dirty = pitch !== (candidate.pitch ?? '');
   const { vetoed } = candidate;
+  const aiTags = candidate.aiTags ?? [];
+  const [aiOpen, setAiOpen] = useState(false);
 
   const body = (
     <>
-      <View className="flex-row items-center gap-3">
+      {/* 동그라미와 빼기·고르기 버튼은 첫 줄(음식 이름) 높이에 붙인다. AI 이유를 펼쳐도 가운데로 내려가지 않게 (11/21 실기기) */}
+      <View className="flex-row items-start gap-3">
         <FoodDot foodId={candidate.foodId} size="md" name={candidate.foodName} />
         <View className="flex-1 gap-0.5">
           <View className="flex-row items-center gap-2">
@@ -94,6 +102,34 @@ export function CandidateCard({
               {VETOED_TEXT}
             </Text>
           ) : null}
+          {/* 4-22 AI가 추정해 더한 재료. 누르면 재료마다 이유 한 줄. 누가 못 먹는지는 보이지 않는다 */}
+          {/* 투표 카드는 카드 전체가 "고르기" 버튼이라, 안에 또 누르는 것을 두지 않는다(버튼 안 버튼, WCAG 4.1.2). 투표 때는 재료 이름만 글로 보이고 이유는 후보 단계에서 본다 */}
+          {aiTags.length > 0 && onVote ? (
+            <Text className={`text-sm font-semibold ${voted ? 'text-text' : 'text-muted'}`}>
+              AI가 추정한 재료 · {aiTags.map((t) => TAG_LABEL[t] ?? t).join(', ')}
+            </Text>
+          ) : null}
+          {aiTags.length > 0 && !onVote ? (
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={`AI가 추정한 재료 ${aiTags.map((t) => TAG_LABEL[t] ?? t).join(', ')}`}
+              accessibilityState={{ expanded: aiOpen }}
+              onPress={() => setAiOpen((v) => !v)}
+              className="min-h-11 justify-center gap-0.5 py-1">
+              {/* 연필은 이름 옆 하나로 충분하다 (빼기 원칙) */}
+              <Text className={`text-sm font-semibold ${voted ? 'text-text' : 'text-muted'}`}>
+                AI가 추정한 재료 · {aiTags.map((t) => TAG_LABEL[t] ?? t).join(', ')}
+              </Text>
+              {aiOpen
+                ? aiTags.map((t) => (
+                    <Text key={t} className={`text-sm leading-5 ${voted ? 'text-text' : 'text-muted'}`}>
+                      <Text className={`font-bold text-text`}>{TAG_LABEL[t] ?? t}</Text>{' '}
+                      {candidate.aiNotes?.[t] ?? '흔히 들어가는 재료예요'}
+                    </Text>
+                  ))
+                : null}
+            </Pressable>
+          ) : null}
           {eatenNote ? (
             <Text className={`text-sm ${voted ? 'text-text' : 'text-muted'}`}>
               {eatenNote}
@@ -114,6 +150,15 @@ export function CandidateCard({
               <Icon name="check" color="primary" />
             ) : null}
           </View>
+        ) : null}
+        {onMore ? (
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={`${candidate.foodName} 신고 또는 차단`}
+            onPress={onMore}
+            className="h-11 w-11 items-center justify-center rounded-full bg-background active:opacity-70">
+            <Icon name="more" size={18} />
+          </Pressable>
         ) : null}
         {onRemove ? (
           <Pressable
@@ -163,7 +208,7 @@ export function CandidateCard({
       <Pressable
         accessibilityRole="button"
         accessibilityState={{ selected: voted, disabled: busy }}
-        accessibilityLabel={`${candidate.foodName} ${voted ? '고른 것 취소' : '고르기'}`}
+        accessibilityLabel={`${candidate.foodName}${aiTags.length > 0 ? `, AI가 추정한 재료 ${aiTags.map((t) => TAG_LABEL[t] ?? t).join(', ')}` : ''} ${voted ? '고른 것 취소' : '고르기'}`}
         disabled={busy}
         onPress={onVote}
         className={`${box} active:opacity-80`}>

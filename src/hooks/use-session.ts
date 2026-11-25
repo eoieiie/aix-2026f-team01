@@ -59,8 +59,8 @@ export function useSession(sessionId: string) {
     queryFn: () => getSession(sessionId),
     enabled: join.isSuccess,
     retry: false,
-    // 실시간이 끊겨도 10초마다 한 번은 맞춘다
-    refetchInterval: 10_000,
+    // 실시간 신호를 놓쳐도 4초마다 한 번은 맞춘다. 40명 부하 시험(11/21)에서 신호 일부가 빠져 10초는 시연에 길었다
+    refetchInterval: 4_000,
   });
 
   useEffect(() => {
@@ -72,7 +72,9 @@ export function useSession(sessionId: string) {
 
   const error = join.error ?? session.error;
   return {
-    session: session.data,
+    // 판이 닫혀 다시 읽기에 실패해도, 전에 읽은 모임으로 돌아갈 수 있게 마지막 값을 같이 준다
+    lastGroupId: session.data?.groupId ?? null,
+    session: session.error ? undefined : session.data,
     isLoading: join.isPending || (join.isSuccess && session.isPending),
     error,
     retry: () => (join.isError ? join.refetch() : session.refetch()),

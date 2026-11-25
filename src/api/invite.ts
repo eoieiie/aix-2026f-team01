@@ -20,6 +20,7 @@ export interface JoinResult {
 export const INVITE_ERROR_MESSAGES: Record<string, string> = {
   group_not_found: '모임을 찾을 수 없어요',
   name_taken: '이미 있는 이름이에요',
+  blocked_word: '쓸 수 없는 말이 있어요',
 };
 
 export class InviteError extends Error {

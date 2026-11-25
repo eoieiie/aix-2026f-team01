@@ -1,13 +1,36 @@
-import { useEffect, useRef, useState } from 'react';
-import { Platform, Pressable, Share } from 'react-native';
+import { type RefObject, useEffect, useRef, useState } from 'react';
+import { Platform, Pressable, Share, type View } from 'react-native';
 import { Text } from '@/components/text';
 
 import { COPIED_TOAST_MS } from '@/constants';
 
 // 공유 버튼 (4-15, 4-17). 검정(bg-ink): 카드가 이미 주황이라 버튼까지 주황이면 강조가 둘이 된다 (docs/design.md 순간 3).
-// 지금은 글로 공유한다. 앱: 기기 공유 창. 웹: 공유 창이 있으면 그것, 없으면 복사하고 "복사했어요".
-// 카드 이미지 공유(react-native-view-shot, expo-sharing)는 새 네이티브 패키지라 앱을 다시 빌드할 때 붙인다 (#43)
-export function ShareButton({ text, label = '공유' }: { text: string; label?: string }) {
+// 앱: captureRef가 있으면 카드를 그림으로 찍어 공유 창(react-native-view-shot, expo-sharing, 4-25).
+// 그 모듈이 없는 옛 앱 판이거나 찍기·공유가 실패하면 글 공유로 떨어진다. 화면에 오류는 띄우지 않는다.
+// 웹: 글. 공유 창이 있으면 그것, 없으면 복사하고 "복사했어요" (웹에는 화면을 그림으로 찍는 모듈을 싣지 않는다)
+async function shareCardImage(ref: RefObject<View | null>): Promise<boolean> {
+  try {
+    if (!ref.current) return false;
+    const shot = await import('react-native-view-shot');
+    const sharing = await import('expo-sharing');
+    if (!(await sharing.isAvailableAsync())) return false;
+    const uri = await shot.captureRef(ref, { format: 'png', quality: 1, result: 'tmpfile' });
+    await sharing.shareAsync(uri, { mimeType: 'image/png', dialogTitle: '이번 끼니' });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+export function ShareButton({
+  text,
+  label = '공유',
+  captureRef,
+}: {
+  text: string;
+  label?: string;
+  captureRef?: RefObject<View | null>;
+}) {
   const [copied, setCopied] = useState(false);
   const [failed, setFailed] = useState(false);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -19,6 +42,7 @@ export function ShareButton({ text, label = '공유' }: { text: string; label?: 
     setFailed(false);
     try {
       if (Platform.OS !== 'web') {
+        if (captureRef && (await shareCardImage(captureRef))) return;
         await Share.share({ message: text });
         return;
       }

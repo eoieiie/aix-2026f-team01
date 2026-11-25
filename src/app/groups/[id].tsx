@@ -5,15 +5,15 @@ import { Text } from '@/components/text';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Button } from '@/components/button';
-import { FoodDot } from '@/components/food-dot';
+import { GroupMenu } from '@/components/group-menu';
 import { GroupProfileCard } from '@/components/group-profile-card';
+import { MealTimeline } from '@/components/meal-timeline';
 import { HeadcountModal } from '@/components/headcount-modal';
 import { IconButton } from '@/components/icon';
 import { InviteCard } from '@/components/invite-card';
 import colors from '@/constants/colors.json';
 import {
   Member,
-  RecentMeal,
   type SessionOptions,
   useGroupDetail,
   useGroupMembersLive,
@@ -34,6 +34,7 @@ export default function GroupScreen() {
   const { startSession, isPending: isStartingSession } = useStartSession(id || '');
   const [askHeadcount, setAskHeadcount] = useState(false);
   const [startError, setStartError] = useState<string | null>(null);
+  const [checking, setChecking] = useState(false);
 
   // 누가 초대 링크, QR로 들어오면 새로고침 없이 바로 멤버 줄에 붙는다 (0019, 4-6)
   useGroupMembersLive(id || '');
@@ -107,7 +108,10 @@ export default function GroupScreen() {
     if (!hasOpenSession && expectedCount === undefined) {
       // 화면을 연 뒤 다른 사람이 판을 열었을 수 있다. 몇 명인지 묻기 전에 다시 읽어서,
       // 이미 열린 판이 있으면 인원수를 묻지 않고 그 판으로 간다. 인원수는 판을 연 사람만 정한다 (#67 GONI1130, 11/17)
-      const fresh = await refetch();
+      // 다시 읽는 동안 버튼에 로딩을 보인다. 누른 뒤 0.4초 안에 반응이 보여야 한다(도허티 임계, 닐슨 1번 시스템 상태)
+      if (checking) return;
+      setChecking(true);
+      const fresh = await refetch().finally(() => setChecking(false));
       const openId = fresh.data?.open_session_id;
       if (openId) {
         router.push(`/sessions/${openId}` as any);
@@ -136,8 +140,9 @@ export default function GroupScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-background">
-      <View className="flex-row items-center px-5 py-3">
+      <View className="flex-row items-center justify-between px-5 py-3">
         <IconButton name="back" label="홈으로" onPress={() => router.replace('/')} />
+        <GroupMenu groupId={group.id} name={group.name} isOwner={!!group.is_owner} onLeft={() => router.replace('/')} />
       </View>
 
       <ScrollView keyboardShouldPersistTaps="handled" automaticallyAdjustKeyboardInsets
@@ -179,32 +184,8 @@ export default function GroupScreen() {
         {/* 최근 식사 5개 (spec.md 4-6) */}
         <View className="gap-3">
           <Text className="text-2xl font-bold tracking-tight text-text">최근에 먹은 것</Text>
-          {group.recent_meals.length === 0 ? (
-            <View className="rounded-3xl bg-surface p-6">
-              <Text className="text-lg font-bold text-muted">아직 기록이 없어요</Text>
-            </View>
-          ) : (
-            <View className="gap-4 rounded-3xl bg-surface p-5">
-              {group.recent_meals.map((meal: RecentMeal) => (
-                // 한 줄을 누르면 그 식사의 결과 카드 (4-17)
-                <Pressable
-                  key={meal.id}
-                  accessibilityRole="button"
-                  accessibilityLabel={`${meal.food_name} 결과 카드`}
-                  onPress={() => router.push(`/meals/${meal.id}` as any)}
-                  className="min-h-11 flex-row items-center gap-3 active:opacity-70">
-                  <FoodDot foodId={meal.food_id} size="md" name={meal.food_name} />
-                  <Text className="flex-1 text-lg font-bold text-text">{meal.food_name}</Text>
-                  <Text className="text-sm text-muted">
-                    {new Date(meal.eaten_at).toLocaleDateString('ko-KR', {
-                      month: 'long',
-                      day: 'numeric',
-                    })}
-                  </Text>
-                </Pressable>
-              ))}
-            </View>
-          )}
+          {/* 4-25 월별 타임라인. 이번 달 한 줄, 더 보기 */}
+          <MealTimeline groupId={group.id} />
         </View>
 
         {/* 모임 프로필 카드 (spec.md 4-16). 실패하면 카드 자리에만 문구가 나온다 */}
@@ -217,7 +198,7 @@ export default function GroupScreen() {
           <Button
             label={hasOpenSession ? '진행 중인 판으로' : '오늘 뭐 먹지'}
             onPress={() => handleStartOrJoinSession()}
-            loading={isStartingSession && !askHeadcount}
+            loading={(isStartingSession && !askHeadcount) || checking}
           />
           {openFlash > 0 ? <NewRing key={openFlash} label="판이 열렸어요" /> : null}
         </View>

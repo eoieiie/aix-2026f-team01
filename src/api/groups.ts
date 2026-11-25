@@ -39,6 +39,8 @@ export interface GroupDetail {
   is_member: boolean;
   open_session_id: string | null;
   my_user_id: string | null; // 같이 먹을 사람 창에서 나를 늘 체크해 두려고 (4-6)
+  // 모임을 만든 사람(방장). 이름 바꾸기는 방장만 (4-24)
+  is_owner?: boolean;
   members: Member[];
   recent_meals: RecentMeal[];
 }
@@ -56,6 +58,7 @@ export interface CreateGroupResult {
 export const GROUP_ERROR_MESSAGES: Record<string, string> = {
   name_empty: '이름을 입력해주세요',
   name_too_long: '이름이 너무 길어요',
+  blocked_word: '쓸 수 없는 말이 있어요',
   display_name_required: '이름을 입력해주세요',
   not_member: '이 모임 멤버가 아니에요',
   not_signed_in: '로그인이 필요해요',
@@ -195,7 +198,7 @@ export async function getGroupDetail(
   // 1. 모임 정보
   const { data: groupData, error: groupError } = await client
     .from('groups')
-    .select('id, name, invite_code, created_at')
+    .select('id, name, invite_code, created_at, created_by')
     .eq('id', groupId)
     .maybeSingle();
 
@@ -271,6 +274,7 @@ export async function getGroupDetail(
   await recordGroupVisit(groupId);
 
   return {
+    is_owner: !!userId && (groupData as any).created_by === userId,
     id: groupData.id,
     name: groupData.name,
     invite_code: groupData.invite_code,
