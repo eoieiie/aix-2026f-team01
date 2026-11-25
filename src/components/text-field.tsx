@@ -64,7 +64,7 @@ export function TextField({
         onFocus={() => setFocused(true)}
         onBlur={() => setFocused(false)}
         // 쓰는 중인 칸은 검정 선 하나로 보인다. 평소 선은 바탕과 같은 색이라 보이지 않는다
-        className={`h-14 rounded-2xl border-2 bg-surface px-5 text-lg text-text placeholder:text-muted ${
+        className={`h-14 rounded-2xl border-2 bg-surface px-4 text-lg text-text placeholder:text-muted ${
           focused ? 'border-ink' : 'border-surface'
         }`}
       />
