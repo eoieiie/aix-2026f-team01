@@ -403,6 +403,8 @@ export interface FoodHint {
   blocked: boolean;
   eatenCount: number;
   lastEatenAt: string | null;
+  // 4-27 맞춤 채우기. 서버가 판 참여자 취향을 합쳐 고른 순서(1이 먼저). 고르지 않은 음식에는 없다
+  fillRank?: number;
 }
 
 export async function getFoodHints(sessionId: string, client: Client = getSupabase()): Promise<FoodHint[]> {
@@ -414,6 +416,34 @@ export async function getFoodHints(sessionId: string, client: Client = getSupaba
     eatenCount: r.eaten_count ?? 0,
     lastEatenAt: r.last_eaten_at ?? null,
   }));
+}
+
+// 빈 판 채우기 추천 (4-20, 4-27, 0036). 서버가 판 참여자 취향을 합쳐 고른 음식 id를 점수 순으로 준다.
+// 점수와 남의 취향은 오지 않는다. 아무도 취향을 안 적었거나 못 받으면 빈 목록이고, 앱은 예전처럼 무작위로 채운다
+export async function getFillPicks(sessionId: string, client: Client = getSupabase()): Promise<number[]> {
+  try {
+    const { data, error } = await client.rpc('session_fill_picks', { p_session_id: sessionId });
+    if (error) return [];
+    return ((data ?? []) as any[])
+      .filter((r) => typeof r.food_id === 'number')
+      .sort((a, b) => (a.rank ?? 0) - (b.rank ?? 0))
+      .map((r) => r.food_id);
+  } catch {
+    return [];
+  }
+}
+
+// 힌트에 서버가 고른 순서를 적는다. 고른 음식이 힌트에 없으면(직접 적은 메뉴 등) 버린다
+export function withFillRanks(hints: FoodHint[], picks: number[]): FoodHint[] {
+  if (picks.length === 0) return hints;
+  const rank = new Map(picks.map((id, i) => [id, i + 1]));
+  return hints.map((h) => (rank.has(h.foodId) ? { ...h, fillRank: rank.get(h.foodId) } : h));
+}
+
+// 판 화면이 쓰는 힌트: 못 먹는 사람과 먹은 기록(0011)에 맞춤 채우기 순서(0036)를 얹는다
+export async function getFoodHintsWithPicks(sessionId: string, client: Client = getSupabase()): Promise<FoodHint[]> {
+  const [hints, picks] = await Promise.all([getFoodHints(sessionId, client), getFillPicks(sessionId, client)]);
+  return withFillRanks(hints, picks);
 }
 
 // 한국 시간 날짜로 며칠 전인지. 오늘이면 0
@@ -444,7 +474,9 @@ export function groupFavorites(hints: FoodHint[], excludeIds: number[], max: num
     .slice(0, max);
 }
 
-// 빈 판 채우기: 모두 먹을 수 있고, 정한 날수 안에 안 먹은 음식 중에서 무작위로. 모자라면 최근에 먹은 것도 쓴다
+// 빈 판 채우기: 모두 먹을 수 있는 음식 중에서 고른다.
+// 서버가 판 참여자 취향으로 고른 순서(fillRank)가 있으면 그 순서가 먼저다 (4-27).
+// 없으면(아무도 취향을 안 적음) 정한 날수 안에 안 먹은 음식 중에서 무작위로, 모자라면 최근에 먹은 것도 쓴다
 export function quickFillPicks(
   hints: FoodHint[],
   excludeIds: number[],
@@ -463,9 +495,13 @@ export function quickFillPicks(
     }
     return a;
   };
-  const fresh = shuffle(safe.filter((h) => eatenNote(h.lastEatenAt, withinDays, now) === null));
-  const recent = shuffle(safe.filter((h) => eatenNote(h.lastEatenAt, withinDays, now) !== null));
-  return [...fresh, ...recent].slice(0, count).map((h) => h.foodId);
+  const ranked = safe
+    .filter((h) => typeof h.fillRank === 'number')
+    .sort((a, b) => (a.fillRank as number) - (b.fillRank as number));
+  const rest = safe.filter((h) => typeof h.fillRank !== 'number');
+  const fresh = shuffle(rest.filter((h) => eatenNote(h.lastEatenAt, withinDays, now) === null));
+  const recent = shuffle(rest.filter((h) => eatenNote(h.lastEatenAt, withinDays, now) !== null));
+  return [...ranked, ...fresh, ...recent].slice(0, count).map((h) => h.foodId);
 }
 
 // 원판 조각. 서버 추첨 대상과 같은 규칙: 1표 이상인 후보를 표 수만큼(못 먹는 사람이 있어도).

@@ -27,23 +27,15 @@ const files = SCREEN_DIRS.flatMap(screenFiles).map((file) => ({
 // 통일 점검 PR에서 이 목록을 비운다. 여기에 새 파일을 더하지 말고 화면을 규칙에 맞춘다
 const NOT_YET = [
   'src/app/(tabs)/_layout.tsx',
-  'src/app/(tabs)/profile.tsx',
   'src/app/(tabs)/shops.tsx',
   'src/app/shops/',
   'src/app/coupons.tsx',
   'src/app/owner/',
   'src/app/admin/',
-  'src/app/profile/',
   'src/app/dev/',
-  'src/components/profile-summary-card.tsx',
-  'src/components/person-dots.tsx',
-  'src/components/avatar.tsx',
   'src/components/nearby-restaurants.tsx',
   'src/components/nearby-cafes.tsx',
   'src/components/coupon-code.tsx',
-  'src/components/food-dex.tsx',
-  'src/components/settings-list.tsx',
-  'src/components/account-sheet.tsx',
   'src/components/legal-page.tsx',
 ];
 const checked = files.filter(({ file }) => !NOT_YET.some((prefix) => file.startsWith(prefix)));
