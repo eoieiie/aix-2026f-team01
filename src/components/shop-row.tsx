@@ -4,8 +4,9 @@ import { Pressable, View } from 'react-native';
 import { AdBadge } from '@/components/ad-badge';
 import { ShopThumb } from '@/components/shop-thumb';
 import { Text } from '@/components/text';
+import { TextPieces } from '@/components/text-pieces';
 
-// 가게 한 줄 (4-26). 왼쪽 그림, 이름과 "광고", 그 아래 한 줄 정보와 제휴 혜택. 누르면 가게 상세로 간다.
+// 가게 한 줄 (4-26). 왼쪽 그림, 이름과 "광고"(혜택이 있는 제휴만), 그 아래 한 줄 정보와 제휴 혜택. 누르면 가게 상세로 간다.
 // 가게 탭 목록(그림 72, 회색 카드)과 판 결과의 식당·카페 줄(그림 56, 카드 안 줄)이 같이 쓴다
 export function ShopRow({
   id,
@@ -23,7 +24,8 @@ export function ShopRow({
   id: number;
   name: string;
   partner: boolean;
-  info: string;
+  // 이름 아래 조각들(종류, 걸어서 몇 분, 영업 중). 기호 없이 간격으로 떨어뜨린다
+  info: readonly string[];
   benefit?: string | null;
   photoUrl: string | null;
   thumbUrl: string | null;
@@ -49,11 +51,7 @@ export function ShopRow({
           </Text>
           {partner ? <AdBadge /> : null}
         </View>
-        {info ? (
-          <Text className="text-sm text-muted" numberOfLines={1}>
-            {info}
-          </Text>
-        ) : null}
+        <TextPieces pieces={info} />
         {benefit ? (
           <Text className="text-sm font-semibold text-text" numberOfLines={1}>
             {benefit}

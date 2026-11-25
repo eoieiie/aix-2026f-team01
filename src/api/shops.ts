@@ -39,14 +39,16 @@ export interface Shop {
   id: number;
   name: string;
   cuisine: string | null;
-  // 제휴 가게. 이름 옆에 "광고"를 붙인다
+  // 혜택 문구가 있는 제휴 가게. 이름 옆에 "광고"를 붙이고 먼저 줄 세운다.
+  // 문구가 없는 제휴는 보통 가게로 본다(혜택이 없는데 광고 표시가 붙으면 관계를 잘못 알린다, 0040)
   partner: boolean;
   couponText: string | null;
   walkMinutes: number | null;
   openNow: boolean | null;
   // 가게 사진(사장님이 주거나 팀이 찍은 것). 없으면 null
   photoUrl: string | null;
-  // 사진이 없을 때 쓰는 음식 그림. 카페와 종류를 모르는 가게는 null이고 화면이 아이콘을 그린다
+  // 사진이 없을 때 쓰는 그림: 이름이나 대표 메뉴로 찾은 음식 그림, 카페는 카페 그림(0040).
+  // 못 찾으면 null이고 화면이 옅은 칸에 종류 이름을 그린다(엉뚱한 음식 그림보다 낫다)
   thumbUrl: string | null;
   lat: number | null;
   lng: number | null;
@@ -75,8 +77,9 @@ export function shopPhotoUrl(base: string, path: string | null | undefined): str
   return storageUrl(base, SHOP_PHOTO_BUCKET, path);
 }
 
+// 음식 그림(음식 id 파일)과 카페 그림(cafe/coffee, cafe/bread, cafe/dessert, 0040)
 function foodThumbUrl(base: string, path: string | null | undefined): string | null {
-  if (!base || !path || !/^[0-9]+\.(webp|png)$/.test(path)) return null;
+  if (!base || !path || !/^([0-9]+|cafe\/[a-z]+)\.(webp|png)$/.test(path)) return null;
   return storageUrl(base, FOOD_IMAGE_BUCKET, path);
 }
 
@@ -84,12 +87,13 @@ const num = (v: unknown): number | null => (typeof v === 'number' && Number.isFi
 const str = (v: unknown): string | null => (typeof v === 'string' && v.trim() !== '' ? v : null);
 
 function toShop(r: any, base: string): Shop {
+  const couponText = r.partner ? str(r.coupon_text) : null;
   return {
     id: r.id,
     name: r.name,
     cuisine: str(r.cuisine),
-    partner: Boolean(r.partner),
-    couponText: r.partner ? str(r.coupon_text) : null,
+    partner: couponText !== null,
+    couponText,
     walkMinutes: num(r.walk_minutes),
     openNow: typeof r.open_now === 'boolean' ? r.open_now : null,
     photoUrl: shopPhotoUrl(base, r.photo_path),
@@ -142,15 +146,16 @@ export function filterShops(list: readonly Shop[], kind: ShopKind, query: string
   });
 }
 
-// 이름 아래 한 줄: "한식 · 걸어서 3분 · 영업 중" 중 값이 있는 것만
-export function shopLine(s: Pick<Shop, 'cuisine' | 'walkMinutes' | 'openNow'>): string {
+// 이름 아래 한 줄의 조각들: 종류, 걸어서 몇 분, 영업 중 중 값이 있는 것만.
+// 화면은 조각을 간격 8로 떨어뜨려 놓는다(가운뎃점 같은 기호로 잇지 않는다, 2026-11-25)
+export function shopLine(s: Pick<Shop, 'cuisine' | 'walkMinutes' | 'openNow'>): string[] {
   const parts: string[] = [];
   const kind = cuisineLabel(s.cuisine);
   if (kind) parts.push(kind);
   if (s.walkMinutes !== null) parts.push(`걸어서 ${s.walkMinutes}분`);
   if (s.openNow === true) parts.push('영업 중');
   if (s.openNow === false) parts.push('지금 닫음');
-  return parts.join(' · ');
+  return parts;
 }
 
 // "경기도 안산시 상록구 한양대학로 38, 2층 (사동)" → "상록구 한양대학로 38, 2층". 같은 도시라 앞과 동 이름은 뺀다

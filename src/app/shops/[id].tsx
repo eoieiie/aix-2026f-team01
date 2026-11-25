@@ -19,6 +19,7 @@ import { CouponCode } from '@/components/coupon-code';
 import { Icon, IconButton, type IconName } from '@/components/icon';
 import { ShopThumb } from '@/components/shop-thumb';
 import { Text } from '@/components/text';
+import { TextPieces } from '@/components/text-pieces';
 import { COUPON_VALID_HOURS } from '@/constants';
 import { OSM_CREDIT } from '@/hooks/use-restaurants';
 import { type ShopDetail, useClaimShopCoupon, useMyCoupons, useShop } from '@/hooks/use-shops';
@@ -72,7 +73,7 @@ function ShopBody({ shop }: { shop: ShopDetail }) {
           <Text className="shrink text-3xl font-bold tracking-tight text-text">{shop.name}</Text>
           {shop.partner ? <AdBadge /> : null}
         </View>
-        {line ? <Text className="text-base text-muted">{line}</Text> : null}
+        <TextPieces pieces={line} className="text-base text-muted" />
       </View>
 
       {shop.partner && shop.couponText ? (

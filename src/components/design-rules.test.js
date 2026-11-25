@@ -102,6 +102,23 @@ describe('디자인 규칙', () => {
     expect(found).toEqual([]);
   });
 
+  it('화면에 보이는 글을 가운뎃점(·) 같은 기호로 잇지 않는다. 조각을 간격 8로 떨어뜨린다(TextPieces)', () => {
+    // 화면 파일과 화면 글을 만드는 src/api, src/hooks, src/constants를 본다. 주석 줄과 줄 끝 주석은 뺀다 (2026-11-25)
+    const textDirs = ['../app', '.', '../api', '../hooks', '../constants'].map((dir) => path.join(__dirname, dir));
+    const dot = /[\u00B7\u318D\u2022\u2219\u30FB]/;
+    const found = textDirs
+      .flatMap(screenFiles)
+      .flatMap((file) =>
+        fs
+          .readFileSync(file, 'utf8')
+          .split('\n')
+          .map((line, i) => ({ line: line.replace(/\s\/\/\s.*$/, ''), i }))
+          .filter(({ line }) => !/^\s*(\/\/|\*|\/\*|\{\/\*)/.test(line) && dot.test(line))
+          .map(({ i }) => `${path.relative(path.join(__dirname, '../..'), file)}:${i + 1}`)
+      );
+    expect(found).toEqual([]);
+  });
+
   it('음식 색 동그라미가 쓰는 색은 모두 tailwind.config.js 토큰에 있다', () => {
     for (const cls of FOOD_COLOR_CLASSES) {
       expect(tailwindColors).toHaveProperty(cls.replace(/^bg-/, ''));
