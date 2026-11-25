@@ -79,7 +79,7 @@ export function VoteRestaurants({ sessionId, candidateKey }: { sessionId: string
   );
 }
 
-// 줄 하나: 그림, 이름과 "광고", 아래에 걸어서 N분 · 영업 중 · 밥BTI로 간 모임 N팀.
+// 줄 하나: 그림, 이름과 "광고", 아래에 걸어서 N분, 영업 중, 밥BTI로 간 모임 N팀을 간격으로 떨어뜨려.
 // 그림은 가게 목록(4-26)에서 찾는다. 목록을 아직 못 읽었으면 아이콘으로 그린다
 function RestaurantRow({ r, shop, onSurface }: { r: NearbyRestaurant; shop: Shop | undefined; onSurface: boolean }) {
   return (

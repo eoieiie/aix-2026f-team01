@@ -2,8 +2,11 @@ import { useState } from 'react';
 import { Image, View } from 'react-native';
 
 import { Icon } from '@/components/icon';
+import { Text } from '@/components/text';
+import { cuisineLabel } from '@/hooks/use-shops';
 
-// 가게 그림 칸 (4-26). 가게 사진 → 대표 메뉴나 종류의 음식 그림 → 아이콘 순으로 그린다.
+// 가게 그림 칸 (4-26). 가게 사진 → 이름이나 대표 메뉴로 찾은 음식 그림(카페는 카페 그림) → 중립 칸 순으로 그린다.
+// 중립 칸은 옅은 면에 종류 이름 한 단어(한식 등), 종류를 모르면 아이콘. 엉뚱한 음식 그림을 대신 넣지 않는다(0040).
 // 사진이 한 장도 없어도 칸이 비어 보이지 않는다. 사진은 사장님이 주거나 팀이 찍은 것만 올라온다
 export function ShopThumb({
   name,
@@ -56,9 +59,16 @@ export function ShopThumb({
     );
   }
 
+  const kind = cuisineLabel(cuisine);
   return (
     <View className={tile} style={box} accessibilityLabel={`${name} 그림 없음`}>
-      <Icon name={cuisine === 'cafe' ? 'cup' : 'shop'} size={Math.round(size * 0.42)} color="muted" />
+      {kind ? (
+        <Text className={`font-bold text-muted ${size >= 96 ? 'text-2xl' : 'text-base'}`} numberOfLines={1}>
+          {kind}
+        </Text>
+      ) : (
+        <Icon name={cuisine === 'cafe' ? 'cup' : 'shop'} size={Math.round(size * 0.42)} color="muted" />
+      )}
     </View>
   );
 }

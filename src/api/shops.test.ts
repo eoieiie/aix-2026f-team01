@@ -89,6 +89,7 @@ describe('가게 목록과 상세 (4-26)', () => {
         menus: ['떡볶이', '김밥'],
       },
       { id: 8, name: '옆 카페', cuisine: 'cafe', partner: false, coupon_text: '안 보여야 함', walk_minutes: null, open_now: null },
+      { id: 9, name: '빵 카페', cuisine: 'cafe', partner: true, coupon_text: null, thumb_image: 'cafe/bread.webp' },
     ]);
     const list = await getShops(client, BASE);
     expect(calls[0].name).toBe('shop_list');
@@ -99,6 +100,12 @@ describe('가게 목록과 상세 (4-26)', () => {
       menus: ['떡볶이', '김밥'],
     });
     expect(list[1]).toMatchObject({ couponText: null, photoUrl: null, thumbUrl: null, menus: [], lat: null });
+    // 혜택 문구가 없는 제휴는 보통 가게처럼(광고 없음), 카페 그림 주소는 cafe/ 아래
+    expect(list[2]).toMatchObject({
+      partner: false,
+      couponText: null,
+      thumbUrl: `${BASE}/storage/v1/object/public/food-images/cafe/bread.webp`,
+    });
   });
 
   it('사진 주소는 버킷 안 경로만 받는다', () => {
@@ -127,7 +134,7 @@ describe('가게 목록과 상세 (4-26)', () => {
   it('종류와 검색어로 거른다. 검색은 이름과 대표 메뉴에서, 띄어쓰기를 보지 않는다', () => {
     const list = [
       shop({ id: 1, name: '북경 반점', cuisine: 'chinese', menus: ['짜장면', '짬뽕'] }),
-      shop({ id: 2, name: '시저커피', cuisine: 'cafe', partner: true }),
+      shop({ id: 2, name: '시저커피', cuisine: 'cafe', partner: true, couponText: '아메리카노 500원 할인' }),
       shop({ id: 3, name: '할매국수', cuisine: 'korean' }),
     ];
     expect(filterShops(list, 'all', '').map((s) => s.id)).toEqual([1, 2, 3]);
@@ -138,10 +145,10 @@ describe('가게 목록과 상세 (4-26)', () => {
     expect(filterShops(list, 'korean', '짬뽕')).toEqual([]);
   });
 
-  it('이름 아래 한 줄은 값이 있는 것만 잇는다', () => {
-    expect(shopLine({ cuisine: 'korean', walkMinutes: 3, openNow: true })).toBe('한식 · 걸어서 3분 · 영업 중');
-    expect(shopLine({ cuisine: 'cafe', walkMinutes: null, openNow: false })).toBe('카페 · 지금 닫음');
-    expect(shopLine({ cuisine: null, walkMinutes: null, openNow: null })).toBe('');
+  it('이름 아래 한 줄은 값이 있는 것만 조각으로 준다(기호로 잇지 않는다)', () => {
+    expect(shopLine({ cuisine: 'korean', walkMinutes: 3, openNow: true })).toEqual(['한식', '걸어서 3분', '영업 중']);
+    expect(shopLine({ cuisine: 'cafe', walkMinutes: null, openNow: false })).toEqual(['카페', '지금 닫음']);
+    expect(shopLine({ cuisine: null, walkMinutes: null, openNow: null })).toEqual([]);
   });
 
   it('주소는 도와 시, 끝의 동 이름을 뺀다', () => {

@@ -2,6 +2,7 @@ import { choiceSurface } from '@/components/choice-colors';
 import { useState } from 'react';
 import { Modal, Pressable, ScrollView, View } from 'react-native';
 import { Text } from '@/components/text';
+import { TextPieces } from '@/components/text-pieces';
 
 import { Button } from '@/components/button';
 import { Icon } from '@/components/icon';
@@ -116,9 +117,10 @@ export function HeadcountModal({
               accessibilityState={{ expanded: showOptions }}
               onPress={() => setShowOptions((v) => !v)}
               className="h-12 flex-row items-center justify-between rounded-2xl bg-surface px-4 active:opacity-70">
-              <Text className="text-base font-bold text-text">
-                옵션 · 인당 {voteLimit}표{allowRepeat ? ' · 한 메뉴에 여러 표' : ''}
-              </Text>
+              <TextPieces
+                pieces={['옵션', `인당 ${voteLimit}표`, allowRepeat ? '한 메뉴에 여러 표' : '']}
+                className="text-base font-bold text-text"
+              />
               <Icon name={showOptions ? 'minus' : 'plus'} size={18} />
             </Pressable>
 

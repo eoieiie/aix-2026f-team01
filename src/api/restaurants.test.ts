@@ -23,20 +23,22 @@ function fake(over: Partial<NearbyRestaurant> & { id: number }): NearbyRestauran
 const noTaste = { axes: null, eatenFoodIds: new Set<number>() };
 
 describe('restaurantInfo (4-21)', () => {
-  it('걸어서 N분 · 영업 중 · 밥BTI로 간 모임 N팀 중 값이 있는 것만', () => {
-    expect(restaurantInfo({ walkMinutes: 5, openNow: true, teamCount: 2, cuisine: 'korean' })).toBe(
-      '걸어서 5분 · 영업 중 · 밥BTI로 간 모임 2팀'
-    );
-    expect(restaurantInfo({ walkMinutes: 3, openNow: null, teamCount: 0, cuisine: 'korean' })).toBe('걸어서 3분');
+  it('걸어서 N분, 영업 중, 밥BTI로 간 모임 N팀 중 값이 있는 것만 조각으로(기호로 잇지 않는다)', () => {
+    expect(restaurantInfo({ walkMinutes: 5, openNow: true, teamCount: 2, cuisine: 'korean' })).toEqual([
+      '걸어서 5분',
+      '영업 중',
+      '밥BTI로 간 모임 2팀',
+    ]);
+    expect(restaurantInfo({ walkMinutes: 3, openNow: null, teamCount: 0, cuisine: 'korean' })).toEqual(['걸어서 3분']);
   });
 
   it('닫았으면 "지금 닫음", 영업시간을 모르면 아무것도 없다', () => {
-    expect(restaurantInfo({ walkMinutes: 4, openNow: false, teamCount: 0, cuisine: null })).toBe('걸어서 4분 · 지금 닫음');
+    expect(restaurantInfo({ walkMinutes: 4, openNow: false, teamCount: 0, cuisine: null })).toEqual(['걸어서 4분', '지금 닫음']);
   });
 
   it('세 값을 다 모르면 종류, 종류도 모르면 빈 줄', () => {
-    expect(restaurantInfo({ walkMinutes: null, openNow: null, teamCount: 0, cuisine: 'chinese' })).toBe('중식');
-    expect(restaurantInfo({ walkMinutes: null, openNow: null, teamCount: 0, cuisine: null })).toBe('');
+    expect(restaurantInfo({ walkMinutes: null, openNow: null, teamCount: 0, cuisine: 'chinese' })).toEqual(['중식']);
+    expect(restaurantInfo({ walkMinutes: null, openNow: null, teamCount: 0, cuisine: null })).toEqual([]);
   });
 });
 
@@ -156,6 +158,21 @@ describe('getSessionRestaurants', () => {
     expect(list[1].couponText).toBeNull();
     expect(list[1].foodId).toBe(7);
     expect(list[1].photoUrl).toBeNull();
+  });
+
+  it('혜택 문구가 없는 제휴는 "광고"를 붙이지 않는다(partner false, 0040)', async () => {
+    const rpc = jest.fn(async () => ({
+      data: [
+        { id: 3, name: '문구 없는 제휴', cuisine: 'korean', partner: true, coupon_text: null, match: 'menu', my_code: null },
+        { id: 4, name: '빈칸 문구 제휴', cuisine: 'korean', partner: true, coupon_text: '  ', match: 'menu', my_code: null },
+      ],
+      error: null,
+    }));
+    const list = await getSessionRestaurants('s1', { rpc } as any);
+    expect(list.map((r) => [r.partner, r.couponText])).toEqual([
+      [false, null],
+      [false, null],
+    ]);
   });
 
   it('0016 전의 서버(새 칸 없음)는 모름으로 읽는다', async () => {

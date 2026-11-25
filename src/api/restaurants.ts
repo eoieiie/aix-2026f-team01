@@ -58,8 +58,9 @@ export async function getSessionRestaurants(
     id: r.id,
     name: r.name,
     cuisine: r.cuisine ?? null,
-    partner: Boolean(r.partner),
-    couponText: r.coupon_text ?? null,
+    // 혜택 문구가 있는 제휴만 "광고"와 먼저 줄 세우기(0040). 서버도 같게 주지만 화면에서 한 번 더
+    partner: offer(r),
+    couponText: offer(r) ? r.coupon_text : null,
     match: r.match === 'menu' ? 'menu' : 'cuisine',
     myCode: r.my_code ?? null,
     lat: typeof r.lat === 'number' ? r.lat : coords.get(r.id)?.lat ?? null,
@@ -71,6 +72,11 @@ export async function getSessionRestaurants(
     // 사진은 제휴 식당에만 (서버도 막지만 화면에서 한 번 더)
     photoUrl: r.partner && typeof r.photo_url === 'string' ? r.photo_url : null,
   }));
+}
+
+// 제휴이면서 혜택 문구가 있는가 (0040). 문구가 없는 제휴는 보통 가게처럼 보인다
+function offer(r: any): boolean {
+  return Boolean(r.partner) && typeof r.coupon_text === 'string' && r.coupon_text.trim() !== '';
 }
 
 // 식당 줄을 누르면 여는 카카오맵 주소. 키가 필요 없는 공개 링크다(앱이 깔려 있으면 휴대폰이 앱으로 넘긴다).
@@ -98,8 +104,8 @@ export async function getSessionCafes(sessionId: string, client: Client = getSup
   return ((data as any[]) ?? []).map((r) => ({
     id: r.id,
     name: r.name,
-    partner: Boolean(r.partner),
-    couponText: r.coupon_text ?? null,
+    partner: offer(r),
+    couponText: offer(r) ? r.coupon_text : null,
     myCode: r.my_code ?? null,
     lat: typeof r.lat === 'number' ? r.lat : null,
     lng: typeof r.lng === 'number' ? r.lng : null,
@@ -134,18 +140,20 @@ const CUISINE_LABELS: Record<string, string> = {
   asian: '아시안',
 };
 
-// 이름 아래 한 줄: "걸어서 N분 · 영업 중 · 밥BTI로 간 모임 N팀" 중 값이 있는 것만 (4-21, 2026-11-16).
-// 닫았으면 "지금 닫음". 셋 다 모르면 줄이 비지 않게 종류(한식 등)를 보인다
+// 이름 아래 한 줄의 조각들: 걸어서 N분, 영업 중, 밥BTI로 간 모임 N팀 중 값이 있는 것만 (4-21, 2026-11-16).
+// 닫았으면 "지금 닫음". 셋 다 모르면 줄이 비지 않게 종류(한식 등)를 보인다.
+// 화면은 조각을 간격 8로 떨어뜨려 놓는다(기호로 잇지 않는다, 2026-11-25)
 export function restaurantInfo(
   r: Pick<NearbyRestaurant, 'walkMinutes' | 'openNow' | 'teamCount' | 'cuisine'>
-): string {
+): string[] {
   const parts: string[] = [];
   if (r.walkMinutes !== null) parts.push(`걸어서 ${r.walkMinutes}분`);
   if (r.openNow === true) parts.push('영업 중');
   if (r.openNow === false) parts.push('지금 닫음');
   if (r.teamCount > 0) parts.push(`밥BTI로 간 모임 ${r.teamCount}팀`);
-  if (parts.length > 0) return parts.join(' · ');
-  return r.cuisine ? CUISINE_LABELS[r.cuisine] ?? '' : '';
+  if (parts.length > 0) return parts;
+  const kind = r.cuisine ? CUISINE_LABELS[r.cuisine] : undefined;
+  return kind ? [kind] : [];
 }
 
 export interface Taste {
