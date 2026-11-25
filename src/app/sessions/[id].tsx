@@ -18,7 +18,7 @@ import { Roulette } from '@/components/roulette';
 import { ConfirmSheet } from '@/components/sheets';
 import colors from '@/constants/colors.json';
 import { safetyErrorMessage, useSafety } from '@/hooks/use-safety';
-import { cantEatNotice } from '@/constants/restrictions';
+import { cantEatNotice, maybeNotice } from '@/constants/restrictions';
 import {
   GROUP_FAVORITES_MAX,
   QUICK_FILL_COUNT,
@@ -239,7 +239,7 @@ function CandidateStage({
   onRestrictions: () => void;
 }) {
   const { foods } = useFoods();
-  const { add, addCustom, pitch, remove, open } = useSessionActions(session.id);
+  const { add, addCustom, pitch, remove, open, confirmAi, addTag } = useSessionActions(session.id);
   const [report, setReport] = useState<ReportTarget | null>(null);
   // 4-20 식사 기록과 못 먹는 것. 참여자 수가 바뀌면 다시 읽는다
   const hints = useFoodHints(session.id, `${session.participants.length}`);
@@ -265,8 +265,9 @@ function CandidateStage({
   };
   // 0010부터 못 먹는 사람이 있는 후보도 남는다. 후보가 하나라도 있으면 투표를 연다
   const alive = session.candidates.length;
-  const busy = filling || add.isPending || addCustom.isPending || pitch.isPending || remove.isPending;
-  const actionError = add.error ?? addCustom.error ?? pitch.error ?? remove.error;
+  const busy =
+    filling || add.isPending || addCustom.isPending || pitch.isPending || remove.isPending || confirmAi.isPending || addTag.isPending;
+  const actionError = add.error ?? addCustom.error ?? pitch.error ?? remove.error ?? confirmAi.error ?? addTag.error;
 
   // 후보를 올리면 어디로 갔는지 몰랐다는 말이 있었다 (#44 인터뷰 3 다시, #67, 11/17).
   // 그래서 후보는 새것부터 보이고, 내가 방금 올린 후보는 잠깐 주황 테두리가 생긴다. 후보 칸이 화면 아래에 있으면 그 자리로 내린다
@@ -369,6 +370,8 @@ function CandidateStage({
                 eatenNote={eatenNote(hintOf.get(c.foodId)?.lastEatenAt ?? null, RECENT_EATEN_DAYS)}
                 onSavePitch={c.isMine ? (text) => pitch.mutate({ foodId: c.foodId, text }) : undefined}
                 onRemove={c.isMine ? () => remove.mutate(c.foodId) : undefined}
+                onConfirmAi={c.isMine && c.custom ? () => confirmAi.mutate(c.foodId) : undefined}
+                onAddTag={c.isMine && c.custom ? (tag) => addTag.mutate({ foodId: c.foodId, tag }) : undefined}
                 onMore={
                   !c.isMine && !c.blocked && (c.pitch || c.custom)
                     ? () =>
@@ -419,6 +422,8 @@ const FRESH_MS = 1600;
 function VotingStage({ session }: { session: SessionView }) {
   const { vote, spin, anyOk } = useSessionActions(session.id);
   const notice = cantEatNotice(session.cantEat.tags, session.cantEat.foods);
+  // 0044 약한 안내: AI만 추정한 재료. 확실한 안내 상자 밖에 옅은 글로 한 줄
+  const maybe = maybeNotice(session.candidates.flatMap((c) => c.maybeTags ?? []), session.cantEat.tags);
   const votedCount = session.participants.filter((p) => p.voted).length;
   // 몇 명이서 먹는지 정한 판은 그 수가 기준이다. 예전 판은 들어온 사람 수
   const total = session.expectedCount ?? session.participants.length;
@@ -459,6 +464,7 @@ function VotingStage({ session }: { session: SessionView }) {
             ))}
           </View>
         ) : null}
+        {maybe ? <Text className="text-sm font-semibold text-muted">{maybe}</Text> : null}
 
         {vote.error ?? anyOk.error ? (
           <Text className="text-sm font-semibold text-danger">

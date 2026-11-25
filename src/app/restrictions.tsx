@@ -11,7 +11,7 @@ import { FoodDot } from '@/components/food-dot';
 import { FoodSearch } from '@/components/food-search';
 import { Icon, IconButton } from '@/components/icon';
 import colors from '@/constants/colors.json';
-import { DIET_TAGS, INGREDIENT_TAGS } from '@/constants/restrictions';
+import { DIET_TAGS, HALAL_NOTE, INGREDIENT_TAGS } from '@/constants/restrictions';
 import {
   itemKey,
   restrictionErrorMessage,
@@ -100,6 +100,7 @@ export default function RestrictionsScreen() {
           tags={DIET_TAGS}
           chosen={chosen}
           onToggle={(tag) => update(toggleItem(draft, { tag }))}
+          note={chosen.has('tag:halal') ? HALAL_NOTE : null}
         />
 
         <View className="gap-3">
@@ -161,11 +162,14 @@ function TagSection({
   tags,
   chosen,
   onToggle,
+  note = null,
 }: {
   title: string;
   tags: readonly { code: string; label: string }[];
   chosen: Set<string>;
   onToggle: (tag: string) => void;
+  // 고른 것에 붙는 한 줄 (할랄: 앱이 모르는 것, 0044)
+  note?: string | null;
 }) {
   return (
     <View className="gap-3">
@@ -194,6 +198,7 @@ function TagSection({
           );
         })}
       </View>
+      {note ? <Text className="text-sm text-muted">{note}</Text> : null}
     </View>
   );
 }

@@ -88,9 +88,9 @@ reset role;
 select is(pg_temp.vetoed('20000000-0000-0000-0000-000000000001', 't_plain'), true,
   '다시 등록하면 진행 중인 판의 후보가 다시 빠진다');
 
--- 원인은 남기지 않는다
+-- 원인은 남기지 않는다. 0044의 maybe_tags는 걸리는 재료, ai_checked_at은 올린 사람이 확인한 때라 원인이 된 사람이 아니다
 select columns_are('public', 'candidates',
-  array['session_id', 'food_id', 'proposed_by', 'pitch', 'vetoed', 'created_at'],
+  array['session_id', 'food_id', 'proposed_by', 'pitch', 'vetoed', 'created_at', 'maybe_tags', 'ai_checked_at'],
   '후보 표에는 빠졌는지만 있고 원인이 된 사람 칸이 없다');
 
 -- 투표 시작 -------------------------------------------------------------

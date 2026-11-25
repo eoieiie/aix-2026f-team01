@@ -33,15 +33,17 @@ select is((select r->>'action' from t_ai where k = 'req1'), 'ask', '저장한 �
 select is((select ai_status from public.foods where name = 't분짜 특선'), 'pending', '묻는 중으로 표시');
 select is((select calls from public.ai_usage where day = (now() at time zone 'Asia/Seoul')::date), 1, '하루 호출 수를 센다');
 
+-- 0044: 판 2 모양(근거 단계, 메뉴인지, 판 번호, 버린 수)
 select public.ai_ingredient_apply((select id from public.foods where name = 't분짜 특선'),
-  array['seafood','halal','pork','gluten'], '{"seafood":"느억맘에 생선 소스","halal":"x","gluten":"y"}'::jsonb, 'test');
+  array['seafood','halal','pork','gluten'], '{"seafood":"느억맘에 생선 소스","pork":"고명에 돼지고기","halal":"x","gluten":"y"}'::jsonb, 'test',
+  '{"seafood":"recipe","pork":"varies"}'::jsonb, true, 2, 0);
 select is((select ai_tags from public.foods where name = 't분짜 특선'), array['pork','seafood'], '9개 밖 값은 버린다');
-select is((select ai_notes from public.foods where name = 't분짜 특선'), '{"seafood":"느억맘에 생선 소스"}'::jsonb, '이유는 남긴 태그의 것만');
-select ok((select 'seafood' = any (tags) from public.foods where name = 't분짜 특선'), 'AI 태그가 판정 태그에 더해진다');
-select is((select vetoed from public.candidates c join public.foods f on f.id = c.food_id where f.name = 't분짜 특선'), true, '해산물 못 먹는 사람이 있으면 "못 먹는 사람이 있어요"');
+select is((select ai_notes from public.foods where name = 't분짜 특선'), '{"pork":"고명에 돼지고기","seafood":"느억맘에 생선 소스"}'::jsonb, '이유는 남긴 태그의 것만');
+select ok((select not ('seafood' = any (tags)) from public.foods where name = 't분짜 특선'), '0044: AI 태그는 확실 태그(tags)에 더해지지 않는다');
+select is((select vetoed from public.candidates c join public.foods f on f.id = c.food_id where f.name = 't분짜 특선'), false, '0044: AI만 추정한 해산물은 "못 먹는 사람이 있어요"가 아니다');
 
-select public.ai_ingredient_apply((select id from public.foods where name = 't분짜 특선'), array['egg'], '{}'::jsonb, 'test');
-select ok((select tags @> array['pork','seafood','egg'] from public.foods where name = 't분짜 특선'), '더하기만 한다(앞 태그가 남는다)');
+select public.ai_ingredient_apply((select id from public.foods where name = 't분짜 특선'), array['egg'], '{}'::jsonb, 'test', '{}'::jsonb, true, 2, 0);
+select is((select dropped from public.ai_answers where name_key = 't분짜특선' order by id desc limit 1), 1, '0044: 근거가 빈 태그는 버리고 버린 수를 남긴다');
 
 -- 같은 이름(공백 달라도)은 저장한 값을 바로 쓴다
 update public.sessions set status = 'done' where id = '20000000-0000-0000-0000-0000000000a1';

@@ -4,7 +4,9 @@ import { useEffect } from 'react';
 import {
   addCandidate,
   addCustomCandidate,
+  addCustomFoodTag,
   castVote,
+  confirmCustomFood,
   getFoodHintsWithPicks,
   getSession,
   getVoteCounts,
@@ -146,5 +148,15 @@ export function useSessionActions(sessionId: string) {
     onSettled: refresh,
   });
 
-  return { add, addCustom, pitch, remove, open, vote, spin, headcount, anyOk };
+  // 0044 사람 확인: 맞아요와 재료 더하기 (빼기는 없다)
+  const confirmAi = useMutation({
+    mutationFn: (foodId: number) => confirmCustomFood(sessionId, foodId),
+    onSettled: refresh,
+  });
+  const addTag = useMutation({
+    mutationFn: ({ foodId, tag }: { foodId: number; tag: string }) => addCustomFoodTag(sessionId, foodId, tag),
+    onSettled: refresh,
+  });
+
+  return { add, addCustom, pitch, remove, open, vote, spin, headcount, anyOk, confirmAi, addTag };
 }
