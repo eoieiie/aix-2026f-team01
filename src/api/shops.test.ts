@@ -12,6 +12,7 @@ import {
   toCollegeRows,
   couponState,
   filterShops,
+  SHOP_KINDS,
   formatKoreanTime,
   formatOpeningHours,
   getAdminBoard,
@@ -321,4 +322,8 @@ describe('단과대별 쓴 쿠폰', () => {
       { label: '기타', users: 2, redeemed: 2 },
     ]);
   });
+});
+
+it('밥BTI 쿠폰 가게 거르개를 학생회 제휴와 구분한다', () => {
+  expect(SHOP_KINDS.find(({ key }) => key === 'partner')?.label).toBe('쿠폰');
 });

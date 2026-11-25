@@ -13,7 +13,7 @@ export type ShopKind = 'all' | 'partner' | 'korean' | 'chinese' | 'japanese' | '
 // 가게 탭 위 종류 고르기. 같은 폭 격자 4칸 두 줄
 export const SHOP_KINDS: readonly { key: ShopKind; label: string }[] = [
   { key: 'all', label: '전체' },
-  { key: 'partner', label: '제휴' },
+  { key: 'partner', label: '쿠폰' },
   { key: 'korean', label: '한식' },
   { key: 'chinese', label: '중식' },
   { key: 'japanese', label: '일식' },
