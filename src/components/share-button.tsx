@@ -72,8 +72,8 @@ export function ShareButton({
         accessibilityRole="button"
         accessibilityLabel={label}
         onPress={onPress}
-        className="h-14 items-center justify-center rounded-2xl bg-primary px-6 active:opacity-80">
-        <Text className="text-lg font-bold text-on-primary">{copied ? '복사했어요' : label}</Text>
+        className="h-14 items-center justify-center rounded-2xl bg-ink px-6 active:opacity-80">
+        <Text className="text-lg font-bold text-on-ink">{copied ? '복사했어요' : label}</Text>
       </Pressable>
       {failed ? (
         <Text selectable className="text-center text-sm text-muted">

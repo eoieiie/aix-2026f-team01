@@ -58,10 +58,10 @@ export default function MealScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-background">
-      <View className="flex-row items-center px-5 py-3">
+      <View className="flex-row items-center px-4 py-3">
         <IconButton name="back" label="뒤로" onPress={back} />
       </View>
-      <ScrollView keyboardShouldPersistTaps="handled" automaticallyAdjustKeyboardInsets contentContainerClassName="gap-5 px-5 pb-10 pt-2">
+      <ScrollView keyboardShouldPersistTaps="handled" automaticallyAdjustKeyboardInsets contentContainerClassName="gap-4 px-4 pb-10 pt-2">
         <Text className="text-3xl font-bold tracking-tight text-text">이번 끼니</Text>
         {/* 그림 공유는 이 칸을 찍는다(4-25). collapsable={false}: 안드로이드에서 칸이 사라지지 않게 */}
         <View ref={cardRef} collapsable={false}>
