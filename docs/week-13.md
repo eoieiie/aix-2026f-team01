@@ -3,7 +3,7 @@
 **배포와 문서화 / Deployment and documentation**
 
 - 작성일 / Date: 2026-11-26
-- 참여자 / Present: 이학준 (README만으로 실행은 확인한 사람을 적는다)
+- 참여자 / Present: 이학준
 - 결과보고서 / Report chapter: 7장 검증과 실행 환경
 - 최종 반영 / Feeds into: 제출물 ② ③ / Submissions ② ③
 
@@ -34,7 +34,24 @@
 
 ## 타 팀원 PC에서 README만으로 실행 / Ran elsewhere using README only
 
-- [ ] 성공 Success  → 보완 Fixes:
+- [ ] 성공 Success  → 보완 Fixes: 아래 4개
+
+2026-11-26, 이학준 노트북(Windows 10, Node 없는 처음 상태)에서 README 3절만 보고 해 봤다. 저장소는 main `cf86e68`을 새로 받았다. 설치와 실행은 됐고, `.env`에 넣을 키를 받는 곳에서 멈췄다. 키를 받은 사람만 이어서 할 수 있어서 "성공"은 체크하지 않는다.
+
+| 단계 | 결과 |
+|---|---|
+| Node | README에는 "`.nvmrc`를 따른다(`nvm use`)"만 있다. `nvm`이 없어서 `winget install OpenJS.NodeJS.24`로 깔았다(v24.22.3) |
+| `npm install` | 됐다. 경고만 있었다 |
+| `cp .env.example .env` | PowerShell에서 됐다 |
+| `npx expo start --web` | 됐다. 처음 묶는 데 약 50초, http://localhost:8081 에서 소개 화면(`/about`)이 떴다 |
+| 키 채우기 | 멈췄다. Supabase 주소와 공개 키를 어디서 받는지 README에 없다. 대시보드 권한이 없는 팀원은 팀에게 받아야 한다 |
+| 키가 빈 채로 "바로 시작하기" | README는 "연결할 수 없어요" 화면이 뜬다고 하지만, 빨간 오류 화면(`MissingEnvError: EXPO_PUBLIC_SUPABASE_URL이(가) 비어 있다`)이 떴다 |
+
+보완할 것
+1. Node 설치법: Node가 없는 PC에서 무엇을 깔지 한 줄(예: nodejs.org에서 24 LTS, 또는 `nvm install`)
+2. 키 받는 곳: "Supabase 주소와 공개(anon) 키는 팀원(Aninnom, eoieiie)에게 개인 메시지로 받는다"처럼 누구에게 받는지
+3. `EXPO_PUBLIC_WEB_BASE`: README 본문에 없다. `https://babti.expo.app`을 넣는다고 적는다
+4. 키가 빈 경우: README 문장과 실제 동작이 다르다. 화면을 "연결할 수 없어요"로 바꾸거나 README 문장을 실제에 맞춘다
 
 ## README 완성도 / README completeness
 
