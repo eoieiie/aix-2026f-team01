@@ -1,6 +1,8 @@
 // 시안 나 "음식 색이 보이는 카드" (2026-11-26). 음식 그림에서 뽑은 색 일곱 가지를 아주 옅게 카드 면에 입힌다.
 // 면(tint-*)은 글자 대비 4.5:1 이상이 되게 옅게, 작은 점(dot-*)은 칩과 구역 제목의 표시에만 쓴다.
 // 클래스 이름을 문자열로 다 적어 둬야 Tailwind가 찾는다
+import colors from '@/constants/colors.json';
+
 export type Tint = 'chili' | 'salmon' | 'gold' | 'green' | 'brown' | 'cold' | 'warm';
 
 export const TINT_BG: Record<Tint, string> = {
@@ -50,4 +52,9 @@ const SHOP_TINT: Record<string, Tint> = {
 
 export function shopTint(cuisine: string | null | undefined): Tint {
   return (cuisine && SHOP_TINT[cuisine]) || 'warm';
+}
+
+// SVG처럼 className을 못 받는 곳에서 쓰는 면 색 값
+export function tintValue(tint: Tint): string {
+  return colors[`tint-${tint}` as keyof typeof colors];
 }

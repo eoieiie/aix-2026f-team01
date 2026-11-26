@@ -13,7 +13,7 @@ import { PersonDots } from '@/components/person-dots';
 import { PlateFoods } from '@/components/plate-foods';
 import { Group, useMyGroups, useMyGroupsLive } from '@/hooks/use-groups';
 import { TAB_BAR_SPACE } from '@/constants';
-import { foodTint, TINT_BG } from '@/constants/food-tint';
+import { foodTint, TINT_BG, tintValue } from '@/constants/food-tint';
 
 const mascotSource = require('../../../assets/images/mascot.png');
 
@@ -72,7 +72,7 @@ export default function HomeScreen() {
             {item.plate_foods.length === 0 ? (
               <PlateFoods foods={[]} />
             ) : earlier.length > 0 ? (
-              <PlateFoods foods={earlier} />
+              <PlateFoods foods={earlier} back={tintValue(foodTint(latest?.food_id))} />
             ) : null}
           </View>
         </View>
