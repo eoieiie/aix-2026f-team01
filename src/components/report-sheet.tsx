@@ -32,12 +32,12 @@ export function ReportSheet({ target, onClose }: { target: ReportTarget | null; 
     <Sheet visible={!!target} onClose={close}>
       {done ? (
         <>
-          <Text className="text-2xl font-bold tracking-tight text-text">{done}</Text>
+          <Text className="text-xl font-bold tracking-tight text-text">{done}</Text>
           <Button label="닫기" variant="secondary" onPress={close} />
         </>
       ) : (
         <>
-          <Text className="text-2xl font-bold tracking-tight text-text">신고하기</Text>
+          <Text className="text-xl font-bold tracking-tight text-text">신고하기</Text>
           <View className="gap-2">
             {REPORT_REASONS.map((r) => (
               <ChoiceRow

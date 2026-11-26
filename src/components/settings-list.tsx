@@ -79,7 +79,7 @@ export function SettingsList({
       />
 
       <Sheet visible={sheet === 'blocks'} onClose={close}>
-        <Text className="text-2xl font-bold tracking-tight text-text">차단한 사람</Text>
+        <Text className="text-xl font-bold tracking-tight text-text">차단한 사람</Text>
         <View className="gap-2">
           {(blocks.data ?? []).length === 0 ? (
             <Text className="text-base text-muted">{blocks.isLoading ? '불러오는 중' : '차단한 사람이 없어요'}</Text>
@@ -134,7 +134,7 @@ export function SettingsList({
 }
 
 function Group({ children }: { children: React.ReactNode }) {
-  return <View className="overflow-hidden rounded-2xl bg-surface">{children}</View>;
+  return <View className="overflow-hidden rounded-3xl bg-surface">{children}</View>;
 }
 
 function Row({

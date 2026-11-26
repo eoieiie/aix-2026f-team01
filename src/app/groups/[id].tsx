@@ -20,7 +20,7 @@ import {
   useStartSession,
 } from '@/hooks/use-groups';
 
-// 멤버 동그라미 색. 사람 동그라미에는 주황을 쓰지 않는다. 회색 네 단계를 돌려 쓴다 (docs/design.md 1절, "프레즐 규칙 그대로" 색)
+// 멤버 동그라미 색. 사람 동그라미에는 주황을 쓰지 않는다. 회색 네 단계를 돌려 쓴다 (docs/design.md 1절, "화면 규칙" 색)
 const MEMBER_COLORS = [
   { bg: 'bg-food-8', text: 'text-on-ink' },
   { bg: 'bg-food-2', text: 'text-on-ink' },
@@ -153,7 +153,7 @@ export default function GroupScreen() {
       >
         {/* 모임 이름과 멤버 이름 동그라미 (spec.md 4-6) */}
         <View className="gap-4">
-          <Text className="text-4xl font-bold leading-tight tracking-tight text-text">
+          <Text className="text-3xl font-bold leading-tight tracking-tight text-text">
             {group.name}
           </Text>
           <View className="flex-row flex-wrap items-center gap-3">
@@ -184,7 +184,7 @@ export default function GroupScreen() {
 
         {/* 최근 식사 5개 (spec.md 4-6) */}
         <View className="gap-3">
-          <Text className="text-2xl font-bold tracking-tight text-text">최근에 먹은 것</Text>
+          <Text className="text-xl font-bold tracking-tight text-text">최근에 먹은 것</Text>
           {/* 4-25 월별 타임라인. 이번 달 한 줄, 더 보기 */}
           <MealTimeline groupId={group.id} />
         </View>

@@ -73,7 +73,7 @@ export function VoteRestaurants({ sessionId, candidateKey }: { sessionId: string
   const byId = new Map(shops.map((s) => [s.id, s]));
 
   return (
-    <View className="gap-3 rounded-2xl bg-surface p-4">
+    <View className="gap-3 rounded-3xl bg-surface p-4">
       <Text className="text-lg font-bold text-text">학교 앞 추천</Text>
       {list.map((r) => (
         <RestaurantRow key={r.id} r={r} shop={byId.get(r.id)} onSurface />

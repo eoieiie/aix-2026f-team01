@@ -28,9 +28,14 @@ export const RECENT_EATEN_DAYS = 14;
 export const GROUP_FAVORITES_MAX = 3;
 export const QUICK_FILL_COUNT = 3;
 
-// 4-15 하단 탭(#41, 4-26). 아래에 붙은 막대 높이와, 탭 화면이 목록 아래를 비우는 높이(막대 + 홈 표시줄)
+// 4-15 하단 탭(#41, 4-26, 4-31). 화면 아래에 떠 있는 흰 알약(2026-11-26). 양옆은 화면 여백 16만큼 띄운다.
+// 알약 높이, 지금 화면 칸의 옅은 주황 원 지름, 안전 영역 위로 띄우는 거리
 export const TAB_BAR_HEIGHT = 64;
-export const TAB_BAR_SPACE = 112;
+export const TAB_DOT_SIZE = 44;
+export const TAB_BAR_GAP = 8;
+// 탭 화면이 목록 아래를 비우는 높이. 알약(64) + 띄움(8) + 홈 표시줄(34) + 마지막 카드가 알약 위로 다 올라올 여유(24) = 130.
+// 목록은 알약 뒤로 지나가고, 끝까지 내리면 마지막 줄이 알약 위로 올라온다. 프로필은 여기에 안전 영역을 더 비운다
+export const TAB_BAR_SPACE = 130;
 
 // 4-21 투표 화면 추천 칸. 서버가 주는 최대 6곳 중 내 취향으로 고르는 수
 export const VOTE_RESTAURANTS_SHOWN = 3;

@@ -5,7 +5,7 @@ import { Text } from '@/components/text';
 import { useAvatars } from '@/hooks/use-prefs';
 
 // 사람 동그라미 (명세 4-27). 아바타(기본 메뉴 그림)를 고른 사람은 그 그림, 아니면 이름 첫 글자.
-// 크기는 목록 30, 카드 44 (프레즐 간격 규칙의 아바타 크기). 회색 면에 검정 글자라 주황을 쓰지 않는다
+// 크기는 목록 30, 카드 44 (docs/design.md "화면 규칙"의 아바타 크기). 회색 면에 검정 글자라 주황을 쓰지 않는다
 export type AvatarSize = 30 | 44 | 72;
 
 const LETTER: Record<AvatarSize, string> = { 30: 'text-xs', 44: 'text-base', 72: 'text-2xl' };

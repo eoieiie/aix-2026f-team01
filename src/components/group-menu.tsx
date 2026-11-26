@@ -32,7 +32,7 @@ export function GroupMenu({
     <>
       <IconButton name="more" label="모임 메뉴" onPress={() => setSheet('menu')} />
       <Sheet visible={sheet === 'menu'} onClose={close}>
-        <Text className="text-2xl font-bold tracking-tight text-text">
+        <Text className="text-xl font-bold tracking-tight text-text">
           {name}
         </Text>
         <View className="gap-2">

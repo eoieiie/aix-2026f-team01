@@ -53,7 +53,7 @@ describe('디자인 규칙', () => {
     expect(offPalette).toEqual([]);
   });
 
-  // ---- 프레즐 규칙 그대로 (docs/design.md, 2026-11-25) ----
+  // ---- 화면 규칙 (docs/design.md, 2026-11-25) ----
 
   it('간격은 눈금(4, 8, 12, 16, 24, 32)만 쓴다', () => {
     // Tailwind 숫자 1칸은 4px이다. 0.5(2px)는 같은 종류 줄 사이에만 쓴다. px-5(20), gap-5, px-7, -1.5, -2.5, 대괄호 값은 눈금 밖이다
@@ -81,6 +81,54 @@ describe('디자인 규칙', () => {
       .map(({ file, text }) => ({ file, count: (text.match(area) || []).length }))
       .filter(({ count }) => count > 1)
       .map(({ file, count }) => `${file}: 주황 면 ${count}곳`);
+    expect(found).toEqual([]);
+  });
+
+  // ---- 아래 탭, 박스 크기, 글자 (docs/design.md "떠 있는 아래 탭과 박스, 글자 정돈", 2026-11-26) ----
+
+  it('아래 탭은 떠 있는 흰 알약, 세 칸 같은 크기, 지금 화면만 옅은 주황 원에 주황 아이콘이다', () => {
+    const tab = files.find(({ file }) => file === 'src/app/(tabs)/_layout.tsx').text;
+    expect(tab).toMatch(/rounded-full bg-background/);
+    expect(tab).toMatch(/FLOAT_SHADOW/);
+    expect(tab).toMatch(/h-full flex-1 items-center justify-center/);
+    expect(tab).toMatch(/on \? 'bg-primary-soft' : ''/);
+    expect(tab).toMatch(/color=\{on \? 'primary' : 'muted'\}/);
+  });
+
+  it('카드는 모서리 24(rounded-3xl), 안 여백 16이다. 모서리 16짜리 회색 카드를 새로 만들지 않는다', () => {
+    const card = files.find(({ file }) => file === 'src/components/card.tsx').text;
+    expect(card).toMatch(/rounded-3xl bg-surface p-4/);
+    // 카드 크기의 회색 면(안 여백 p-4 이상)은 24로 맞춘다. 단추, 입력칸, 고르기 칸(높이를 정한 것)은 뺀다
+    const old = /rounded-2xl bg-surface p-[468]\b/;
+    const ALLOW = ['src/app/about.tsx', 'src/app/dev/parts.tsx', 'src/components/redeem-sheet.tsx'];
+    const found = files
+      .filter(({ file }) => !ALLOW.includes(file))
+      .flatMap(({ file, text }) => text.split('\n').flatMap((line, i) => (old.test(line) ? [`${file}:${i + 1}`] : [])));
+    expect(found).toEqual([]);
+  });
+
+  it('글자 크기는 역할 표에 있는 것만 쓴다. 4xl 이상은 결정이 나는 순간과 코드 화면에만', () => {
+    // 표: 화면 제목 3xl, 구역과 창 제목 xl, 카드 제목 lg, 본문 base, 보조 sm, 칩과 라벨 xs, 큰 숫자 3xl
+    // 2xl은 표에 없다. 그림 안 글자(아바타 72의 첫 글자, 도감의 물음표), 로고, 숫자 입력칸만 예외
+    // 소개 화면(노트북 넓은 판)과 부품 견본 화면은 앱 화면이 아니라 뺀다
+    const TWO_XL_OK = ['src/app/about.tsx', 'src/app/dev/parts.tsx', 'src/components/avatar.tsx', 'src/components/food-dex.tsx', 'src/components/logo.tsx', 'src/components/redeem-sheet.tsx'];
+    const BIG_OK = [
+      'src/components/result-moment.tsx',
+      'src/components/result-card.tsx',
+      'src/app/onboarding.tsx',
+      'src/components/invite-card.tsx',
+      'src/components/coupon-code.tsx',
+      'src/app/g/[code].tsx',
+      'src/components/headcount-stepper.tsx',
+      'src/app/about.tsx',
+      'src/app/dev/parts.tsx',
+    ];
+    const found = files.flatMap(({ file, text }) => {
+      const bad = [];
+      if (!TWO_XL_OK.includes(file) && /(?<![\w-])text-2xl(?![\w-])/.test(text)) bad.push(`${file}: text-2xl`);
+      if (!BIG_OK.includes(file) && /(?<![\w-])text-[4-9]xl(?![\w-])/.test(text)) bad.push(`${file}: text-4xl 이상`);
+      return bad;
+    });
     expect(found).toEqual([]);
   });
 

@@ -55,7 +55,7 @@ export default function AdminCouponsScreen() {
         {board.isLoading ? (
           <Text className="text-sm text-muted">현황을 불러오는 중</Text>
         ) : notAdmin ? (
-          <View className="max-w-md gap-2 rounded-2xl bg-surface p-6">
+          <View className="max-w-md gap-2 rounded-3xl bg-surface p-6">
             <Text className="text-xl font-bold tracking-tight text-text">운영자만 볼 수 있어요</Text>
             <Text className="text-base text-muted">
               {profile.data?.handle

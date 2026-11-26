@@ -2,14 +2,15 @@ import { Redirect, Tabs, usePathname } from 'expo-router';
 import { Pressable, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { FadeEdge } from '@/components/fade-edge';
 import { Icon, type IconName } from '@/components/icon';
-import colors from '@/constants/colors.json';
-import { TAB_BAR_HEIGHT } from '@/constants';
+import { TAB_BAR_GAP, TAB_BAR_HEIGHT, TAB_DOT_SIZE } from '@/constants';
+import { FLOAT_SHADOW } from '@/constants/shadow';
 import { isFirstWebVisit } from '@/lib/first-visit';
 
-// 하단 탭 (4-15, 4-26). 홈, 가게, 프로필에서만 보인다. 모임, 판 화면은 탭 밖이라 탭이 없다.
-// 흰 바탕에 회색 아이콘, 지금 화면만 주황 아이콘. 주황 알약은 뺐다 (2026-11-25 병주 "주황색이 너무 많은데, 포인트컬러로 남기면 좋아")
+// 하단 탭 (4-15, 4-26, 4-31). 홈, 가게, 프로필에서만 보인다. 모임, 판 화면은 탭 밖이라 탭이 없다.
+// 2026-11-26 병주 요청: 화면 아래에 떠 있는 흰 알약, 양옆 16 띄움, 그림자. 엄지가 닿는 아래쪽에 세 칸을 크게 두고,
+// 목록이 알약 뒤로 지나가 화면이 위아래로 넓어 보인다. 흰 바탕에 묻히지 않게 그림자를 조금 또렷하게 둔다.
+// 세 칸은 같은 크기. 지금 화면은 옅은 주황 원(44) 안에 주황 아이콘, 나머지는 회색 아이콘. 목록은 알약 뒤로 지나간다
 const TABS: { name: string; icon: IconName; label: string }[] = [
   { name: 'index', icon: 'home', label: '홈' },
   { name: 'shops', icon: 'shop', label: '가게' },
@@ -30,19 +31,23 @@ export default function TabLayout() {
   );
 }
 
-// 화면 아래에 붙은 흰 막대. 탭은 같은 폭으로 나눈다. 목록 끝이 막대에 칼로 자른 듯 걸리지 않게 선 대신 바로 위에 흰색으로 옅어지는 띠(2026-11-25)
 function TabBar({ state, navigation }: { state: any; navigation: any }) {
   const insets = useSafeAreaInsets();
+  const routes = state.routes.filter((r: any) => TABS.some((t) => t.name === r.name));
+  const at = Math.max(0, routes.findIndex((r: any) => r.key === state.routes[state.index]?.key));
+
   return (
     <View
-      className="absolute bottom-0 left-0 right-0 bg-background"
-      style={{ paddingBottom: insets.bottom }}>
-      <FadeEdge color={colors.background} edge="above" height={32} />
-      <View className="flex-row" style={{ height: TAB_BAR_HEIGHT }}>
-        {state.routes.map((route: any, i: number) => {
-          const tab = TABS.find((t) => t.name === route.name);
-          if (!tab) return null;
-          const on = state.index === i;
+      pointerEvents="box-none"
+      className="absolute bottom-0 left-0 right-0 px-4"
+      style={{ paddingBottom: insets.bottom + TAB_BAR_GAP }}>
+      <View
+        accessibilityRole="tablist"
+        className="flex-row rounded-full bg-background px-2"
+        style={[{ height: TAB_BAR_HEIGHT }, FLOAT_SHADOW]}>
+        {routes.map((route: any, i: number) => {
+          const tab = TABS.find((t) => t.name === route.name)!;
+          const on = i === at;
           return (
             <Pressable
               key={route.key}
@@ -52,8 +57,12 @@ function TabBar({ state, navigation }: { state: any; navigation: any }) {
               onPress={() => {
                 if (!on) navigation.navigate(route.name);
               }}
-              className="flex-1 items-center justify-center active:opacity-70">
-              <Icon name={tab.icon} size={26} color={on ? 'primary' : 'muted'} />
+              className="h-full flex-1 items-center justify-center active:opacity-70">
+              <View
+                className={`items-center justify-center rounded-full ${on ? 'bg-primary-soft' : ''}`}
+                style={{ width: TAB_DOT_SIZE, height: TAB_DOT_SIZE }}>
+                <Icon name={tab.icon} size={24} color={on ? 'primary' : 'muted'} />
+              </View>
             </Pressable>
           );
         })}

@@ -16,17 +16,17 @@ export function MealTimeline({ groupId }: { groupId: string }) {
   const [all, setAll] = useState(false);
 
   if (isError) return null;
-  if (!meals) return <View className="h-20 rounded-2xl bg-surface" />;
+  if (!meals) return <View className="h-20 rounded-3xl bg-surface" />;
   if (meals.length === 0) {
     return (
-      <View className="rounded-2xl bg-surface p-4">
+      <View className="rounded-3xl bg-surface p-4">
         <Text className="text-lg font-bold text-muted">아직 기록이 없어요</Text>
       </View>
     );
   }
   const stat = monthStatLine(meals);
   const shown = all ? meals : meals.slice(0, FIRST);
-  // 한 끼가 한 칸. 큰 회색 상자 안에 얇은 줄을 쌓지 않는다 (docs/design.md "프레즐 규칙 그대로": 목록 칸 높이 72 이상)
+  // 한 끼가 한 칸. 큰 회색 상자 안에 얇은 줄을 쌓지 않는다 (docs/design.md "화면 규칙": 목록 칸 높이 72 이상)
   return (
     <View className="gap-3">
       {stat ? <Text className="text-base font-bold text-text">{stat}</Text> : null}
@@ -56,7 +56,7 @@ function MealRow({ meal, onPress }: { meal: TimelineMeal; onPress: () => void })
       accessibilityRole="button"
       accessibilityLabel={`${dayLabel(meal.eatenAt)} ${meal.foodName} 결과 카드`}
       onPress={onPress}
-      className="flex-row items-center gap-3 rounded-2xl bg-surface p-4 active:opacity-70">
+      className="flex-row items-center gap-3 rounded-3xl bg-surface p-4 active:opacity-70">
       <FoodThumb foodId={meal.foodId} size="sm" imageUrl={meal.imageUrl} />
       <View className="flex-1 gap-1">
         <Text className="text-lg font-bold text-text">
