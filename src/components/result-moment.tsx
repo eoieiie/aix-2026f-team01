@@ -142,7 +142,7 @@ export function ResultMoment({ session, from, onGroup, onCard }: ResultMomentPro
         <SafeAreaView className="flex-1">
           {/* 마지막 줄이 버튼 띠에 칼로 자른 듯 걸리지 않게 아래 여백과 주황으로 옅어지는 띠 */}
           <View className="flex-1">
-            <ScrollView keyboardShouldPersistTaps="handled" automaticallyAdjustKeyboardInsets contentContainerClassName="px-6 pb-8 pt-6">
+            <ScrollView keyboardShouldPersistTaps="handled" automaticallyAdjustKeyboardInsets contentContainerClassName="px-4 pb-8 pt-6">
               <Text className="text-xl font-semibold text-on-primary">
                 {session.groupName}
               </Text>
@@ -181,7 +181,7 @@ export function ResultMoment({ session, from, onGroup, onCard }: ResultMomentPro
             <FadeEdge color={colors.primary} />
           </View>
           {/* 같은 역할의 버튼 둘은 같은 크기로 나란히. 결과 카드가 다음 할 일이라 흰 버튼, 모임으로는 회색 */}
-          <View className="flex-row gap-2 px-6 pb-4">
+          <View className="flex-row gap-2 px-4 pb-4">
             <View className="flex-1">
               <Button label="모임으로" variant="secondary" onPress={onGroup} />
             </View>

@@ -28,7 +28,7 @@ export default function AdminCouponsScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-background">
-      <ScrollView contentContainerClassName="gap-6 p-6 pb-16">
+      <ScrollView contentContainerClassName="gap-6 px-4 pb-16 pt-6">
         <View className="flex-row flex-wrap items-center justify-between gap-4">
           <View className="gap-1">
             <Text className="text-3xl font-bold tracking-tight text-text">쿠폰 현황</Text>
@@ -126,8 +126,8 @@ function BoardBody({ board, colleges }: { board: AdminBoard; colleges: CollegeRo
   return (
     <View className="gap-6">
       <View className="flex-row flex-wrap gap-3">
-        <StatTile value={String(board.totals.claimed)} label="받은 쿠폰(팀)" />
-        <StatTile value={String(board.totals.redeemed)} label="쓴 쿠폰(팀)" />
+        <StatTile value={String(board.totals.claimed)} label="받은 팀" />
+        <StatTile value={String(board.totals.redeemed)} label="쓴 팀" />
         <StatTile value={rate === null ? '-' : `${rate}%`} label="사용률" />
         <StatTile value={String(board.totals.shops)} label="쿠폰이 나간 가게" />
       </View>

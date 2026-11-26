@@ -162,7 +162,7 @@ export default function OnboardingScreen() {
                 accessibilityLabel={a === 'A' ? q.a : q.b}
                 disabled={save.isPending}
                 onPress={() => pick(a)}
-                className="h-20 justify-center rounded-2xl bg-surface px-6 active:bg-surface-strong disabled:opacity-50"
+                className="h-20 justify-center rounded-2xl bg-surface px-4 active:bg-surface-strong disabled:opacity-50"
               >
                 <Text className="text-xl font-bold text-text">{a === 'A' ? q.a : q.b}</Text>
               </Pressable>

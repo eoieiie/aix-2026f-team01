@@ -155,7 +155,7 @@ function Row({
       onPress={onPress}
       className="h-14 flex-row items-center gap-3 px-4 active:bg-surface-strong">
       {icon ? <Icon name={icon} size={20} /> : null}
-      <Text className={`text-base font-bold ${danger ? 'text-danger' : 'text-text'}`}>{label}</Text>
+      <Text className={`text-base font-semibold ${danger ? 'text-danger' : 'text-text'}`}>{label}</Text>
     </Pressable>
   );
 }
