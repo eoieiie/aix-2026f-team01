@@ -6,6 +6,7 @@
   "muted": "#6B6B6B",
   "primary": "#F05A00",
   "primary-soft": "#FFEDE0",
+  "on-primary-soft": "#C2410C",
   "on-primary": "#FFFFFF",
   "ink": "#000000",
   "on-ink": "#FFFFFF",

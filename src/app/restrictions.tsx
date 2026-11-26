@@ -174,7 +174,7 @@ function TagSection({
   return (
     <View className="gap-3">
       <Text className="text-base font-bold text-text">{title}</Text>
-      {/* 태그는 글 길이와 상관없이 같은 폭으로 한 줄에 넷. 고른 태그는 검정으로 꽉 채운다. 주황은 아래 저장 단추 하나뿐 (docs/design.md 4절 2번, "프레즐 규칙 그대로" 색) */}
+      {/* 태그는 글 길이와 상관없이 같은 폭으로 한 줄에 넷. 고른 태그는 검정으로 꽉 채운다. 주황은 아래 저장 단추 하나뿐 (docs/design.md 4절 2번, "화면 규칙" 색) */}
       <View className="-mx-1 flex-row flex-wrap">
         {tags.map((tag) => {
           const on = chosen.has(`tag:${tag.code}`);

@@ -22,7 +22,7 @@ export default function OwnerScreen() {
         {board.isLoading ? (
           <Text className="text-sm text-muted">현황을 불러오는 중</Text>
         ) : board.isError || !board.data ? (
-          <View className="max-w-md gap-3 rounded-2xl bg-surface p-6">
+          <View className="max-w-md gap-3 rounded-3xl bg-surface p-6">
             <Text className="text-xl font-bold tracking-tight text-text">주소를 다시 확인해 주세요</Text>
             <Text className="text-base text-muted">밥BTI 팀이 드린 주소 그대로 열어야 보여요</Text>
             <Button label="다시 시도" variant="secondary" className="bg-background" onPress={() => board.refetch()} />

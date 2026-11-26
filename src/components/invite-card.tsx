@@ -57,7 +57,7 @@ export function InviteCard({ inviteCode, groupName }: InviteCardProps) {
   };
 
   return (
-    <View className="w-full gap-4 rounded-2xl bg-ink p-4">
+    <View className="w-full gap-4 rounded-3xl bg-ink p-4">
       <View className="gap-1">
         <Text className="text-xl font-bold text-on-ink">초대 코드</Text>
         <Text className="text-4xl font-bold tracking-widest text-on-ink">{inviteCode}</Text>

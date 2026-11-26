@@ -34,7 +34,7 @@ export default function CouponsScreen() {
             <Button label="다시 시도" variant="secondary" onPress={() => refetch()} />
           </View>
         ) : ready.length === 0 ? (
-          <View className="items-center gap-4 rounded-2xl bg-surface p-4">
+          <View className="items-center gap-4 rounded-3xl bg-surface p-4">
             <Text className="text-xl font-bold tracking-tight text-text">쓸 수 있는 쿠폰이 없어요</Text>
             <Button label="가게 보러 가기" className="self-center px-8" onPress={() => router.replace('/(tabs)/shops' as any)} />
           </View>
@@ -76,7 +76,7 @@ function PastRow({ coupon, onPress }: { coupon: Coupon; onPress: () => void }) {
       accessibilityRole="link"
       accessibilityLabel={`${coupon.shopName}, ${coupon.benefit}, ${status}`}
       onPress={onPress}
-      className="min-h-20 flex-row items-center gap-3 rounded-2xl bg-surface p-4 active:opacity-70">
+      className="min-h-20 flex-row items-center gap-3 rounded-3xl bg-surface p-4 active:opacity-70">
       <ShopThumb name={coupon.shopName} photoUrl={shop?.photoUrl ?? null} thumbUrl={shop?.thumbUrl ?? null}
         cuisine={shop?.cuisine ?? null} size={56} />
       <View className="flex-1 gap-1">

@@ -13,8 +13,8 @@ export function GroupProfileCard({ groupId }: { groupId: string }) {
 
   return (
     <View className="gap-3">
-      <Text className="text-2xl font-bold tracking-tight text-text">우리 모임</Text>
-      <View className="gap-6 rounded-2xl bg-surface p-4">
+      <Text className="text-xl font-bold tracking-tight text-text">우리 모임</Text>
+      <View className="gap-6 rounded-3xl bg-surface p-4">
         {isLoading ? (
           <ActivityIndicator color={colors.text} accessibilityLabel="모임 카드를 불러오는 중" />
         ) : isError || !card ? (

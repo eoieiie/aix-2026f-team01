@@ -36,7 +36,7 @@ export function ProfileSummaryCard({
 }) {
   const percent = Math.round(Math.min(1, Math.max(0, progress)) * 100);
   return (
-    <View className="gap-4 rounded-2xl bg-surface p-4">
+    <View className="gap-4 rounded-3xl bg-surface p-4">
       <View className="flex-row items-center gap-3">
         <Avatar name={name} foodId={avatarFoodId} size={44} />
         <View className="flex-1 gap-1">

@@ -50,7 +50,7 @@ function RedeemBody({ coupon, onClose }: { coupon: Coupon; onClose: () => void }
   return (
     <>
       <View className="gap-2">
-        <Text className="text-2xl font-bold tracking-tight text-text">직원 확인</Text>
+        <Text className="text-xl font-bold tracking-tight text-text">직원 확인</Text>
         <Text className="text-base text-muted">
           {coupon.pinRequired ? '가게 직원이 비밀번호를 넣어 주세요' : '가게 직원이 눌러 주세요'}
         </Text>

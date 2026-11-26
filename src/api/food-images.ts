@@ -21,7 +21,7 @@ export async function getFoodImageUrl(foodId: number, client: Client = getSupaba
   }
 }
 
-// 그림이 있는 음식의 주소를 한 번에 받는다. 목록 칸 왼쪽 그림에 쓴다 (docs/design.md "프레즐 규칙 그대로").
+// 그림이 있는 음식의 주소를 한 번에 받는다. 목록 칸 왼쪽 그림에 쓴다 (docs/design.md "화면 규칙").
 // 실패하면 빈 표를 돌려준다. 화면은 그림 대신 색 동그라미로 그린다
 export async function getFoodImageMap(client: Client = getSupabase()): Promise<Record<number, string>> {
   try {

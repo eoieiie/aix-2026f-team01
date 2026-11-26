@@ -8,7 +8,7 @@ import { Text } from '@/components/text';
 // 큰 숫자 하나와 그 이름. 한 줄에 같은 폭으로 놓는다
 export function StatTile({ value, label }: { value: string; label: string }) {
   return (
-    <View accessible accessibilityLabel={`${label} ${value}`} className="flex-1 gap-1 rounded-2xl bg-surface p-4">
+    <View accessible accessibilityLabel={`${label} ${value}`} className="flex-1 gap-1 rounded-3xl bg-surface p-4">
       <Text className="text-3xl font-bold tracking-tight text-text">{value}</Text>
       <Text className="text-sm text-muted">{label}</Text>
     </View>
@@ -18,7 +18,7 @@ export function StatTile({ value, label }: { value: string; label: string }) {
 // 제목이 붙은 회색 면
 export function Panel({ title, note, children }: { title: string; note?: string; children: ReactNode }) {
   return (
-    <View className="gap-4 rounded-2xl bg-surface p-4">
+    <View className="gap-4 rounded-3xl bg-surface p-4">
       <View className="flex-row items-baseline justify-between gap-3">
         <Text className="text-lg font-bold text-text">{title}</Text>
         {note ? <Text className="text-xs text-muted">{note}</Text> : null}

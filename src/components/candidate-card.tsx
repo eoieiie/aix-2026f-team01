@@ -116,7 +116,7 @@ export function CandidateCard({
       </View>
       {onVote ? (
         // 고른 표시는 검정 동그라미에 흰 체크, 안 고른 것은 빈 흰 동그라미. 카드를 주황으로 채우지 않는다.
-        // 주황은 화면 아래 주 단추 하나에만 쓴다 (docs/design.md "프레즐 규칙 그대로" 색)
+        // 주황은 화면 아래 주 단추 하나에만 쓴다 (docs/design.md "화면 규칙" 색)
         <View className="h-14 justify-center">
           <View
             className={`h-11 w-11 items-center justify-center rounded-full ${voted ? 'bg-ink' : 'bg-background'}`}>
@@ -180,7 +180,7 @@ export function CandidateCard({
       </Pressable>
     ) : null;
 
-  // 0044 사람 확인(11팀). 올린 사람에게 AI가 찾은 재료를 보이고 "맞아요"와 "재료 더하기"만 받는다. 두 단추는 같은 폭
+  // 0044 사람 확인. 올린 사람에게 AI가 찾은 재료를 보이고 "맞아요"와 "재료 더하기"만 받는다. 두 단추는 같은 폭
   const sure = candidate.sureTags ?? [];
   const checkBox = askCheck ? (
     <View className="gap-3 rounded-lg bg-background p-3">
@@ -230,8 +230,8 @@ export function CandidateCard({
     </View>
   ) : null;
 
-  // 카드는 옅은 면 하나. 모서리 16, 안 여백 16 (docs/design.md "프레즐 규칙 그대로")
-  const box = 'gap-3 rounded-2xl bg-surface p-4';
+  // 카드는 옅은 면 하나. 모서리 24, 안 여백 16 (docs/design.md "떠 있는 아래 탭과 박스, 글자 정돈")
+  const box = 'gap-3 rounded-3xl bg-surface p-4';
 
   if (onVote) {
     return (
@@ -283,7 +283,7 @@ export function CandidateCard({
 
       {!onSavePitch && candidate.isMine ? <Text className="text-xs text-muted">내가 올린 후보</Text> : null}
 
-      {/* Animated.View는 className을 받지 못해서 style로 쓴다. 모서리 16은 rounded-2xl과 같다 */}
+      {/* Animated.View는 className을 받지 못해서 style로 쓴다. 모서리 24는 rounded-3xl과 같다 */}
       <Animated.View
         pointerEvents="none"
         style={{
@@ -292,7 +292,7 @@ export function CandidateCard({
           left: 0,
           right: 0,
           bottom: 0,
-          borderRadius: 16,
+          borderRadius: 24,
           borderWidth: 4,
           borderColor: colors.primary,
           opacity: ring,

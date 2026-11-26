@@ -26,7 +26,7 @@ export default function CouncilBenefitScreen() {
       <ScrollView contentContainerClassName="gap-6 px-4 pb-8">
         {entry && name ? <>
           <Text className="text-3xl font-bold text-text">{name}</Text>
-          <View className="gap-4 rounded-2xl bg-surface p-4">
+          <View className="gap-4 rounded-3xl bg-surface p-4">
             <Text className="text-lg font-bold text-text">학생회 제휴 혜택</Text>
             <CouncilRecord entry={entry} />
           </View>

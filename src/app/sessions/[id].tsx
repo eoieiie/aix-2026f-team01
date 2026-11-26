@@ -311,7 +311,7 @@ function CandidateStage({
         onLayout={(e: LayoutChangeEvent) => (viewH.current = e.nativeEvent.layout.height)}
         contentContainerClassName="gap-4 px-4 pb-40 pt-2">
         <View className="flex-row items-end justify-between">
-          <Text className="flex-1 text-2xl font-bold tracking-tight text-text">뭐 먹고 싶어요?</Text>
+          <Text className="flex-1 text-xl font-bold tracking-tight text-text">뭐 먹고 싶어요?</Text>
           <Pressable
             accessibilityRole="button"
             accessibilityLabel="못 먹는 것"
@@ -443,7 +443,7 @@ function VotingStage({ session }: { session: SessionView }) {
           <Text className="text-base text-muted">누가 뭘 골랐는지는 아무도 몰라요</Text>
         </View>
 
-        <View className="gap-2 rounded-2xl bg-surface p-4">
+        <View className="gap-2 rounded-3xl bg-surface p-4">
           <View className="flex-row justify-between">
             <Text className="text-sm font-semibold text-text">
               {votedCount}/{total}명 골랐어요
@@ -459,7 +459,7 @@ function VotingStage({ session }: { session: SessionView }) {
 
         {/* 이 판 후보에 걸리는 못 먹는 것. 빼지 않고 알린다. 누가 적었는지는 없다 (0010) */}
         {notice.length > 0 ? (
-          <View accessibilityRole="alert" className="gap-1 rounded-2xl bg-ink p-4">
+          <View accessibilityRole="alert" className="gap-1 rounded-3xl bg-ink p-4">
             {notice.map((line) => (
               <Text key={line} className="text-lg font-bold text-on-ink">
                 {line}

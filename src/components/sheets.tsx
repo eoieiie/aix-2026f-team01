@@ -53,7 +53,7 @@ export function ConfirmSheet({
   return (
     <Sheet visible={visible} onClose={onClose}>
       <View className="gap-2">
-        <Text className="text-2xl font-bold tracking-tight text-text">{title}</Text>
+        <Text className="text-xl font-bold tracking-tight text-text">{title}</Text>
         {body ? <Text className="text-base text-muted">{body}</Text> : null}
       </View>
       {error ? <Text className="text-sm font-semibold text-danger">{error}</Text> : null}
@@ -105,7 +105,7 @@ function NameSheetBody({ title, initial, maxLength, busy = false, error, onSave,
   const ok = name.trim().length > 0 && name.trim() !== initial;
   return (
     <>
-      <Text className="text-2xl font-bold tracking-tight text-text">{title}</Text>
+      <Text className="text-xl font-bold tracking-tight text-text">{title}</Text>
       <TextField
         value={name}
         onChangeText={setName}

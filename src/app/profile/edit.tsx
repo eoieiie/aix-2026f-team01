@@ -106,7 +106,7 @@ export default function ProfileEditScreen() {
           accessibilityRole="button"
           accessibilityLabel="아바타 고르기"
           onPress={() => setPicker(true)}
-          className="flex-row items-center gap-4 rounded-2xl bg-surface p-4 active:opacity-80">
+          className="flex-row items-center gap-4 rounded-3xl bg-surface p-4 active:opacity-80">
           <Avatar name={name || '?'} foodId={current.avatarFoodId} size={72} />
           <View className="flex-1 gap-1">
             <Text className="text-lg font-bold text-text">아바타</Text>
@@ -239,7 +239,7 @@ function AvatarPicker({
 
   return (
     <Sheet visible={visible} onClose={onClose}>
-      <Text className="text-2xl font-bold tracking-tight text-text">아바타 고르기</Text>
+      <Text className="text-xl font-bold tracking-tight text-text">아바타 고르기</Text>
       <ScrollView style={{ maxHeight: 392 }} showsVerticalScrollIndicator={false}>
         <View className="gap-3">
           {rows.map((row, r) => (

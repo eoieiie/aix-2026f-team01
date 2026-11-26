@@ -83,14 +83,14 @@ function ShopBody({ shop }: { shop: ShopDetail }) {
       </View>
 
       {council.length ? (
-        <View className="gap-4 rounded-2xl bg-surface p-4">
+        <View className="gap-4 rounded-3xl bg-surface p-4">
           <Text className="text-lg font-bold text-text">학생회 제휴 혜택</Text>
           {council.map((entry) => <CouncilRecord key={entry.id} entry={entry} showBadge={new Set(council.map((b) => b.college)).size > 1} />)}
         </View>
       ) : null}
 
       {shop.partner && shop.couponText ? (
-        <View className="gap-3 rounded-2xl bg-surface p-4">
+        <View className="gap-3 rounded-3xl bg-surface p-4">
           <View className="gap-1">
             <Text className="text-sm font-semibold text-muted">제휴 혜택</Text>
             <Text className="text-lg font-bold text-text">{shop.couponText}</Text>
@@ -112,7 +112,7 @@ function ShopBody({ shop }: { shop: ShopDetail }) {
         </View>
       ) : null}
 
-      <View className="gap-4 rounded-2xl bg-surface p-4">
+      <View className="gap-4 rounded-3xl bg-surface p-4">
         {address ? <InfoRow icon="pin">{address}</InfoRow> : null}
         {shop.phone ? (
           <Pressable
@@ -151,7 +151,7 @@ function Hero({ shop }: { shop: ShopDetail }) {
   const [width, setWidth] = useState(0);
   if (shop.photos.length === 0) {
     return (
-      <View className="items-center justify-center rounded-2xl bg-surface" style={{ height: HERO_HEIGHT }}>
+      <View className="items-center justify-center rounded-3xl bg-surface" style={{ height: HERO_HEIGHT }}>
         <ShopThumb
           name={shop.name}
           photoUrl={null}
@@ -169,7 +169,7 @@ function Hero({ shop }: { shop: ShopDetail }) {
         horizontal
         pagingEnabled
         showsHorizontalScrollIndicator={false}
-        className="rounded-2xl bg-surface"
+        className="rounded-3xl bg-surface"
         style={{ height: HERO_HEIGHT }}>
         {shop.photos.map((p, i) => (
           <Image

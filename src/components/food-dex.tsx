@@ -14,14 +14,14 @@ export function FoodDex() {
   const [selected, setSelected] = useState<number | null>(null);
 
   if (isLoading) return (
-    <View accessibilityLiveRegion="polite" className="min-h-20 flex-row items-center gap-3 rounded-2xl bg-surface p-4">
+    <View accessibilityLiveRegion="polite" className="min-h-20 flex-row items-center gap-3 rounded-3xl bg-surface p-4">
       <ActivityIndicator color={colors.muted} />
       <Text className="text-base text-muted">도감을 불러오는 중이에요</Text>
     </View>
   );
   if (isError || !dex) {
     return (
-      <Pressable accessibilityRole="button" onPress={() => refetch()} className="min-h-11 rounded-2xl bg-surface p-6">
+      <Pressable accessibilityRole="button" onPress={() => refetch()} className="min-h-11 rounded-3xl bg-surface p-6">
         <Text className="text-lg font-bold text-muted">도감을 불러오지 못했어요. 눌러서 다시</Text>
       </Pressable>
     );
@@ -53,7 +53,7 @@ export function FoodDex() {
       {custom.length > 0 ? (
         <View className="gap-2">
           <Text className="text-base font-bold text-text">직접 적은 메뉴</Text>
-          <View className="gap-2 rounded-2xl bg-surface p-4">
+          <View className="gap-2 rounded-3xl bg-surface p-4">
             {custom.map((f) => (
               <Pressable
                 key={f.foodId}
@@ -105,7 +105,7 @@ function DexTile({ food, on, onPress }: { food: DexFood; on: boolean; onPress: (
 
 function DexDetail({ food, onClose }: { food: DexFood; onClose: () => void }) {
   return (
-    <Pressable accessibilityRole="button" accessibilityLabel={`${food.name} 기록 닫기`} onPress={onClose} className="gap-1 rounded-2xl bg-surface p-4">
+    <Pressable accessibilityRole="button" accessibilityLabel={`${food.name} 기록 닫기`} onPress={onClose} className="gap-1 rounded-3xl bg-surface p-4">
       <Text className="text-lg font-bold text-text">{food.name}</Text>
       {food.firstEaten ? <Text className="text-sm text-text">처음 먹은 날 {dayLabel(food.firstEaten)}</Text> : null}
       {food.lastEaten ? <Text className="text-sm text-text">마지막으로 {dayLabel(food.lastEaten)}</Text> : null}
