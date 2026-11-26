@@ -2,6 +2,7 @@ import * as Haptics from 'expo-haptics';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { ActivityIndicator, Animated, Platform, Pressable, View } from 'react-native';
+import { EmptyScreen } from '@/components/empty-state';
 import { Text } from '@/components/text';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -49,12 +50,7 @@ export default function OnboardingScreen() {
 
   if (profile.isError) {
     return (
-      <SafeAreaView className="flex-1 items-center justify-center gap-4 bg-background px-6">
-        <Text className="text-lg font-bold text-text">연결할 수 없어요</Text>
-        <View className="w-full max-w-xs">
-          <Button label="다시 시도" variant="secondary" onPress={() => profile.refetch()} />
-        </View>
-      </SafeAreaView>
+      <EmptyScreen title="연결할 수 없어요" icon="refresh" action={{ label: '다시 시도', variant: 'inverse', onPress: () => profile.refetch() }} />
     );
   }
 

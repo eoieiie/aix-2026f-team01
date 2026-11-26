@@ -4,7 +4,6 @@ import * as Updates from 'expo-updates';
 import { useState } from 'react';
 import { Platform, Pressable, View } from 'react-native';
 
-import { Icon, type IconName } from '@/components/icon';
 import { ConfirmSheet, NameSheet, Sheet } from '@/components/sheets';
 import { Button } from '@/components/button';
 import { Text } from '@/components/text';
@@ -49,10 +48,10 @@ export function SettingsList({
   return (
     <View className="gap-3">
       <Group>
-        <Row icon="pencil" label="내 이름 바꾸기" onPress={() => setSheet('name')} />
-        <Row icon="close" label="못 먹는 음식" onPress={onRestrictions} />
-        {hasType ? <Row icon="refresh" label="밥BTI 다시 만들기" onPress={onOnboarding} /> : null}
-        <Row icon="person" label="다른 기기에서 이어 쓰기" onPress={onAccount} />
+        <Row label="내 이름 바꾸기" onPress={() => setSheet('name')} />
+        <Row label="못 먹는 음식" onPress={onRestrictions} />
+        {hasType ? <Row label="밥BTI 다시 만들기" onPress={onOnboarding} /> : null}
+        <Row label="다른 기기에서 이어 쓰기" onPress={onAccount} />
       </Group>
       <Group>
         <Row label="밥BTI 소개" onPress={() => router.push('/about' as any)} />
@@ -138,12 +137,10 @@ function Group({ children }: { children: React.ReactNode }) {
 }
 
 function Row({
-  icon,
   label,
   onPress,
   danger = false,
 }: {
-  icon?: IconName;
   label: string;
   onPress: () => void;
   danger?: boolean;
@@ -153,8 +150,7 @@ function Row({
       accessibilityRole="button"
       accessibilityLabel={label}
       onPress={onPress}
-      className="h-14 flex-row items-center gap-3 px-4 active:bg-surface-strong">
-      {icon ? <Icon name={icon} size={20} /> : null}
+      className="h-14 flex-row items-center px-4 active:bg-surface-strong">
       <Text className={`text-base font-semibold ${danger ? 'text-danger' : 'text-text'}`}>{label}</Text>
     </Pressable>
   );

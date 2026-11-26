@@ -4,7 +4,7 @@ import { Pressable, ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { couponState, formatKoreanTime, splitCoupons } from '@/hooks/use-shops';
-import { Button } from '@/components/button';
+import { EmptyState } from '@/components/empty-state';
 import { CouponCode } from '@/components/coupon-code';
 import { IconButton } from '@/components/icon';
 import { ShopThumb } from '@/components/shop-thumb';
@@ -30,15 +30,9 @@ export default function CouponsScreen() {
         {isLoading ? (
           <Text className="text-sm text-muted">쿠폰을 불러오는 중</Text>
         ) : isError ? (
-          <View className="gap-3">
-            <Text className="text-base font-semibold text-text">쿠폰을 불러올 수 없어요</Text>
-            <Button label="다시 시도" variant="secondary" onPress={() => refetch()} />
-          </View>
+          <EmptyState title="쿠폰을 불러올 수 없어요" icon="refresh" action={{ label: '다시 시도', variant: 'inverse', onPress: () => refetch() }} />
         ) : ready.length === 0 ? (
-          <View className="items-center gap-4 rounded-3xl bg-surface p-6">
-            <Text className="text-xl font-bold tracking-tight text-text">쓸 수 있는 쿠폰이 없어요</Text>
-            <Button label="가게 보러 가기" className="self-center px-8" onPress={() => router.replace('/(tabs)/shops' as any)} />
-          </View>
+          <EmptyState title="쓸 수 있는 쿠폰이 없어요" icon="ticket" action={{ label: '가게 보러 가기', onPress: () => router.replace('/(tabs)/shops' as any) }} />
         ) : (
           <View className="gap-3">
             {ready.map((c) => (

@@ -1,10 +1,10 @@
 import { useRef } from 'react';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { ActivityIndicator, Platform, ScrollView, View } from 'react-native';
+import { EmptyScreen } from '@/components/empty-state';
 import { Text } from '@/components/text';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { Button } from '@/components/button';
 import { IconButton } from '@/components/icon';
 import { NearbyCafes } from '@/components/nearby-cafes';
 import { NearbyRestaurants } from '@/components/nearby-restaurants';
@@ -43,16 +43,11 @@ export default function MealScreen() {
     // 없는 기록과 소속 아님은 다시 해도 같아서 홈으로, 연결 문제는 다시 시도
     const known = error instanceof MealError;
     return (
-      <SafeAreaView className="flex-1 items-center justify-center gap-4 bg-background px-6">
-        <Text className="text-lg font-bold text-text">{mealErrorMessage(error)}</Text>
-        <View className="w-full max-w-xs">
-          {known ? (
-            <Button label="홈으로" onPress={() => router.replace('/')} />
-          ) : (
-            <Button label="다시 시도" variant="secondary" onPress={() => retry()} />
-          )}
-        </View>
-      </SafeAreaView>
+      <EmptyScreen
+        title={mealErrorMessage(error)}
+        icon={known ? undefined : 'refresh'}
+        action={known ? { label: '홈으로', onPress: () => router.replace('/') } : { label: '다시 시도', variant: 'inverse', onPress: () => retry() }}
+      />
     );
   }
 

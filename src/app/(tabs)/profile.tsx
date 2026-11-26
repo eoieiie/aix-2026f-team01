@@ -1,6 +1,7 @@
 import { useFocusEffect, useRouter } from 'expo-router';
 import { useCallback, useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, View } from 'react-native';
+import { EmptyScreen } from '@/components/empty-state';
 import { Text } from '@/components/text';
 import { choiceSurface } from '@/components/choice-colors';
 import { FoodDex } from '@/components/food-dex';
@@ -8,7 +9,6 @@ import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { AccountSheet } from '@/components/account-sheet';
 import { Avatar } from '@/components/avatar';
-import { Button } from '@/components/button';
 import { CardButton, ProfileSummaryCard } from '@/components/profile-summary-card';
 import { SettingsList } from '@/components/settings-list';
 import colors from '@/constants/colors.json';
@@ -49,12 +49,7 @@ export default function ProfileScreen() {
 
   if (isError || !stats) {
     return (
-      <SafeAreaView className="flex-1 items-center justify-center gap-4 bg-background px-4">
-        <Text className="text-lg font-bold text-text">프로필을 불러올 수 없어요</Text>
-        <View className="w-full max-w-xs">
-          <Button label="다시 시도" variant="secondary" onPress={() => refetch()} />
-        </View>
-      </SafeAreaView>
+      <EmptyScreen title="프로필을 불러올 수 없어요" icon="refresh" action={{ label: '다시 시도', variant: 'inverse', onPress: () => refetch() }} />
     );
   }
 

@@ -180,10 +180,10 @@ export function ResultMoment({ session, from, onGroup, onCard }: ResultMomentPro
             </ScrollView>
             <FadeEdge color={colors.primary} />
           </View>
-          {/* 같은 역할의 버튼 둘은 같은 크기로 나란히. 결과 카드가 다음 할 일이라 흰 버튼, 모임으로는 회색 */}
+          {/* 같은 역할의 버튼 둘은 같은 크기, 같은 모양(주황 위 흰 단추)으로 나란히. 주황 면 위라 주황 단추를 두지 않는다 */}
           <View className="flex-row gap-2 px-4 pb-4">
             <View className="flex-1">
-              <Button label="모임으로" variant="secondary" onPress={onGroup} />
+              <Button label="모임으로" variant="inverse" onPress={onGroup} />
             </View>
             <View className="flex-1">
               <Button

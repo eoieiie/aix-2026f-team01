@@ -254,6 +254,37 @@ describe('디자인 규칙', () => {
     expect(found).toEqual([]);
   });
 
+  // 2026-11-26 화면 검수 2: 제안으로 남겼던 모양을 하나로 맞춘 것을 지킨다 (docs/design.md "화면 검수 2")
+  it('빈 화면과 오류 화면은 EmptyState 하나로 그린다(그림이나 아이콘, 한 줄, 단추 하나)', () => {
+    // 예전 모양: 흰 바탕 가운데 굵은 글과 폭 320 단추, 회색 글 한 줄만 있는 화면
+    const old = /items-center justify-center gap-4 bg-background|w-full max-w-xs/;
+    const found = files.filter(({ file, text }) => file !== 'src/components/empty-state.tsx' && old.test(text)).map(({ file }) => file);
+    expect(found).toEqual([]);
+  });
+
+  it('설정 목록 줄은 모두 같은 모양이다(아이콘 없이 같은 시작선)', () => {
+    const settings = files.find(({ file }) => file === 'src/components/settings-list.tsx').text;
+    expect(settings).not.toMatch(/<Row icon=/);
+  });
+
+  it('가게 상세 정보 줄은 모두 왼쪽에 아이콘 하나다', () => {
+    const detail = files.find(({ file }) => file === 'src/app/shops/[id].tsx').text;
+    const rows = [...detail.matchAll(/<InfoRow\b[^>]*>/g)].map(([m]) => m);
+    expect(rows.length).toBeGreaterThan(0);
+    expect(rows.filter((m) => !/icon="/.test(m))).toEqual([]);
+  });
+
+  it('누르면 후보에 오르는 "이 모임 단골" 칩은 고르지 않은 모양(회색 면)이다. 검정은 고른 상태에만', () => {
+    const session = files.find(({ file }) => file === 'src/app/sessions/[id].tsx').text;
+    const chip = session.slice(session.indexOf('이 모임 단골'), session.indexOf('이 모임 단골') + 1500);
+    expect(chip).not.toMatch(/bg-ink|text-on-ink/);
+  });
+
+  it('결과 순간 아래 두 단추는 같은 모양(주황 위 흰 단추)이다', () => {
+    const moment = files.find(({ file }) => file === 'src/components/result-moment.tsx').text;
+    expect(moment).toMatch(/label="모임으로" variant="inverse"/);
+  });
+
   // ---- 음식 색 (docs/design.md "음식 색", 2026-11-26) ----
 
   it('음식 색은 food-tint.ts에서만 고른다. 화면 파일에 bg-tint-, bg-dot- 이름을 직접 쓰지 않는다', () => {

@@ -2,6 +2,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Linking, ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { EmptyState } from '@/components/empty-state';
 import { Button } from '@/components/button';
 import { CouncilRecord } from '@/components/council-benefit';
 import { IconButton } from '@/components/icon';
@@ -34,7 +35,9 @@ export default function CouncilBenefitScreen() {
             <View className="flex-1"><Button label="네이버 지도" variant="secondary" onPress={() => open(links.naver)} /></View>
             <View className="flex-1"><Button label="카카오맵" variant="secondary" onPress={() => open(links.kakao)} /></View>
           </View>
-        </> : <Text className="text-base text-muted">{council.isPending ? '제휴를 불러오는 중' : '제휴를 찾을 수 없어요'}</Text>}
+        </> : council.isPending ? <Text className="text-sm text-muted">제휴를 불러오는 중</Text> : (
+          <EmptyState title="제휴를 찾을 수 없어요" icon="shop" action={{ label: '가게 보러 가기', onPress: () => router.replace('/shops' as any) }} />
+        )}
       </ScrollView>
     </SafeAreaView>
   );

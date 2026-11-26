@@ -1,3 +1,4 @@
+import { EmptyScreen } from '@/components/empty-state';
 import { choiceSurface } from '@/components/choice-colors';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
@@ -50,12 +51,11 @@ export default function RestrictionsScreen() {
 
   if (error || draft === null) {
     return (
-      <SafeAreaView className="flex-1 items-center justify-center gap-4 bg-background px-6">
-        <Text className="text-lg font-bold text-text">{restrictionErrorMessage(error)}</Text>
-        <View className="w-full max-w-xs">
-          <Button label="다시 시도" variant="secondary" onPress={() => refetch()} loading={retrying} />
-        </View>
-      </SafeAreaView>
+      <EmptyScreen
+        title={restrictionErrorMessage(error)}
+        icon="refresh"
+        action={{ label: '다시 시도', variant: 'inverse', onPress: () => refetch(), loading: retrying }}
+      />
     );
   }
 

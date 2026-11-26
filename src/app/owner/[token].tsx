@@ -1,11 +1,12 @@
 import { useLocalSearchParams } from 'expo-router';
-import { ScrollView, useWindowDimensions, View } from 'react-native';
+import { Linking, ScrollView, useWindowDimensions, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { BarLegend, Bars, HOUR_LABELS, Panel, StatTile } from '@/components/board-parts';
-import { Button } from '@/components/button';
+import { BarLegend, Bars, HOUR_LABELS, Panel } from '@/components/board-parts';
+import { EmptyState } from '@/components/empty-state';
 import { Text } from '@/components/text';
 import { type OwnerBoard, useOwnerBoard } from '@/hooks/use-shops';
+import { supportMailUrl } from '@/lib/support-mail';
 
 const WIDE_MIN = 960;
 
@@ -22,10 +23,13 @@ export default function OwnerScreen() {
         {board.isLoading ? (
           <Text className="text-sm text-muted">현황을 불러오는 중</Text>
         ) : board.isError || !board.data ? (
-          <View className="max-w-md gap-3 rounded-3xl bg-surface p-6">
-            <Text className="text-xl font-bold tracking-tight text-text">주소를 다시 확인해 주세요</Text>
-            <Text className="text-base text-muted">밥BTI 팀이 드린 주소 그대로 열어야 보여요</Text>
-            <Button label="다시 시도" variant="inverse" onPress={() => board.refetch()} />
+          // 주소가 틀리면 다시 열어도 같아서 "다시 시도" 대신 밥BTI 팀에 묻는 메일을 연다
+          <View className="w-full max-w-[480px]">
+            <EmptyState
+              title="주소를 다시 확인해 주세요"
+              icon="link"
+              action={{ label: '밥BTI 팀에 묻기', variant: 'inverse', onPress: () => void Linking.openURL(supportMailUrl()).catch(() => undefined) }}
+            />
           </View>
         ) : (
           <OwnerBody board={board.data} />
