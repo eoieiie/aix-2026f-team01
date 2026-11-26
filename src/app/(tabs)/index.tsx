@@ -10,6 +10,7 @@ import { FoodThumb } from '@/components/food-thumb';
 import { IconButton } from '@/components/icon';
 import { Logo } from '@/components/logo';
 import { PersonDots } from '@/components/person-dots';
+import { PlateFoods } from '@/components/plate-foods';
 import { Group, useMyGroups, useMyGroupsLive } from '@/hooks/use-groups';
 import { TAB_BAR_SPACE } from '@/constants';
 
@@ -23,7 +24,8 @@ export default function HomeScreen() {
   const [modalVisible, setModalVisible] = useState(false);
   const hasGroups = groups.length > 0;
 
-  // 모임 카드: 왼쪽에 가장 최근에 먹은 음식 그림, 모임 이름과 최근 먹은 것, 아래에 사람 동그라미.
+  // 모임 카드: 왼쪽에 가장 최근에 먹은 음식 그림, 모임 이름과 최근 먹은 것, 아래에 사람 동그라미와 인원수,
+  // 오른쪽 아래에 같이 먹은 음식 줄(없으면 빈 접시 둘. docs/design.md "홈 모임 카드 꾸밈").
   // 진행 중인 판이 있으면 주황 알약 하나. 이 화면의 주황은 이것뿐이다 (docs/design.md "프레즐 규칙 그대로")
   const renderGroupItem = ({ item }: { item: Group }) => {
     const latest = item.recent_foods[0];
@@ -59,9 +61,12 @@ export default function HomeScreen() {
             </View>
           ) : null}
         </View>
-        <View className="flex-row items-center justify-between">
-          <PersonDots names={item.members} />
-          <Text className="text-sm font-semibold text-muted">{item.members.length}명</Text>
+        <View className="flex-row items-center justify-between gap-3">
+          <View className="flex-row items-center gap-2">
+            <PersonDots names={item.members} />
+            <Text className="text-sm font-semibold text-muted">{item.members.length}명</Text>
+          </View>
+          <PlateFoods foods={item.plate_foods} />
         </View>
       </Pressable>
     );
@@ -112,6 +117,13 @@ export default function HomeScreen() {
               className="self-center px-8"
               onPress={() => setModalVisible(true)}
             />
+            {/* 처음 온 사람이 무엇을 하는 앱인지 볼 곳. 모임이 생기면 이 화면과 함께 사라진다 */}
+            <Pressable
+              accessibilityRole="link"
+              className="h-11 justify-center px-4 active:opacity-80"
+              onPress={() => router.push('/about')}>
+              <Text className="text-sm text-muted">어떻게 하나요</Text>
+            </Pressable>
           </View>
         ) : (
           // 최근에 들어간 순으로 보이는 모임 목록 (spec.md 4-3)

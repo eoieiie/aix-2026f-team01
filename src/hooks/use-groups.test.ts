@@ -61,6 +61,7 @@ describe('C 묶음 규칙 테스트 (spec.md 4-2, 4-3, 4-4, 4-6)', () => {
           last_visited_at: '2026-10-01T00:00:00Z',
           members: [],
           recent_foods: [],
+          plate_foods: [],
           has_open_session: false,
         },
         {
@@ -71,6 +72,7 @@ describe('C 묶음 규칙 테스트 (spec.md 4-2, 4-3, 4-4, 4-6)', () => {
           last_visited_at: '2026-10-28T00:00:00Z',
           members: [],
           recent_foods: [],
+          plate_foods: [],
           has_open_session: false,
         },
       ];
