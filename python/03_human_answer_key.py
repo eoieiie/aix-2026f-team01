@@ -8,7 +8,9 @@
 2) 두 사람씩 일치도, 그리고 다수결로 못 정하는 칸 목록 (그 칸만 같이 정해 human_decided.csv에 적는다)
 3) 사람 정답 = 칸마다 두 명 이상이 같은 값(다수결) + human_decided.csv에서 정한 칸. 아직 안 정한 칸은 빼고 수를 알린다
    세 번째 시트가 없으면 두 사람이 같은 칸만 쓴다
-4) 사람 정답으로 (가) 낱말 표만 (나) AI 판 1 (다) 합침 (라) 지금 판 2 두 단계를 잰다. 발표 한 장용 표
+4) 사람 정답으로 (가) 낱말 표만 (나) AI 판 1 (다) 합침 (라) 판 2 두 단계 (마) 지금 판 3 두 단계를 잰다. 발표 한 장용 표
+   (마)는 (라)가 놓친 칸을 보고 프롬프트와 서버를 고친 뒤(0055) 같은 메뉴 40개로 다시 잰 값이다. 같은 자료로 고친 뒤 잰 값이라
+   새 메뉴에서의 성능보다 좋게 나올 수 있다. system_v3.csv가 없으면 (마)는 내지 않는다
 5) AI 기준 정답(consensus.csv)이 사람 정답과 얼마나 맞는지
 
 표준 라이브러리만 쓰고 인터넷에 닿지 않는다. 쓰는 법: python3 03_human_answer_key.py [--data 폴더]
@@ -30,6 +32,9 @@ eval02 = importlib.util.module_from_spec(_spec)
 _spec.loader.exec_module(eval02)
 TAGS, level, by_id, agreement, systems, kappa = (
     eval02.TAGS, eval02.level, eval02.by_id, eval02.agreement, eval02.systems, eval02.kappa)
+V3 = 'system_v3.csv'
+V3_LABEL = '(마) 지금 판 3 두 단계'
+V3_NOTE = '(마)는 (라)가 놓친 칸을 보고 고친 뒤 같은 메뉴로 다시 잰 값이다(같은 자료로 고친 뒤 잰 값). 새 메뉴에서는 더 나쁠 수 있다'
 NOT_MENU = '메뉴 아님(1=아님)'
 
 
@@ -86,6 +91,24 @@ def human_gold(people, decided):
     return gold, open_cells
 
 
+def two_level(gold, v, ids):
+    """02의 (라)와 같은 정의로 한 판을 잰다: 확실 = sure_tags, 약함 = ai_tags 중 확실에 없는 것."""
+    cells = []
+    for i in ids:
+        sure = eval02.tagset(v[i]['sure_tags'])
+        weak = eval02.tagset(v[i]['ai_tags']) - sure
+        for t in TAGS:
+            g = level(gold[i][t])
+            if g is not None:
+                cells.append(eval02.judge(g, t in sure, t in weak))
+    return eval02.count(cells)
+
+
+def missed_cells(gold, v, ids):
+    return [f"{i} {gold[i]['메뉴 이름']} {t}" for i in ids for t in TAGS
+            if level(gold[i][t]) == 2 and t not in eval02.tagset(v[i]['ai_tags']) | eval02.tagset(v[i]['sure_tags'])]
+
+
 def rate(n, d):
     return f'{n}/{d} ({n / d:.1%})' if d else f'{n}/0'
 
@@ -132,6 +155,7 @@ def main(argv):
         print(f"  {i} {name} {t}: {' / '.join('빈칸' if v is None else str(v) for v in values)}")
 
     v1, v2 = by_id(read(data, 'system_v1.csv')), by_id(read(data, 'system_v2.csv'))
+    v3 = by_id(read(data, V3)) if (data / V3).exists() else None
     real = [i for i in gold if gold[i][NOT_MENU] != '1']
     shops = [i for i in gold if gold[i][NOT_MENU] == '1' and any(level(gold[i][t]) is not None for t in TAGS)]
     for label, ids in (('메뉴 이름 입력', real), ('가게 이름 입력(대표 메뉴로 매김)', shops)):
@@ -139,12 +163,20 @@ def main(argv):
             continue
         print(f'\n== 4. 사람 정답으로 잰 직접 적은 메뉴: {label} {len(ids)}개 ==')
         print('방식                    놓친 재료(정답 2인데 표시 없음)   괜히 붙은 확실 경고(정답 0인데 확실)   약한 표시 과잉')
-        for name, c in systems(gold, v1, v2, ids).items():
+        rows = list(systems(gold, v1, v2, ids).items())
+        if v3:
+            rows.append((V3_LABEL, two_level(gold, v3, ids)))
+        for name, c in rows:
             print(f"{name:20}  {rate(c['놓침'], c['정답 2 칸']):>22}   {rate(c['과잉 확실'], c['정답 0 칸']):>24}"
                   f"   {c['약한 표시 과잉']:>6}")
-        missed = [f"{i} {gold[i]['메뉴 이름']} {t}" for i in ids for t in TAGS
-                  if level(gold[i][t]) == 2 and t not in eval02.tagset(v2[i]['ai_tags']) | eval02.tagset(v2[i]['sure_tags'])]
-        print(f"(라)가 놓친 칸: {', '.join(missed) or '없음'}")
+        print(f"(라)가 놓친 칸: {', '.join(missed_cells(gold, v2, ids)) or '없음'}")
+        if v3:
+            print(f"(마)가 놓친 칸: {', '.join(missed_cells(gold, v3, ids)) or '없음'}")
+    if v3:
+        print(V3_NOTE)
+        said = [i for i in gold if v3[i]['is_menu'].strip().lower() == 'false']
+        wrong = [f"{i} {gold[i]['메뉴 이름']}" for i in said if gold[i][NOT_MENU] != '1']
+        print(f"(마) 메뉴 아님으로 본 것 {len(said)}개, 그중 사람 정답이 메뉴인 것: {', '.join(wrong) or '없음'}")
 
     consensus = by_id(read(data, 'consensus.csv'))
     pairs = [(level(gold[i][t]), level(consensus[i][t])) for i in gold for t in TAGS
