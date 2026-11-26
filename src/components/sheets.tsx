@@ -56,7 +56,7 @@ export function ConfirmSheet({
         <Text className="text-xl font-bold tracking-tight text-text">{title}</Text>
         {body ? <Text className="text-base text-muted">{body}</Text> : null}
       </View>
-      {error ? <Text className="text-sm font-semibold text-danger">{error}</Text> : null}
+      {error ? <Text className="text-sm text-danger">{error}</Text> : null}
       <View className="flex-row gap-2">
         <View className="flex-1">
           <Button label="취소" variant="secondary" onPress={onClose} />

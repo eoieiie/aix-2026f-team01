@@ -56,8 +56,8 @@ function RedeemBody({ coupon, onClose }: { coupon: Coupon; onClose: () => void }
         </Text>
       </View>
       <View className="gap-1 rounded-2xl bg-surface p-4">
-        <Text className="text-sm font-semibold text-muted">{coupon.shopName}</Text>
-        <Text className="text-lg font-bold text-text">{coupon.benefit}</Text>
+        <Text className="text-sm text-muted">{coupon.shopName}</Text>
+        <Text className="text-lg font-semibold text-text">{coupon.benefit}</Text>
       </View>
       {coupon.pinRequired ? (
         <TextInput
@@ -74,7 +74,7 @@ function RedeemBody({ coupon, onClose }: { coupon: Coupon; onClose: () => void }
           className="h-14 rounded-lg bg-surface px-4 text-center text-2xl font-bold tracking-widest text-text placeholder:text-muted"
         />
       ) : null}
-      {message ? <Text className="text-sm font-semibold text-danger">{message}</Text> : null}
+      {message ? <Text className="text-sm text-danger">{message}</Text> : null}
       <View className="flex-row gap-2">
         <View className="flex-1">
           <Button label="취소" variant="secondary" onPress={onClose} />

@@ -110,8 +110,8 @@ export default function InviteScreen() {
       <View className="flex-1 justify-center gap-8 px-4">
         {/* 초대받은 모임 카드. 이름표 한 줄과 모임 이름만 둔다 (설명 줄은 버튼과 입력칸이 대신한다) */}
         <View className="gap-2 rounded-3xl bg-surface p-4">
-          <Text className="text-base font-bold text-muted">초대받은 모임</Text>
-          <Text className="text-5xl font-extrabold leading-tight tracking-tight text-text">
+          <Text className="text-base text-muted">초대받은 모임</Text>
+          <Text className="text-5xl font-bold leading-tight tracking-tight text-text">
             {invite.groupName}
           </Text>
         </View>

@@ -38,7 +38,7 @@ export function HeadcountStepper({
       {round('minus', -1, '한 명 빼기', disabled || value <= HEADCOUNT_MIN)}
       <Text
         accessibilityLabel={`${value}명`}
-        className={`${big ? 'min-w-28 text-6xl' : 'min-w-14 text-xl'} text-center font-extrabold tracking-tight text-text`}>
+        className={`${big ? 'min-w-28 text-6xl' : 'min-w-14 text-xl'} text-center font-bold tracking-tight text-text`}>
         {value}
         <Text className={big ? 'text-3xl' : 'text-base'}>명</Text>
       </Text>

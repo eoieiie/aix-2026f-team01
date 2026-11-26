@@ -46,7 +46,7 @@ export default function AdminCouponsScreen() {
                 accessibilityState={{ selected: d === days }}
                 onPress={() => setDays(d)}
                 className={`h-11 w-24 items-center justify-center rounded-xl active:opacity-70 ${d === days ? 'bg-ink' : 'bg-surface'}`} style={choiceSurface(d === days)}>
-                <Text className={`text-base font-bold ${d === days ? 'text-on-ink' : 'text-text'}`}>{`${d}일`}</Text>
+                <Text className={`text-base font-semibold ${d === days ? 'text-on-ink' : 'text-text'}`}>{`${d}일`}</Text>
               </Pressable>
             ))}
           </View>
@@ -65,7 +65,7 @@ export default function AdminCouponsScreen() {
           </View>
         ) : board.isError || !board.data ? (
           <View className="max-w-md gap-3">
-            <Text className="text-base font-bold text-text">현황을 불러올 수 없어요</Text>
+            <Text className="text-base font-semibold text-text">현황을 불러올 수 없어요</Text>
             <Button label="다시 시도" variant="secondary" onPress={() => board.refetch()} />
           </View>
         ) : (

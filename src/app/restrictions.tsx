@@ -104,7 +104,7 @@ export default function RestrictionsScreen() {
         />
 
         <View className="gap-3">
-          <Text className="text-base font-bold text-text">음식</Text>
+          <Text className="text-base font-semibold text-text">음식</Text>
           <FoodSearch
             foods={foods}
             excludeIds={draft.flatMap((i) => (i.foodId !== null ? [i.foodId] : []))}
@@ -114,7 +114,7 @@ export default function RestrictionsScreen() {
         </View>
 
         <View className="gap-3">
-          <Text className="text-base font-bold text-text">고른 것 {draft.length}개</Text>
+          <Text className="text-base font-semibold text-text">고른 것 {draft.length}개</Text>
           {draft.length === 0 ? (
             <Text className="text-sm text-muted">아직 고른 것이 없어요</Text>
           ) : (
@@ -173,7 +173,7 @@ function TagSection({
 }) {
   return (
     <View className="gap-3">
-      <Text className="text-base font-bold text-text">{title}</Text>
+      <Text className="text-base font-semibold text-text">{title}</Text>
       {/* 태그는 글 길이와 상관없이 같은 폭으로 한 줄에 넷. 고른 태그는 검정으로 꽉 채운다. 주황은 아래 저장 단추 하나뿐 (docs/design.md 4절 2번, "화면 규칙" 색) */}
       <View className="-mx-1 flex-row flex-wrap">
         {tags.map((tag) => {
@@ -189,7 +189,7 @@ function TagSection({
                   on ? 'bg-ink' : 'bg-surface'
                 }`} style={choiceSurface(on)}>
                 <Text
-                  className={`text-sm font-bold ${on ? 'text-on-ink' : 'text-text'}`}>
+                  className={`text-sm font-semibold ${on ? 'text-on-ink' : 'text-text'}`}>
                   {tag.label}
                 </Text>
               </Pressable>

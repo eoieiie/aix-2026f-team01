@@ -132,6 +132,28 @@ describe('디자인 규칙', () => {
     expect(found).toEqual([]);
   });
 
+  it('굵기는 역할 표대로: 800과 900은 로고만, 작은 글자(12, 14)는 700으로 쓰지 않는다 (병주 2026-11-26)', () => {
+    // 굵게(700)는 읽는 순서를 정하는 곳(화면, 구역, 카드 제목과 이름, 큰 숫자, 주 단추)에만. 칩, 정보 줄, 안내 한 줄은 400이나 600
+    // 로고는 글이 아니라 이름을 그린 표시라 800을 그대로 둔다
+    const heavy = /(?<![\w-])font-(?:extrabold|black)(?![\w-])|fontWeight[=:]\s*\{?['"]?(?:800|900|heavy|black)/;
+    const smallBold = /(?<![\w-])text-(?:xs|sm)(?![\w-])[^'"`\n]*(?<![\w-])font-bold(?![\w-])|(?<![\w-])font-bold(?![\w-])[^'"`\n]*(?<![\w-])text-(?:xs|sm)(?![\w-])/;
+    const found = files.flatMap(({ file, text }) =>
+      text.split('\n').flatMap((line, i) => {
+        if (/^\s*(\/\/|\*|\{\/\*)/.test(line)) return [];
+        const bad = [];
+        if (file !== 'src/components/logo.tsx' && heavy.test(line)) bad.push(`${file}:${i + 1} 800 이상`);
+        if (smallBold.test(line)) bad.push(`${file}:${i + 1} 작은 글자 700`);
+        return bad;
+      })
+    );
+    expect(found).toEqual([]);
+  });
+
+  it('단추는 주 단추만 700, 나머지 단추는 600이다', () => {
+    const button = files.find(({ file }) => file === 'src/components/button.tsx').text;
+    expect(button).toMatch(/primary \? 'font-bold' : 'font-semibold'/);
+  });
+
   it('상자를 테두리로 그리지 않는다. 옅은 면으로 나눈다', () => {
     // 허용하는 선: 한쪽 구분선(border-b 등), 겹친 동그라미 사이의 바탕색 고리, 잠깐 보이는 주황 선(상태)
     const boxWidth = /(?<![\w-])border(?:-(?:\d+|\[[^\]]+\]))?(?![\w-])/;

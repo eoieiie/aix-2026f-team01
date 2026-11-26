@@ -7,7 +7,7 @@ import { Text } from '@/components/text';
 export function AdBadge() {
   return (
     <View accessibilityLabel="광고" className="shrink-0 rounded-lg bg-surface-strong px-2">
-      <Text className="text-xs font-bold text-muted">광고</Text>
+      <Text className="text-xs font-semibold text-muted">광고</Text>
     </View>
   );
 }

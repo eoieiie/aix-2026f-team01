@@ -143,20 +143,20 @@ export function ResultMoment({ session, from, onGroup, onCard }: ResultMomentPro
           {/* 마지막 줄이 버튼 띠에 칼로 자른 듯 걸리지 않게 아래 여백과 주황으로 옅어지는 띠 */}
           <View className="flex-1">
             <ScrollView keyboardShouldPersistTaps="handled" automaticallyAdjustKeyboardInsets contentContainerClassName="px-6 pb-8 pt-6">
-              <Text className="text-xl font-bold text-on-primary">
+              <Text className="text-xl font-semibold text-on-primary">
                 {session.groupName}
               </Text>
               {winnerId > 0 ? (
                 <FoodIllustration foodId={winnerId} size={160} name={winner} wrapClassName="mt-6" />
               ) : null}
               <MilestoneBadge foodId={winnerId} foodName={winner} />
-              <Text className="mt-8 text-xl font-bold text-on-primary">룰렛이 골랐어요</Text>
+              <Text className="mt-8 text-xl font-semibold text-on-primary">룰렛이 골랐어요</Text>
               <Text
                 className={`mt-1 font-bold tracking-tight text-on-primary ${nameSizeClass(winner)}`}>
                 {winner}
               </Text>
               {counts ? (
-                <Text className="mt-2 text-xl font-bold text-on-primary">
+                <Text className="mt-2 text-xl font-semibold text-on-primary">
                   {voteLine(counts, winnerId)}
                 </Text>
               ) : null}

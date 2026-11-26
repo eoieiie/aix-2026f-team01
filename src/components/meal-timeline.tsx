@@ -20,7 +20,7 @@ export function MealTimeline({ groupId }: { groupId: string }) {
   if (meals.length === 0) {
     return (
       <View className="rounded-3xl bg-surface p-4">
-        <Text className="text-lg font-bold text-muted">아직 기록이 없어요</Text>
+        <Text className="text-lg font-semibold text-muted">아직 기록이 없어요</Text>
       </View>
     );
   }
@@ -29,10 +29,10 @@ export function MealTimeline({ groupId }: { groupId: string }) {
   // 한 끼가 한 칸. 큰 회색 상자 안에 얇은 줄을 쌓지 않는다 (docs/design.md "화면 규칙": 목록 칸 높이 72 이상)
   return (
     <View className="gap-3">
-      {stat ? <Text className="text-base font-bold text-text">{stat}</Text> : null}
+      {stat ? <Text className="text-base text-text">{stat}</Text> : null}
       {groupByMonth(shown).map((g) => (
         <View key={g.month} className="gap-2">
-          <Text className="text-sm font-bold text-muted">{g.month}</Text>
+          <Text className="text-sm text-muted">{g.month}</Text>
           {g.meals.map((m) => (
             <MealRow key={m.mealId} meal={m} onPress={() => router.push(`/meals/${m.mealId}` as any)} />
           ))}
@@ -68,10 +68,10 @@ function MealRow({ meal, onPress }: { meal: TimelineMeal; onPress: () => void })
       <View className="flex-row">
         {meal.eaters.slice(0, 4).map((n, i) => (
           <View key={`${n}-${i}`} className="-ml-2 h-8 w-8 items-center justify-center rounded-full border-2 border-surface bg-surface-strong">
-            <Text className="text-xs font-bold text-text">{Array.from(n)[0] ?? ''}</Text>
+            <Text className="text-xs font-semibold text-text">{Array.from(n)[0] ?? ''}</Text>
           </View>
         ))}
-        {meal.eaters.length > 4 ? <Text className="ml-1 self-center text-xs font-bold text-muted">+{meal.eaters.length - 4}</Text> : null}
+        {meal.eaters.length > 4 ? <Text className="ml-1 self-center text-xs font-semibold text-muted">+{meal.eaters.length - 4}</Text> : null}
       </View>
     </Pressable>
   );

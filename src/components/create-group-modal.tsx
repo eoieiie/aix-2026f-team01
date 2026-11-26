@@ -108,7 +108,7 @@ export function CreateGroupModal({ visible, onClose }: CreateGroupModalProps) {
             ) : null}
             {/* 서버 오류는 창 안에 보이고 창을 닫지 않는다 (spec.md 4-2) */}
             {displayErrorMessage ? (
-              <Text className="text-sm font-semibold text-danger">{displayErrorMessage}</Text>
+              <Text className="text-sm text-danger">{displayErrorMessage}</Text>
             ) : null}
           </View>
 

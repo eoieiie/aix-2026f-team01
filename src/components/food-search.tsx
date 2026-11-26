@@ -44,7 +44,7 @@ export function FoodSearch({
     <View className="gap-2">
       {visiblePicks.length > 0 ? (
         <View className="mb-4 gap-2">
-          <Text className="text-base font-bold text-text" accessibilityRole="header">내 추천</Text>
+          <Text className="text-base font-semibold text-text" accessibilityRole="header">내 추천</Text>
           <View className="flex-row gap-2">
             {visiblePicks.map((food) => (
               <Pressable
@@ -55,7 +55,7 @@ export function FoodSearch({
                 onPress={() => onPick(food)}
                 className="min-w-0 flex-1 items-center gap-2 rounded-xl bg-surface p-3 active:opacity-70 disabled:opacity-50">
                 <FoodThumb foodId={food.id} size="sm" />
-                <Text className="text-center text-sm font-bold text-text">
+                <Text className="text-center text-sm font-semibold text-text">
                   {food.name}
                 </Text>
               </Pressable>
@@ -98,7 +98,7 @@ export function FoodSearch({
             }}
             className="min-h-14 w-[49%] flex-row items-center gap-2 rounded-xl bg-surface py-2 pl-2 pr-3 active:opacity-70 disabled:opacity-50">
             <FoodThumb foodId={food.id} size="xs" />
-            <Text className="flex-1 text-base font-bold text-text">
+            <Text className="flex-1 text-base font-semibold text-text">
               {food.name}
             </Text>
           </Pressable>

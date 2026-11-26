@@ -107,7 +107,7 @@ export default function ProfileScreen() {
                 subTab === 'foods' ? 'bg-ink' : ''
               }`}>
               <Text
-                className={`text-base font-bold ${
+                className={`text-base font-semibold ${
                   subTab === 'foods' ? 'text-on-ink' : 'text-muted'
                 }`}>
                 음식 도감 ({stats.foods.length})
@@ -123,7 +123,7 @@ export default function ProfileScreen() {
                 subTab === 'companions' ? 'bg-ink' : ''
               }`}>
               <Text
-                className={`text-base font-bold ${
+                className={`text-base font-semibold ${
                   subTab === 'companions' ? 'text-on-ink' : 'text-muted'
                 }`}>
                 밥 친구 랭킹 ({stats.companions.length})
@@ -136,7 +136,7 @@ export default function ProfileScreen() {
             <FoodDex />
           ) : stats.companions.length === 0 ? (
             <View className="rounded-3xl bg-surface p-4">
-              <Text className="text-base font-bold text-muted">아직 같이 먹은 밥 친구가 없어요</Text>
+              <Text className="text-base text-muted">아직 같이 먹은 밥 친구가 없어요</Text>
             </View>
           ) : (
             // 사람 한 줄: 왼쪽 아바타 44, 안 여백 16 (얇은 칸을 쓰지 않는다)
@@ -147,7 +147,7 @@ export default function ProfileScreen() {
                   <Text className="flex-1 text-lg font-bold text-text">
                     {c.displayName}
                   </Text>
-                  <Text className="text-sm font-semibold text-muted">{c.mealCount}번</Text>
+                  <Text className="text-sm text-muted">{c.mealCount}번</Text>
                 </View>
               ))}
             </View>
@@ -174,7 +174,7 @@ function Stat({ value, unit, label }: { value: number; unit: string; label: stri
     <View accessible accessibilityLabel={`${label} ${value}${unit}`} className="flex-1 gap-1 rounded-3xl bg-surface p-4">
       <View className="flex-row items-baseline gap-1">
         <Text className="text-3xl font-bold tracking-tight text-text">{value}</Text>
-        <Text className="text-sm font-semibold text-muted">{unit}</Text>
+        <Text className="text-sm text-muted">{unit}</Text>
       </View>
       <Text className="text-sm text-muted">{label}</Text>
     </View>

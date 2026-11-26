@@ -167,7 +167,7 @@ export default function ProfileEditScreen() {
       <View
         className="absolute bottom-0 left-0 right-0 gap-2 bg-background px-4 pt-3"
         style={{ paddingBottom: 16 + insets.bottom }}>
-        {error ? <Text className="text-center text-sm font-semibold text-danger">{error}</Text> : null}
+        {error ? <Text className="text-center text-sm text-danger">{error}</Text> : null}
         <Button label="저장" onPress={onSave} loading={busy} disabled={name.trim().length === 0} />
       </View>
 
@@ -195,7 +195,7 @@ function pairs<T>(items: readonly T[]): T[][] {
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <View className="gap-3">
-      <Text className="text-base font-bold text-text">{title}</Text>
+      <Text className="text-base font-semibold text-text">{title}</Text>
       <View className="gap-2">{children}</View>
     </View>
   );
@@ -210,7 +210,7 @@ function Chip({ label, on, onPress }: { label: string; on: boolean; onPress: () 
       accessibilityState={{ selected: on }}
       onPress={onPress}
       className={`min-h-11 flex-1 items-center justify-center rounded-xl px-1 py-2 active:opacity-70 ${on ? 'bg-ink' : 'bg-surface'}`} style={choiceSurface(on)}>
-      <Text className={`text-sm font-bold ${on ? 'text-on-ink' : 'text-text'}`}>
+      <Text className={`text-sm font-semibold ${on ? 'text-on-ink' : 'text-text'}`}>
         {label}
       </Text>
     </Pressable>
@@ -265,7 +265,7 @@ function AvatarPicker({
                         <Icon name="check" size={14} color="on-ink" />
                       </View>
                     ) : null}
-                    <Text className={`text-xs font-bold ${locked ? 'text-muted' : 'text-text'}`}>
+                    <Text className={`text-xs font-semibold ${locked ? 'text-muted' : 'text-text'}`}>
                       {locked ? `레벨 ${o?.unlockLevel}` : label}
                     </Text>
                   </Pressable>

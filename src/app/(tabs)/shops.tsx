@@ -65,7 +65,7 @@ export default function ShopsScreen() {
             }}
             className={`min-h-11 flex-1 items-center justify-center rounded-xl active:opacity-70 ${scope === key ? 'bg-ink' : 'bg-surface'}`}
             style={choiceSurface(scope === key)}>
-            <Text className={`text-sm font-bold ${scope === key ? 'text-on-ink' : 'text-text'}`}>
+            <Text className={`text-sm font-semibold ${scope === key ? 'text-on-ink' : 'text-text'}`}>
               {key === 'mine' ? '내 단과대 제휴' : '총학생회 제휴'}
             </Text>
           </Pressable>
@@ -85,7 +85,7 @@ export default function ShopsScreen() {
                   accessibilityState={{ selected: on }}
                   onPress={() => setKind(k.key)}
                   className={`h-11 flex-1 items-center justify-center rounded-xl active:opacity-70 ${on ? 'bg-ink' : 'bg-surface'}`} style={choiceSurface(on)}>
-                  <Text className={`text-base font-bold ${on ? 'text-on-ink' : 'text-text'}`}>{k.label}</Text>
+                  <Text className={`text-base font-semibold ${on ? 'text-on-ink' : 'text-text'}`}>{k.label}</Text>
                 </Pressable>
               );
             })}
@@ -113,7 +113,7 @@ export default function ShopsScreen() {
             onPress={() => router.push('/coupons' as any)}
             className="h-12 flex-row items-center justify-center gap-2 rounded-full bg-surface px-4 active:opacity-70">
             <Icon name="ticket" />
-            {readyCount > 0 ? <Text className="text-base font-bold text-text">{readyCount}</Text> : null}
+            {readyCount > 0 ? <Text className="text-base font-semibold text-text">{readyCount}</Text> : null}
           </Pressable>
         </View>
 
@@ -123,7 +123,7 @@ export default function ShopsScreen() {
           <Text className="text-sm text-muted">가게를 불러오는 중</Text>
         ) : isError ? (
           <View className="gap-3">
-            <Text className="text-base font-bold text-text">가게를 불러올 수 없어요</Text>
+            <Text className="text-base font-semibold text-text">가게를 불러올 수 없어요</Text>
             <Text className="text-sm text-muted">인터넷 연결을 확인하고 다시 시도해 주세요</Text>
             <Button label="다시 시도" variant="secondary" onPress={() => refetch()} />
           </View>

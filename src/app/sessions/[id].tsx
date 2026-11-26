@@ -166,7 +166,7 @@ function Header({ session, onBack }: { session: SessionView; onBack: () => void 
         className="gap-2"
         accessible
         accessibilityLabel={`${STEPS.length}단계 중 ${current + 1}단계, ${STEPS[current]?.label ?? ''}`}>
-        <Text className="text-base font-bold text-text">
+        <Text className="text-base font-semibold text-text">
           {current + 1} / {STEPS.length}  {STEPS[current]?.label}
         </Text>
         <View className="flex-row gap-2">
@@ -204,7 +204,7 @@ function Participants({ session }: { session: SessionView }) {
               accessibilityLabel={`${p.displayName}${on ? ' 투표함' : ''}`}
               className={`min-h-9 max-w-36 flex-row items-center rounded-full px-3 py-1 ${on ? 'bg-text' : 'bg-surface-strong'}`}>
               <Text
-                className={`text-sm font-bold ${on ? 'text-on-primary' : 'text-text'}`}>
+                className={`text-sm font-semibold ${on ? 'text-on-primary' : 'text-text'}`}>
                 {p.displayName}
               </Text>
             </View>
@@ -344,7 +344,7 @@ function CandidateStage({
 
         {favorites.length > 0 ? (
           <View className="gap-2">
-            <Text className="text-sm font-bold text-text">이 모임 단골</Text>
+            <Text className="text-sm font-semibold text-text">이 모임 단골</Text>
             <View className="flex-row flex-wrap gap-2">
               {favorites.map((h) => (
                 <Pressable
@@ -354,8 +354,8 @@ function CandidateStage({
                   disabled={busy}
                   onPress={() => add.mutate(h.foodId)}
                   className="h-11 flex-row items-center gap-2 rounded-xl bg-ink px-4 active:opacity-80 disabled:opacity-50">
-                  <Text className="text-base font-bold text-on-ink">{foodName.get(h.foodId) ?? ''}</Text>
-                  <Text className="text-sm font-semibold text-on-ink opacity-60">{h.eatenCount}번</Text>
+                  <Text className="text-base font-semibold text-on-ink">{foodName.get(h.foodId) ?? ''}</Text>
+                  <Text className="text-sm text-on-ink opacity-60">{h.eatenCount}번</Text>
                 </Pressable>
               ))}
             </View>
@@ -409,7 +409,7 @@ function CandidateStage({
             ) : null}
           </>
         ) : (
-          <Text className="text-center text-base font-semibold text-muted">
+          <Text className="text-center text-base text-muted">
             {session.hostName ? `방장 ${session.hostName} 님이 투표를 열면 시작돼요` : '방장이 투표를 열면 시작돼요'}
           </Text>
         )}
@@ -467,7 +467,7 @@ function VotingStage({ session }: { session: SessionView }) {
             ))}
           </View>
         ) : null}
-        {maybe ? <Text className="text-sm font-semibold text-muted">{maybe}</Text> : null}
+        {maybe ? <Text className="text-sm text-muted">{maybe}</Text> : null}
 
         {vote.error ?? anyOk.error ? (
           <Text className="text-sm font-semibold text-danger">
@@ -527,7 +527,7 @@ function VotingStage({ session }: { session: SessionView }) {
             ) : null}
           </>
         ) : (
-          <Text className="text-center text-base font-semibold text-muted">
+          <Text className="text-center text-base text-muted">
             {session.hostName ? `방장 ${session.hostName} 님이 돌리면 결과가 나와요` : '방장이 돌리면 결과가 나와요'}
           </Text>
         )}

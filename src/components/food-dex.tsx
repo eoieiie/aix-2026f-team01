@@ -22,7 +22,7 @@ export function FoodDex() {
   if (isError || !dex) {
     return (
       <Pressable accessibilityRole="button" onPress={() => refetch()} className="min-h-11 rounded-3xl bg-surface p-6">
-        <Text className="text-lg font-bold text-muted">도감을 불러오지 못했어요. 눌러서 다시</Text>
+        <Text className="text-lg font-semibold text-muted">도감을 불러오지 못했어요. 눌러서 다시</Text>
       </Pressable>
     );
   }
@@ -34,7 +34,7 @@ export function FoodDex() {
   return (
     <View className="gap-4">
       <View className="gap-2">
-        <Text className="text-base font-bold text-text">
+        <Text className="text-base font-semibold text-text">
           {total}개 중 {collected}개 모음
         </Text>
         <View className="h-3 overflow-hidden rounded-full bg-surface-strong" accessibilityLabel={`${total}개 중 ${collected}개 모음`}>
@@ -52,7 +52,7 @@ export function FoodDex() {
 
       {custom.length > 0 ? (
         <View className="gap-2">
-          <Text className="text-base font-bold text-text">직접 적은 메뉴</Text>
+          <Text className="text-base font-semibold text-text">직접 적은 메뉴</Text>
           <View className="gap-2 rounded-3xl bg-surface p-4">
             {custom.map((f) => (
               <Pressable
@@ -62,7 +62,7 @@ export function FoodDex() {
                 className="min-h-11 flex-row items-center gap-3">
                 <FoodDot foodId={f.foodId} size="sm" />
                 <Text className="flex-1 text-base font-bold text-text">{f.name}</Text>
-                <Text className="text-sm font-semibold text-muted">{f.mealCount}번</Text>
+                <Text className="text-sm text-muted">{f.mealCount}번</Text>
               </Pressable>
             ))}
           </View>
@@ -95,10 +95,10 @@ function DexTile({ food, on, onPress }: { food: DexFood; on: boolean; onPress: (
         ) : eaten ? <FoodDot foodId={food.foodId} size="sm" /> : null}
         {!eaten ? <Text className="absolute text-2xl font-bold text-muted">?</Text> : null}
       </View>
-      <Text className={`text-xs font-bold ${eaten ? 'text-text' : 'text-muted'}`}>
+      <Text className={`text-xs font-semibold ${eaten ? 'text-text' : 'text-muted'}`}>
         {eaten ? food.name : '???'}
       </Text>
-      {eaten ? <Text className="text-xs font-semibold text-muted">{food.mealCount}번</Text> : null}
+      {eaten ? <Text className="text-xs text-muted">{food.mealCount}번</Text> : null}
     </Pressable>
   );
 }

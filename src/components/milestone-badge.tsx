@@ -13,7 +13,7 @@ export function MilestoneBadge({ foodId, foodName }: { foodId: number; foodName:
   if (!label) return null;
   return (
     <View className="mt-6 self-start rounded-full bg-on-primary px-4 py-2" accessibilityLabel={label}>
-      <Text className="text-base font-bold text-text">{label}</Text>
+      <Text className="text-base font-semibold text-text">{label}</Text>
     </View>
   );
 }

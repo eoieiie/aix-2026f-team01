@@ -30,7 +30,7 @@ export default function CouponsScreen() {
           <Text className="text-sm text-muted">쿠폰을 불러오는 중</Text>
         ) : isError ? (
           <View className="gap-3">
-            <Text className="text-base font-bold text-text">쿠폰을 불러올 수 없어요</Text>
+            <Text className="text-base font-semibold text-text">쿠폰을 불러올 수 없어요</Text>
             <Button label="다시 시도" variant="secondary" onPress={() => refetch()} />
           </View>
         ) : ready.length === 0 ? (
@@ -82,7 +82,7 @@ function PastRow({ coupon, onPress }: { coupon: Coupon; onPress: () => void }) {
       <View className="flex-1 gap-1">
         <Text className="text-base font-bold text-text">{coupon.shopName}</Text>
         <Text className="text-sm text-text">{coupon.benefit}</Text>
-        <Text className="text-xs font-semibold text-muted">{status}</Text>
+        <Text className="text-xs text-muted">{status}</Text>
       </View>
     </Pressable>
   );
