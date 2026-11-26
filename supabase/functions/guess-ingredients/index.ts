@@ -1,6 +1,6 @@
 // Edge Function guess-ingredients (명세 4-22). body {food_id}만 받는다.
 // 1) 부른 사람의 JWT로 ai_ingredient_request: 직접 적은 메뉴인지, 판 참여자인지, 저장한 값, 사람별과 전체 하루 상한을 서버가 본다
-// 2) 물어야 하면 Gemini에 정제한 메뉴 이름만 보낸다(8초, 안 되면 다른 모델로 한 번 더)
+// 2) 물어야 하면 Gemini에 정제한 메뉴 이름만 보낸다(8초, 안 되면 다른 모델로 한 번 더). 서버가 음식 낱말이라고 하면(food_word, 0055) 프롬프트에 한 줄 붙인다
 // 3) service role로 ai_ingredient_apply(출력 정제, 저장, 판정, 답 기록) 또는 ai_ingredient_failed(실패 이유 기록)
 // 키는 Supabase Secrets의 GEMINI_API_KEY에만 있다
 import { allowedOrigin, buildRequestBody, type Guess, MODELS, parseGuess, PROMPT_VERSION, TIMEOUT_MS } from './logic.ts';
@@ -42,7 +42,7 @@ async function rpc(name: string, args: unknown, bearer: string, apikey: string) 
 
 type Answer = { ok: true; model: string; guess: Guess } | { ok: false; model: string | null; reason: string };
 
-async function askGemini(name: string): Promise<Answer> {
+async function askGemini(name: string, foodWord: boolean): Promise<Answer> {
   let last: Answer = { ok: false, model: null, reason: 'no_answer' };
   for (const model of MODELS) {
     const ctl = new AbortController();
@@ -51,7 +51,7 @@ async function askGemini(name: string): Promise<Answer> {
       const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'x-goog-api-key': GEMINI },
-        body: JSON.stringify(buildRequestBody(name)),
+        body: JSON.stringify(buildRequestBody(name, foodWord)),
         signal: ctl.signal,
       });
       if (!r.ok) {
@@ -102,7 +102,7 @@ Deno.serve(async (req) => {
   };
 
   if (!GEMINI) return fail('no_key', null);
-  const answer = await askGemini(String(check.data.name ?? ''));
+  const answer = await askGemini(String(check.data.name ?? ''), check.data.food_word === true);
   if (!answer.ok) return fail(answer.reason, answer.model);
 
   const saved = await rpc(
