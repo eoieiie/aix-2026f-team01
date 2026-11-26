@@ -5,7 +5,7 @@ const expoConfig = require('eslint-config-expo/flat');
 module.exports = defineConfig([
   expoConfig,
   {
-    ignores: ['dist/*', 'node_modules/*'],
+    ignores: ['dist/*', 'node_modules/*', 'supabase/functions/*/index.ts'],
   },
   {
     // 화면은 DB를 직접 부르지 않는다 (spec.md 3절 2번). Supabase 호출은 src/api, src/hooks에만 둔다

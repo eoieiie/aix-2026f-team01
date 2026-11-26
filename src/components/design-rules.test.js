@@ -23,6 +23,7 @@ const files = SCREEN_DIRS.flatMap(screenFiles).map((file) => ({
   text: fs.readFileSync(file, 'utf8'),
 }));
 
+
 describe('디자인 규칙', () => {
   it('화면 파일에 색 코드를 직접 쓰지 않는다. tailwind.config.js의 색 이름만 쓴다', () => {
     // '#fff'처럼 따옴표로 감싼 값과 bg-[#fff]처럼 className 안에 대괄호로 넣은 값을 모두 잡는다
@@ -50,6 +51,158 @@ describe('디자인 규칙', () => {
       return !(hue >= 15 && hue <= 35);
     });
     expect(offPalette).toEqual([]);
+  });
+
+  // ---- 화면 규칙 (docs/design.md, 2026-11-25) ----
+
+  it('간격은 눈금(4, 8, 12, 16, 24, 32)만 쓴다', () => {
+    // Tailwind 숫자 1칸은 4px이다. 0.5(2px)는 같은 종류 줄 사이에만 쓴다. px-5(20), gap-5, px-7, -1.5, -2.5, 대괄호 값은 눈금 밖이다
+    const ON_GRID = new Set(['0', 'px', '0.5', '1', '2', '3', '4', '6', '8']);
+    const spacing =
+      /(?<![\w-])-?(gap|gap-x|gap-y|space-x|space-y|p|px|py|pt|pb|pl|pr|m|mx|my|mt|mb|ml|mr)-(\[[^\]]+\]|\d+(?:\.\d+)?|px)(?![\w.-])/g;
+    // 굴러가는 화면 끝을 비우는 자리(떠 있는 단추 줄이나 탭 막대 높이만큼)는 묶음 사이 간격이 아니라 자리다. pb-10 이상과 pt-16만 뺀다
+    const isClearance = (prop, value) => (prop === 'pb' && Number(value) >= 10) || (prop === 'pt' && value === '16');
+    const found = files.flatMap(({ file, text }) => {
+      const bad = new Set();
+      for (const [whole, prop, value] of text.matchAll(spacing)) {
+        if (!ON_GRID.has(value) && !isClearance(prop, value)) bad.add(whole);
+      }
+      return bad.size > 0 ? [`${file}: ${[...bad].join(' ')}`] : [];
+    });
+    expect(found).toEqual([]);
+  });
+
+  it('주황 면은 파일 하나에 한 곳까지다. 룰렛 결과 순간과 결과 카드만 예외', () => {
+    // 주황은 포인트로만 쓴다: 주 단추 하나나 상태 알약 하나. 고른 상태는 검정(bg-ink)으로 보인다
+    const ORANGE_OK = ['src/components/result-moment.tsx', 'src/components/result-card.tsx'];
+    const area = /\bbg-primary(?:-soft)?\b|backgroundColor:\s*colors(?:\.primary\b|\[['"]primary(?:-soft)?['"]\])/g;
+    const found = files
+      .filter(({ file }) => !ORANGE_OK.includes(file))
+      .map(({ file, text }) => ({ file, count: (text.match(area) || []).length }))
+      .filter(({ count }) => count > 1)
+      .map(({ file, count }) => `${file}: 주황 면 ${count}곳`);
+    expect(found).toEqual([]);
+  });
+
+  // ---- 아래 탭, 박스 크기, 글자 (docs/design.md "떠 있는 아래 탭과 박스, 글자 정돈", 2026-11-26) ----
+
+  it('아래 탭은 떠 있는 흰 알약, 세 칸 같은 크기, 지금 화면만 옅은 주황 원에 주황 아이콘이다', () => {
+    const tab = files.find(({ file }) => file === 'src/app/(tabs)/_layout.tsx').text;
+    expect(tab).toMatch(/rounded-full bg-background/);
+    expect(tab).toMatch(/FLOAT_SHADOW/);
+    expect(tab).toMatch(/h-full flex-1 items-center justify-center/);
+    expect(tab).toMatch(/on \? 'bg-primary-soft' : ''/);
+    expect(tab).toMatch(/color=\{on \? 'primary' : 'muted'\}/);
+  });
+
+  it('카드는 모서리 24(rounded-3xl), 안 여백 16이다. 모서리 16짜리 회색 카드를 새로 만들지 않는다', () => {
+    const card = files.find(({ file }) => file === 'src/components/card.tsx').text;
+    expect(card).toMatch(/rounded-3xl bg-surface p-4/);
+    // 카드 크기의 회색 면(안 여백 p-4 이상)은 24로 맞춘다. 단추, 입력칸, 고르기 칸(높이를 정한 것)은 뺀다
+    const old = /rounded-2xl bg-surface p-[468]\b/;
+    const ALLOW = ['src/app/about.tsx', 'src/app/dev/parts.tsx', 'src/components/redeem-sheet.tsx'];
+    const found = files
+      .filter(({ file }) => !ALLOW.includes(file))
+      .flatMap(({ file, text }) => text.split('\n').flatMap((line, i) => (old.test(line) ? [`${file}:${i + 1}`] : [])));
+    expect(found).toEqual([]);
+  });
+
+  it('글자 크기는 역할 표에 있는 것만 쓴다. 4xl 이상은 결정이 나는 순간과 코드 화면에만', () => {
+    // 표: 화면 제목 3xl, 구역과 창 제목 xl, 카드 제목 lg, 본문 base, 보조 sm, 칩과 라벨 xs, 큰 숫자 3xl
+    // 2xl은 표에 없다. 그림 안 글자(아바타 72의 첫 글자, 도감의 물음표), 로고, 숫자 입력칸만 예외
+    // 소개 화면(노트북 넓은 판)과 부품 견본 화면은 앱 화면이 아니라 뺀다
+    const TWO_XL_OK = ['src/app/about.tsx', 'src/app/dev/parts.tsx', 'src/components/avatar.tsx', 'src/components/food-dex.tsx', 'src/components/logo.tsx', 'src/components/redeem-sheet.tsx'];
+    const BIG_OK = [
+      'src/components/result-moment.tsx',
+      'src/components/result-card.tsx',
+      'src/app/onboarding.tsx',
+      'src/components/invite-card.tsx',
+      'src/components/coupon-code.tsx',
+      'src/app/g/[code].tsx',
+      'src/components/headcount-stepper.tsx',
+      'src/app/about.tsx',
+      'src/app/dev/parts.tsx',
+    ];
+    const found = files.flatMap(({ file, text }) => {
+      const bad = [];
+      if (!TWO_XL_OK.includes(file) && /(?<![\w-])text-2xl(?![\w-])/.test(text)) bad.push(`${file}: text-2xl`);
+      if (!BIG_OK.includes(file) && /(?<![\w-])text-[4-9]xl(?![\w-])/.test(text)) bad.push(`${file}: text-4xl 이상`);
+      return bad;
+    });
+    expect(found).toEqual([]);
+  });
+
+  it('굵기는 역할 표대로: 800과 900은 로고만, 작은 글자(12, 14)는 700으로 쓰지 않는다 (병주 2026-11-26)', () => {
+    // 굵게(700)는 읽는 순서를 정하는 곳(화면, 구역, 카드 제목과 이름, 큰 숫자, 주 단추)에만. 칩, 정보 줄, 안내 한 줄은 400이나 600
+    // 로고는 글이 아니라 이름을 그린 표시라 800을 그대로 둔다
+    const heavy = /(?<![\w-])font-(?:extrabold|black)(?![\w-])|fontWeight[=:]\s*\{?['"]?(?:800|900|heavy|black)/;
+    const smallBold = /(?<![\w-])text-(?:xs|sm)(?![\w-])[^'"`\n]*(?<![\w-])font-bold(?![\w-])|(?<![\w-])font-bold(?![\w-])[^'"`\n]*(?<![\w-])text-(?:xs|sm)(?![\w-])/;
+    const found = files.flatMap(({ file, text }) =>
+      text.split('\n').flatMap((line, i) => {
+        if (/^\s*(\/\/|\*|\{\/\*)/.test(line)) return [];
+        const bad = [];
+        if (file !== 'src/components/logo.tsx' && heavy.test(line)) bad.push(`${file}:${i + 1} 800 이상`);
+        if (smallBold.test(line)) bad.push(`${file}:${i + 1} 작은 글자 700`);
+        return bad;
+      })
+    );
+    expect(found).toEqual([]);
+  });
+
+  it('단추는 주 단추만 700, 나머지 단추는 600이다', () => {
+    const button = files.find(({ file }) => file === 'src/components/button.tsx').text;
+    expect(button).toMatch(/primary \? 'font-bold' : 'font-semibold'/);
+  });
+
+  it('상자를 테두리로 그리지 않는다. 옅은 면으로 나눈다', () => {
+    // 허용하는 선: 한쪽 구분선(border-b 등), 겹친 동그라미 사이의 바탕색 고리, 잠깐 보이는 주황 선(상태)
+    const boxWidth = /(?<![\w-])border(?:-(?:\d+|\[[^\]]+\]))?(?![\w-])/;
+    const ringColor = /(?<![\w-])border-(?:surface|background|primary|on-primary|transparent)(?![\w-])/;
+    const styleLine = /borderColor:\s*colors(?:\.(?:muted|text|ink)\b|\[['"](?:muted|text|ink|surface-strong)['"]\])/;
+    const found = files
+      .flatMap(({ file, text }) =>
+        text
+          .split('\n')
+          .flatMap((line, i) => {
+            // 입력 초점선은 상자 장식이 아니다. 파일 전체가 아닌 이 클래스 선언만 허용한다.
+            if (file === 'src/components/text-field.tsx' && /rounded-2xl border-2 bg-surface/.test(line) && (text.split('\n')[i + 1] ?? '').includes("focused ? 'border-ink' : 'border-surface'")) return [];
+            return (boxWidth.test(line) && !ringColor.test(line)) || styleLine.test(line) ? [`${file}:${i + 1}`] : [];
+          })
+      );
+    expect(found).toEqual([]);
+  });
+
+  it('글자를 말줄임으로 자르지 않는다. numberOfLines, ellipsizeMode, adjustsFontSizeToFit을 쓰지 않고 줄바꿈한다 (병주, 2026-11-25)', () => {
+    const textDirs = ['../app', '.'].map((dir) => path.join(__dirname, dir));
+    const cut = /\b(numberOfLines|ellipsizeMode|adjustsFontSizeToFit)\b/;
+    const found = textDirs
+      .flatMap(screenFiles)
+      .flatMap((file) =>
+        fs
+          .readFileSync(file, 'utf8')
+          .split('\n')
+          .map((line, i) => ({ line: line.replace(/\s\/\/\s.*$/, ''), i }))
+          .filter(({ line }) => !/^\s*(\/\/|\*|\/\*|\{\/\*)/.test(line) && cut.test(line))
+          .map(({ i }) => `${path.relative(path.join(__dirname, '../..'), file)}:${i + 1}`)
+      );
+    expect(found).toEqual([]);
+  });
+
+  it('화면에 보이는 글을 가운뎃점(·) 같은 기호로 잇지 않는다. 조각을 간격 8로 떨어뜨린다(TextPieces)', () => {
+    // 화면 파일과 화면 글을 만드는 src/api, src/hooks, src/constants를 본다. 주석 줄과 줄 끝 주석은 뺀다 (2026-11-25)
+    const textDirs = ['../app', '.', '../api', '../hooks', '../constants'].map((dir) => path.join(__dirname, dir));
+    const dot = /[\u00B7\u318D\u2022\u2219\u30FB]/;
+    const found = textDirs
+      .flatMap(screenFiles)
+      .flatMap((file) =>
+        fs
+          .readFileSync(file, 'utf8')
+          .split('\n')
+          .map((line, i) => ({ line: line.replace(/\s\/\/\s.*$/, ''), i }))
+          .filter(({ line }) => !/^\s*(\/\/|\*|\/\*|\{\/\*)/.test(line) && dot.test(line))
+          .map(({ i }) => `${path.relative(path.join(__dirname, '../..'), file)}:${i + 1}`)
+      );
+    expect(found).toEqual([]);
   });
 
   it('음식 색 동그라미가 쓰는 색은 모두 tailwind.config.js 토큰에 있다', () => {

@@ -20,11 +20,28 @@ export interface Candidate {
   foodId: number;
   foodName: string;
   isMine: boolean;
+  // 올린 사람. 신고와 차단에 쓴다 (4-24)
+  proposedBy: string;
+  // 내가 차단한 사람이 올린 후보. 어필과 직접 적은 메뉴 이름을 가린다 (4-24)
+  blocked: boolean;
   pitch: string | null;
   vetoed: boolean;
   // vetoed: 이 판에 못 먹는 사람이 있다. 0010부터 빠지지 않고 표시만 한다
   // 목록에 없어서 이름을 직접 적어 올린 메뉴 (4-9). 재료는 이름으로 짐작했다
   custom: boolean;
+  // 4-22 AI만 추정한 재료(확실 태그에 없는 것)와 태그별 이유 한 줄. 누가 못 먹는지는 없다
+  aiTags: string[];
+  aiNotes: Record<string, string>;
+  // 0044 태그마다 기본 레시피(recipe)인지 가게마다 다른지(varies)
+  aiBasis: Record<string, 'recipe' | 'varies'>;
+  // 0044 AI 상태. not_menu: 가게 이름처럼 메뉴 이름이 아니라 태그를 붙이지 않았다
+  aiStatus: string | null;
+  // 0044 약한 표시: AI만 추정한 재료 중 이 판 누군가의 못 먹는 것에 걸리는 것 ("OO 들어갈 수 있어요")
+  maybeTags: string[];
+  // 확실한 재료 태그(기본 메뉴, 낱말 표, 사람이 더한 것). 재료 더하기에서 이미 있는 것을 보인다
+  sureTags: string[];
+  // 올린 사람이 AI 재료를 확인했다(맞아요)
+  aiChecked: boolean;
 }
 
 export interface SessionView {
@@ -68,7 +85,7 @@ export interface VoteCount {
 export const SESSION_ERROR_MESSAGES: Record<string, string> = {
   not_signed_in: '로그인이 필요해요',
   not_member: '이 모임 멤버가 아니에요',
-  session_not_found: '판을 찾을 수 없어요',
+  session_not_found: '판이 닫혔어요',
   not_participant: '이 판에 아직 참여하지 않았어요',
   voting_started: '이미 투표가 시작됐어요',
   food_not_found: '음식을 찾을 수 없어요',
@@ -88,7 +105,27 @@ export const SESSION_ERROR_MESSAGES: Record<string, string> = {
   name_too_long: '메뉴 이름은 20자까지예요',
   not_all_voted: '아직 고르지 않은 사람이 있어요',
   bad_headcount: '인원은 1명부터 20명까지예요',
+  already_done: '이미 끝난 판이에요',
+  blocked_word: '쓸 수 없는 말이 있어요',
+  not_proposer: '메뉴를 올린 사람만 할 수 있어요',
+  bad_tag: '고를 수 없는 재료예요',
 };
+
+// 후보 한 줄의 재료 칸 (0044 두 단계). AI 태그는 확실 태그에 없는 것만 남긴다
+export function aiFields(c: any) {
+  const sure: string[] = Array.isArray(c.foods?.tags) ? c.foods.tags : [];
+  const ai: string[] = Array.isArray(c.foods?.ai_tags) ? c.foods.ai_tags : [];
+  const obj = (v: unknown) => (v && typeof v === 'object' && !Array.isArray(v) ? (v as Record<string, any>) : {});
+  return {
+    aiTags: ai.filter((t) => !sure.includes(t)),
+    aiNotes: obj(c.foods?.ai_notes) as Record<string, string>,
+    aiBasis: obj(c.foods?.ai_basis) as Record<string, 'recipe' | 'varies'>,
+    aiStatus: typeof c.foods?.ai_status === 'string' ? c.foods.ai_status : null,
+    maybeTags: Array.isArray(c.maybe_tags) ? (c.maybe_tags as string[]) : [],
+    sureTags: sure,
+    aiChecked: !!c.ai_checked_at,
+  };
+}
 
 export class SessionError extends Error {
   constructor(public readonly code: string) {
@@ -121,6 +158,13 @@ export async function listFoods(client: Client = getSupabase()): Promise<Food[]>
   const { data, error } = await client.from('foods').select('*').order('id');
   if (error) throwSessionError(error);
   return (data ?? []).filter((f: any) => f.custom !== true).map((f: any) => ({ id: f.id, name: f.name }));
+}
+
+// 4-27 개인 추천. 순서는 내 기록과 못 먹는 것에 따라 서버가 정한다.
+export async function getMyFoodPicks(sessionId: string, client: Client = getSupabase()): Promise<Food[]> {
+  const { data, error } = await client.rpc('my_food_picks', { p_session_id: sessionId });
+  if (error) throwSessionError(error);
+  return (data ?? []).map((row: { food_id: number; name: string }) => ({ id: row.food_id, name: row.name }));
 }
 
 // 이름 일부로 찾는다. 이미 올라간 음식은 빼고 최대 limit개 (4-9)
@@ -158,15 +202,20 @@ export async function getSession(
     .eq('id', sessionId)
     .maybeSingle();
   if (sessionError) throwSessionError(sessionError);
-  // 소속이 아니면 권한 때문에 판이 안 보인다 (4-8, 4-6)
-  if (!session) throw new SessionError('not_member');
+  // 판이 안 보이면 둘 중 하나다: 소속이 아니어서 권한 때문에 안 보이거나(4-8, 4-6), 판을 연 사람이 판을 접어 없어졌거나(4-24).
+  // 판이 있는지만 묻는 함수로 나눈다. 못 물으면 예전처럼 소속 아님으로 본다
+  if (!session) {
+    const exists: any = await Promise.resolve(client.rpc('session_exists', { p_session_id: sessionId })).catch(() => null);
+    if (exists && !exists.error && exists.data === false) throw new SessionError('session_not_found');
+    throw new SessionError('not_member');
+  }
 
   const [participantsRes, membersRes, candidatesRes, votesRes] = await Promise.all([
     client.from('session_participants').select('user_id, voted, joined_at').eq('session_id', sessionId),
     client.from('memberships').select('user_id, display_name').eq('group_id', session.group_id),
     client
       .from('candidates')
-      .select('food_id, proposed_by, pitch, vetoed, created_at, foods ( * )')
+      .select('food_id, proposed_by, pitch, vetoed, maybe_tags, ai_checked_at, created_at, foods ( * )')
       .eq('session_id', sessionId),
     client.from('votes').select('food_id, weight').eq('session_id', sessionId),
   ]);
@@ -174,6 +223,13 @@ export async function getSession(
   const cantRes: any = await Promise.resolve(
     client.rpc('session_cant_eat', { p_session_id: sessionId })
   ).catch(() => null);
+  // 내가 차단한 사람 (4-24). 못 읽어도 판은 보인다
+  const blockRes: any = await Promise.resolve(
+    client.from('blocks').select('blocked').eq('blocker', userId)
+  ).catch(() => null);
+  const blockedIds = new Set<string>(
+    blockRes && !blockRes.error && Array.isArray(blockRes.data) ? blockRes.data.map((b: any) => b.blocked) : []
+  );
   const cantRows: { tag: string | null; food_name: string | null }[] =
     cantRes && !cantRes.error && Array.isArray(cantRes.data) ? cantRes.data : [];
   for (const res of [participantsRes, membersRes, candidatesRes, votesRes]) {
@@ -199,10 +255,14 @@ export async function getSession(
     .sort((a: any, b: any) => String(a.created_at).localeCompare(String(b.created_at)))
     .map((c: any) => ({
       foodId: c.food_id,
-      foodName: c.foods?.name ?? '',
+      foodName: blockedIds.has(c.proposed_by) && c.foods?.custom === true ? '가린 메뉴' : (c.foods?.name ?? ''),
       custom: c.foods?.custom === true,
+      ...aiFields(c),
       isMine: c.proposed_by === userId,
-      pitch: c.pitch,
+      proposedBy: c.proposed_by,
+      blocked: blockedIds.has(c.proposed_by),
+      // 차단한 사람이 쓴 어필은 내 화면에 보이지 않는다. 직접 적은 메뉴 이름은 화면에서 가린다
+      pitch: blockedIds.has(c.proposed_by) ? null : c.pitch,
       vetoed: c.vetoed,
     }));
 
@@ -258,7 +318,38 @@ export async function addCustomCandidate(
     p_name: name,
   });
   if (error) throwSessionError(error);
+  const foodId = (data as { food_id?: number } | null)?.food_id;
+  if (foodId) requestAiIngredients(foodId, client);
   return Boolean((data as { vetoed?: boolean } | null)?.vetoed);
+}
+
+// 4-22 직접 적은 메뉴의 재료를 AI에게 묻게 한다. 기다리지 않는다. 답이 오면 서버가 재료를 더하고
+// 후보 판정을 다시 해서 판 화면이 실시간으로 바뀐다. 실패해도 낱말 표 태그로 그대로 간다
+export function requestAiIngredients(foodId: number, client: Client = getSupabase()): void {
+  try {
+    Promise.resolve((client as any).functions?.invoke?.('guess-ingredients', { body: { food_id: foodId } })).catch(
+      () => undefined
+    );
+  } catch {
+    // 무시
+  }
+}
+
+// 0044 사람 확인: 내가 직접 적은 메뉴의 AI 재료가 맞다. 기록만 남고 단계는 그대로다
+export async function confirmCustomFood(sessionId: string, foodId: number, client: Client = getSupabase()) {
+  const { error } = await client.rpc('confirm_custom_food', { p_session_id: sessionId, p_food_id: foodId });
+  if (error) throwSessionError(error);
+}
+
+// 0044 사람 확인: 재료 더하기. 더한 재료는 확실 단계("못 먹는 사람이 있어요")로 간다. 빼기는 없다
+export async function addCustomFoodTag(
+  sessionId: string,
+  foodId: number,
+  tag: string,
+  client: Client = getSupabase()
+) {
+  const { error } = await client.rpc('add_custom_food_tag', { p_session_id: sessionId, p_food_id: foodId, p_tag: tag });
+  if (error) throwSessionError(error);
 }
 
 // 내가 올린 후보의 어필. 빈 글이면 지운다 (4-9)
@@ -363,6 +454,8 @@ export interface FoodHint {
   blocked: boolean;
   eatenCount: number;
   lastEatenAt: string | null;
+  // 4-27 맞춤 채우기. 서버가 판 참여자 취향을 합쳐 고른 순서(1이 먼저). 고르지 않은 음식에는 없다
+  fillRank?: number;
 }
 
 export async function getFoodHints(sessionId: string, client: Client = getSupabase()): Promise<FoodHint[]> {
@@ -374,6 +467,34 @@ export async function getFoodHints(sessionId: string, client: Client = getSupaba
     eatenCount: r.eaten_count ?? 0,
     lastEatenAt: r.last_eaten_at ?? null,
   }));
+}
+
+// 빈 판 채우기 추천 (4-20, 4-27, 0036). 서버가 판 참여자 취향을 합쳐 고른 음식 id를 점수 순으로 준다.
+// 점수와 남의 취향은 오지 않는다. 아무도 취향을 안 적었거나 못 받으면 빈 목록이고, 앱은 예전처럼 무작위로 채운다
+export async function getFillPicks(sessionId: string, client: Client = getSupabase()): Promise<number[]> {
+  try {
+    const { data, error } = await client.rpc('session_fill_picks', { p_session_id: sessionId });
+    if (error) return [];
+    return ((data ?? []) as any[])
+      .filter((r) => typeof r.food_id === 'number')
+      .sort((a, b) => (a.rank ?? 0) - (b.rank ?? 0))
+      .map((r) => r.food_id);
+  } catch {
+    return [];
+  }
+}
+
+// 힌트에 서버가 고른 순서를 적는다. 고른 음식이 힌트에 없으면(직접 적은 메뉴 등) 버린다
+export function withFillRanks(hints: FoodHint[], picks: number[]): FoodHint[] {
+  if (picks.length === 0) return hints;
+  const rank = new Map(picks.map((id, i) => [id, i + 1]));
+  return hints.map((h) => (rank.has(h.foodId) ? { ...h, fillRank: rank.get(h.foodId) } : h));
+}
+
+// 판 화면이 쓰는 힌트: 못 먹는 사람과 먹은 기록(0011)에 맞춤 채우기 순서(0036)를 얹는다
+export async function getFoodHintsWithPicks(sessionId: string, client: Client = getSupabase()): Promise<FoodHint[]> {
+  const [hints, picks] = await Promise.all([getFoodHints(sessionId, client), getFillPicks(sessionId, client)]);
+  return withFillRanks(hints, picks);
 }
 
 // 한국 시간 날짜로 며칠 전인지. 오늘이면 0
@@ -404,7 +525,9 @@ export function groupFavorites(hints: FoodHint[], excludeIds: number[], max: num
     .slice(0, max);
 }
 
-// 빈 판 채우기: 모두 먹을 수 있고, 정한 날수 안에 안 먹은 음식 중에서 무작위로. 모자라면 최근에 먹은 것도 쓴다
+// 빈 판 채우기: 모두 먹을 수 있는 음식 중에서 고른다.
+// 서버가 판 참여자 취향으로 고른 순서(fillRank)가 있으면 그 순서가 먼저다 (4-27).
+// 없으면(아무도 취향을 안 적음) 정한 날수 안에 안 먹은 음식 중에서 무작위로, 모자라면 최근에 먹은 것도 쓴다
 export function quickFillPicks(
   hints: FoodHint[],
   excludeIds: number[],
@@ -423,9 +546,13 @@ export function quickFillPicks(
     }
     return a;
   };
-  const fresh = shuffle(safe.filter((h) => eatenNote(h.lastEatenAt, withinDays, now) === null));
-  const recent = shuffle(safe.filter((h) => eatenNote(h.lastEatenAt, withinDays, now) !== null));
-  return [...fresh, ...recent].slice(0, count).map((h) => h.foodId);
+  const ranked = safe
+    .filter((h) => typeof h.fillRank === 'number')
+    .sort((a, b) => (a.fillRank as number) - (b.fillRank as number));
+  const rest = safe.filter((h) => typeof h.fillRank !== 'number');
+  const fresh = shuffle(rest.filter((h) => eatenNote(h.lastEatenAt, withinDays, now) === null));
+  const recent = shuffle(rest.filter((h) => eatenNote(h.lastEatenAt, withinDays, now) !== null));
+  return [...ranked, ...fresh, ...recent].slice(0, count).map((h) => h.foodId);
 }
 
 // 원판 조각. 서버 추첨 대상과 같은 규칙: 1표 이상인 후보를 표 수만큼(못 먹는 사람이 있어도).

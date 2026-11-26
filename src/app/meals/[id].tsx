@@ -1,3 +1,4 @@
+import { useRef } from 'react';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { ActivityIndicator, Platform, ScrollView, View } from 'react-native';
 import { Text } from '@/components/text';
@@ -23,6 +24,7 @@ function webBase() {
 
 // 결과 카드 화면 (spec.md 4-17, 7절 /meals/{식사 id}). 하단 탭은 없다
 export default function MealScreen() {
+  const cardRef = useRef<View>(null);
   const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
   const { card, isLoading, error, retry } = useMealCard(id ?? '');
@@ -56,14 +58,17 @@ export default function MealScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-background">
-      <View className="flex-row items-center px-5 py-3">
+      <View className="flex-row items-center px-4 py-3">
         <IconButton name="back" label="뒤로" onPress={back} />
       </View>
-      <ScrollView keyboardShouldPersistTaps="handled" automaticallyAdjustKeyboardInsets contentContainerClassName="gap-5 px-5 pb-10 pt-2">
+      <ScrollView keyboardShouldPersistTaps="handled" automaticallyAdjustKeyboardInsets contentContainerClassName="gap-4 px-4 pb-10 pt-2">
         <Text className="text-3xl font-bold tracking-tight text-text">이번 끼니</Text>
-        <ResultCard card={card} />
-        <ShareButton text={mealShareText(card, webBase())} />
-        <NearbyRestaurants sessionId={sessionId} foodName={card.foodName} />
+        {/* 그림 공유는 이 칸을 찍는다(4-25). collapsable={false}: 안드로이드에서 칸이 사라지지 않게 */}
+        <View ref={cardRef} collapsable={false}>
+          <ResultCard card={card} />
+        </View>
+        <ShareButton text={mealShareText(card, webBase())} captureRef={cardRef} />
+        <NearbyRestaurants sessionId={sessionId} />
         <NearbyCafes sessionId={sessionId} />
       </ScrollView>
     </SafeAreaView>

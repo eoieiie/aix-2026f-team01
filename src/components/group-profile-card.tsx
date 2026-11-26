@@ -13,12 +13,12 @@ export function GroupProfileCard({ groupId }: { groupId: string }) {
 
   return (
     <View className="gap-3">
-      <Text className="text-2xl font-bold tracking-tight text-text">우리 모임</Text>
-      <View className="gap-6 rounded-3xl bg-surface p-5">
+      <Text className="text-xl font-bold tracking-tight text-text">우리 모임</Text>
+      <View className="gap-6 rounded-3xl bg-surface p-4">
         {isLoading ? (
           <ActivityIndicator color={colors.text} accessibilityLabel="모임 카드를 불러오는 중" />
         ) : isError || !card ? (
-          <Text className="text-base font-semibold text-muted">모임 카드를 불러올 수 없어요</Text>
+          <Text className="text-base text-muted">모임 카드를 불러올 수 없어요</Text>
         ) : (
           <>
             <Restrictions view={restrictionView(card)} />
@@ -46,7 +46,7 @@ function Restrictions({ view }: { view: ReturnType<typeof restrictionView> }) {
   if (view.kind !== 'rows') {
     return (
       <Section title="못 먹는 것">
-        <Text className="text-base font-semibold text-muted">{view.text}</Text>
+        <Text className="text-base text-muted">{view.text}</Text>
       </Section>
     );
   }
@@ -55,18 +55,18 @@ function Restrictions({ view }: { view: ReturnType<typeof restrictionView> }) {
       {view.rows.map((r) => (
         <View key={r.tag} className="gap-2" accessibilityLabel={`${r.label} 못 먹는 사람 ${r.count}명`}>
           <View className="flex-row justify-between">
-            <Text className="flex-1 text-base font-bold text-text">{r.label}</Text>
-            <Text className="text-base font-bold text-text">{r.count}명</Text>
+            <Text className="flex-1 text-base text-text">{r.label}</Text>
+            <Text className="text-base font-semibold text-text">{r.count}명</Text>
           </View>
           <View className="h-3 overflow-hidden rounded-full bg-surface-strong">
-            <View className="h-3 rounded-full bg-primary" style={{ width: `${r.ratio * 100}%` }} />
+            <View className="h-3 rounded-full bg-ink" style={{ width: `${r.ratio * 100}%` }} />
           </View>
         </View>
       ))}
       {view.foodBlockCount > 0 ? (
         <View className="flex-row justify-between">
-          <Text className="flex-1 text-base font-bold text-text">음식을 직접 고른 사람</Text>
-          <Text className="text-base font-bold text-text">{view.foodBlockCount}명</Text>
+          <Text className="flex-1 text-base text-text">음식을 직접 고른 사람</Text>
+          <Text className="text-base font-semibold text-text">{view.foodBlockCount}명</Text>
         </View>
       ) : null}
     </Section>
@@ -78,7 +78,7 @@ function Axes({ view }: { view: ReturnType<typeof axesView> }) {
   if (view.kind === 'hidden') {
     return (
       <Section title="입맛">
-        <Text className="text-base font-semibold text-muted">{view.text}</Text>
+        <Text className="text-base text-muted">{view.text}</Text>
       </Section>
     );
   }
@@ -92,17 +92,17 @@ function Axes({ view }: { view: ReturnType<typeof axesView> }) {
             key={a.key}
             className="flex-row items-center gap-3"
             accessibilityLabel={`${a.left}과 ${a.right} 중 ${a.value === 0 ? '가운데' : leftOn ? a.left : a.right} 쪽`}>
-            <Text className={`w-16 text-sm font-bold ${leftOn ? 'text-text' : 'text-muted'}`}>{a.left}</Text>
+            <Text className={`w-16 text-sm font-semibold ${leftOn ? 'text-text' : 'text-muted'}`}>{a.left}</Text>
             <View className="h-3 flex-1 flex-row overflow-hidden rounded-full bg-surface-strong">
               <View className="flex-1 flex-row justify-end">
-                {leftOn ? <View className="h-3 bg-primary" style={{ width: `${Math.abs(a.value) * 100}%` }} /> : null}
+                {leftOn ? <View className="h-3 bg-ink" style={{ width: `${Math.abs(a.value) * 100}%` }} /> : null}
               </View>
               <View className="h-3 w-0.5 bg-muted" />
               <View className="flex-1 flex-row">
-                {rightOn ? <View className="h-3 bg-primary" style={{ width: `${Math.abs(a.value) * 100}%` }} /> : null}
+                {rightOn ? <View className="h-3 bg-ink" style={{ width: `${Math.abs(a.value) * 100}%` }} /> : null}
               </View>
             </View>
-            <Text className={`w-16 text-right text-sm font-bold ${rightOn ? 'text-text' : 'text-muted'}`}>
+            <Text className={`w-16 text-right text-sm font-semibold ${rightOn ? 'text-text' : 'text-muted'}`}>
               {a.right}
             </Text>
           </View>

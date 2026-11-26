@@ -25,8 +25,8 @@ describe('못 먹는 것 코드', () => {
     expect(INGREDIENT_TAGS.map((t) => t.code)).toEqual(serverArray('ingredient_tags'));
   });
 
-  it('식단 태그 3개가 서버 diet_tags와 같다', () => {
-    expect(DIET_TAGS.map((t) => t.code)).toEqual(serverArray('diet_tags'));
+  it('식단 태그 5개가 서버 diet_tags와 같다 (0044에서 힌두교, 페스코)', () => {
+    expect(DIET_TAGS.map((t) => t.code).sort()).toEqual([...serverArray('diet_tags')].sort());
   });
 
   it('서버 restrictions 표에 이유 칸이 남아 있지 않다 (0007에서 지운다)', () => {

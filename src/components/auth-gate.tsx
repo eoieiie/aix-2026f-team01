@@ -3,14 +3,21 @@ import { type ReactNode, useEffect } from 'react';
 import { ActivityIndicator, Pressable, View } from 'react-native';
 import { Text } from '@/components/text';
 
+import { isPublicPath } from '@/constants/public-paths';
+import { isFirstWebVisit } from '@/lib/first-visit';
 import { useAnonymousAuth } from '@/hooks/use-anonymous-auth';
 import { useMyProfile } from '@/hooks/use-profile';
 
-// 익명 로그인이 끝나야 안쪽 화면을 보여준다 (spec.md 4-1)
+// 익명 로그인이 끝나야 안쪽 화면을 보여준다 (spec.md 4-1).
+// 소개, 처리방침, 약관, 문의는 로그인 없이 바로 보인다. 열기만 해서는 익명 계정이 생기지 않고,
+// 거기서 앱 화면(/)으로 가면 그때 로그인한다 (4-30). 웹 첫 방문의 루트(/)도 소개로 넘어가기 전까지는 같다
 export function AuthGate({ children }: { children: ReactNode }) {
-  const { status, retry, retrying } = useAnonymousAuth();
+  const pathname = usePathname();
+  // 웹에 처음 온 사람이 루트를 열면 계정을 만들지 않고 둔다. 탭 레이아웃이 소개(/about)로 보낸다 (4-30, 2026-11-26)
+  const open = isPublicPath(pathname) || isFirstWebVisit(pathname);
+  const { status, retry, retrying } = useAnonymousAuth({ enabled: !open });
 
-  if (status === 'loading') {
+  if (!open && status === 'loading') {
     return (
       <View className="flex-1 items-center justify-center bg-background">
         <ActivityIndicator accessibilityLabel="연결하는 중" />
@@ -18,7 +25,7 @@ export function AuthGate({ children }: { children: ReactNode }) {
     );
   }
 
-  if (status === 'error') {
+  if (!open && status === 'error') {
     return (
       <View className="flex-1 items-center justify-center gap-4 bg-background px-6">
         <Text className="text-lg font-semibold text-text">연결할 수 없어요</Text>
@@ -35,9 +42,10 @@ export function AuthGate({ children }: { children: ReactNode }) {
     );
   }
 
+  // 공개 주소에서도 같은 자리에 children을 둔다. 자리가 바뀌면 Stack이 새로 그려져 앱 안에서 뒤로 가기가 끊긴다
   return (
     <>
-      <OnboardingRedirect />
+      {open ? null : <OnboardingRedirect />}
       {children}
     </>
   );

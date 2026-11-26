@@ -72,8 +72,8 @@ export function CreateGroupModal({ visible, onClose }: CreateGroupModalProps) {
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={handleClose}>
       <KeyboardSafe>
-      <View className="flex-1 items-center justify-center bg-black/40 px-5">
-        <View className="w-full max-w-sm gap-6 rounded-3xl bg-background p-6">
+      <View className="flex-1 items-center justify-center bg-black/40 px-4">
+        <View className="w-full max-w-[440px] gap-6 rounded-3xl bg-background p-6">
           <View className="gap-1">
             <Text className="text-3xl font-bold tracking-tight text-text">새 모임</Text>
             {profileName !== null ? (
@@ -108,7 +108,7 @@ export function CreateGroupModal({ visible, onClose }: CreateGroupModalProps) {
             ) : null}
             {/* 서버 오류는 창 안에 보이고 창을 닫지 않는다 (spec.md 4-2) */}
             {displayErrorMessage ? (
-              <Text className="text-sm font-semibold text-danger">{displayErrorMessage}</Text>
+              <Text className="text-sm text-danger">{displayErrorMessage}</Text>
             ) : null}
           </View>
 

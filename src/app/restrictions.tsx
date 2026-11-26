@@ -1,3 +1,4 @@
+import { choiceSurface } from '@/components/choice-colors';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, View } from 'react-native';
@@ -10,7 +11,7 @@ import { FoodDot } from '@/components/food-dot';
 import { FoodSearch } from '@/components/food-search';
 import { Icon, IconButton } from '@/components/icon';
 import colors from '@/constants/colors.json';
-import { DIET_TAGS, INGREDIENT_TAGS } from '@/constants/restrictions';
+import { DIET_TAGS, HALAL_NOTE, INGREDIENT_TAGS } from '@/constants/restrictions';
 import {
   itemKey,
   restrictionErrorMessage,
@@ -77,11 +78,11 @@ export default function RestrictionsScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-background" edges={['top']}>
-      <View className="flex-row px-5 pb-2 pt-3">
+      <View className="flex-row px-4 pb-2 pt-3">
         <IconButton name="back" label="뒤로" onPress={close} />
       </View>
 
-      <ScrollView keyboardShouldPersistTaps="handled" automaticallyAdjustKeyboardInsets contentContainerClassName="gap-8 px-5 pb-48 pt-2">
+      <ScrollView keyboardShouldPersistTaps="handled" automaticallyAdjustKeyboardInsets contentContainerClassName="gap-8 px-4 pb-48 pt-2">
         {/* 설명은 처음 온 사람이 꼭 알아야 하는 한 줄만 (docs/design.md 4절 1번) */}
         <View className="gap-1">
           <Text className="text-3xl font-bold tracking-tight text-text">못 먹는 것</Text>
@@ -99,10 +100,11 @@ export default function RestrictionsScreen() {
           tags={DIET_TAGS}
           chosen={chosen}
           onToggle={(tag) => update(toggleItem(draft, { tag }))}
+          note={chosen.has('tag:halal') ? HALAL_NOTE : null}
         />
 
         <View className="gap-3">
-          <Text className="text-base font-bold text-text">음식</Text>
+          <Text className="text-base font-semibold text-text">음식</Text>
           <FoodSearch
             foods={foods}
             excludeIds={draft.flatMap((i) => (i.foodId !== null ? [i.foodId] : []))}
@@ -112,7 +114,7 @@ export default function RestrictionsScreen() {
         </View>
 
         <View className="gap-3">
-          <Text className="text-base font-bold text-text">고른 것 {draft.length}개</Text>
+          <Text className="text-base font-semibold text-text">고른 것 {draft.length}개</Text>
           {draft.length === 0 ? (
             <Text className="text-sm text-muted">아직 고른 것이 없어요</Text>
           ) : (
@@ -144,7 +146,7 @@ export default function RestrictionsScreen() {
       </ScrollView>
 
       <View
-        className="absolute bottom-0 left-0 right-0 gap-2 bg-background px-5 pt-3"
+        className="absolute bottom-0 left-0 right-0 gap-2 bg-background px-4 pt-3"
         style={{ paddingBottom: insets.bottom + 16 }}>
         <Button label="저장" onPress={onSave} loading={isPending} />
         {saveError ? (
@@ -160,16 +162,19 @@ function TagSection({
   tags,
   chosen,
   onToggle,
+  note = null,
 }: {
   title: string;
   tags: readonly { code: string; label: string }[];
   chosen: Set<string>;
   onToggle: (tag: string) => void;
+  // 고른 것에 붙는 한 줄 (할랄: 앱이 모르는 것, 0044)
+  note?: string | null;
 }) {
   return (
     <View className="gap-3">
-      <Text className="text-base font-bold text-text">{title}</Text>
-      {/* 태그는 글 길이와 상관없이 같은 폭으로 한 줄에 넷. 고른 태그는 주황으로 꽉 채운다 (docs/design.md 4절 2번, 4번) */}
+      <Text className="text-base font-semibold text-text">{title}</Text>
+      {/* 태그는 글 길이와 상관없이 같은 폭으로 한 줄에 넷. 고른 태그는 검정으로 꽉 채운다. 주황은 아래 저장 단추 하나뿐 (docs/design.md 4절 2번, "화면 규칙" 색) */}
       <View className="-mx-1 flex-row flex-wrap">
         {tags.map((tag) => {
           const on = chosen.has(`tag:${tag.code}`);
@@ -180,12 +185,11 @@ function TagSection({
                 accessibilityState={{ selected: on }}
                 accessibilityLabel={tag.label}
                 onPress={() => onToggle(tag.code)}
-                className={`h-12 items-center justify-center rounded-full active:opacity-70 ${
-                  on ? 'bg-primary' : 'bg-surface'
-                }`}>
+                className={`min-h-12 items-center justify-center rounded-full px-2 py-2 active:opacity-70 ${
+                  on ? 'bg-ink' : 'bg-surface'
+                }`} style={choiceSurface(on)}>
                 <Text
-                  className="text-sm font-bold text-text"
-                  numberOfLines={1}>
+                  className={`text-sm font-semibold ${on ? 'text-on-ink' : 'text-text'}`}>
                   {tag.label}
                 </Text>
               </Pressable>
@@ -193,6 +197,7 @@ function TagSection({
           );
         })}
       </View>
+      {note ? <Text className="text-sm text-muted">{note}</Text> : null}
     </View>
   );
 }

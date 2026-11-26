@@ -1,0 +1,113 @@
+{
+  "version": 0.6,
+  "generator": "Overpass API 0.7.62.11 87bfad18",
+  "osm3s": {
+    "timestamp_osm_base": "2026-11-25T05:18:33Z",
+    "copyright": "The data included in this document is from www.openstreetmap.org. The data is made available under ODbL."
+  },
+  "elements": [
+    {
+      "type": "node",
+      "id": 5087674522,
+      "lat": 37.3006324,
+      "lon": 126.8383357,
+      "tags": {
+        "name:ko": "파리바게뜨",
+        "name": "파리바게뜨"
+      }
+    },
+    {
+      "type": "node",
+      "id": 7777172285,
+      "lat": 37.3094912,
+      "lon": 126.8378887,
+      "tags": {
+        "name": "종이꽃 coffee",
+        "cuisine": "coffee_shop;tea"
+      }
+    },
+    {
+      "type": "node",
+      "id": 7791059486,
+      "lat": 37.3078003,
+      "lon": 126.832302,
+      "tags": {
+        "cuisine": "tea"
+      }
+    },
+    {
+      "type": "node",
+      "id": 7791059685,
+      "lat": 37.3078065,
+      "lon": 126.8321545,
+      "tags": {
+        "name": "까까 아이스 세계 과자 & 아이스크림 할인점"
+      }
+    },
+    {
+      "type": "node",
+      "id": 7798016186,
+      "lat": 37.3014427,
+      "lon": 126.8437062,
+      "tags": {
+        "name": "하늘 정원",
+        "cuisine": "cake;coffee_shop;tea"
+      }
+    },
+    {
+      "type": "node",
+      "id": 7837139586,
+      "lat": 37.3093163,
+      "lon": 126.8344536,
+      "tags": {
+        "name": "아이스크림 스탠드"
+      }
+    },
+    {
+      "type": "node",
+      "id": 8431229017,
+      "lat": 37.3006872,
+      "lon": 126.8383015,
+      "tags": {
+        "name:ko": "카페모리아",
+        "name": "카페모리아"
+      }
+    },
+    {
+      "type": "node",
+      "id": 8431229018,
+      "lat": 37.3017918,
+      "lon": 126.8383085,
+      "tags": {
+        "name": "떼드떼"
+      }
+    },
+    {
+      "type": "node",
+      "id": 8431229019,
+      "lat": 37.3018455,
+      "lon": 126.8383275,
+      "tags": {
+        "name": "위너"
+      }
+    },
+    {
+      "type": "node",
+      "id": 8678532528,
+      "lat": 37.2978071,
+      "lon": 126.8343458,
+      "tags": {
+        "name": "카페드림"
+      }
+    },
+    {
+      "type": "node",
+      "id": 12851082391,
+      "lat": 37.2956994,
+      "lon": 126.8371569,
+      "tags": {
+        "name": "한양베이커리 에리카점"
+      }
+    }
+  ]
+}

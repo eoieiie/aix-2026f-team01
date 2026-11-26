@@ -43,6 +43,7 @@ export function typeLines(axes: Axes, answers?: readonly QuizAnswer[] | null): {
 export const PROFILE_ERROR_MESSAGES: Record<string, string> = {
   name_empty: '이름을 적어 주세요',
   name_too_long: '이름은 20자까지예요',
+  blocked_word: '쓸 수 없는 말이 있어요',
   display_name_required: '이름을 먼저 적어 주세요',
   handle_invalid: '영어 소문자, 숫자, 밑줄로 3~16자',
   handle_taken: '이미 쓰는 아이디예요',

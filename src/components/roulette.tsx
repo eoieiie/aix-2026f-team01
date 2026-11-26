@@ -248,7 +248,7 @@ export function Roulette({
                     y={p.y + 16}
                     fill={s.label}
                     fontSize={13}
-                    fontWeight="bold"
+                    fontWeight="600"
                     fontFamily={FONT_FAMILY}
                     textAnchor="middle">
                     {`${a.weight}표`}

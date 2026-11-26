@@ -4,10 +4,13 @@ import { Text } from '@/components/text';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Button } from '@/components/button';
+import { FoodIllustration } from '@/components/food-illustration';
+import { MilestoneBadge } from '@/components/milestone-badge';
 import { NearbyCafes } from '@/components/nearby-cafes';
 import { NearbyRestaurants } from '@/components/nearby-restaurants';
 import { Roulette } from '@/components/roulette';
 import colors from '@/constants/colors.json';
+import { FadeEdge } from '@/components/fade-edge';
 import { RESULT_MOMENT_FLOOD_MS, RESULT_MOMENT_PAUSE_MS, RESULT_MOMENT_TEXT_MS } from '@/constants';
 import { rouletteSlices, type SessionView, useVoteCounts } from '@/hooks/use-session';
 import { useSessionMealId } from '@/hooks/use-meal';
@@ -137,42 +140,48 @@ export function ResultMoment({ session, from, onGroup, onCard }: ResultMomentPro
           ],
         }}>
         <SafeAreaView className="flex-1">
-          <ScrollView keyboardShouldPersistTaps="handled" automaticallyAdjustKeyboardInsets contentContainerClassName="px-7 pb-6 pt-6">
-            <Text className="text-xl font-bold text-on-primary" numberOfLines={2}>
-              {session.groupName}
-            </Text>
-            <Text className="mt-8 text-xl font-bold text-on-primary">룰렛이 골랐어요</Text>
-            <Text
-              className={`mt-1 font-bold tracking-tight text-on-primary ${nameSizeClass(winner)}`}
-              numberOfLines={2}
-              adjustsFontSizeToFit>
-              {winner}
-            </Text>
-            {counts ? (
-              <Text className="mt-2 text-xl font-bold text-on-primary">
-                {voteLine(counts, winnerId)}
+          {/* 마지막 줄이 버튼 띠에 칼로 자른 듯 걸리지 않게 아래 여백과 주황으로 옅어지는 띠 */}
+          <View className="flex-1">
+            <ScrollView keyboardShouldPersistTaps="handled" automaticallyAdjustKeyboardInsets contentContainerClassName="px-6 pb-8 pt-6">
+              <Text className="text-xl font-semibold text-on-primary">
+                {session.groupName}
               </Text>
-            ) : null}
-            {slices.length > 0 ? (
-              <View className="mt-10 items-center">
-                <Roulette
-                  slices={slices}
-                  resultFoodId={winnerId}
-                  spin={false}
-                  tone="onPrimary"
-                  showVotes={anyVotes}
-                  maxSize={340}
-                />
+              {winnerId > 0 ? (
+                <FoodIllustration foodId={winnerId} size={160} name={winner} wrapClassName="mt-6" />
+              ) : null}
+              <MilestoneBadge foodId={winnerId} foodName={winner} />
+              <Text className="mt-8 text-xl font-semibold text-on-primary">룰렛이 골랐어요</Text>
+              <Text
+                className={`mt-1 font-bold tracking-tight text-on-primary ${nameSizeClass(winner)}`}>
+                {winner}
+              </Text>
+              {counts ? (
+                <Text className="mt-2 text-xl font-semibold text-on-primary">
+                  {voteLine(counts, winnerId)}
+                </Text>
+              ) : null}
+              {slices.length > 0 ? (
+                <View className="mt-8 items-center">
+                  <Roulette
+                    slices={slices}
+                    resultFoodId={winnerId}
+                    spin={false}
+                    tone="onPrimary"
+                    showVotes={anyVotes}
+                    maxSize={340}
+                  />
+                </View>
+              ) : null}
+              {/* 결과 뒤에만 학교 앞 식당 (4-21). 투표와 룰렛에는 쓰지 않는다 */}
+              <View className="mt-8 gap-4">
+                <NearbyRestaurants sessionId={session.id} onPrimary />
+                <NearbyCafes sessionId={session.id} onPrimary />
               </View>
-            ) : null}
-            {/* 결과 뒤에만 학교 앞 식당 (4-21). 투표와 룰렛에는 쓰지 않는다 */}
-            <View className="mt-8 gap-4">
-              <NearbyRestaurants sessionId={session.id} foodName={winner} onPrimary />
-              <NearbyCafes sessionId={session.id} onPrimary />
-            </View>
-          </ScrollView>
+            </ScrollView>
+            <FadeEdge color={colors.primary} />
+          </View>
           {/* 같은 역할의 버튼 둘은 같은 크기로 나란히. 결과 카드가 다음 할 일이라 흰 버튼, 모임으로는 회색 */}
-          <View className="flex-row gap-2 px-7 pb-4">
+          <View className="flex-row gap-2 px-6 pb-4">
             <View className="flex-1">
               <Button label="모임으로" variant="secondary" onPress={onGroup} />
             </View>

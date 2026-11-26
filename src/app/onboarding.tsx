@@ -77,7 +77,7 @@ export default function OnboardingScreen() {
     return (
       <SafeAreaView className="flex-1 bg-background">
         <KeyboardSafe>
-        <View className="flex-1 gap-8 px-5 pt-16">
+        <View className="flex-1 gap-8 px-4 pt-16">
           <Text className="text-3xl font-bold tracking-tight text-text">뭐라고 부를까요?</Text>
           <TextField
             label="이름"
@@ -93,7 +93,7 @@ export default function OnboardingScreen() {
             error={saveError}
           />
         </View>
-        <View className="px-5 pb-8">
+        <View className="px-4 pb-8">
           <Button label="다음" onPress={submit} disabled={!trimmed} loading={save.isPending} />
         </View>
       </KeyboardSafe>
@@ -125,7 +125,7 @@ export default function OnboardingScreen() {
     };
     return (
       <SafeAreaView className="flex-1 bg-background">
-        <View className="flex-row items-center gap-3 px-5 py-3">
+        <View className="flex-row items-center gap-3 px-4 py-3">
           {i > 0 ? (
             <IconButton name="back" label="이전 문항" onPress={() => setAnswers(answers.slice(0, -1))} />
           ) : (
@@ -141,14 +141,14 @@ export default function OnboardingScreen() {
               style={{ width: `${((i + 1) / QUIZ_LENGTH) * 100}%` }}
             />
           </View>
-          <Text className="w-12 text-right text-sm font-semibold text-muted">
+          <Text className="w-12 text-right text-sm text-muted">
             {i + 1}/{QUIZ_LENGTH}
           </Text>
         </View>
-        <View className="flex-1 justify-center gap-8 px-5 pb-16">
+        <View className="flex-1 justify-center gap-8 px-4 pb-16">
           {/* 첫 문항에서 무엇을 하라는지 몰랐다는 말이 있었다 (#44 인터뷰 3 다시, 11/17). 모든 문항 같은 자리에 한 줄만 */}
           <View className="gap-2">
-            <Text className="text-base font-bold text-muted">끌리는 쪽을 골라요</Text>
+            <Text className="text-base text-muted">끌리는 쪽을 골라요</Text>
             <Text className="text-3xl font-bold leading-tight tracking-tight text-text">
               {q.situation}
             </Text>
@@ -162,7 +162,7 @@ export default function OnboardingScreen() {
                 accessibilityLabel={a === 'A' ? q.a : q.b}
                 disabled={save.isPending}
                 onPress={() => pick(a)}
-                className="h-20 justify-center rounded-3xl bg-surface px-6 active:bg-surface-strong disabled:opacity-50"
+                className="h-20 justify-center rounded-2xl bg-surface px-6 active:bg-surface-strong disabled:opacity-50"
               >
                 <Text className="text-xl font-bold text-text">{a === 'A' ? q.a : q.b}</Text>
               </Pressable>
@@ -173,7 +173,7 @@ export default function OnboardingScreen() {
           ) : null}
           {saveError && lastPick ? (
             <View className="gap-2">
-              <Text className="text-sm font-semibold text-danger">{saveError}</Text>
+              <Text className="text-sm text-danger">{saveError}</Text>
               <Button label="다시 시도" variant="secondary" onPress={() => pick(lastPick)} />
             </View>
           ) : null}
@@ -214,7 +214,7 @@ export default function OnboardingScreen() {
   return (
     <SafeAreaView className="flex-1 bg-background">
       <KeyboardSafe>
-      <View className="flex-1 gap-8 px-5 pt-16">
+      <View className="flex-1 gap-8 px-4 pt-16">
         <Text className="text-3xl font-bold tracking-tight text-text">아이디를 정해요</Text>
         <TextField
           label="아이디"
@@ -232,7 +232,7 @@ export default function OnboardingScreen() {
           error={handleError ?? saveError}
         />
       </View>
-      <View className="flex-row gap-2 px-5 pb-8">
+      <View className="flex-row gap-2 px-4 pb-8">
         <View className="flex-1">
           <Button label="건너뛰기" variant="secondary" onPress={finish} disabled={save.isPending} />
         </View>
@@ -299,11 +299,11 @@ function TypeReveal({
 
   return (
     <SafeAreaView
-      className="relative flex-1 bg-primary">
-      {/* 그라데이션은 뺐다. 주황 한 면으로 둔다 (2026-11-19, 웹과 앱이 같게, 흰 글자 대비) */}
+      className="relative flex-1 bg-ink">
+      {/* 바탕은 검정, 글자 칸은 흰색. 주황은 아래 주 단추 하나뿐이다 (2026-11-25 주황 면을 뺌, docs/design.md 순간 2) */}
 
-      <View className="flex-1 justify-center gap-8 px-5">
-        <Text className="text-xl font-bold text-on-primary" accessibilityRole="header">
+      <View className="flex-1 justify-center gap-8 px-4">
+        <Text className="text-xl font-bold text-on-ink" accessibilityRole="header">
           나의 밥BTI
         </Text>
         <View
@@ -326,22 +326,22 @@ function TypeReveal({
                 ],
               }}
             >
-              <View className="aspect-square items-center justify-center gap-1 rounded-3xl bg-on-primary">
-                <Text className="text-8xl font-extrabold text-primary">{l.letter}</Text>
-                <Text className="text-base font-bold text-text">{l.line}</Text>
+              <View className="aspect-square items-center justify-center gap-1 rounded-2xl bg-on-ink">
+                <Text className="text-8xl font-bold text-ink">{l.letter}</Text>
+                <Text className="text-base font-semibold text-text">{l.line}</Text>
               </View>
             </Animated.View>
           ))}
         </View>
       </View>
-      <View className="gap-2 px-5 pb-8">
+      <View className="gap-2 px-4 pb-8">
         <Pressable
           accessibilityRole="button"
           accessibilityLabel="아이디 정하고 시작하기"
           onPress={onNext}
-          className="h-14 items-center justify-center rounded-2xl bg-on-primary px-6 active:opacity-80"
+          className="h-14 items-center justify-center rounded-2xl bg-primary px-6 active:opacity-80"
         >
-          <Text className="text-lg font-bold text-primary">아이디 정하고 시작하기</Text>
+          <Text className="text-xl font-bold text-on-primary">아이디 정하고 시작하기</Text>
         </Pressable>
         <Pressable
           accessibilityRole="button"
@@ -349,7 +349,7 @@ function TypeReveal({
           onPress={onRetry}
           className="h-12 items-center justify-center active:opacity-70"
         >
-          <Text className="text-xl font-bold text-on-primary">다시 하기</Text>
+          <Text className="text-xl font-bold text-on-ink">다시 하기</Text>
         </Pressable>
       </View>
     </SafeAreaView>

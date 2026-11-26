@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Animated, Easing, Platform, View } from 'react-native';
 import { Text } from '@/components/text';
 
+import { FoodIllustration } from '@/components/food-illustration';
 import { PersonDots } from '@/components/person-dots';
 import { useReduceMotion } from '@/hooks/use-reduce-motion';
 import { mealDateLabel, monthCuisineLine, togetherLines, type MealCard } from '@/hooks/use-meal';
@@ -47,23 +48,24 @@ export function ResultCard({ card }: { card: MealCard }) {
         <View className="absolute -bottom-6 -right-6 h-28 w-28 rounded-full bg-on-primary opacity-15" />
 
         <View className="flex-row items-center justify-between gap-3">
-          <Text className="flex-1 text-xl font-bold text-on-primary" numberOfLines={2}>
+          <Text className="flex-1 text-xl font-bold text-on-primary">
             {card.groupName}
           </Text>
-          <Text className="text-xl font-bold text-on-primary">{mealDateLabel(card.eatenAt)}</Text>
+          <Text className="text-xl font-semibold text-on-primary">{mealDateLabel(card.eatenAt)}</Text>
         </View>
+
+        {/* 메뉴 그림이 있으면 음식 이름 위 오른쪽에 둥글게 (0025). 없으면 지금 모양 그대로 */}
+        <FoodIllustration foodId={card.foodId} size={112} name={card.foodName} wrapClassName="items-end" />
 
         <View className="gap-2">
           <Text
-            className={`font-bold tracking-tight text-on-primary ${nameSize}`}
-            numberOfLines={2}
-            adjustsFontSizeToFit>
+            className={`font-bold tracking-tight text-on-primary ${nameSize}`}>
             {card.foodName}
           </Text>
-          <Text className="text-xl font-bold text-on-primary">
+          <Text className="text-xl font-semibold text-on-primary">
             우리 모임 {card.groupFoodNth}번째 {card.foodName}
           </Text>
-          {month ? <Text className="text-xl font-bold text-on-primary">{month}</Text> : null}
+          {month ? <Text className="text-xl font-semibold text-on-primary">{month}</Text> : null}
         </View>
 
         <View className="gap-2">
@@ -71,7 +73,7 @@ export function ResultCard({ card }: { card: MealCard }) {
             <PersonDots names={card.people.map((p) => p.displayName)} ringClass="border-primary" />
           ) : null}
           {lines.map((line) => (
-            <Text key={line} className="text-xl font-bold text-on-primary">
+            <Text key={line} className="text-xl font-semibold text-on-primary">
               {line}
             </Text>
           ))}
@@ -81,7 +83,7 @@ export function ResultCard({ card }: { card: MealCard }) {
         <View className="flex-row items-end justify-between gap-4">
           <Text className="text-xl font-bold text-on-primary">밥비티아이</Text>
           {card.myFoodNth !== null ? (
-            <Text className="flex-1 text-right text-xl font-bold text-on-primary">
+            <Text className="flex-1 text-right text-xl font-semibold text-on-primary">
               나의 {card.myFoodNth}번째 {card.foodName}
             </Text>
           ) : null}

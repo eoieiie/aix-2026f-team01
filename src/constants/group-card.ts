@@ -16,8 +16,10 @@ export type GroupCardInput = {
 // "할랄 1명"보다 무엇을 피하면 되는지가 먼저 보이게 한다
 const DIET_AS_INGREDIENTS: Record<string, string> = {
   halal: '돼지고기 (할랄)',
+  hindu: '소고기 (힌두교)',
+  pescatarian: '고기 (페스코)',
   vegetarian: '고기, 해산물 (채식)',
-  vegan: '고기, 해산물, 유제품 (비건)',
+  vegan: '고기, 해산물, 유제품, 달걀 (비건)',
 };
 
 export function tagLabel(code: string): string {

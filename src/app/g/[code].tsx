@@ -55,14 +55,16 @@ export default function InviteScreen() {
   }
 
   if (error || !invite) {
-    const notFound = inviteErrorCode(error) === 'group_not_found';
+    const errCode = inviteErrorCode(error);
+    const notFound = errCode === 'group_not_found';
+    const tooMany = errCode === 'too_many_tries';
     return (
       <SafeAreaView className="flex-1 items-center justify-center gap-4 bg-background px-6">
         <Text className="text-lg font-bold text-text">
-          {notFound ? '모임을 찾을 수 없어요' : '연결할 수 없어요'}
+          {notFound ? '모임을 찾을 수 없어요' : tooMany ? '잠시 뒤에 다시 해 주세요' : '연결할 수 없어요'}
         </Text>
         <View className="w-full max-w-xs">
-          {notFound ? (
+          {notFound || tooMany ? (
             <Button label="홈으로" onPress={() => router.replace('/')} />
           ) : (
             <Button label="다시 시도" variant="secondary" onPress={() => refetch()} loading={retrying} />
@@ -105,11 +107,11 @@ export default function InviteScreen() {
   return (
     <SafeAreaView className="flex-1 bg-background">
       <KeyboardSafe>
-      <View className="flex-1 justify-center gap-8 px-5">
+      <View className="flex-1 justify-center gap-8 px-4">
         {/* 초대받은 모임 카드. 이름표 한 줄과 모임 이름만 둔다 (설명 줄은 버튼과 입력칸이 대신한다) */}
-        <View className="gap-3 rounded-3xl bg-primary p-6">
-          <Text className="text-xl font-bold text-on-primary">초대받은 모임</Text>
-          <Text className="text-5xl font-extrabold leading-tight tracking-tight text-on-primary">
+        <View className="gap-2 rounded-3xl bg-surface p-4">
+          <Text className="text-base text-muted">초대받은 모임</Text>
+          <Text className="text-5xl font-bold leading-tight tracking-tight text-text">
             {invite.groupName}
           </Text>
         </View>

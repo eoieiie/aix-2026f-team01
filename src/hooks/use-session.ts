@@ -4,8 +4,11 @@ import { useEffect } from 'react';
 import {
   addCandidate,
   addCustomCandidate,
+  addCustomFoodTag,
   castVote,
-  getFoodHints,
+  confirmCustomFood,
+  getFoodHintsWithPicks,
+  getMyFoodPicks,
   getSession,
   getVoteCounts,
   joinSession,
@@ -18,6 +21,7 @@ import {
   spinRoulette,
   subscribeSession,
 } from '@/api/sessions';
+import { useAnonymousAuth } from '@/hooks/use-anonymous-auth';
 
 export type {
   CantEat,
@@ -59,8 +63,8 @@ export function useSession(sessionId: string) {
     queryFn: () => getSession(sessionId),
     enabled: join.isSuccess,
     retry: false,
-    // 실시간이 끊겨도 10초마다 한 번은 맞춘다
-    refetchInterval: 10_000,
+    // 실시간 신호를 놓쳐도 4초마다 한 번은 맞춘다. 40명 부하 시험(11/21)에서 신호 일부가 빠져 10초는 시연에 길었다
+    refetchInterval: 4_000,
   });
 
   useEffect(() => {
@@ -72,7 +76,9 @@ export function useSession(sessionId: string) {
 
   const error = join.error ?? session.error;
   return {
-    session: session.data,
+    // 판이 닫혀 다시 읽기에 실패해도, 전에 읽은 모임으로 돌아갈 수 있게 마지막 값을 같이 준다
+    lastGroupId: session.data?.groupId ?? null,
+    session: session.error ? undefined : session.data,
     isLoading: join.isPending || (join.isSuccess && session.isPending),
     error,
     retry: () => (join.isError ? join.refetch() : session.refetch()),
@@ -86,12 +92,26 @@ export function useFoods() {
 }
 
 // 4-20 음식마다 못 먹는 사람이 있는지, 이 모임이 언제 먹었는지. 사람이 들어오거나 못 먹는 것이 바뀌면 다시 읽는다.
+// 4-27 판 참여자 취향으로 서버가 고른 채우기 순서도 같이 온다(취향 자체는 오지 않는다).
 // 못 불러오면 빈 목록이고 판은 그대로 진행한다
 export function useFoodHints(sessionId: string, key: string) {
   const query = useQuery({
     queryKey: ['session-food-hints', sessionId, key],
-    queryFn: () => getFoodHints(sessionId),
+    queryFn: () => getFoodHintsWithPicks(sessionId),
     enabled: !!sessionId,
+    retry: false,
+    staleTime: 60_000,
+  });
+  return query.data ?? [];
+}
+
+// 같은 판이라도 다른 계정의 추천은 캐시에서 재사용하지 않는다.
+export function useMyFoodPicks(sessionId: string, key: string) {
+  const { userId } = useAnonymousAuth();
+  const query = useQuery({
+    queryKey: ['my-food-picks', userId, sessionId, key],
+    queryFn: () => getMyFoodPicks(sessionId),
+    enabled: !!userId && !!sessionId,
     retry: false,
     staleTime: 60_000,
   });
@@ -143,5 +163,15 @@ export function useSessionActions(sessionId: string) {
     onSettled: refresh,
   });
 
-  return { add, addCustom, pitch, remove, open, vote, spin, headcount, anyOk };
+  // 0044 사람 확인: 맞아요와 재료 더하기 (빼기는 없다)
+  const confirmAi = useMutation({
+    mutationFn: (foodId: number) => confirmCustomFood(sessionId, foodId),
+    onSettled: refresh,
+  });
+  const addTag = useMutation({
+    mutationFn: ({ foodId, tag }: { foodId: number; tag: string }) => addCustomFoodTag(sessionId, foodId, tag),
+    onSettled: refresh,
+  });
+
+  return { add, addCustom, pitch, remove, open, vote, spin, headcount, anyOk, confirmAi, addTag };
 }

@@ -1,3 +1,4 @@
+import { choiceSurface } from '@/components/choice-colors';
 import { useState } from 'react';
 import { Modal, Pressable, View } from 'react-native';
 import { Text } from '@/components/text';
@@ -37,15 +38,15 @@ export function AccountSheet({ visible, onClose }: { visible: boolean; onClose: 
 
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={close}>
-      <View className="flex-1 items-center justify-center bg-black/40 px-5">
-        <View className="w-full max-w-sm gap-6 rounded-3xl bg-background p-6">
+      <View className="flex-1 items-center justify-center bg-black/40 px-4">
+        <View className="w-full max-w-[440px] gap-6 rounded-3xl bg-background p-6">
           {loginId ? (
             <>
               <View className="gap-1">
                 <Text className="text-3xl font-bold tracking-tight text-text">@{loginId}</Text>
                 <Text className="text-base text-muted">다른 기기에서도 이 아이디로 들어와요</Text>
               </View>
-              {error ? <Text className="text-sm font-semibold text-danger">{accountErrorMessage(error)}</Text> : null}
+              {error ? <Text className="text-sm text-danger">{accountErrorMessage(error)}</Text> : null}
               <View className="flex-row gap-2">
                 <View className="flex-1">
                   <Button label="닫기" variant="secondary" onPress={close} />
@@ -81,8 +82,8 @@ export function AccountSheet({ visible, onClose }: { visible: boolean; onClose: 
                         claim.reset();
                         signIn.reset();
                       }}
-                      className={`h-11 flex-1 items-center justify-center rounded-xl ${on ? 'bg-primary' : 'bg-surface'}`}>
-                      <Text className={`text-base font-bold ${on ? 'text-on-primary' : 'text-muted'}`}>{label}</Text>
+                      className={`h-12 flex-1 items-center justify-center rounded-lg ${on ? 'bg-ink' : 'bg-surface'}`} style={choiceSurface(on)}>
+                      <Text className={`text-base font-semibold ${on ? 'text-on-ink' : 'text-muted'}`}>{label}</Text>
                     </Pressable>
                   );
                 })}
@@ -111,7 +112,7 @@ export function AccountSheet({ visible, onClose }: { visible: boolean; onClose: 
                   onSubmitEditing={submit}
                 />
                 {error ? (
-                  <Text className="text-sm font-semibold text-danger">{accountErrorMessage(error)}</Text>
+                  <Text className="text-sm text-danger">{accountErrorMessage(error)}</Text>
                 ) : (
                   <Text className="text-sm text-muted">
                     {mode === 'claim'

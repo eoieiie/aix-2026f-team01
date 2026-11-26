@@ -58,14 +58,14 @@ select is(
   true, '달걀을 못 먹는 사람이 들어오면 달걀 후보가 걸린다');
 
 -- 기본 음식 태그 (seed, 0007) ------------------------------------------------
-select ok((select tags @> array['beef', 'egg'] and not tags @> array['veg_ok'] from public.foods where name = '비빔밥'),
-  '비빔밥: 소고기와 달걀이 있고 채식 표시가 없다');
+select ok((select (tags || soft_tags) @> array['beef', 'egg'] and not tags @> array['veg_ok'] from public.foods where name = '비빔밥'),
+  '비빔밥: 소고기(0045부터 가게마다)와 달걀이 있고 채식 표시가 없다');
 select ok((select not tags @> array['halal_ok'] from public.foods where name = '인도 커리'),
   '인도 커리: 할랄 표시가 없다');
 select ok((select not tags @> array['halal_ok'] from public.foods where name = '케밥'),
   '케밥: 할랄 표시가 없다');
-select ok((select tags @> array['nuts', 'wheat'] from public.foods where name = '마라탕'),
-  '마라탕: 견과류와 밀가루가 있다');
+select ok((select (tags || soft_tags) @> array['nuts', 'wheat'] from public.foods where name = '마라탕'),
+  '마라탕: 견과류와 밀가루(0045부터 가게마다)가 있다');
 select ok((select tags @> array['seafood', 'wheat', 'egg'] from public.foods where name = '김밥'),
   '김밥: 해산물(어묵), 밀가루, 달걀이 있다');
 select is((select count(*)::int from public.foods where not custom and name not in ('r_egg', 'r_plain')), 40,

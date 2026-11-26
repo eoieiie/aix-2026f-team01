@@ -1,7 +1,13 @@
+import { VOTE_RESTAURANTS_SHOWN } from '@/constants';
+
 import type { Client } from './groups';
+import type { CouncilBenefit } from './council-benefits';
 import { getSupabase } from './supabase';
 
-// 결과 뒤 학교 앞 식당 (spec.md 4-21, 0015). 투표와 룰렛에는 쓰지 않는다
+type CouncilCollege = CouncilBenefit['college'];
+
+// 학교 앞 식당 (spec.md 4-21). 결과 뒤(0015)와 투표 화면 추천 칸(0016).
+// 보이기만 하고 투표와 룰렛 확률에는 쓰지 않는다
 
 export interface NearbyRestaurant {
   id: number;
@@ -17,6 +23,27 @@ export interface NearbyRestaurant {
   // 지도 앱으로 열 위치. 못 읽으면 null이고 이름으로 찾는다
   lat: number | null;
   lng: number | null;
+  // 아래부터 0016. 0016 전의 서버는 이 칸을 주지 않아서 null(간 모임 수는 0)로 읽는다
+  // 메뉴가 맞은 음식. 종류만 맞으면 null
+  foodId: number | null;
+  // 정문에서 걸어서 몇 분
+  walkMinutes: number | null;
+  // 지금 영업 중이면 true, 닫았으면 false, 영업시간을 모르면 null
+  openNow: boolean | null;
+  // 밥BTI로 간 모임 수(쿠폰을 받은 서로 다른 판 수)
+  teamCount: number;
+  // 제휴 식당이 직접 준 사진
+  photoUrl: string | null;
+  // 아래부터 0048. 내 단과대나 총학생회의 학생회 제휴(돈 관계가 없어 "광고"가 아니다)와 그 혜택 첫 줄
+  councilCollege: CouncilCollege | null;
+  councilText: string | null;
+  // 이 판에 맞는 가게 수. 보인 곳보다 많으면 "더 보기"
+  total: number;
+  // 끝난 판의 메뉴 이름과 종류. "더 보기"로 가게 탭을 이 이름으로 찾은 채 연다
+  menuName: string | null;
+  menuCuisine: string | null;
+  // 묶음(0050): 1 메뉴가 맞는 가게, 2 같은 종류 일반 가게, 3 다른 음식 전문점. 0050 전 서버는 match로 1이나 2
+  tier: number;
 }
 
 export async function getSessionRestaurants(
@@ -44,13 +71,37 @@ export async function getSessionRestaurants(
     id: r.id,
     name: r.name,
     cuisine: r.cuisine ?? null,
-    partner: Boolean(r.partner),
-    couponText: r.coupon_text ?? null,
+    // 혜택 문구가 있는 제휴만 "광고"와 먼저 줄 세우기(0040). 서버도 같게 주지만 화면에서 한 번 더
+    partner: offer(r),
+    couponText: offer(r) ? r.coupon_text : null,
     match: r.match === 'menu' ? 'menu' : 'cuisine',
     myCode: r.my_code ?? null,
     lat: typeof r.lat === 'number' ? r.lat : coords.get(r.id)?.lat ?? null,
     lng: typeof r.lng === 'number' ? r.lng : coords.get(r.id)?.lng ?? null,
+    foodId: typeof r.food_id === 'number' ? r.food_id : null,
+    walkMinutes: typeof r.walk_minutes === 'number' ? r.walk_minutes : null,
+    openNow: typeof r.open_now === 'boolean' ? r.open_now : null,
+    teamCount: typeof r.team_count === 'number' ? r.team_count : 0,
+    // 사진은 제휴 식당에만 (서버도 막지만 화면에서 한 번 더)
+    photoUrl: r.partner && typeof r.photo_url === 'string' ? r.photo_url : null,
+    ...councilOf(r),
+    total: typeof r.total_count === 'number' ? r.total_count : rows.length,
+    menuName: typeof r.menu_name === 'string' ? r.menu_name : null,
+    menuCuisine: typeof r.menu_cuisine === 'string' ? r.menu_cuisine : null,
+    tier: typeof r.tier === 'number' ? r.tier : r.match === 'menu' ? 1 : 2,
   }));
+}
+
+// 학생회 제휴 칸 (0048). 0048 전의 서버는 주지 않아 null
+function councilOf(r: any): { councilCollege: CouncilCollege | null; councilText: string | null } {
+  const college = typeof r.council_college === 'string' ? (r.council_college as CouncilCollege) : null;
+  const text = typeof r.council_text === 'string' && r.council_text.trim() !== '' ? r.council_text.trim() : null;
+  return { councilCollege: college, councilText: college ? text : null };
+}
+
+// 제휴이면서 혜택 문구가 있는가 (0040). 문구가 없는 제휴는 보통 가게처럼 보인다
+function offer(r: any): boolean {
+  return Boolean(r.partner) && typeof r.coupon_text === 'string' && r.coupon_text.trim() !== '';
 }
 
 // 식당 줄을 누르면 여는 카카오맵 주소. 키가 필요 없는 공개 링크다(앱이 깔려 있으면 휴대폰이 앱으로 넘긴다).
@@ -61,7 +112,7 @@ export function kakaoMapUrl(r: Pick<NearbyRestaurant, 'name' | 'lat' | 'lng'>): 
   return `https://map.kakao.com/link/search/${encodeURIComponent('안산 ' + r.name)}`;
 }
 
-// 먹고 나서 카페 (spec.md 4-23, 0020). 제휴가 먼저, 나머지는 정문에서 가까운 순으로 서버가 3곳까지 준다
+// 먹고 나서 카페 (spec.md 4-23, 0020, 0048). 쿠폰 카페, 내 학생회 제휴 카페, 정문에서 가까운 순으로 서버가 3곳까지 준다
 export interface NearbyCafe {
   id: number;
   name: string;
@@ -70,19 +121,25 @@ export interface NearbyCafe {
   myCode: string | null;
   lat: number | null;
   lng: number | null;
+  councilCollege: CouncilCollege | null;
+  councilText: string | null;
+  total: number;
 }
 
 export async function getSessionCafes(sessionId: string, client: Client = getSupabase()): Promise<NearbyCafe[]> {
   const { data, error } = await client.rpc('session_cafes', { p_session_id: sessionId });
   if (error) throw error;
-  return ((data as any[]) ?? []).map((r) => ({
+  const rows = (data as any[]) ?? [];
+  return rows.map((r) => ({
     id: r.id,
     name: r.name,
-    partner: Boolean(r.partner),
-    couponText: r.coupon_text ?? null,
+    partner: offer(r),
+    couponText: offer(r) ? r.coupon_text : null,
     myCode: r.my_code ?? null,
     lat: typeof r.lat === 'number' ? r.lat : null,
     lng: typeof r.lng === 'number' ? r.lng : null,
+    ...councilOf(r),
+    total: typeof r.total_count === 'number' ? r.total_count : rows.length,
   }));
 }
 
@@ -114,10 +171,54 @@ const CUISINE_LABELS: Record<string, string> = {
   asian: '아시안',
 };
 
-// 줄 아래 한 줄: 메뉴가 맞으면 "칼국수 있어요", 아니면 종류
-export function restaurantLine(r: Pick<NearbyRestaurant, 'match' | 'cuisine'>, foodName: string): string {
-  if (r.match === 'menu') return `${foodName} 있어요`;
-  return r.cuisine ? CUISINE_LABELS[r.cuisine] ?? '' : '';
+// 이름 아래 한 줄의 조각들: 걸어서 N분, 영업 중, 밥BTI로 간 모임 N팀 중 값이 있는 것만 (4-21, 2026-11-16).
+// 닫았으면 "지금 닫음". 셋 다 모르면 줄이 비지 않게 종류(한식 등)를 보인다.
+// 화면은 조각을 간격 8로 떨어뜨려 놓는다(기호로 잇지 않는다, 2026-11-25)
+export function restaurantInfo(
+  r: Pick<NearbyRestaurant, 'walkMinutes' | 'openNow' | 'teamCount' | 'cuisine'>
+): string[] {
+  const parts: string[] = [];
+  if (r.walkMinutes !== null) parts.push(`걸어서 ${r.walkMinutes}분`);
+  if (r.openNow === true) parts.push('영업 중');
+  if (r.openNow === false) parts.push('지금 닫음');
+  if (r.teamCount > 0) parts.push(`밥BTI로 간 모임 ${r.teamCount}팀`);
+  if (parts.length > 0) return parts;
+  const kind = r.cuisine ? CUISINE_LABELS[r.cuisine] : undefined;
+  return kind ? [kind] : [];
+}
+
+export interface Taste {
+  // 네 글자 축 점수(-1, 0, 1). 네 글자를 만든 적이 없으면 null
+  axes: Record<string, number> | null;
+  // 내가 먹어 본 음식
+  eatenFoodIds: ReadonlySet<number>;
+}
+
+// 투표 화면 추천 칸 (4-21). 서버가 준 최대 6곳(0050 순서: 묶음 메뉴 맞음 → 같은 종류 → 전문점, 묶음 안에서 쿠폰 가게, 내 학생회 제휴, 가까운 순)에서 3곳.
+// 묶음이 먼저이고, 묶음 안에서 쿠폰 가게(#53 11/19 병주 요청, "광고"는 숨기지 않는다), 내 학생회 제휴. 지금 닫은 곳은 먼저 오지 않는다.
+// 그 안에서는 내 취향 점수 순: 메뉴가 맞으면 +2. 한식↔외국음식 축과 종류가 맞으면 +1.
+// 탐험이면 안 먹어 본 음식, 반복이면 먹어 본 음식에 +1. 지금 닫았으면 -3. 점수가 같으면 서버 순서
+export function pickForMe(
+  list: readonly NearbyRestaurant[],
+  taste: Taste,
+  count: number = VOTE_RESTAURANTS_SHOWN
+): NearbyRestaurant[] {
+  const korean = taste.axes?.korean ?? 0;
+  const explore = taste.axes?.explore ?? 0;
+  const score = (r: NearbyRestaurant) => {
+    let s = r.match === 'menu' ? 2 : 0;
+    if (r.cuisine !== null && korean !== 0 && (korean > 0) === (r.cuisine === 'korean')) s += 1;
+    if (r.foodId !== null && explore !== 0 && (explore > 0) !== taste.eatenFoodIds.has(r.foodId)) s += 1;
+    if (r.openNow === false) s -= 3;
+    return s;
+  };
+  const first = (r: NearbyRestaurant) =>
+    r.openNow === false ? 0 : r.partner ? 2 : r.councilCollege !== null ? 1 : 0;
+  return list
+    .map((r, i) => ({ r, i, p: first(r), s: score(r) }))
+    .sort((a, b) => a.r.tier - b.r.tier || b.p - a.p || b.s - a.s || a.i - b.i)
+    .slice(0, count)
+    .map((x) => x.r);
 }
 
 // 식당 목록 출처: 오픈스트리트맵(ODbL, 표시 필요)과 공공데이터포털 일반음식점(0017)
