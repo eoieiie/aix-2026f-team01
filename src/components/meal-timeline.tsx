@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { Pressable, View } from 'react-native';
 
 import { FoodThumb } from '@/components/food-thumb';
+import { foodTint, TINT_BG, tintValue } from '@/constants/food-tint';
 import { Text } from '@/components/text';
 import { dayLabel, groupByMonth, monthStatLine, type TimelineMeal } from '@/constants/dex';
 import { useGroupTimeline } from '@/hooks/use-dex';
@@ -56,7 +57,7 @@ function MealRow({ meal, onPress }: { meal: TimelineMeal; onPress: () => void })
       accessibilityRole="button"
       accessibilityLabel={`${dayLabel(meal.eatenAt)} ${meal.foodName} 결과 카드`}
       onPress={onPress}
-      className="flex-row items-center gap-3 rounded-3xl bg-surface p-4 active:opacity-70">
+      className={`flex-row items-center gap-3 rounded-3xl p-4 active:opacity-70 ${TINT_BG[foodTint(meal.foodId)]}`}>
       <FoodThumb foodId={meal.foodId} size="sm" imageUrl={meal.imageUrl} />
       <View className="flex-1 gap-1">
         <Text className="text-lg font-bold text-text">
@@ -67,7 +68,7 @@ function MealRow({ meal, onPress }: { meal: TimelineMeal; onPress: () => void })
       {/* 겹친 동그라미 사이의 고리는 칸 바탕색이다 (선이 아니라 틈) */}
       <View className="flex-row">
         {meal.eaters.slice(0, 4).map((n, i) => (
-          <View key={`${n}-${i}`} className="-ml-2 h-8 w-8 items-center justify-center rounded-full border-2 border-surface bg-surface-strong">
+          <View key={`${n}-${i}`} className="-ml-2 h-8 w-8 items-center justify-center rounded-full border-2 border-surface bg-surface-strong" style={{ borderColor: tintValue(foodTint(meal.foodId)) }}>
             <Text className="text-xs font-semibold text-text">{Array.from(n)[0] ?? ''}</Text>
           </View>
         ))}
