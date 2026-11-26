@@ -127,12 +127,27 @@ const KW45 = new Map([...kwBlock45.matchAll(/\('([^']+)', '\{([a-z,]*)\}', '\{([
 const KEYWORDS: [string, string[]][] = OLD_KEYWORDS.filter(([k]) => !KW45.has(k)).concat([...KW45].map(([k, v]) => [k, v.sure] as [string, string[]]));
 const KW_SOFT: [string, string[]][] = [...KW45].map(([k, v]) => [k, v.soft]);
 const skipRows = (sql: string) => {
-  const block = sql.slice(sql.indexOf('insert into public.food_keyword_skips'), sql.indexOf('on conflict do nothing'));
+  const at = sql.indexOf('insert into public.food_keyword_skips');
+  const block = sql.slice(at, sql.indexOf('on conflict do nothing', at));
   return [...block.matchAll(/\('([^']+)', '([^']+)'\)/g)].map((m) => [m[1], m[2]] as [string, string]);
 };
-const SKIPS = [...skipRows(mig44), ...skipRows(mig45)];
+// 0060: 식단 이름(비건, 채식 등)이면 낱말 표의 고기, 해산물, 유제품, 달걀을 약함으로 내리고, 짧은 낱말 오발 막기를 더한다
+const mig60 = read('supabase/migrations/0060_word_table_diet_names.sql');
+const SKIPS = [...skipRows(mig44), ...skipRows(mig45), ...skipRows(mig60)];
+const dietAt = mig60.indexOf('insert into public.food_diet_words');
+const DIET_WORDS = [...mig60.slice(dietAt, mig60.indexOf('on conflict do nothing', dietAt)).matchAll(/\('([^']+)'\)/g)].map((m) => m[1]);
+const DIET_SOFT = arr(/select '\{([a-z,]+)\}'::text\[\] \$\$/.exec(mig60)![1]);
+function isDietName(name: string): boolean {
+  const n = name.replace(/ /g, '').toLowerCase();
+  return DIET_WORDS.some((w) => SKIPS.filter(([k]) => k === w).map(([, inside]) => inside).reduce((s, x) => s.split(x).join(' '), n).includes(w));
+}
 
 function guess(name: string, useSkips = true): string[] {
+  const raw = wordTags(name, useSkips);
+  return useSkips && isDietName(name) ? raw.filter((t) => !DIET_SOFT.includes(t)) : raw;
+}
+
+function wordTags(name: string, useSkips = true): string[] {
   const strip = (word: string) =>
     (useSkips ? SKIPS.filter(([k]) => k === word).map(([, inside]) => inside) : []).reduce((s, w) => s.split(w).join(' '), name);
   const tags = new Set<string>();
@@ -149,6 +164,7 @@ function guessSoft(name: string): string[] {
   const tags = new Set<string>();
   for (const b of BASE) if (strip(b.name).includes(b.name)) softOf(b.name).forEach((t) => tags.add(t));
   for (const [k, ts] of KW_SOFT) if (strip(k).includes(k)) ts.forEach((t) => tags.add(t));
+  if (isDietName(name)) wordTags(name).filter((t) => DIET_SOFT.includes(t)).forEach((t) => tags.add(t));
   return [...tags].filter((t) => !sure.includes(t)).sort();
 }
 
@@ -252,5 +268,34 @@ describe('낱말 표 두 단계 (0045)', () => {
   it('기본 메뉴 이름이 든 직접 적은 메뉴는 그 메뉴의 약함을 이어받는다', () => {
     expect(guessSoft('부대찌개 2인')).toEqual(expect.arrayContaining(['beef', 'dairy', 'seafood']));
     expect(guess('부대찌개 2인')).not.toContain('dairy');
+  });
+});
+
+describe('낱말 표 오발: 식단 이름과 짧은 낱말 (0060)', () => {
+  // 2차 메뉴 40개(consensus2.csv)에서 낱말 표가 붙인 "괜히 붙은 확실 경고" 4칸
+  it.each([
+    ['굴라쉬', 'seafood'],
+    ['비건 라멘', 'pork'],
+    ['채식 만두', 'pork'],
+    ['콩고기 불고기', 'beef'],
+  ])('%s에는 %s 확실 경고가 없다', (name, bad) => {
+    expect(guess(name)).not.toContain(bad);
+    expect(wordTags(name, false)).toContain(bad);
+  });
+  it('식단 이름의 고기, 해산물, 유제품, 달걀은 지우지 않고 약함으로', () => {
+    expect(guessSoft('비건 라멘')).toEqual(expect.arrayContaining(['egg', 'pork']));
+    expect(guessSoft('채식 만두')).toContain('pork');
+    expect(guessSoft('콩고기 불고기')).toContain('beef');
+    expect(guessSoft('비건 크림 파스타')).toContain('dairy');
+    expect(guess('비건 라멘')).toEqual(['wheat']);
+  });
+  it('식단 이름이 아니면 그대로, 짧은 낱말도 진짜 음식은 그대로', () => {
+    expect(isDietName('야채 식빵')).toBe(false);
+    expect(isDietName('VEGAN 버거')).toBe(true);
+    expect(guess('김치만두')).toContain('pork');
+    expect(guess('굴국밥')).toContain('seafood');
+    expect(guess('물회')).toContain('seafood');
+    expect(guess('회과육')).not.toContain('seafood');
+    expect(guess('돼지감자 볶음')).not.toContain('pork');
   });
 });
