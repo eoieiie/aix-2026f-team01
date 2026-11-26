@@ -13,6 +13,7 @@ import { PersonDots } from '@/components/person-dots';
 import { PlateFoods } from '@/components/plate-foods';
 import { Group, useMyGroups, useMyGroupsLive } from '@/hooks/use-groups';
 import { TAB_BAR_SPACE } from '@/constants';
+import { foodTint, TINT_BG } from '@/constants/food-tint';
 
 const mascotSource = require('../../../assets/images/mascot.png');
 
@@ -24,6 +25,7 @@ export default function HomeScreen() {
   const [modalVisible, setModalVisible] = useState(false);
   const hasGroups = groups.length > 0;
 
+  // 시안 나: 카드 면은 마지막으로 같이 먹은 음식의 옅은 색, 그림은 88로 키움. 기록이 없으면 따뜻한 중립색
   // 모임 카드 (docs/design.md "떠 있는 아래 탭과 박스, 글자 정돈", 2026-11-26). 그림이 크면 글을 읽기 전에 어느 모임인지 알아본다.
   // 왼쪽에 큰 동그라미 그림 72(마지막으로 같이 먹은 음식, 없으면 마스코트), 굵은 모임 이름과 옆에 인원 칩,
   // 회색 한 줄(최근 먹은 메뉴들), 진행 중인 판이 있으면 옅은 주황 칩 "판 진행 중"(이 화면의 주황은 이것뿐),
@@ -35,14 +37,14 @@ export default function HomeScreen() {
       <Pressable
         accessibilityRole="button"
         accessibilityLabel={`${item.name} 모임 열기`}
-        className="flex-row items-center gap-4 rounded-3xl bg-surface p-4 active:opacity-80"
+        className={`flex-row items-center gap-4 rounded-3xl p-4 active:opacity-80 ${TINT_BG[foodTint(latest?.food_id)]}`}
         onPress={() => router.push(`/groups/${item.id}`)}
       >
         {latest ? (
-          <FoodThumb foodId={latest.food_id} size="lg" />
+          <FoodThumb foodId={latest.food_id} size="xl" />
         ) : (
           // 아직 먹은 기록이 없는 모임은 마스코트를 그림 자리에 둔다
-          <View className="h-[72px] w-[72px] items-center justify-center rounded-full bg-background">
+          <View className="h-[88px] w-[88px] items-center justify-center rounded-full bg-background">
             <Image source={mascotSource} style={{ width: 40, height: 30 }} resizeMode="contain" />
           </View>
         )}

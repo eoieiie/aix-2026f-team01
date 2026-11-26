@@ -13,6 +13,7 @@ import { CardButton, ProfileSummaryCard } from '@/components/profile-summary-car
 import { SettingsList } from '@/components/settings-list';
 import colors from '@/constants/colors.json';
 import { TAB_BAR_SPACE } from '@/constants';
+import { TINT_BG, type Tint } from '@/constants/food-tint';
 import { nextAvatarUnlock } from '@/constants/prefs';
 import { useAvatarOptions, useMyPrefs } from '@/hooks/use-prefs';
 import { authorityTitle, levelProgress, typeLetters, useMyStats } from '@/hooks/use-stats';
@@ -89,9 +90,9 @@ export default function ProfileScreen() {
         />
 
         <View className="flex-row gap-2">
-          <Stat value={total} unit="끼" label="총 끼니" />
-          <Stat value={stats.foods.length} unit="개" label="음식 도감" />
-          <Stat value={stats.companions.length} unit="명" label="밥 친구" />
+          <Stat value={total} unit="끼" label="총 끼니" tint="gold" />
+          <Stat value={stats.foods.length} unit="개" label="음식 도감" tint="chili" />
+          <Stat value={stats.companions.length} unit="명" label="밥 친구" tint="green" />
         </View>
 
         {/* 기록 탭: 음식 도감과 밥 친구 랭킹을 세그먼트 탭으로 전환 */}
@@ -169,9 +170,10 @@ export default function ProfileScreen() {
 }
 
 // 큰 숫자와 단위는 글자 아래 기준선을 맞춘다 (docs/design.md "글자는 역할별로")
-function Stat({ value, unit, label }: { value: number; unit: string; label: string }) {
+// 시안 나: 숫자 칸마다 음식 색 하나를 옅게
+function Stat({ value, unit, label, tint }: { value: number; unit: string; label: string; tint: Tint }) {
   return (
-    <View accessible accessibilityLabel={`${label} ${value}${unit}`} className="flex-1 gap-1 rounded-3xl bg-surface p-4">
+    <View accessible accessibilityLabel={`${label} ${value}${unit}`} className={`flex-1 gap-1 rounded-3xl p-4 ${TINT_BG[tint]}`}>
       <View className="flex-row items-baseline gap-1">
         <Text className="text-3xl font-bold tracking-tight text-text">{value}</Text>
         <Text className="text-sm text-muted">{unit}</Text>

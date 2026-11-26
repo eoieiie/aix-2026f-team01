@@ -3,6 +3,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { type ReactNode, useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, View } from 'react-native';
 import { Text } from '@/components/text';
+import { TintMark } from '@/components/tint-mark';
 import type { LayoutChangeEvent } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -311,7 +312,10 @@ function CandidateStage({
         onLayout={(e: LayoutChangeEvent) => (viewH.current = e.nativeEvent.layout.height)}
         contentContainerClassName="gap-4 px-4 pb-40 pt-2">
         <View className="flex-row items-end justify-between">
-          <Text className="flex-1 text-xl font-bold tracking-tight text-text">뭐 먹고 싶어요?</Text>
+          <View className="flex-1 flex-row items-center gap-2">
+            <TintMark tint="chili" />
+            <Text className="flex-1 text-xl font-bold tracking-tight text-text">뭐 먹고 싶어요?</Text>
+          </View>
           <Pressable
             accessibilityRole="button"
             accessibilityLabel="못 먹는 것"
@@ -363,7 +367,10 @@ function CandidateStage({
         ) : null}
 
         <View className="gap-2" onLayout={(e: LayoutChangeEvent) => (listY.current = e.nativeEvent.layout.y)}>
-          <Text className="text-lg font-bold text-text">후보 {session.candidates.length}개</Text>
+          <View className="flex-row items-center gap-2">
+            <TintMark tint="gold" />
+            <Text className="text-lg font-bold text-text">후보 {session.candidates.length}개</Text>
+          </View>
           {newestFirst.map((c) => (
               <CandidateCard
                 key={c.foodId}

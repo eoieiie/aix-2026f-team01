@@ -40,7 +40,9 @@ describe('디자인 규칙', () => {
 
   it('색은 주황 하나와 검정, 흰색, 회색만 쓴다', () => {
     // 회색 계열(채도 0.1 미만)이거나 주황 계열(색상 15~35도)이어야 한다
-    const offPalette = Object.entries(tailwindColors).filter(([, hex]) => {
+    // 시안 나(2026-11-26): 음식 그림에서 뽑은 옅은 면(tint-*)과 작은 점(dot-*)은 음식 색이라 뺀다. 면은 글자 대비 4.5:1 이상
+    const offPalette = Object.entries(tailwindColors).filter(([name, hex]) => {
+      if (/^(tint|dot)-/.test(name)) return false;
       const [r, g, b] = [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16) / 255);
       const max = Math.max(r, g, b);
       const min = Math.min(r, g, b);

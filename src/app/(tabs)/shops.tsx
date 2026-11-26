@@ -4,6 +4,8 @@ import { FlatList, Linking, Pressable, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { filterShops, SHOP_KINDS, shopLine, splitCoupons } from '@/hooks/use-shops';
+import { shopTint } from '@/constants/food-tint';
+import { TintMark } from '@/components/tint-mark';
 import { councilShopRows, useCouncilBenefits } from '@/hooks/use-council-benefits';
 import { Button } from '@/components/button';
 import { Icon } from '@/components/icon';
@@ -84,7 +86,9 @@ export default function ShopsScreen() {
                   accessibilityLabel={`${k.label} 가게만 보기`}
                   accessibilityState={{ selected: on }}
                   onPress={() => setKind(k.key)}
-                  className={`h-11 flex-1 items-center justify-center rounded-xl active:opacity-70 ${on ? 'bg-ink' : 'bg-surface'}`} style={choiceSurface(on)}>
+                  className={`h-11 flex-1 flex-row items-center justify-center gap-2 rounded-xl active:opacity-70 ${on ? 'bg-ink' : 'bg-surface'}`} style={choiceSurface(on)}>
+                  {/* 시안 나: 종류마다 그 음식 색 점 하나 */}
+                  {['korean', 'chinese', 'japanese', 'western', 'asian'].includes(k.key) ? <TintMark tint={shopTint(k.key)} size={8} /> : null}
                   <Text className={`text-base font-semibold ${on ? 'text-on-ink' : 'text-text'}`}>{k.label}</Text>
                 </Pressable>
               );
