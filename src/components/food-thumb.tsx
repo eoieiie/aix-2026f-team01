@@ -5,8 +5,8 @@ import { FoodDot } from '@/components/food-dot';
 import { useFoodImageMap } from '@/hooks/use-food-images';
 
 // 고르기 칸 40, 목록 줄 48, 카드 56 (docs/design.md "화면 규칙": 목록 칸 왼쪽 그림 48~72).
-// xxs 32는 홈 모임 카드의 먹은 음식 줄(PlateFoods)에만, lg 72는 홈 모임 카드 왼쪽 큰 그림에만 쓴다(2026-11-26)
-const SIZES = { xxs: 32, xs: 40, sm: 48, md: 56, lg: 72 } as const;
+// 시안 나: xl 88은 홈 모임 카드 왼쪽 큰 그림에 쓴다. xxs 32는 홈 모임 카드의 먹은 음식 줄(PlateFoods)에만, lg 72는 홈 모임 카드 왼쪽 큰 그림에만 쓴다(2026-11-26)
+const SIZES = { xxs: 32, xs: 40, sm: 48, md: 56, lg: 72, xl: 88 } as const;
 
 type FoodThumbProps = {
   foodId: number;

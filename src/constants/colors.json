@@ -18,5 +18,19 @@
   "food-5": "#C2410C",
   "food-6": "#D4D4D8",
   "food-7": "#FF8A3D",
-  "food-8": "#18181B"
+  "food-8": "#18181B",
+  "tint-chili": "#FDEEE8",
+  "tint-salmon": "#FEECEA",
+  "tint-gold": "#FCF3DD",
+  "tint-green": "#EDF5E6",
+  "tint-brown": "#F7F0E8",
+  "tint-cold": "#E9F2F8",
+  "tint-warm": "#F7F3EE",
+  "dot-chili": "#E0533A",
+  "dot-salmon": "#EE8378",
+  "dot-gold": "#E3A532",
+  "dot-green": "#6E9E58",
+  "dot-brown": "#9C6B48",
+  "dot-cold": "#6C9CC0",
+  "dot-warm": "#B9AB9C"
 }

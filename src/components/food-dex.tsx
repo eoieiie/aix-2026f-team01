@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { ActivityIndicator, Image, Pressable, View } from 'react-native';
 
 import colors from '@/constants/colors.json';
+import { foodTint, TINT_BG } from '@/constants/food-tint';
 import { FoodDot } from '@/components/food-dot';
 import { Text } from '@/components/text';
 import { dayLabel, dexProgress, type DexFood } from '@/constants/dex';
@@ -82,7 +83,7 @@ function DexTile({ food, on, onPress }: { food: DexFood; on: boolean; onPress: (
       accessibilityLabel={eaten ? `${food.name} ${food.mealCount}번` : '아직 안 먹은 메뉴'}
       onPress={eaten ? onPress : undefined}
       disabled={!eaten}
-      className={`w-[23.5%] items-center gap-1 rounded-2xl p-2 ${on ? 'bg-surface-strong' : 'bg-surface'}`}>
+      className={`w-[23.5%] items-center gap-1 rounded-2xl p-2 ${on ? 'bg-surface-strong' : eaten ? TINT_BG[foodTint(food.foodId)] : 'bg-surface'}`}>
       {/* 결과 화면 그림(FoodIllustration)과 같은 모양: 흰 원 안에 둥글게 자른 그림. 그림 배경(옅은 미색 네모)이 회색 칸 위에 드러나지 않는다 */}
       <View className="aspect-square w-full items-center justify-center overflow-hidden rounded-full bg-on-primary">
         {hasImage ? (

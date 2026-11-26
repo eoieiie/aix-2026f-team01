@@ -3,6 +3,7 @@ import { AccessibilityInfo, Animated, Pressable, View } from 'react-native';
 import { Text, TextInput } from '@/components/text';
 
 import { FoodThumb } from '@/components/food-thumb';
+import { foodTint, TINT_BG } from '@/constants/food-tint';
 import { Icon } from '@/components/icon';
 import { PITCH_MAX } from '@/constants';
 import { INGREDIENT_TAGS, maybeLine } from '@/constants/restrictions';
@@ -97,8 +98,8 @@ export function CandidateCard({
   // 그림(56)과 오른쪽 동그라미(44)는 첫 줄에 붙인다. 글이 한 줄이면 그림 가운데에 오고, 길어지면 아래로만 늘어난다 (11/21 실기기)
   const head = (
     <View className="flex-row items-start gap-3">
-      <FoodThumb foodId={candidate.foodId} />
-      <View className="min-h-14 flex-1 justify-center gap-1">
+      <FoodThumb foodId={candidate.foodId} size="lg" />
+      <View className="min-h-[72px] flex-1 justify-center gap-1">
         <View className="flex-row items-center gap-2">
           <Text className="shrink text-xl font-bold tracking-tight text-text">{candidate.foodName}</Text>
           {/* 직접 적은 메뉴는 연필 표시. 재료를 이름으로 짐작했다는 뜻 (4-9) */}
@@ -117,7 +118,7 @@ export function CandidateCard({
       {onVote ? (
         // 고른 표시는 검정 동그라미에 흰 체크, 안 고른 것은 빈 흰 동그라미. 카드를 주황으로 채우지 않는다.
         // 주황은 화면 아래 주 단추 하나에만 쓴다 (docs/design.md "화면 규칙" 색)
-        <View className="h-14 justify-center">
+        <View className="h-[72px] justify-center">
           <View
             className={`h-11 w-11 items-center justify-center rounded-full ${voted ? 'bg-ink' : 'bg-background'}`}>
             {myVoteCount > 1 ? (
@@ -129,7 +130,7 @@ export function CandidateCard({
         </View>
       ) : null}
       {onMore ? (
-        <View className="h-14 justify-center">
+        <View className="h-[72px] justify-center">
           <Pressable
             accessibilityRole="button"
             accessibilityLabel={`${candidate.foodName} 신고 또는 차단`}
@@ -140,7 +141,7 @@ export function CandidateCard({
         </View>
       ) : null}
       {onRemove ? (
-        <View className="h-14 justify-center">
+        <View className="h-[72px] justify-center">
           <Pressable
             accessibilityRole="button"
             accessibilityLabel={`${candidate.foodName} 빼기`}
@@ -231,7 +232,8 @@ export function CandidateCard({
   ) : null;
 
   // 카드는 옅은 면 하나. 모서리 24, 안 여백 16 (docs/design.md "떠 있는 아래 탭과 박스, 글자 정돈")
-  const box = 'gap-3 rounded-3xl bg-surface p-4';
+  // 시안 나: 면은 그 음식의 옅은 색, 그림은 72
+  const box = `gap-3 rounded-3xl p-4 ${TINT_BG[foodTint(candidate.foodId)]}`;
 
   if (onVote) {
     return (

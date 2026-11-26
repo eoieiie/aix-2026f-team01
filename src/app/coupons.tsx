@@ -8,6 +8,7 @@ import { Button } from '@/components/button';
 import { CouponCode } from '@/components/coupon-code';
 import { IconButton } from '@/components/icon';
 import { ShopThumb } from '@/components/shop-thumb';
+import { shopTint, TINT_BG } from '@/constants/food-tint';
 import { Text } from '@/components/text';
 import { type Coupon, useMyCoupons, useShop } from '@/hooks/use-shops';
 
@@ -76,7 +77,7 @@ function PastRow({ coupon, onPress }: { coupon: Coupon; onPress: () => void }) {
       accessibilityRole="link"
       accessibilityLabel={`${coupon.shopName}, ${coupon.benefit}, ${status}`}
       onPress={onPress}
-      className="min-h-20 flex-row items-center gap-3 rounded-3xl bg-surface p-4 active:opacity-70">
+      className={`min-h-20 flex-row items-center gap-3 rounded-3xl p-4 active:opacity-70 ${TINT_BG[shopTint(shop?.cuisine)]}`}>
       <ShopThumb name={coupon.shopName} photoUrl={shop?.photoUrl ?? null} thumbUrl={shop?.thumbUrl ?? null}
         cuisine={shop?.cuisine ?? null} size={56} />
       <View className="flex-1 gap-1">
