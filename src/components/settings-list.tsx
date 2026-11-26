@@ -1,7 +1,8 @@
 import Constants from 'expo-constants';
 import { useRouter } from 'expo-router';
+import * as Updates from 'expo-updates';
 import { useState } from 'react';
-import { Pressable, View } from 'react-native';
+import { Platform, Pressable, View } from 'react-native';
 
 import { Icon, type IconName } from '@/components/icon';
 import { ConfirmSheet, NameSheet, Sheet } from '@/components/sheets';
@@ -9,6 +10,7 @@ import { Button } from '@/components/button';
 import { Text } from '@/components/text';
 import { useMyBlocks, useSafety, safetyErrorMessage } from '@/hooks/use-safety';
 import { useWebInstall } from '@/hooks/use-web-install';
+import { versionLabel } from '@/lib/app-version';
 
 // 내 프로필 아래 설정 (명세 4-24). 같은 역할 같은 크기(높이 56), 주황은 쓰지 않고 삭제만 danger 글자
 export function SettingsList({
@@ -34,7 +36,15 @@ export function SettingsList({
     safety.deleteAccount.reset();
     setSheet(null);
   };
-  const version = Constants.expoConfig?.version ?? '';
+  // 버전 뒤에 지금 받은 판의 날짜와 시각을 붙인다. 팀 폰이 최신인지 이 줄로 확인한다 (2026-11-26).
+  // 앱은 지금 열린 업데이트가 만들어진 시각, 웹은 배포 때 EXPO_PUBLIC_BUILD_TIME을 넣었으면 그 시각, 없으면 버전만
+  const builtAt =
+    Platform.OS === 'web'
+      ? process.env.EXPO_PUBLIC_BUILD_TIME
+        ? new Date(process.env.EXPO_PUBLIC_BUILD_TIME)
+        : null
+      : (Updates.createdAt ?? null);
+  const version = versionLabel(Constants.expoConfig?.version ?? '', builtAt);
 
   return (
     <View className="gap-3">
@@ -55,7 +65,7 @@ export function SettingsList({
       <Group>
         <Row label="계정 삭제" danger onPress={() => setSheet('delete1')} />
       </Group>
-      {version ? <Text className="px-1 text-sm text-muted">버전 {version}</Text> : null}
+      {version ? <Text className="px-1 text-sm text-muted">{version}</Text> : null}
 
       <NameSheet
         visible={sheet === 'name'}
