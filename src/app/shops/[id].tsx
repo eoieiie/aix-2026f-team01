@@ -114,19 +114,19 @@ function ShopBody({ shop }: { shop: ShopDetail }) {
       ) : null}
 
       <View className="gap-4 rounded-3xl bg-surface p-4">
-        {address ? <InfoRow icon="pin">{address}</InfoRow> : null}
+        {address ? <InfoRow icon="pin" label="주소">{address}</InfoRow> : null}
         {shop.phone ? (
           <Pressable
             accessibilityRole="link"
             accessibilityLabel={`${shop.name}에 전화 걸기 ${shop.phone}`}
             onPress={() => openUrl(telUrl(shop.phone as string))}
             className="active:opacity-70">
-            <InfoRow icon="phone">{shop.phone}</InfoRow>
+            <InfoRow icon="phone" label="전화">{shop.phone}</InfoRow>
           </Pressable>
         ) : null}
-        {hours ? <InfoRow icon="clock">{hours.join('\n')}</InfoRow> : null}
-        {shop.menus.length > 0 ? <InfoRow label="대표 메뉴">{shop.menus.join(', ')}</InfoRow> : null}
-        {shop.visits ? <InfoRow label="밥BTI">{`모임 ${shop.visits}팀이 쿠폰을 쓰고 다녀갔어요`}</InfoRow> : null}
+        {hours ? <InfoRow icon="clock" label="영업시간">{hours.join('\n')}</InfoRow> : null}
+        {shop.menus.length > 0 ? <InfoRow icon="meal" label="대표 메뉴">{shop.menus.join(', ')}</InfoRow> : null}
+        {shop.visits ? <InfoRow icon="ticket" label="밥BTI 쿠폰을 쓴 모임">{`모임 ${shop.visits}팀이 쿠폰을 쓰고 다녀갔어요`}</InfoRow> : null}
         {!address && !shop.phone && !hours && shop.menus.length === 0 ? (
           <Text className="text-base text-muted">아직 모은 정보가 없어요</Text>
         ) : null}
@@ -187,13 +187,14 @@ function Hero({ shop }: { shop: ShopDetail }) {
   );
 }
 
-// 정보 한 줄: 왼쪽에 아이콘이나 짧은 이름(같은 폭), 오른쪽에 값
-function InfoRow({ icon, label, children }: { icon?: IconName; label?: string; children: ReactNode }) {
+// 정보 한 줄: 왼쪽에 아이콘 하나(모든 줄 같은 크기), 오른쪽에 값. 이름은 읽어 주기로만 붙인다
+function InfoRow({ icon, label, children }: { icon: IconName; label?: string; children: ReactNode }) {
   return (
-    <View className="min-h-6 flex-row gap-3">
-      <View className="w-16">
-        {icon ? <Icon name={icon} size={22} color="muted" /> : <Text className="text-sm text-muted">{label}</Text>}
-      </View>
+    <View
+      accessible
+      accessibilityLabel={label && typeof children === 'string' ? `${label}, ${children}` : undefined}
+      className="min-h-6 flex-row items-start gap-3">
+      <Icon name={icon} size={22} color="muted" />
       <Text className="flex-1 text-base text-text">{children}</Text>
     </View>
   );

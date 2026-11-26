@@ -1,3 +1,4 @@
+import { EmptyScreen } from '@/components/empty-state';
 import { choiceSurface } from '@/components/choice-colors';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { type ReactNode, useEffect, useRef, useState } from 'react';
@@ -77,23 +78,17 @@ export default function SessionScreen() {
     // 판을 연 사람이 판을 접었다(4-24). 실시간이나 4초 다시 읽기에서 판이 사라지면 바로 이 화면이 된다
     const gone = error instanceof SessionError && error.code === 'session_not_found';
     return (
-      <SafeAreaView className="flex-1 items-center justify-center gap-4 bg-background px-6">
-        <Text className="text-lg font-bold text-text">
-          {gone ? '판이 닫혔어요' : notMember ? '이 모임 멤버가 아니에요' : sessionErrorMessage(error)}
-        </Text>
-        <View className="w-full max-w-xs">
-          {gone ? (
-            <Button
-              label={lastGroupId ? '모임으로' : '홈으로'}
-              onPress={() => router.replace((lastGroupId ? `/groups/${lastGroupId}` : '/') as any)}
-            />
-          ) : notMember ? (
-            <Button label="홈으로" onPress={() => router.replace('/')} />
-          ) : (
-            <Button label="다시 시도" variant="secondary" onPress={() => retry()} />
-          )}
-        </View>
-      </SafeAreaView>
+      <EmptyScreen
+        title={gone ? '판이 닫혔어요' : notMember ? '이 모임 멤버가 아니에요' : sessionErrorMessage(error)}
+        icon={gone || notMember ? undefined : 'refresh'}
+        action={
+          gone
+            ? { label: lastGroupId ? '모임으로' : '홈으로', onPress: () => router.replace((lastGroupId ? `/groups/${lastGroupId}` : '/') as any) }
+            : notMember
+              ? { label: '홈으로', onPress: () => router.replace('/') }
+              : { label: '다시 시도', variant: 'inverse', onPress: () => retry() }
+        }
+      />
     );
   }
 
@@ -357,9 +352,9 @@ function CandidateStage({
                   accessibilityLabel={`${foodName.get(h.foodId) ?? ''} 후보로 올리기, ${h.eatenCount}번 먹음`}
                   disabled={busy}
                   onPress={() => add.mutate(h.foodId)}
-                  className="h-11 flex-row items-center gap-2 rounded-xl bg-ink px-4 active:opacity-80 disabled:opacity-50">
-                  <Text className="text-base font-semibold text-on-ink">{foodName.get(h.foodId) ?? ''}</Text>
-                  <Text className="text-sm text-on-ink opacity-60">{h.eatenCount}번</Text>
+                  className="h-11 flex-row items-center gap-2 rounded-xl bg-surface px-4 active:bg-surface-strong disabled:opacity-50">
+                  <Text className="text-base font-semibold text-text">{foodName.get(h.foodId) ?? ''}</Text>
+                  <Text className="text-sm text-muted">{h.eatenCount}번</Text>
                 </Pressable>
               ))}
             </View>

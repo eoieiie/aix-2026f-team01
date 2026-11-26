@@ -1,7 +1,7 @@
 import { usePathname, useRouter } from 'expo-router';
 import { type ReactNode, useEffect } from 'react';
-import { ActivityIndicator, Pressable, View } from 'react-native';
-import { Text } from '@/components/text';
+import { ActivityIndicator, View } from 'react-native';
+import { EmptyScreen } from '@/components/empty-state';
 
 import { isPublicPath } from '@/constants/public-paths';
 import { isFirstWebVisit } from '@/lib/first-visit';
@@ -27,18 +27,7 @@ export function AuthGate({ children }: { children: ReactNode }) {
 
   if (!open && status === 'error') {
     return (
-      <View className="flex-1 items-center justify-center gap-4 bg-background px-6">
-        <Text className="text-lg font-semibold text-text">연결할 수 없어요</Text>
-        <Pressable
-          accessibilityRole="button"
-          disabled={retrying}
-          onPress={retry}
-          className="rounded-xl bg-primary px-6 py-3 disabled:opacity-50">
-          <Text className="font-semibold text-on-primary">
-            {retrying ? '다시 연결하는 중' : '다시 시도'}
-          </Text>
-        </Pressable>
-      </View>
+      <EmptyScreen title="연결할 수 없어요" icon="refresh" action={{ label: '다시 시도', variant: 'inverse', onPress: retry, loading: retrying }} />
     );
   }
 

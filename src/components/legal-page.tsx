@@ -5,7 +5,13 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { IconButton } from '@/components/icon';
 import { Text } from '@/components/text';
 
-export type LegalSection = { title: string; lines: string[]; link?: { label: string; href: `mailto:${string}` } };
+export type LegalSection = {
+  title: string;
+  lines: string[];
+  link?: { label: string; href: `mailto:${string}` };
+  // 자주 묻는 것: 질문 줄은 600, 답 줄은 400으로 나눠 질문이 먼저 눈에 들어오게 한다
+  qa?: { q: string; a: string }[];
+};
 
 // 개인정보 처리방침, 이용약관, 문의 (명세 4-24). 웹 주소로도 열린다(앱스토어 제출용)
 export function LegalPage({ title, updated, sections }: { title: string; updated?: string; sections: LegalSection[] }) {
@@ -30,6 +36,12 @@ export function LegalPage({ title, updated, sections }: { title: string; updated
             {s.link ? (
               <MailLink {...s.link} />
             ) : null}
+            {s.qa?.map(({ q, a }) => (
+              <View key={q} className="gap-1">
+                <Text className="text-base font-semibold text-text">{q}</Text>
+                <Text className="text-base leading-6 text-muted">{a}</Text>
+              </View>
+            ))}
             {s.lines.map((l, i) => (
               <Text key={i} className="text-base leading-6 text-text">
                 {l}

@@ -5,6 +5,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { filterShops, SHOP_KINDS, shopLine, splitCoupons } from '@/hooks/use-shops';
 import { shopTint } from '@/constants/food-tint';
+import { EmptyState } from '@/components/empty-state';
 import { TintMark } from '@/components/tint-mark';
 import { councilShopRows, useCouncilBenefits } from '@/hooks/use-council-benefits';
 import { Button } from '@/components/button';
@@ -167,19 +168,19 @@ export default function ShopsScreen() {
             ItemSeparatorComponent={() => <View className="h-2" />}
             ListHeaderComponent={header}
             ListEmptyComponent={
-              <View className="items-center gap-4 rounded-3xl bg-surface p-6">
-                <Text className="text-center text-xl font-bold tracking-tight text-text">{scope && council.isFetching ? '제휴를 불러오는 중' : scope && council.isError ? '제휴를 불러올 수 없어요' : scope && entries.length === 0 ? `아직 ${councilName ?? '내 단과대'} 제휴 목록이 없어요` : kind === 'partner' && !query.trim() ? '쿠폰 주는 가게가 아직 없어요' : '찾는 가게가 없어요'}</Text>
-                <Button
-                  label="전체 보기"
-                  variant="inverse"
-                  className="self-center px-8"
-                  onPress={() => {
+              <EmptyState
+                title={scope && council.isFetching ? '제휴를 불러오는 중' : scope && council.isError ? '제휴를 불러올 수 없어요' : scope && entries.length === 0 ? `아직 ${councilName ?? '내 단과대'} 제휴 목록이 없어요` : kind === 'partner' && !query.trim() ? '쿠폰 주는 가게가 아직 없어요' : '찾는 가게가 없어요'}
+                icon="shop"
+                action={{
+                  label: '전체 보기',
+                  variant: 'inverse',
+                  onPress: () => {
                     setScope(null);
                     setKind('all');
                     setQuery('');
-                  }}
-                />
-              </View>
+                  },
+                }}
+              />
             }
             ListFooterComponent={scope && source && shown.length ? (
               <Pressable accessibilityRole="link" onPress={() => { void Linking.openURL(source).catch(() => {}); }} className="min-h-11 justify-center">

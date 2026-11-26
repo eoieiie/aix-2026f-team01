@@ -1,10 +1,10 @@
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { FlatList, Image, Pressable, View } from 'react-native';
+import { EmptyState } from '@/components/empty-state';
 import { Text } from '@/components/text';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { Button } from '@/components/button';
 import { CreateGroupModal } from '@/components/create-group-modal';
 import { FoodThumb } from '@/components/food-thumb';
 import { IconButton } from '@/components/icon';
@@ -102,29 +102,11 @@ export default function HomeScreen() {
           <Text className="text-sm text-muted">모임을 불러오는 중</Text>
         ) : isError ? (
           // 오류 상태: 오류 문구와 다시 시도 버튼 (spec.md 4-3)
-          <View className="gap-3">
-            <Text className="text-base font-semibold text-text">모임을 불러올 수 없어요</Text>
-            <Text className="text-sm text-muted">
-              {/* 오류 원문(영어)은 보이지 않고 한국어 문구만 (spec.md 4절 실패할 때) */}
-              인터넷 연결을 확인하고 다시 시도해 주세요
-            </Text>
-            <Button label="다시 시도" variant="secondary" onPress={() => refetch()} />
-          </View>
+          // 오류 원문(영어)은 보이지 않고 한국어 문구만 (spec.md 4절 실패할 때)
+          <EmptyState title="모임을 불러올 수 없어요" icon="refresh" action={{ label: '다시 시도', variant: 'inverse', onPress: () => refetch() }} />
         ) : !hasGroups ? (
           // 모임이 없을 때: 마스코트, "아직 모임이 없어요"(spec.md 4-3), 글 길이에 맞춘 가운데 버튼 (PR #52)
-          <View className="items-center gap-4 rounded-3xl bg-surface p-6">
-            <Image
-              source={mascotSource}
-              style={{ width: 64, height: 49 }}
-              resizeMode="contain"
-              accessibilityLabel="밥BTI 마스코트"
-            />
-            <Text className="text-xl font-bold tracking-tight text-text">아직 모임이 없어요</Text>
-            <Button
-              label="첫 모임 만들기"
-              className="self-center px-8"
-              onPress={() => setModalVisible(true)}
-            />
+          <EmptyState title="아직 모임이 없어요" action={{ label: '첫 모임 만들기', onPress: () => setModalVisible(true) }}>
             {/* 처음 온 사람이 무엇을 하는 앱인지 볼 곳. 모임이 생기면 이 화면과 함께 사라진다 */}
             <Pressable
               accessibilityRole="link"
@@ -132,7 +114,7 @@ export default function HomeScreen() {
               onPress={() => router.push('/about')}>
               <Text className="text-sm text-muted">어떻게 하나요</Text>
             </Pressable>
-          </View>
+          </EmptyState>
         ) : (
           // 최근에 들어간 순으로 보이는 모임 목록 (spec.md 4-3)
           <FlatList
