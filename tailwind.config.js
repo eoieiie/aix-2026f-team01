@@ -1,6 +1,7 @@
 // 색은 여기 이름으로만 쓴다. 화면 파일에 색 코드를 직접 쓰지 않는다 (spec.md 3절 5번)
 // 값은 src/constants/colors.json 한곳에 있다. SVG처럼 className을 못 받는 곳은 그 파일에서 같은 이름으로 꺼낸다
-// 주황 하나를 강조색으로 쓰고 나머지는 검정, 흰색, 회색만 쓴다 (spec.md 7절)
+// 주황 하나를 강조색으로 쓰고 나머지는 검정, 흰색, 회색만 쓴다 (spec.md 7절).
+// 시안 가(2026-11-26): 바탕은 옅은 크림, 카드는 옅은 베이지, 회색 글자와 선은 따뜻한 회색. 주황은 그대로 한 곳
 const colors = require('./src/constants/colors.json');
 
 /** @type {import('tailwindcss').Config} */
