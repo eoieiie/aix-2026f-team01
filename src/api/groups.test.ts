@@ -6,6 +6,7 @@ import {
   getMyGroups,
   getMyProfileName,
   GroupError,
+  plateFoodsFromMeals,
   startSession,
 } from './groups';
 
@@ -181,6 +182,57 @@ describe('src/api/groups.ts 테스트', () => {
       expect(group.members).toEqual(['민지', '준호']);
       expect(group.recent_foods.map((f) => f.food_name)).toEqual(['비빔밥', '쌀국수', '불고기']);
       expect(group.has_open_session).toBe(true);
+      // 서버 함수가 없을 때(rpc가 빈 값)는 같은 식사 기록으로 먹은 음식 줄을 만든다
+      expect(group.plate_foods.map((f) => f.name)).toEqual(['비빔밥', '쌀국수', '불고기', '김치찌개']);
+    });
+
+    it('먹은 음식 줄은 서버 함수(home_group_foods)의 모임별 값을 쓰고 그림 주소를 만든다 (0053)', async () => {
+      const prev = process.env.EXPO_PUBLIC_SUPABASE_URL;
+      process.env.EXPO_PUBLIC_SUPABASE_URL = 'https://x.supabase.co';
+      const { client, rpc } = fakeClient({
+        userId: 'user-me',
+        rpcData: [
+          {
+            group_id: 'g1',
+            foods: [
+              { food_id: 7, name: '마라탕', image_path: '7.webp' },
+              { food_id: 900, name: '찌개찌개', image_path: null },
+            ],
+          },
+          { group_id: 'g2', foods: [{ food_id: 8, name: '남의 모임 음식', image_path: '8.webp' }] },
+        ],
+        fromData: {
+          memberships: {
+            list: [
+              {
+                group_id: 'g1',
+                joined_at: '2026-10-01T00:00:00Z',
+                groups: {
+                  id: 'g1',
+                  name: '점심 팟',
+                  invite_code: 'AB3K9P',
+                  created_at: '2026-10-01T00:00:00Z',
+                  meals: [{ food_id: 1, eaten_at: '2026-10-03T00:00:00Z', foods: { name: '김치찌개' } }],
+                },
+              },
+            ],
+          },
+        },
+      });
+      const [group] = await getMyGroups(client);
+      process.env.EXPO_PUBLIC_SUPABASE_URL = prev;
+      expect(rpc).toHaveBeenCalledWith('home_group_foods');
+      expect(group.plate_foods).toEqual([
+        { food_id: 7, name: '마라탕', image_url: 'https://x.supabase.co/storage/v1/object/public/food-images/7.webp' },
+        { food_id: 900, name: '찌개찌개', image_url: null },
+      ]);
+    });
+  });
+
+  describe('plateFoodsFromMeals', () => {
+    it('같은 음식은 한 번, 최대 4개', () => {
+      const meals = [1, 2, 1, 3, 4, 5].map((id) => ({ food_id: id, foods: { name: `음식${id}` } }));
+      expect(plateFoodsFromMeals(meals).map((f) => f.food_id)).toEqual([1, 2, 3, 4]);
     });
   });
 

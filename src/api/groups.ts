@@ -1,8 +1,9 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import type { SupabaseClient } from '@supabase/supabase-js';
 
-import { HOME_RECENT_FOODS, RECENT_MEALS_LIMIT } from '@/constants';
+import { HOME_PLATE_FOODS, HOME_RECENT_FOODS, RECENT_MEALS_LIMIT } from '@/constants';
 
+import { foodImagePublicUrl } from './food-images';
 import { getSupabase } from './supabase';
 
 export type Client = Pick<SupabaseClient, 'auth' | 'from' | 'rpc'>;
@@ -18,7 +19,16 @@ export interface Group {
   // members와 같은 순서의 사람 id. PersonDots의 userIds로 넘기면 아바타가 보인다 (4-27)
   member_ids?: string[];
   recent_foods: { food_id: number; food_name: string }[];
+  // 카드 오른쪽 아래 먹은 음식 줄. 같이 먹은 음식을 최근 순으로 최대 4개, 같은 음식은 한 번 (0053)
+  plate_foods: PlateFood[];
   has_open_session: boolean;
+}
+
+export interface PlateFood {
+  food_id: number;
+  name: string;
+  // 그림이 없으면(직접 적은 메뉴) null. 화면은 음식 번호로 색 동그라미를 그린다
+  image_url: string | null;
 }
 
 export interface Member {
@@ -139,16 +149,53 @@ const MY_GROUPS_SELECT =
   'sessions!sessions_group_id_fkey ( status ), ' +
   'meals ( food_id, eaten_at, foods ( name ) ) )';
 
+// 모임별 먹은 음식 줄 (0053 home_group_foods). 서버가 아직 함수를 모르거나 실패하면 null을 돌려주고,
+// 그때는 목록과 함께 읽은 식사 기록으로 같은 줄을 만든다(그림 주소는 화면이 음식 번호로 찾는다)
+export async function getHomePlateFoods(client: Client = getSupabase()): Promise<Map<string, PlateFood[]> | null> {
+  try {
+    const { data, error } = await client.rpc('home_group_foods');
+    if (error || !Array.isArray(data)) return null;
+    const base = process.env.EXPO_PUBLIC_SUPABASE_URL ?? '';
+    const out = new Map<string, PlateFood[]>();
+    for (const row of data as { group_id: string; foods: any[] | null }[]) {
+      out.set(
+        row.group_id,
+        (row.foods ?? []).slice(0, HOME_PLATE_FOODS).map((f: any) => ({
+          food_id: Number(f.food_id),
+          name: String(f.name ?? ''),
+          image_url: base ? foodImagePublicUrl(base, f.image_path) : null,
+        }))
+      );
+    }
+    return out;
+  } catch {
+    return null;
+  }
+}
+
+// 최근 순으로 줄 세운 식사 기록에서 같은 음식을 한 번씩만 남긴다
+export function plateFoodsFromMeals(meals: { food_id: number; foods?: { name?: string } | null }[]): PlateFood[] {
+  const seen = new Set<number>();
+  const out: PlateFood[] = [];
+  for (const m of meals) {
+    if (seen.has(m.food_id)) continue;
+    seen.add(m.food_id);
+    out.push({ food_id: m.food_id, name: m.foods?.name ?? '식사', image_url: null });
+    if (out.length >= HOME_PLATE_FOODS) break;
+  }
+  return out;
+}
+
 export async function getMyGroups(client: Client = getSupabase()): Promise<Group[]> {
   const session = await client.auth.getSession();
   if (session.error) throw session.error;
   const userId = session.data.session?.user?.id;
   if (!userId) return [];
 
-  const { data, error } = await client
-    .from('memberships')
-    .select(MY_GROUPS_SELECT)
-    .eq('user_id', userId);
+  const [{ data, error }, plates] = await Promise.all([
+    client.from('memberships').select(MY_GROUPS_SELECT).eq('user_id', userId),
+    getHomePlateFoods(client),
+  ]);
 
   if (error) throwServerError(error);
   if (!data) return [];
@@ -176,6 +223,7 @@ export async function getMyGroups(client: Client = getSupabase()): Promise<Group
           food_id: m.food_id,
           food_name: m.foods?.name ?? '식사',
         })),
+        plate_foods: plates?.get(g.id) ?? plateFoodsFromMeals(meals),
         has_open_session: (g.sessions ?? []).some((s: any) => s.status !== 'done'),
       } as Group;
     })
