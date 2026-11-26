@@ -1,0 +1,41 @@
+id,name,food_id,sure_tags,ai_tags,ai_basis,is_menu,ai_status,prompt_version
+M01,찌개찌개,44,,,{},false,not_menu,3
+M02,빵,67,wheat,dairy egg wheat,"{""egg"":""varies"",""dairy"":""varies"",""wheat"":""recipe""}",true,done,3
+M03,떼드떼,68,,,{},false,not_menu,3
+M04,보배반점,69,,,{},false,not_menu,3
+M05,병천순대,70,pork,pork seafood spicy wheat,"{""pork"":""recipe"",""spicy"":""varies"",""wheat"":""varies"",""seafood"":""varies""}",true,done,3
+M06,쥬시 모찌,71,,,{},false,not_menu,3
+M07,백소정,72,,,{},false,not_menu,3
+M08,메가커피 케이크,73,,dairy egg nuts wheat,"{""egg"":""recipe"",""nuts"":""varies"",""dairy"":""recipe"",""wheat"":""recipe""}",true,done,3
+M09,분짜,74,pork,pork seafood wheat,"{""pork"":""recipe"",""wheat"":""varies"",""seafood"":""recipe""}",true,done,3
+M10,말레이시아 나시레막,75,,beef chicken egg nuts seafood spicy,"{""egg"":""recipe"",""beef"":""varies"",""nuts"":""recipe"",""spicy"":""recipe"",""chicken"":""varies"",""seafood"":""recipe""}",true,done,3
+M11,나시고랭,102,,chicken egg pork seafood wheat,"{""egg"":""varies"",""pork"":""varies"",""wheat"":""recipe"",""chicken"":""varies"",""seafood"":""recipe""}",true,done,3
+M12,반미,103,,beef chicken egg pork wheat,"{""egg"":""varies"",""beef"":""varies"",""pork"":""recipe"",""wheat"":""recipe"",""chicken"":""varies""}",true,done,3
+M13,훠궈,104,,beef chicken nuts pork seafood wheat,"{""beef"":""varies"",""nuts"":""recipe"",""pork"":""varies"",""wheat"":""varies"",""chicken"":""recipe"",""seafood"":""varies""}",true,done,3
+M14,포케,105,seafood,nuts seafood wheat,"{""nuts"":""varies"",""wheat"":""varies"",""seafood"":""recipe""}",true,done,3
+M15,타코,106,,beef chicken dairy pork seafood spicy wheat,"{""beef"":""varies"",""pork"":""varies"",""dairy"":""varies"",""spicy"":""varies"",""wheat"":""recipe"",""chicken"":""varies"",""seafood"":""varies""}",true,done,3
+M16,부리토,107,,beef chicken dairy pork spicy wheat,"{""beef"":""varies"",""pork"":""varies"",""dairy"":""varies"",""spicy"":""varies"",""wheat"":""recipe"",""chicken"":""varies""}",true,done,3
+M17,똠얌꿍,108,,chicken seafood spicy wheat,"{""spicy"":""recipe"",""wheat"":""varies"",""chicken"":""varies"",""seafood"":""recipe""}",true,done,3
+M18,팟카파오,109,,beef chicken egg pork seafood spicy,"{""egg"":""recipe"",""beef"":""varies"",""pork"":""varies"",""spicy"":""recipe"",""chicken"":""varies"",""seafood"":""recipe""}",true,done,3
+M19,샤와르마,110,,beef chicken dairy wheat,"{""beef"":""varies"",""dairy"":""varies"",""wheat"":""recipe"",""chicken"":""varies""}",true,done,3
+M20,팔라펠,111,,nuts wheat,"{""nuts"":""varies"",""wheat"":""varies""}",true,done,3
+M21,비리야니,113,,beef chicken dairy nuts seafood spicy,"{""beef"":""varies"",""nuts"":""varies"",""dairy"":""recipe"",""spicy"":""recipe"",""chicken"":""varies"",""seafood"":""varies""}",true,done,3
+M22,퀘사디아,114,,beef chicken dairy pork seafood spicy wheat,"{""beef"":""varies"",""pork"":""varies"",""dairy"":""recipe"",""spicy"":""varies"",""wheat"":""recipe"",""chicken"":""varies"",""seafood"":""varies""}",true,done,3
+M23,카오팟,115,,chicken egg pork seafood,"{""egg"":""recipe"",""pork"":""varies"",""chicken"":""varies"",""seafood"":""recipe""}",true,done,3
+M24,잡채,116,,beef egg pork spicy wheat,"{""egg"":""varies"",""beef"":""varies"",""pork"":""varies"",""spicy"":""varies"",""wheat"":""recipe""}",true,done,3
+M25,순대국,117,pork,pork seafood spicy wheat,"{""pork"":""recipe"",""spicy"":""varies"",""wheat"":""varies"",""seafood"":""varies""}",true,done,3
+M26,마파두부,118,,pork spicy wheat,"{""pork"":""recipe"",""spicy"":""recipe"",""wheat"":""recipe""}",true,done,3
+M27,충무김밥,119,,seafood spicy wheat,"{""spicy"":""recipe"",""wheat"":""varies"",""seafood"":""recipe""}",true,done,3
+M28,쫄면,120,wheat,egg pork spicy wheat,"{""egg"":""recipe"",""pork"":""varies"",""spicy"":""recipe"",""wheat"":""recipe""}",true,done,3
+M29,잔치국수,121,wheat,seafood spicy wheat,"{""spicy"":""varies"",""wheat"":""recipe"",""seafood"":""recipe""}",true,done,3
+M30,해장국,122,,beef pork seafood spicy,"{""beef"":""recipe"",""pork"":""varies"",""spicy"":""varies"",""seafood"":""varies""}",true,done,3
+M31,계란찜,123,egg,dairy egg seafood,"{""egg"":""recipe"",""dairy"":""varies"",""seafood"":""varies""}",true,done,3
+M32,부추전,124,,egg seafood wheat,"{""egg"":""varies"",""wheat"":""recipe"",""seafood"":""varies""}",true,done,3
+M33,콩나물국밥,125,,egg pork seafood spicy,"{""egg"":""recipe"",""pork"":""varies"",""spicy"":""varies"",""seafood"":""recipe""}",true,done,3
+M34,떡국,126,,beef chicken egg pork seafood wheat,"{""egg"":""recipe"",""beef"":""recipe"",""pork"":""varies"",""wheat"":""varies"",""chicken"":""varies"",""seafood"":""varies""}",true,done,3
+M35,후무스 플레이트,127,,dairy nuts wheat,"{""nuts"":""recipe"",""dairy"":""varies"",""wheat"":""recipe""}",true,done,3
+M36,샥슈카,128,,dairy egg spicy wheat,"{""egg"":""recipe"",""dairy"":""varies"",""spicy"":""recipe"",""wheat"":""varies""}",true,done,3
+M37,비건 두부덮밥,129,,spicy wheat,"{""spicy"":""varies"",""wheat"":""recipe""}",true,done,3
+M38,병아리콩 카레,130,,dairy nuts spicy,"{""nuts"":""varies"",""dairy"":""varies"",""spicy"":""varies""}",true,done,3
+M39,템페 볶음밥,131,,dairy egg spicy wheat,"{""egg"":""varies"",""dairy"":""varies"",""spicy"":""varies"",""wheat"":""recipe""}",true,done,3
+M40,아사이볼,132,,dairy nuts,"{""nuts"":""varies"",""dairy"":""varies""}",true,done,3
