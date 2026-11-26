@@ -77,8 +77,8 @@ def human_gold(people, decided):
                 row[t] = decided[(i, t)]
             elif v is not None:
                 row[t] = '' if t == NOT_MENU and v == '0' else str(v)
-            elif all(x is None for x in values):
-                row[t] = ''  # 모두 비움(대표 메뉴를 모르는 가게): 정할 값이 없다
+            elif values.count(None) * 2 >= len(values):
+                row[t] = ''  # 절반 이상이 비움(대표 메뉴를 모르는 가게 등): 정할 값이 없다
             else:
                 row[t] = ''
                 open_cells.append((i, row['메뉴 이름'], t, values))
@@ -99,9 +99,11 @@ def main(argv):
     print('== 1. 채운 정도 ==')
     for who, rows in sheets:
         print(f'{who}: {filled(rows)}/{total}칸')
-    if any(filled(rows) < total for _, rows in sheets):
+    if any(filled(rows) < total for _, rows in sheets[:len(SHEETS)]):
         print('시트가 다 차면 일치도와 비교를 낸다. 0(거의 없음), 1(가게나 버전에 따라), 2(대부분 가게의 기본 레시피)')
         return
+    if len(sheets) > len(SHEETS) and filled(sheets[-1][1]) < total:
+        print(f'{sheets[-1][0]} 시트의 빈칸은 표 없음으로 보고 진행한다 (나머지 두 사람이 같으면 그 값, 다르면 같이 정할 칸)')
     people = [by_id(rows) for _, rows in sheets]
     for (who, _), p in zip(sheets[1:], people[1:]):
         if set(p) != set(people[0]):
@@ -140,6 +142,9 @@ def main(argv):
         for name, c in systems(gold, v1, v2, ids).items():
             print(f"{name:20}  {rate(c['놓침'], c['정답 2 칸']):>22}   {rate(c['과잉 확실'], c['정답 0 칸']):>24}"
                   f"   {c['약한 표시 과잉']:>6}")
+        missed = [f"{i} {gold[i]['메뉴 이름']} {t}" for i in ids for t in TAGS
+                  if level(gold[i][t]) == 2 and t not in eval02.tagset(v2[i]['ai_tags']) | eval02.tagset(v2[i]['sure_tags'])]
+        print(f"(라)가 놓친 칸: {', '.join(missed) or '없음'}")
 
     consensus = by_id(read(data, 'consensus.csv'))
     pairs = [(level(gold[i][t]), level(consensus[i][t])) for i in gold for t in TAGS
