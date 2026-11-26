@@ -170,7 +170,7 @@ export default function GroupScreen() {
                     </View>
                     {fresh.has(member.user_id) ? <NewRing /> : null}
                   </View>
-                  <Text className="max-w-14 text-sm font-semibold text-text">
+                  <Text className="max-w-14 text-sm text-text">
                     {member.display_name}
                   </Text>
                 </View>

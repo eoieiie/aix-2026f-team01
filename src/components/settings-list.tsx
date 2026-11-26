@@ -94,7 +94,7 @@ export function SettingsList({
                   accessibilityLabel={`${b.displayName ?? ''} 차단 풀기`}
                   onPress={() => safety.unblock.mutate(b.userId, { onSuccess: () => blocks.refetch() })}
                   className="h-11 justify-center rounded-xl bg-background px-4 active:opacity-70">
-                  <Text className="text-sm font-bold text-text">풀기</Text>
+                  <Text className="text-sm font-semibold text-text">풀기</Text>
                 </Pressable>
               </View>
             ))

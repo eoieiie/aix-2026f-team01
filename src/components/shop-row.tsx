@@ -65,7 +65,7 @@ export function ShopRow({
         </View>
         {info.length ? <TextPieces pieces={info} /> : null}
         {lines.map((l, i) => (
-          <Text key={i} className="text-sm font-semibold text-text">
+          <Text key={i} className="text-sm text-text">
             {l}
           </Text>
         ))}

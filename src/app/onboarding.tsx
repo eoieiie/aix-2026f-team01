@@ -141,14 +141,14 @@ export default function OnboardingScreen() {
               style={{ width: `${((i + 1) / QUIZ_LENGTH) * 100}%` }}
             />
           </View>
-          <Text className="w-12 text-right text-sm font-semibold text-muted">
+          <Text className="w-12 text-right text-sm text-muted">
             {i + 1}/{QUIZ_LENGTH}
           </Text>
         </View>
         <View className="flex-1 justify-center gap-8 px-4 pb-16">
           {/* 첫 문항에서 무엇을 하라는지 몰랐다는 말이 있었다 (#44 인터뷰 3 다시, 11/17). 모든 문항 같은 자리에 한 줄만 */}
           <View className="gap-2">
-            <Text className="text-base font-bold text-muted">끌리는 쪽을 골라요</Text>
+            <Text className="text-base text-muted">끌리는 쪽을 골라요</Text>
             <Text className="text-3xl font-bold leading-tight tracking-tight text-text">
               {q.situation}
             </Text>
@@ -173,7 +173,7 @@ export default function OnboardingScreen() {
           ) : null}
           {saveError && lastPick ? (
             <View className="gap-2">
-              <Text className="text-sm font-semibold text-danger">{saveError}</Text>
+              <Text className="text-sm text-danger">{saveError}</Text>
               <Button label="다시 시도" variant="secondary" onPress={() => pick(lastPick)} />
             </View>
           ) : null}
@@ -327,8 +327,8 @@ function TypeReveal({
               }}
             >
               <View className="aspect-square items-center justify-center gap-1 rounded-2xl bg-on-ink">
-                <Text className="text-8xl font-extrabold text-ink">{l.letter}</Text>
-                <Text className="text-base font-bold text-text">{l.line}</Text>
+                <Text className="text-8xl font-bold text-ink">{l.letter}</Text>
+                <Text className="text-base font-semibold text-text">{l.line}</Text>
               </View>
             </Animated.View>
           ))}

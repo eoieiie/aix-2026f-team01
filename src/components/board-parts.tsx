@@ -96,7 +96,7 @@ export function TableRow({ cells, flex, head = false }: { cells: (string | numbe
         <Text
           key={i}
           style={{ flex: flex[i] ?? 1 }}
-          className={head ? 'text-xs font-semibold text-muted' : i === 0 ? 'text-base font-bold text-text' : 'text-base text-text'}>
+          className={head ? 'text-xs font-semibold text-muted' : i === 0 ? 'text-base font-semibold text-text' : 'text-base text-text'}>
           {c}
         </Text>
       ))}

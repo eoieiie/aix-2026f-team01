@@ -63,7 +63,7 @@ export function ReportSheet({ target, onClose }: { target: ReportTarget | null; 
               />
             ) : null}
           </View>
-          {error ? <Text className="text-sm font-semibold text-danger">{safetyErrorMessage(error)}</Text> : null}
+          {error ? <Text className="text-sm text-danger">{safetyErrorMessage(error)}</Text> : null}
           <Button label="취소" variant="secondary" onPress={close} />
         </>
       )}

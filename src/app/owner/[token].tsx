@@ -95,7 +95,7 @@ function OwnerBody({ board }: { board: OwnerBoard }) {
                   {board.menus.map((m) => (
                     <View key={m.name} className="gap-1">
                       <View className="flex-row justify-between gap-3">
-                        <Text className="text-base font-bold text-text">{m.name}</Text>
+                        <Text className="text-base font-semibold text-text">{m.name}</Text>
                         <Text className="text-base text-text">{`${m.teams}팀`}</Text>
                       </View>
                       <View className="h-2 rounded bg-surface-strong">

@@ -109,7 +109,7 @@ export function CandidateCard({
           ) : null}
         </View>
         {vetoed ? <Text className="text-sm font-semibold text-danger">{VETOED_TEXT}</Text> : null}
-        {maybe ? <Text className="text-sm font-semibold text-muted">{maybe}</Text> : null}
+        {maybe ? <Text className="text-sm text-muted">{maybe}</Text> : null}
         {notMenu ? <Text className="text-sm text-muted">{NOT_MENU_TEXT}</Text> : null}
         {eatenNote ? <Text className="text-sm text-muted">{eatenNote}</Text> : null}
         {candidate.pitch && !onSavePitch ? <Text className="text-sm text-muted">{candidate.pitch}</Text> : null}
@@ -164,7 +164,7 @@ export function CandidateCard({
         accessibilityState={{ expanded: aiOpen }}
         onPress={() => setAiOpen((v) => !v)}
         className="min-h-11 justify-center gap-1 rounded-lg bg-background px-3 py-2 active:opacity-70">
-        <Text className="text-sm font-bold text-text">{AI_LINE}</Text>
+        <Text className="text-sm font-semibold text-text">{AI_LINE}</Text>
         {aiOpen ? (
           <>
             {aiTags.map((t) => (
@@ -185,7 +185,7 @@ export function CandidateCard({
   const checkBox = askCheck ? (
     <View className="gap-3 rounded-lg bg-background p-3">
       <View className="gap-1">
-        <Text className="text-sm font-bold text-text">AI가 찾은 재료</Text>
+        <Text className="text-sm font-semibold text-text">AI가 찾은 재료</Text>
         <Text className="text-sm text-muted">{aiLabels.length > 0 ? aiLabels.join(', ') : '찾은 재료가 없어요'}</Text>
       </View>
       <View className="flex-row gap-2">
@@ -220,7 +220,7 @@ export function CandidateCard({
                   disabled={on || busy}
                   onPress={() => onAddTag?.(t.code)}
                   className={`h-11 items-center justify-center rounded-lg active:opacity-70 ${on ? 'bg-ink' : 'bg-surface'}`}>
-                  <Text className={`text-sm font-bold ${on ? 'text-on-ink' : 'text-text'}`}>{t.label}</Text>
+                  <Text className={`text-sm font-semibold ${on ? 'text-on-ink' : 'text-text'}`}>{t.label}</Text>
                 </Pressable>
               </View>
             );

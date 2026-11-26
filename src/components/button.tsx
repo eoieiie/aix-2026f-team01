@@ -51,7 +51,8 @@ export function Button({
         // 로딩 표시는 className을 받지 못해서 토큰 값을 colors.json에서 꺼내 준다
         <ActivityIndicator color={primary ? colors['on-primary'] : colors.text} />
       ) : (
-        <Text className={`text-xl font-bold ${fg}`}>
+        // 주 단추만 굵게(700), 나머지 단추는 중간 굵기(600). 한 화면에서 할 일 하나가 먼저 읽힌다 (docs/design.md "글자는 역할별로")
+        <Text className={`text-xl ${primary ? 'font-bold' : 'font-semibold'} ${fg}`}>
           {label}
         </Text>
       )}

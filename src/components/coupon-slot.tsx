@@ -49,7 +49,7 @@ export function CouponSlot({
         disabled={busy}
         onPress={onClaim}
         className="h-11 items-center justify-center rounded-lg bg-ink px-4 active:opacity-80 disabled:opacity-50">
-        <Text className="text-sm font-bold text-on-ink">쿠폰 받기</Text>
+        <Text className="text-sm font-semibold text-on-ink">쿠폰 받기</Text>
       </Pressable>
     </View>
   );

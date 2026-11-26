@@ -172,7 +172,7 @@ function TopBar({ onBack }: { onBack: (() => void) | null }) {
   return (
     <View className="h-16 flex-row items-center gap-3">
       {onBack ? <IconButton name="back" label="뒤로" onPress={onBack} /> : null}
-      <Text accessibilityRole="header" className="text-2xl font-extrabold tracking-tight text-text">
+      <Text accessibilityRole="header" className="text-2xl font-bold tracking-tight text-text">
         밥BTI
       </Text>
     </View>
@@ -214,7 +214,7 @@ function Stage({ children }: { children: ReactNode }) {
 function Tag({ label }: { label: string }) {
   return (
     <View accessibilityLabel={label} className="shrink-0 self-center rounded-lg bg-surface-strong px-2">
-      <Text className="text-xs font-bold text-muted">{label}</Text>
+      <Text className="text-xs font-semibold text-muted">{label}</Text>
     </View>
   );
 }
@@ -323,7 +323,7 @@ function Features({ wide }: { wide: boolean }) {
         <Stage>
           <View className="flex-row items-center gap-3">
             <PersonDots names={PEOPLE} size={44} ringClass="border-background" />
-            <Text className="text-base font-bold text-text">2 / 3 투표</Text>
+            <Text className="text-base font-semibold text-text">2 / 3 투표</Text>
           </View>
           <View className="flex-row gap-2">
             <View className="h-3 flex-1 rounded-full bg-ink" />
@@ -364,7 +364,7 @@ function Features({ wide }: { wide: boolean }) {
             ].map(([id, name]) => (
               <View key={id} className="flex-1 items-center gap-2 rounded-xl bg-surface p-3">
                 <FoodThumb foodId={id as number} size="sm" />
-                <Text className="text-center text-sm font-bold text-text">{name}</Text>
+                <Text className="text-center text-sm font-semibold text-text">{name}</Text>
               </View>
             ))}
           </View>
@@ -377,7 +377,7 @@ function Features({ wide }: { wide: boolean }) {
 function FeatureHead({ kicker, title }: { kicker: string; title: string }) {
   return (
     <View className="gap-1">
-      <Text className="text-sm font-bold text-muted">{kicker}</Text>
+      <Text className="text-sm font-semibold text-muted">{kicker}</Text>
       <Text className="text-xl font-bold tracking-tight text-text">{title}</Text>
     </View>
   );
@@ -522,7 +522,7 @@ function StepPiece({ index }: { index: number }) {
       <ShopSample />
       <View className="flex-row items-center gap-3 rounded-2xl bg-background p-4">
         <Icon name="ticket" />
-        <Text className="flex-1 text-base font-bold text-text">가게에서 직원 확인을 누르면 쿠폰이 써져요</Text>
+        <Text className="flex-1 text-base font-semibold text-text">가게에서 직원 확인을 누르면 쿠폰이 써져요</Text>
       </View>
     </View>
   );
@@ -548,7 +548,7 @@ function StartCard({
   return (
     <Cell wide={wide}>
       <View className="gap-1">
-        <Text className="text-sm font-bold text-muted">{kicker}</Text>
+        <Text className="text-sm font-semibold text-muted">{kicker}</Text>
         <Text className="text-2xl font-bold tracking-tight text-text">{title}</Text>
       </View>
       <View className="flex-1 gap-2">

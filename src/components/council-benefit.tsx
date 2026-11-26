@@ -9,7 +9,7 @@ export function CouncilBadge({ college, inline = false }: { college: CouncilBene
   return (
     // "광고"(AdBadge)와 같은 역할이라 같은 크기와 모양
     <View className={`shrink-0 rounded-lg bg-surface-strong px-2 ${inline ? '' : 'self-start'}`}>
-      <Text className="text-xs font-bold text-muted">{councilBadge(college)}</Text>
+      <Text className="text-xs font-semibold text-muted">{councilBadge(college)}</Text>
     </View>
   );
 }

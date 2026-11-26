@@ -58,7 +58,7 @@ export function HeadcountModal({
       accessibilityState={{ selected: on }}
       onPress={onPress}
       className={`h-12 flex-1 items-center justify-center rounded-xl ${on ? 'bg-ink' : 'bg-surface'} active:opacity-70`} style={choiceSurface(on)}>
-      <Text className={`text-base font-bold ${on ? 'text-on-ink' : 'text-text'}`}>{label}</Text>
+      <Text className={`text-base font-semibold ${on ? 'text-on-ink' : 'text-text'}`}>{label}</Text>
     </Pressable>
   );
 
@@ -95,7 +95,7 @@ export function HeadcountModal({
                     onPress={() => toggle(m.user_id)}
                     className={`min-h-11 max-w-full flex-row items-center gap-1 rounded-full px-4 py-2 ${on ? 'bg-ink' : 'bg-surface'} active:opacity-70`} style={choiceSurface(on)}>
                     {on ? <Icon name="check" size={16} color="on-ink" /> : null}
-                    <Text className={`text-base font-bold ${on ? 'text-on-ink' : 'text-muted'}`}>
+                    <Text className={`text-base font-semibold ${on ? 'text-on-ink' : 'text-muted'}`}>
                       {m.display_name}
                     </Text>
                   </Pressable>
@@ -104,7 +104,7 @@ export function HeadcountModal({
             </View>
 
             <View className="flex-row items-center gap-2">
-              <Text className="flex-1 text-base font-bold text-text">앱 없는 사람</Text>
+              <Text className="flex-1 text-base font-semibold text-text">앱 없는 사람</Text>
               {round('minus', '앱 없는 사람 한 명 빼기', extra <= 0, -1)}
               <Text accessibilityLabel={`앱 없는 사람 ${extra}명`} className="min-w-10 text-center text-xl font-bold text-text">
                 {extra}
@@ -119,7 +119,7 @@ export function HeadcountModal({
               className="h-12 flex-row items-center justify-between rounded-2xl bg-surface px-4 active:opacity-70">
               <TextPieces
                 pieces={['옵션', `인당 ${voteLimit}표`, allowRepeat ? '한 메뉴에 여러 표' : '']}
-                className="text-base font-bold text-text"
+                className="text-base font-semibold text-text"
               />
               <Icon name={showOptions ? 'minus' : 'plus'} size={18} />
             </Pressable>
@@ -127,13 +127,13 @@ export function HeadcountModal({
             {showOptions ? (
               <View className="gap-4">
                 <View className="gap-2">
-                  <Text className="text-sm font-bold text-text">인당 표 수</Text>
+                  <Text className="text-sm font-semibold text-text">인당 표 수</Text>
                   <View className="flex-row gap-2">
                     {[1, 2, 3].map((n) => seg(`${n}표`, voteLimit === n, () => setVoteLimit(n)))}
                   </View>
                 </View>
                 <View className="gap-2">
-                  <Text className="text-sm font-bold text-text">한 메뉴에 여러 표</Text>
+                  <Text className="text-sm font-semibold text-text">한 메뉴에 여러 표</Text>
                   <View className="flex-row gap-2">
                     {seg('끔', !allowRepeat, () => setAllowRepeat(false))}
                     {seg('켬', allowRepeat, () => setAllowRepeat(true))}
@@ -142,7 +142,7 @@ export function HeadcountModal({
               </View>
             ) : null}
 
-            {error ? <Text className="text-sm font-semibold text-danger">{error}</Text> : null}
+            {error ? <Text className="text-sm text-danger">{error}</Text> : null}
             <View className="flex-row gap-2">
               <View className="flex-1">
                 <Button label="취소" variant="secondary" onPress={onClose} disabled={loading} />

@@ -48,7 +48,7 @@ export default function ShopScreen() {
         <Text className="px-4 text-sm text-muted">가게를 불러오는 중</Text>
       ) : shop.isError || !shop.data ? (
         <View className="gap-3 px-4">
-          <Text className="text-base font-bold text-text">가게를 불러올 수 없어요</Text>
+          <Text className="text-base font-semibold text-text">가게를 불러올 수 없어요</Text>
           <Button label="다시 시도" variant="secondary" onPress={() => shop.refetch()} />
         </View>
       ) : (
@@ -92,8 +92,8 @@ function ShopBody({ shop }: { shop: ShopDetail }) {
       {shop.partner && shop.couponText ? (
         <View className="gap-3 rounded-3xl bg-surface p-4">
           <View className="gap-1">
-            <Text className="text-sm font-semibold text-muted">제휴 혜택</Text>
-            <Text className="text-lg font-bold text-text">{shop.couponText}</Text>
+            <Text className="text-sm text-muted">제휴 혜택</Text>
+            <Text className="text-lg font-semibold text-text">{shop.couponText}</Text>
           </View>
           {coupon ? (
             <CouponCode code={coupon.code} shop={shop.name} benefit={coupon.benefit} coupon={coupon} />
@@ -107,7 +107,7 @@ function ShopBody({ shop }: { shop: ShopDetail }) {
               }}
             />
           )}
-          {claimError ? <Text className="text-sm font-semibold text-danger">{claimError}</Text> : null}
+          {claimError ? <Text className="text-sm text-danger">{claimError}</Text> : null}
           <Text className="text-xs text-muted">{`하루 한 장, 받고 ${COUPON_VALID_HOURS}시간 안에 가게에서 보여 주세요`}</Text>
         </View>
       ) : null}
@@ -191,7 +191,7 @@ function InfoRow({ icon, label, children }: { icon?: IconName; label?: string; c
   return (
     <View className="min-h-6 flex-row gap-3">
       <View className="w-16">
-        {icon ? <Icon name={icon} size={22} color="muted" /> : <Text className="text-sm font-semibold text-muted">{label}</Text>}
+        {icon ? <Icon name={icon} size={22} color="muted" /> : <Text className="text-sm text-muted">{label}</Text>}
       </View>
       <Text className="flex-1 text-base text-text">{children}</Text>
     </View>

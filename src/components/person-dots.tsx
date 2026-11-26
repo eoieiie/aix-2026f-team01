@@ -38,7 +38,7 @@ export function PersonDots({ names, userIds, ringClass = 'border-surface', size 
           <View
             className="items-center justify-center rounded-full bg-surface-strong"
             style={{ width: size, height: size }}>
-            <Text className="text-xs font-bold text-text">+{rest}</Text>
+            <Text className="text-xs font-semibold text-text">+{rest}</Text>
           </View>
         </View>
       ) : null}

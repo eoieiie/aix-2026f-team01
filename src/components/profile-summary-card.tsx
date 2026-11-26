@@ -51,7 +51,7 @@ export function ProfileSummaryCard({
         </View>
         {handle && title ? (
           <View className="h-8 justify-center rounded-lg bg-background px-2">
-            <Text className="text-xs font-bold text-text">{title}</Text>
+            <Text className="text-xs font-semibold text-text">{title}</Text>
           </View>
         ) : null}
       </View>
@@ -61,7 +61,7 @@ export function ProfileSummaryCard({
         <View accessibilityLabel={`내 네 글자 ${letters.join('')}`} className="flex-row gap-2">
           {letters.map((l, i) => (
             <View key={i} className="h-14 flex-1 items-center justify-center rounded-lg bg-background">
-              <Text className="text-3xl font-extrabold text-text">{l}</Text>
+              <Text className="text-3xl font-bold text-text">{l}</Text>
             </View>
           ))}
         </View>
@@ -71,7 +71,7 @@ export function ProfileSummaryCard({
 
       <View className="gap-2">
         <View className="flex-row items-baseline justify-between">
-          <Text className="text-base font-bold text-text">레벨 {level}</Text>
+          <Text className="text-base font-semibold text-text">레벨 {level}</Text>
           <Text className="text-sm text-muted">다음 레벨까지 {toNext}끼</Text>
         </View>
         <View
@@ -89,7 +89,7 @@ export function ProfileSummaryCard({
             <Avatar name={nextAvatar.name} foodId={nextAvatar.foodId} size={44} />
           </View>
           <View className="flex-1 gap-1">
-            <Text className="text-sm font-bold text-text">레벨 {nextAvatar.unlockLevel}에 열려요</Text>
+            <Text className="text-sm font-semibold text-text">레벨 {nextAvatar.unlockLevel}에 열려요</Text>
             <Text className="text-sm text-muted">
               {nextAvatar.name} 아바타
             </Text>

@@ -49,10 +49,10 @@ export function CouponCode({
       accessible={!coupon || dim}
       accessibilityLabel={`${shop} 쿠폰 코드 ${code.split('').join(' ')}, ${benefit}${status ? ', ' + status : ''}`}
       className={`items-center gap-2 rounded-2xl p-4 ${onBackground ? 'bg-surface' : 'bg-background'}`}>
-      <Text className="text-sm font-bold text-text">{shop}</Text>
+      <Text className="text-sm font-semibold text-text">{shop}</Text>
       <Text className={`text-4xl font-bold tracking-widest ${dim ? 'text-muted' : 'text-text'}`}>{code}</Text>
       <Text className="text-center text-sm text-text">{benefit}</Text>
-      {status ? <Text className="text-xs font-semibold text-muted">{status}</Text> : null}
+      {status ? <Text className="text-xs text-muted">{status}</Text> : null}
       {coupon && state === 'ready' ? (
         <>
           <Pressable
