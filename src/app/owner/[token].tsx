@@ -18,14 +18,14 @@ export default function OwnerScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-background">
-      <ScrollView contentContainerClassName="gap-6 p-6 pb-16">
+      <ScrollView contentContainerClassName="gap-6 px-4 pb-16 pt-6">
         {board.isLoading ? (
           <Text className="text-sm text-muted">현황을 불러오는 중</Text>
         ) : board.isError || !board.data ? (
           <View className="max-w-md gap-3 rounded-3xl bg-surface p-6">
             <Text className="text-xl font-bold tracking-tight text-text">주소를 다시 확인해 주세요</Text>
             <Text className="text-base text-muted">밥BTI 팀이 드린 주소 그대로 열어야 보여요</Text>
-            <Button label="다시 시도" variant="secondary" className="bg-background" onPress={() => board.refetch()} />
+            <Button label="다시 시도" variant="inverse" onPress={() => board.refetch()} />
           </View>
         ) : (
           <OwnerBody board={board.data} />
@@ -43,8 +43,8 @@ function OwnerBody({ board }: { board: OwnerBoard }) {
   const week = (
     <Panel title="이번 주" note="월요일부터">
       <View className="flex-row gap-3">
-        <StatTileOnPanel value={board.week.claimed} label="쿠폰 받은 팀" />
-        <StatTileOnPanel value={board.week.redeemed} label="가게에 온 팀" />
+        <StatTileOnPanel value={board.week.claimed} label="받은 팀" />
+        <StatTileOnPanel value={board.week.redeemed} label="쓴 팀" />
         <StatTileOnPanel value={board.week.people} label="온 사람" />
       </View>
     </Panel>
@@ -52,8 +52,8 @@ function OwnerBody({ board }: { board: OwnerBoard }) {
   const total = (
     <Panel title="처음부터">
       <View className="flex-row gap-3">
-        <StatTileOnPanel value={board.total.claimed} label="쿠폰 받은 팀" />
-        <StatTileOnPanel value={board.total.redeemed} label="가게에 온 팀" />
+        <StatTileOnPanel value={board.total.claimed} label="받은 팀" />
+        <StatTileOnPanel value={board.total.redeemed} label="쓴 팀" />
         <StatTileOnPanel value={board.total.people} label="온 사람" />
       </View>
     </Panel>

@@ -34,7 +34,7 @@ export default function CouponsScreen() {
             <Button label="다시 시도" variant="secondary" onPress={() => refetch()} />
           </View>
         ) : ready.length === 0 ? (
-          <View className="items-center gap-4 rounded-3xl bg-surface p-4">
+          <View className="items-center gap-4 rounded-3xl bg-surface p-6">
             <Text className="text-xl font-bold tracking-tight text-text">쓸 수 있는 쿠폰이 없어요</Text>
             <Button label="가게 보러 가기" className="self-center px-8" onPress={() => router.replace('/(tabs)/shops' as any)} />
           </View>

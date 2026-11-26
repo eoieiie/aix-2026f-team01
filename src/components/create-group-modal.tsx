@@ -75,7 +75,7 @@ export function CreateGroupModal({ visible, onClose }: CreateGroupModalProps) {
       <View className="flex-1 items-center justify-center bg-black/40 px-4">
         <View className="w-full max-w-[440px] gap-6 rounded-3xl bg-background p-6">
           <View className="gap-1">
-            <Text className="text-3xl font-bold tracking-tight text-text">새 모임</Text>
+            <Text className="text-xl font-bold tracking-tight text-text">새 모임</Text>
             {profileName !== null ? (
               <Text className="text-base text-muted">{withRo(profileName)} 들어가요</Text>
             ) : null}

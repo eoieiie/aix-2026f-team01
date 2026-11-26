@@ -205,6 +205,53 @@ describe('디자인 규칙', () => {
     expect(found).toEqual([]);
   });
 
+  // 2026-11-26 전체 화면 검수에서 찾은 어긋남을 다시 생기지 않게 막는다 (docs/design.md "화면 검수")
+  it('굴러가는 화면의 옆 여백은 16(px-4)이다. 결과 순간과 현황판도 같은 왼쪽 선에서 시작한다', () => {
+    // 창(같이 먹을 사람) 안 여백 24와 소개, 부품 견본 화면은 앱 화면 옆 여백이 아니라 뺀다
+    const OK = ['src/components/headcount-modal.tsx', 'src/app/dev/parts.tsx', 'src/app/about.tsx'];
+    const found = files.flatMap(({ file, text }) =>
+      OK.includes(file)
+        ? []
+        : [...text.matchAll(/contentContainerClassName="([^"]*)"/g)]
+            .filter(([, cls]) => /(?<![\w-])(?:p|px)-(?:5|6|7|8)(?![\w-])/.test(cls))
+            .map(([, cls]) => `${file}: ${cls}`)
+    );
+    expect(found).toEqual([]);
+  });
+
+  it('창 제목은 20(text-xl)이다. 창 안에서 30 이상은 코드(아이디, 초대 코드)에만 쓴다', () => {
+    const SHEETS = [
+      'src/components/create-group-modal.tsx',
+      'src/components/headcount-modal.tsx',
+      'src/components/sheets.tsx',
+      'src/components/report-sheet.tsx',
+      'src/components/group-menu.tsx',
+      'src/components/redeem-sheet.tsx',
+    ];
+    const found = files
+      .filter(({ file }) => SHEETS.includes(file))
+      .filter(({ text }) => /(?<![\w-])text-[3-9]xl(?![\w-])/.test(text))
+      .map(({ file }) => file);
+    expect(found).toEqual([]);
+  });
+
+  it('줄 단추(창의 고르기 줄, 설정 줄)는 다른 단추처럼 600이다. 확인 창의 빨간 단추는 옆 "취소"와 같은 크기다', () => {
+    const sheets = files.find(({ file }) => file === 'src/components/sheets.tsx').text;
+    const settings = files.find(({ file }) => file === 'src/components/settings-list.tsx').text;
+    expect(sheets).not.toMatch(/text-(?:base|lg) font-bold \$\{danger/);
+    expect(settings).not.toMatch(/text-base font-bold \$\{danger/);
+    expect(sheets).toMatch(/text-xl font-semibold text-danger/);
+  });
+
+  it('단추 바탕색은 variant로만 정한다. Button에 className으로 bg-를 넘기지 않는다(바탕이 부딪혀 단추가 면에 묻힌다)', () => {
+    const found = files.flatMap(({ file, text }) =>
+      [...text.matchAll(/<Button\b[^>]*?className="([^"]*)"/gs)]
+        .filter(([, cls]) => /(?<![\w-])bg-/.test(cls))
+        .map(([, cls]) => `${file}: ${cls}`)
+    );
+    expect(found).toEqual([]);
+  });
+
   it('음식 색 동그라미가 쓰는 색은 모두 tailwind.config.js 토큰에 있다', () => {
     for (const cls of FOOD_COLOR_CLASSES) {
       expect(tailwindColors).toHaveProperty(cls.replace(/^bg-/, ''));

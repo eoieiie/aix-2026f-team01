@@ -310,7 +310,7 @@ function CandidateStage({
         scrollEventThrottle={64}
         onLayout={(e: LayoutChangeEvent) => (viewH.current = e.nativeEvent.layout.height)}
         contentContainerClassName="gap-4 px-4 pb-40 pt-2">
-        <View className="flex-row items-end justify-between">
+        <View className="flex-row items-center justify-between gap-3">
           <Text className="flex-1 text-xl font-bold tracking-tight text-text">뭐 먹고 싶어요?</Text>
           <Pressable
             accessibilityRole="button"
@@ -363,7 +363,7 @@ function CandidateStage({
         ) : null}
 
         <View className="gap-2" onLayout={(e: LayoutChangeEvent) => (listY.current = e.nativeEvent.layout.y)}>
-          <Text className="text-lg font-bold text-text">후보 {session.candidates.length}개</Text>
+          <Text className="text-xl font-bold tracking-tight text-text">후보 {session.candidates.length}개</Text>
           {newestFirst.map((c) => (
               <CandidateCard
                 key={c.foodId}

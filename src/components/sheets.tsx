@@ -24,7 +24,7 @@ export function ChoiceRow({ label, onPress, danger = false }: { label: string; o
       accessibilityLabel={label}
       onPress={onPress}
       className="h-14 justify-center rounded-2xl bg-surface px-4 active:opacity-70">
-      <Text className={`text-base font-bold ${danger ? 'text-danger' : 'text-text'}`}>{label}</Text>
+      <Text className={`text-base font-semibold ${danger ? 'text-danger' : 'text-text'}`}>{label}</Text>
     </Pressable>
   );
 }
@@ -69,7 +69,7 @@ export function ConfirmSheet({
               disabled={busy}
               onPress={onConfirm}
               className="h-14 items-center justify-center rounded-2xl bg-surface-strong active:opacity-70 disabled:opacity-50">
-              <Text className="text-lg font-bold text-danger">{busy ? '처리하는 중' : confirmLabel}</Text>
+              <Text className="text-xl font-semibold text-danger">{busy ? '처리하는 중' : confirmLabel}</Text>
             </Pressable>
           ) : (
             <Button label={confirmLabel} variant="primary" onPress={onConfirm} loading={busy} />

@@ -164,15 +164,14 @@ export default function ShopsScreen() {
             ListHeaderComponent={header}
             ListEmptyComponent={
               <View className="items-center gap-4 rounded-3xl bg-surface p-6">
-                <Text className="text-lg font-bold text-text">{scope && council.isFetching ? '제휴를 불러오는 중' : scope && council.isError ? '제휴를 불러올 수 없어요' : scope && entries.length === 0 ? `아직 ${councilName ?? '내 단과대'} 제휴 목록이 없어요` : '찾는 가게가 없어요'}</Text>
+                <Text className="text-center text-xl font-bold tracking-tight text-text">{scope && council.isFetching ? '제휴를 불러오는 중' : scope && council.isError ? '제휴를 불러올 수 없어요' : scope && entries.length === 0 ? `아직 ${councilName ?? '내 단과대'} 제휴 목록이 없어요` : kind === 'partner' && !query.trim() ? '쿠폰 주는 가게가 아직 없어요' : '찾는 가게가 없어요'}</Text>
                 <Button
                   label="전체 보기"
-                  variant="secondary"
-                  className="self-center bg-background px-8"
+                  variant="inverse"
+                  className="self-center px-8"
                   onPress={() => {
                     setScope(null);
                     setKind('all');
-                    setQuery('');
                     setQuery('');
                   }}
                 />
