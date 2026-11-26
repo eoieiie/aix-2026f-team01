@@ -8,6 +8,7 @@ import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { AccountSheet } from '@/components/account-sheet';
 import { Avatar } from '@/components/avatar';
+import { HeroBand } from '@/components/hero-band';
 import { Button } from '@/components/button';
 import { CardButton, ProfileSummaryCard } from '@/components/profile-summary-card';
 import { SettingsList } from '@/components/settings-list';
@@ -70,9 +71,8 @@ export default function ProfileScreen() {
         // 아래 안전 영역(홈 막대) 위에 탭이 떠 있으니 그만큼 더 비운다. 아이폰에서 마지막 설정 줄이 탭에 가렸다(11/20 실기기)
         contentContainerStyle={{ paddingBottom: TAB_BAR_SPACE + insets.bottom }}
         showsVerticalScrollIndicator={false}>
-        <View className="h-12 justify-center">
-          <Text className="text-3xl font-bold tracking-tight text-text">내 프로필</Text>
-        </View>
+        {/* 시안 다: 제목을 옅은 주황 머리 칸에 넣고 마스코트를 붙인다 */}
+        <HeroBand title="내 프로필" />
 
         <ProfileSummaryCard
           letters={letters}

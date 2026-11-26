@@ -74,7 +74,8 @@ describe('디자인 규칙', () => {
 
   it('주황 면은 파일 하나에 한 곳까지다. 룰렛 결과 순간과 결과 카드만 예외', () => {
     // 주황은 포인트로만 쓴다: 주 단추 하나나 상태 알약 하나. 고른 상태는 검정(bg-ink)으로 보인다
-    const ORANGE_OK = ['src/components/result-moment.tsx', 'src/components/result-card.tsx'];
+    // 시안 다(2026-11-26): 아래 탭은 지금 탭의 옅은 주황 원과 그 아래 작은 주황 점이 한 표시라 뺀다
+    const ORANGE_OK = ['src/components/result-moment.tsx', 'src/components/result-card.tsx', 'src/app/(tabs)/_layout.tsx'];
     const area = /\bbg-primary(?:-soft)?\b|backgroundColor:\s*colors(?:\.primary\b|\[['"]primary(?:-soft)?['"]\])/g;
     const found = files
       .filter(({ file }) => !ORANGE_OK.includes(file))

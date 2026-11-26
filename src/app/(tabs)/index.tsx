@@ -9,6 +9,7 @@ import { CreateGroupModal } from '@/components/create-group-modal';
 import { FoodThumb } from '@/components/food-thumb';
 import { IconButton } from '@/components/icon';
 import { Logo } from '@/components/logo';
+import { HeroBand, mealGreeting } from '@/components/hero-band';
 import { PersonDots } from '@/components/person-dots';
 import { PlateFoods } from '@/components/plate-foods';
 import { Group, useMyGroups, useMyGroupsLive } from '@/hooks/use-groups';
@@ -92,9 +93,10 @@ export default function HomeScreen() {
         </View>
 
         {/* 위쪽 줄과 제목 사이 24, 제목과 목록 사이 24 (docs/design.md 4절). 아래 설명 줄은 두지 않는다 */}
-        <Text className="mb-6 mt-6 text-3xl font-bold tracking-tight text-text">
-          오늘은 누구랑 먹어요?
-        </Text>
+        {/* 시안 다: 제목을 옅은 주황 머리 칸에 넣고 인사 한 줄과 마스코트를 붙인다 */}
+        <View className="mb-6 mt-4">
+          <HeroBand greeting={mealGreeting()} title="오늘은 누구랑 먹어요?" />
+        </View>
 
         {isLoading ? (
           <Text className="text-sm text-muted">모임을 불러오는 중</Text>

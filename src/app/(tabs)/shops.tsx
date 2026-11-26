@@ -4,6 +4,7 @@ import { FlatList, Linking, Pressable, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { filterShops, SHOP_KINDS, shopLine, splitCoupons } from '@/hooks/use-shops';
+import { HeroBand } from '@/components/hero-band';
 import { councilShopRows, useCouncilBenefits } from '@/hooks/use-council-benefits';
 import { Button } from '@/components/button';
 import { Icon } from '@/components/icon';
@@ -105,17 +106,17 @@ export default function ShopsScreen() {
   return (
     <SafeAreaView className="flex-1 bg-background" edges={['top']}>
       <View className="flex-1 px-4 pt-3">
-        <View className="h-12 flex-row items-center justify-between">
-          <Text className="text-3xl font-bold tracking-tight text-text">학교 앞 가게</Text>
+        {/* 시안 다: 제목을 옅은 주황 머리 칸에 넣고 음식 그림(떡볶이)을 붙인다. 쿠폰함은 제목 아래 흰 알약 */}
+        <HeroBand title="학교 앞 가게" foodId={16}>
           <Pressable
             accessibilityRole="button"
             accessibilityLabel={readyCount > 0 ? `쿠폰함, 쓸 수 있는 쿠폰 ${readyCount}장` : '쿠폰함'}
             onPress={() => router.push('/coupons' as any)}
-            className="h-12 flex-row items-center justify-center gap-2 rounded-full bg-surface px-4 active:opacity-70">
+            className="h-11 flex-row items-center justify-center gap-2 self-start rounded-full bg-background px-4 active:opacity-70">
             <Icon name="ticket" />
-            {readyCount > 0 ? <Text className="text-base font-semibold text-text">{readyCount}</Text> : null}
+            <Text className="text-base font-semibold text-text">쿠폰함{readyCount > 0 ? ` ${readyCount}` : ''}</Text>
           </Pressable>
-        </View>
+        </HeroBand>
 
         <View className="h-6" />
 

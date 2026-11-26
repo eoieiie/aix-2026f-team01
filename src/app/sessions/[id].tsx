@@ -7,6 +7,7 @@ import type { LayoutChangeEvent } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Button } from '@/components/button';
+import { HeroBand } from '@/components/hero-band';
 import { CandidateCard } from '@/components/candidate-card';
 import { FoodSearch } from '@/components/food-search';
 import { HeadcountStepper } from '@/components/headcount-stepper';
@@ -310,16 +311,16 @@ function CandidateStage({
         scrollEventThrottle={64}
         onLayout={(e: LayoutChangeEvent) => (viewH.current = e.nativeEvent.layout.height)}
         contentContainerClassName="gap-4 px-4 pb-40 pt-2">
-        <View className="flex-row items-end justify-between">
-          <Text className="flex-1 text-xl font-bold tracking-tight text-text">뭐 먹고 싶어요?</Text>
+        {/* 시안 다: 질문을 옅은 주황 머리 칸에 넣고 가장 최근 후보의 그림(없으면 마스코트)을 붙인다 */}
+        <HeroBand title="뭐 먹고 싶어요?" foodId={newestFirst[0]?.foodId ?? null}>
           <Pressable
             accessibilityRole="button"
             accessibilityLabel="못 먹는 것"
             onPress={onRestrictions}
-            className="h-11 justify-center rounded-xl bg-surface px-4 active:opacity-70">
+            className="h-11 justify-center self-start rounded-xl bg-background px-4 active:opacity-70">
             <Text className="text-sm font-semibold text-text">못 먹는 것</Text>
           </Pressable>
-        </View>
+        </HeroBand>
 
         <FoodSearch
           foods={searchFoods}
@@ -363,7 +364,11 @@ function CandidateStage({
         ) : null}
 
         <View className="gap-2" onLayout={(e: LayoutChangeEvent) => (listY.current = e.nativeEvent.layout.y)}>
-          <Text className="text-lg font-bold text-text">후보 {session.candidates.length}개</Text>
+          {/* 시안 다: 구역 제목 앞 짧은 주황 선 */}
+          <View className="flex-row items-center gap-2">
+            <View className="h-4 w-1 rounded-full bg-primary" />
+            <Text className="text-lg font-bold text-text">후보 {session.candidates.length}개</Text>
+          </View>
           {newestFirst.map((c) => (
               <CandidateCard
                 key={c.foodId}

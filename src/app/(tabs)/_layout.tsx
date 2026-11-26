@@ -63,6 +63,8 @@ function TabBar({ state, navigation }: { state: any; navigation: any }) {
                 style={{ width: TAB_DOT_SIZE, height: TAB_DOT_SIZE }}>
                 <Icon name={tab.icon} size={24} color={on ? 'primary' : 'muted'} />
               </View>
+              {/* 시안 다: 지금 탭 아래 작은 주황 점 */}
+              {on ? <View className="absolute bottom-2 h-1 w-1 rounded-full bg-primary" /> : null}
             </Pressable>
           );
         })}
