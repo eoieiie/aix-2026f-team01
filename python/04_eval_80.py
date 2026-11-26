@@ -10,6 +10,7 @@
 2) 1차 40개, 사람 정답 기준: (가)~(마). 03과 같은 숫자
 3) 2차 40개, AI 기준 정답 기준: (가)~(마). 2차는 판 3을 고칠 때 보지 않은 새 메뉴다
 4) 합쳐서 80개: 1차는 사람 정답, 2차는 AI 기준 정답으로 센 합계
+(바) 낱말 표 고친 뒤(0060): 2차에서 찾은 낱말 표 오발을 고친 뒤 같은 메뉴로 잰 값. 2차도 보고 고친 뒤 잰 값이 된다
 5) (마)가 2차에서 놓친 칸과 메뉴 아님 판단이 틀린 것
 
 시스템 답: 1차 system_v1~v3.csv(그때 서버 값), 2차 system2_v1~v3.csv. 2차의 판 3은 운영 서버 답이고, 판 1과 판 2는
@@ -36,20 +37,22 @@ TAGS, level, by_id, tagset, judge, count, agreement, kappa = (
     eval02.TAGS, eval02.level, eval02.by_id, eval02.tagset, eval02.judge, eval02.count, eval02.agreement, eval02.kappa)
 read, filled, human_gold, rate, NOT_MENU = key03.read, key03.filled, key03.human_gold, key03.rate, key03.NOT_MENU
 
-LABELS = ('(가) 낱말 표만', '(나) 예전 AI 판 1', '(다) 예전 합침', '(라) 판 2 두 단계', '(마) 판 3 두 단계')
+LABELS = ('(가) 낱말 표만', '(나) 예전 AI 판 1', '(다) 예전 합침', '(라) 판 2 두 단계', '(마) 판 3 두 단계',
+          '(바) 낱말 표 고친 뒤')
 BASIS1, BASIS2 = '사람 정답(세 명 다수결)', 'AI 기준 정답(consensus2)'
 
 
-def show(i, v1, v2, v3):
-    """메뉴 하나를 다섯 방식으로 보였을 때의 (확실, 약함). soft_tags 열이 없으면(1차) 빈 것으로 본다."""
+def show(i, v1, v2, v3, v4):
+    """메뉴 하나를 여섯 방식으로 보였을 때의 (확실, 약함). soft_tags 열이 없으면(1차) 빈 것으로 본다."""
     soft = tagset(v3[i].get('soft_tags', ''))
-    sure, sure3 = tagset(v2[i]['sure_tags']), tagset(v3[i]['sure_tags'])
+    sure, sure3, sure4 = tagset(v2[i]['sure_tags']), tagset(v3[i]['sure_tags']), tagset(v4[i]['sure_tags'])
     return {
         LABELS[0]: (sure, soft - sure),
         LABELS[1]: (tagset(v1[i]['ai_tags']), set()),
         LABELS[2]: (tagset(v1[i]['merged_tags']), set()),
         LABELS[3]: (sure, (tagset(v2[i]['ai_tags']) | tagset(v2[i].get('soft_tags', ''))) - sure),
         LABELS[4]: (sure3, (tagset(v3[i]['ai_tags']) | soft) - sure3),
+        LABELS[5]: (sure4, (tagset(v4[i]['ai_tags']) | tagset(v4[i].get('soft_tags', ''))) - sure4),
     }
 
 
@@ -112,7 +115,10 @@ def main(argv):
     cons1 = by_id(read(data, 'consensus.csv'))
 
     def rows3(prefix):
-        return tuple(by_id(read(data, f'{prefix}_v{k}.csv')) for k in (1, 2, 3))
+        """판 1~3과 낱말 표 고친 뒤(v4). v4 파일이 없으면(1차: 0060으로 바뀐 칸이 없다) 판 3 값을 쓴다."""
+        got = [by_id(read(data, f'{prefix}_v{k}.csv')) for k in (1, 2, 3)]
+        v4 = f'{prefix}_v4.csv'
+        return tuple(got + [by_id(read(data, v4)) if (data / v4).exists() else got[2]])
     sys1, sys2 = rows3('system'), rows3('system2')
 
     print('== 1. 2차를 AI 기준 정답으로 재는 근거 ==')
@@ -147,8 +153,11 @@ def main(argv):
             totals[('n', kind)] += len(ids)
         if n == 2:
             print('(마) 1차는 (라)가 놓친 칸을 보고 고친 뒤 같은 메뉴로 다시 잰 값이다(같은 자료로 고친 뒤 잰 값)')
+            print('(바) 1차는 0060으로 바뀐 칸이 없어 (마)와 같다')
         else:
             print('2차의 (나)(다)(라)는 예전 프롬프트로 지금 다시 물은 값이고, 2차의 낱말 표는 지금 서버 값이다')
+            print('(바)는 2차에서 찾은 낱말 표 오발을 보고 고친 뒤(0060) 같은 메뉴로 잰 값이다. 2차도 이제 보고 고친 뒤 잰 값이라 '
+                  '새 메뉴 성능은 (마)로 본다')
 
     print(f'\n== 4. 합쳐서 80개 (1차는 {BASIS1}, 2차는 {BASIS2}로 센 합계) ==')
     for kind, _ in split(gold1):
@@ -160,6 +169,8 @@ def main(argv):
     print(f'\n== 5. (마) 판 3이 2차({BASIS2} 기준)에서 틀린 것 ==')
     for kind, ids in split(gold2):
         print(f"{kind} 놓친 칸: {', '.join(missed(gold2, sys2, ids, LABELS[4])) or '없음'}")
+        new = sorted(set(missed(gold2, sys2, ids, LABELS[5])) - set(missed(gold2, sys2, ids, LABELS[4])))
+        print(f"{kind} (바)에서 새로 생긴 놓친 칸: {', '.join(new) or '없음'}")
     v3 = sys2[2]
     wrong_not = [f"{i} {gold2[i]['메뉴 이름']}" for i in ids2
                  if v3[i]['is_menu'].strip().lower() == 'false' and gold2[i][NOT_MENU].strip() != '1']
