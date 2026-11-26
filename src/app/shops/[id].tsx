@@ -21,6 +21,7 @@ import { useCouncilBenefits } from '@/hooks/use-council-benefits';
 import { CouponCode } from '@/components/coupon-code';
 import { Icon, IconButton, type IconName } from '@/components/icon';
 import { ShopThumb } from '@/components/shop-thumb';
+import { shopTint, TINT_BG } from '@/constants/food-tint';
 import { Text } from '@/components/text';
 import { TextPieces } from '@/components/text-pieces';
 import { COUPON_VALID_HOURS } from '@/constants';
@@ -151,7 +152,7 @@ function Hero({ shop }: { shop: ShopDetail }) {
   const [width, setWidth] = useState(0);
   if (shop.photos.length === 0) {
     return (
-      <View className="items-center justify-center rounded-3xl bg-surface" style={{ height: HERO_HEIGHT }}>
+      <View className={`items-center justify-center rounded-3xl ${TINT_BG[shopTint(shop.cuisine)]}`} style={{ height: HERO_HEIGHT }}>
         <ShopThumb
           name={shop.name}
           photoUrl={null}
@@ -169,7 +170,7 @@ function Hero({ shop }: { shop: ShopDetail }) {
         horizontal
         pagingEnabled
         showsHorizontalScrollIndicator={false}
-        className="rounded-3xl bg-surface"
+        className={`rounded-3xl ${TINT_BG[shopTint(shop.cuisine)]}`}
         style={{ height: HERO_HEIGHT }}>
         {shop.photos.map((p, i) => (
           <Image

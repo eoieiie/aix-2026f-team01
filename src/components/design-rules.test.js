@@ -40,7 +40,7 @@ describe('디자인 규칙', () => {
 
   it('색은 주황 하나와 검정, 흰색, 회색만 쓴다', () => {
     // 회색 계열(채도 0.1 미만)이거나 주황 계열(색상 15~35도)이어야 한다
-    // 시안 나(2026-11-26): 음식 그림에서 뽑은 옅은 면(tint-*)과 작은 점(dot-*)은 음식 색이라 뺀다. 면은 글자 대비 4.5:1 이상
+    // 음식 색(docs/design.md "음식 색", 2026-11-26): 음식 그림에서 뽑은 옅은 면(tint-*)과 작은 점(dot-*)만 뺀다
     const offPalette = Object.entries(tailwindColors).filter(([name, hex]) => {
       if (/^(tint|dot)-/.test(name)) return false;
       const [r, g, b] = [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16) / 255);
@@ -205,6 +205,31 @@ describe('디자인 규칙', () => {
           .map(({ i }) => `${path.relative(path.join(__dirname, '../..'), file)}:${i + 1}`)
       );
     expect(found).toEqual([]);
+  });
+
+  // ---- 음식 색 (docs/design.md "음식 색", 2026-11-26) ----
+
+  it('음식 색은 food-tint.ts에서만 고른다. 화면 파일에 bg-tint-, bg-dot- 이름을 직접 쓰지 않는다', () => {
+    const direct = /(?<![\w-])(?:bg|text|border)-(?:tint|dot)-[a-z]+/;
+    const found = files.filter(({ text }) => direct.test(text)).map(({ file }) => file);
+    expect(found).toEqual([]);
+  });
+
+  it('음식 색 면 위 글자 대비는 4.5:1 이상이다 (회색 글자, 못 먹는 것 경고의 붉은 글자, 검정)', () => {
+    const lum = (hex) => {
+      const c = [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16) / 255).map((v) => (v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4));
+      return 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2];
+    };
+    const ratio = (a, b) => {
+      const [x, y] = [lum(a), lum(b)].sort((p, q) => q - p);
+      return (x + 0.05) / (y + 0.05);
+    };
+    const tints = Object.entries(tailwindColors).filter(([name]) => name.startsWith('tint-'));
+    expect(tints.length).toBeGreaterThan(0);
+    const low = tints.flatMap(([name, hex]) =>
+      ['muted', 'danger', 'text'].filter((fg) => ratio(tailwindColors[fg], hex) < 4.5).map((fg) => `${name} 위 ${fg}`)
+    );
+    expect(low).toEqual([]);
   });
 
   it('음식 색 동그라미가 쓰는 색은 모두 tailwind.config.js 토큰에 있다', () => {

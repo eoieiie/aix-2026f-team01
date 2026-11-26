@@ -9,6 +9,7 @@ import { AdBadge } from '@/components/ad-badge';
 import { CandidateCard } from '@/components/candidate-card';
 import { CouncilBadge } from '@/components/council-benefit';
 import { FoodThumb } from '@/components/food-thumb';
+import { foodTint, TINT_BG } from '@/constants/food-tint';
 import { Icon, IconButton } from '@/components/icon';
 import { PersonDots } from '@/components/person-dots';
 import { QrCode } from '@/components/qr-code';
@@ -362,7 +363,7 @@ function Features({ wide }: { wide: boolean }) {
               [FOOD.cutlet, '돈까스'],
               [FOOD.pho, '쌀국수'],
             ].map(([id, name]) => (
-              <View key={id} className="flex-1 items-center gap-2 rounded-xl bg-surface p-3">
+              <View key={id} className={`flex-1 items-center gap-2 rounded-xl p-3 ${TINT_BG[foodTint(id as number)]}`}>
                 <FoodThumb foodId={id as number} size="sm" />
                 <Text className="text-center text-sm font-semibold text-text">{name}</Text>
               </View>
@@ -385,7 +386,7 @@ function FeatureHead({ kicker, title }: { kicker: string; title: string }) {
 
 function ShopSample() {
   return (
-    <View className="flex-row items-start gap-3 rounded-2xl bg-surface p-4">
+    <View className={`flex-row items-start gap-3 rounded-2xl p-4 ${TINT_BG[foodTint(FOOD.bunsik)]}`}>
       <FoodThumb foodId={FOOD.bunsik} />
       <View className="flex-1 gap-1">
         <View className="flex-row flex-wrap items-center gap-2">

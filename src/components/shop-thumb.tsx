@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Image, View } from 'react-native';
 
 import { Icon } from '@/components/icon';
+import { TINT_BG, type Tint } from '@/constants/food-tint';
 
 // 가게 그림 칸 (4-26). 가게 사진 → 이름이나 대표 메뉴로 찾은 음식 그림(카페는 카페 그림) → 중립 칸 순으로 그린다.
 // 중립 칸은 옅은 면에 옅은 회색 아이콘 하나(식당은 수저, 카페는 잔). 엉뚱한 음식 그림을 대신 넣지 않는다(0040, 0041).
@@ -13,6 +14,7 @@ export function ShopThumb({
   cuisine,
   size,
   onSurface = true,
+  tint,
 }: {
   name: string;
   photoUrl: string | null;
@@ -21,11 +23,13 @@ export function ShopThumb({
   size: number;
   // 회색 카드 위면 흰 칸, 흰 바탕 위면 회색 칸으로 그려 칸이 보이게 한다
   onSurface?: boolean;
+  // 음식 색 (docs/design.md "음식 색"): 주면 칸을 그 옅은 색으로 칠한다. 카드 안 줄처럼 줄 자체에 면이 없을 때 쓴다
+  tint?: Tint;
 }) {
   const [photoFailed, setPhotoFailed] = useState(false);
   const [thumbFailed, setThumbFailed] = useState(false);
   const box = { width: size, height: size };
-  const tile = `items-center justify-center overflow-hidden rounded-xl ${onSurface ? 'bg-background' : 'bg-surface'}`;
+  const tile = `items-center justify-center overflow-hidden rounded-xl ${tint ? TINT_BG[tint] : onSurface ? 'bg-background' : 'bg-surface'}`;
 
   if (photoUrl && !photoFailed) {
     return (

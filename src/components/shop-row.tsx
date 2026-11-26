@@ -56,7 +56,7 @@ export function ShopRow({
       accessibilityLabel={`${shown}${partner ? ', 광고' : ''}${colleges.map((c) => `, ${councilBadge(c)}`).join('')}, 가게 정보 보기`}
       onPress={onOpen ?? (() => router.push(`/shops/${id}` as any))}
       className={`flex-row items-center gap-3 active:opacity-70 ${card ? `rounded-3xl p-4 ${TINT_BG[shopTint(cuisine)]}` : 'py-2'}`}>
-      <ShopThumb name={name} photoUrl={photoUrl} thumbUrl={thumbUrl} cuisine={cuisine} size={thumbSize} onSurface={onSurface} />
+      <ShopThumb name={name} photoUrl={photoUrl} thumbUrl={thumbUrl} cuisine={cuisine} size={thumbSize} onSurface={onSurface} tint={card ? undefined : shopTint(cuisine)} />
       <View className="flex-1 gap-1">
         {/* 이름 옆 표시: 이름이 길면 표시가 다음 줄로 넘어간다(말줄임 없음) */}
         <View className="flex-row flex-wrap items-center gap-2">
