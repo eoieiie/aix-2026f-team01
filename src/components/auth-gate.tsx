@@ -4,15 +4,17 @@ import { ActivityIndicator, Pressable, View } from 'react-native';
 import { Text } from '@/components/text';
 
 import { isPublicPath } from '@/constants/public-paths';
+import { isFirstWebVisit } from '@/lib/first-visit';
 import { useAnonymousAuth } from '@/hooks/use-anonymous-auth';
 import { useMyProfile } from '@/hooks/use-profile';
 
 // 익명 로그인이 끝나야 안쪽 화면을 보여준다 (spec.md 4-1).
 // 소개, 처리방침, 약관, 문의는 로그인 없이 바로 보인다. 열기만 해서는 익명 계정이 생기지 않고,
-// 거기서 앱 화면(/)으로 가면 그때 로그인한다 (4-30)
+// 거기서 앱 화면(/)으로 가면 그때 로그인한다 (4-30). 웹 첫 방문의 루트(/)도 소개로 넘어가기 전까지는 같다
 export function AuthGate({ children }: { children: ReactNode }) {
   const pathname = usePathname();
-  const open = isPublicPath(pathname);
+  // 웹에 처음 온 사람이 루트를 열면 계정을 만들지 않고 둔다. 탭 레이아웃이 소개(/about)로 보낸다 (4-30, 2026-11-26)
+  const open = isPublicPath(pathname) || isFirstWebVisit(pathname);
   const { status, retry, retrying } = useAnonymousAuth({ enabled: !open });
 
   if (!open && status === 'loading') {

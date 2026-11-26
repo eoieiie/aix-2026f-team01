@@ -17,6 +17,7 @@ import { Text } from '@/components/text';
 import { TextPieces } from '@/components/text-pieces';
 import { baseFoodImageMap } from '@/hooks/use-food-images';
 import { AVATARS_KEY } from '@/hooks/use-prefs';
+import { markStarted } from '@/lib/first-visit';
 import { SUPPORT_MAIL } from '@/lib/support-mail';
 import type { Candidate } from '@/hooks/use-session';
 
@@ -92,7 +93,11 @@ export default function AboutScreen() {
   const scroll = useRef<ScrollView>(null);
   const [stepsY, setStepsY] = useState(0);
 
-  const start = () => router.replace('/' as any);
+  // "바로 시작하기"를 누르면 표시를 남기고 앱으로 들어간다. 다시 소개로 튕기지 않는다 (2026-11-26)
+  const start = () => {
+    markStarted();
+    router.replace('/' as any);
+  };
   const mail = (subject: string) =>
     Linking.openURL(`mailto:${SUPPORT_MAIL}?subject=${encodeURIComponent(subject)}`).catch(() => undefined);
 

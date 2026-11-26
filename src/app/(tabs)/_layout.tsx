@@ -1,4 +1,4 @@
-import { Tabs } from 'expo-router';
+import { Redirect, Tabs, usePathname } from 'expo-router';
 import { Pressable, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -6,6 +6,7 @@ import { FadeEdge } from '@/components/fade-edge';
 import { Icon, type IconName } from '@/components/icon';
 import colors from '@/constants/colors.json';
 import { TAB_BAR_HEIGHT } from '@/constants';
+import { isFirstWebVisit } from '@/lib/first-visit';
 
 // 하단 탭 (4-15, 4-26). 홈, 가게, 프로필에서만 보인다. 모임, 판 화면은 탭 밖이라 탭이 없다.
 // 흰 바탕에 회색 아이콘, 지금 화면만 주황 아이콘. 주황 알약은 뺐다 (2026-11-25 병주 "주황색이 너무 많은데, 포인트컬러로 남기면 좋아")
@@ -16,6 +17,10 @@ const TABS: { name: string; icon: IconName; label: string }[] = [
 ];
 
 export default function TabLayout() {
+  // 웹에 처음 온 사람(로그인 기록 없음)이 루트를 열면 익명 계정을 만들기 전에 소개부터 보여준다 (4-30, 2026-11-26)
+  const pathname = usePathname();
+  if (isFirstWebVisit(pathname)) return <Redirect href={'/about' as any} />;
+
   return (
     <Tabs screenOptions={{ headerShown: false }} tabBar={(props) => <TabBar {...props} />}>
       {TABS.map((t) => (
