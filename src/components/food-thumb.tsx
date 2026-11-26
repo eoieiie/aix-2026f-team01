@@ -4,8 +4,9 @@ import { Image, View } from 'react-native';
 import { FoodDot } from '@/components/food-dot';
 import { useFoodImageMap } from '@/hooks/use-food-images';
 
-// 고르기 칸 40, 목록 줄 48, 카드 56 (docs/design.md "프레즐 규칙 그대로": 목록 칸 왼쪽 그림 48~72)
-const SIZES = { xs: 40, sm: 48, md: 56 } as const;
+// 고르기 칸 40, 목록 줄 48, 카드 56 (docs/design.md "프레즐 규칙 그대로": 목록 칸 왼쪽 그림 48~72).
+// xxs 32는 홈 모임 카드의 먹은 음식 줄(PlateFoods)에만 쓴다
+const SIZES = { xxs: 32, xs: 40, sm: 48, md: 56 } as const;
 
 type FoodThumbProps = {
   foodId: number;

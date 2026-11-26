@@ -69,6 +69,8 @@ export const ROULETTE_LABEL_MAX = 7;
 
 // 홈 모임 카드 (docs/design.md 1절)
 export const HOME_RECENT_FOODS = 3;
+// 홈 모임 카드 오른쪽 아래의 먹은 음식 줄. 서버 home_group_foods(0053)의 v_max와 같은 값
+export const HOME_PLATE_FOODS = 4;
 export const PERSON_DOTS_MAX = 3;
 
 // 룰렛 결과 순간 (docs/design.md 순간 1). 원판이 멈추고 쉬는 시간, 주황이 번지는 시간, 글자가 나타나는 시간

@@ -11,6 +11,7 @@ import {
   type Group,
   type GroupDetail,
   type Member,
+  type PlateFood,
   type RecentMeal,
   getGroupProfileCard,
   type GroupProfileCardData,
@@ -33,6 +34,7 @@ export type {
   Group,
   GroupDetail,
   Member,
+  PlateFood,
   RecentMeal,
 };
 
