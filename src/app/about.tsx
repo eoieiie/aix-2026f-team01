@@ -29,6 +29,10 @@ import type { Candidate } from '@/hooks/use-session';
 
 const WIDE_MIN = 1024;
 
+// 한국 앱스토어 주소 (2026-11-27 심사 통과). 웹에서만 보이고 아이폰 앱 안에서는 숨긴다
+const APP_STORE_URL = 'https://apps.apple.com/kr/app/id6814341668';
+const SHOW_STORE = Platform.OS === 'web';
+
 // 기본 음식 번호 (실제 서버의 foods.id, 그림 파일 이름이 음식 번호다. 17은 김밥 그림이라 분식 가게 그림으로 쓴다)
 const FOOD = { kimchiStew: 1, bulgogi: 7, kalguksu: 13, bunsik: 17, jjajang: 21, sushi: 25, cutlet: 26, pho: 37 } as const;
 // 직접 적은 메뉴의 예시 번호. 그림이 없어 회색 동그라미로 보인다
@@ -232,6 +236,13 @@ function DarkButton({ label, onPress }: { label: string; onPress: () => void }) 
   );
 }
 
+function StoreButton() {
+  if (!SHOW_STORE) return null;
+  return (
+    <GreyButton label="앱스토어에서 받기" onPress={() => Linking.openURL(APP_STORE_URL).catch(() => undefined)} />
+  );
+}
+
 function GreyButton({ label, onPress }: { label: string; onPress: () => void }) {
   return (
     <Pressable
@@ -255,9 +266,16 @@ function Hero({ wide, onStart, onHow }: { wide: boolean; onStart: () => void; on
         </Text>
         <Text className={`text-muted ${wide ? 'text-xl' : 'text-lg'}`}>후보를 올리고, 익명으로 투표하고, 룰렛으로 정해요.</Text>
       </View>
-      <View className="flex-row gap-2" style={wide ? { maxWidth: 440 } : undefined}>
-        <DarkButton label="바로 시작하기" onPress={onStart} />
-        <GreyButton label="어떻게 하나요" onPress={onHow} />
+      <View className="gap-2" style={wide ? { maxWidth: 440 } : undefined}>
+        <View className="flex-row gap-2">
+          <DarkButton label="바로 시작하기" onPress={onStart} />
+          <GreyButton label="어떻게 하나요" onPress={onHow} />
+        </View>
+        {SHOW_STORE ? (
+          <View className="flex-row">
+            <StoreButton />
+          </View>
+        ) : null}
       </View>
     </View>
   );
@@ -574,7 +592,7 @@ function StartCard({
 const FAQ = [
   {
     q: '친구가 앱이 없어도 되나요?',
-    a: '네. 모임 링크나 QR을 열면 웹에서 이름만 적고 들어와요.',
+    a: '네. 모임 링크나 QR을 열면 웹에서 이름만 적고 들어와요. 앱을 쓰고 싶으면 앱스토어에도 있어요.',
   },
   {
     q: '못 먹는 음식은 누가 보나요?',
@@ -628,8 +646,15 @@ function Closing({ wide, onStart }: { wide: boolean; onStart: () => void }) {
       <Text accessibilityRole="header" className={`text-center font-bold tracking-tight text-text ${wide ? 'text-5xl' : 'text-3xl'}`}>
         오늘 점심, 지금 정해 볼까요?
       </Text>
-      <View className="w-full flex-row" style={{ maxWidth: 320 }}>
-        <DarkButton label="바로 시작하기" onPress={onStart} />
+      <View className="w-full gap-2" style={{ maxWidth: 320 }}>
+        <View className="flex-row">
+          <DarkButton label="바로 시작하기" onPress={onStart} />
+        </View>
+        {SHOW_STORE ? (
+          <View className="flex-row">
+            <StoreButton />
+          </View>
+        ) : null}
       </View>
     </View>
   );

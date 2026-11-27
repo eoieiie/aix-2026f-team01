@@ -5,7 +5,7 @@
 **배포 URL / Live URL:** https://babti.expo.app
 
 - 초대 링크나 QR을 받은 사람은 설치와 가입 없이 웹에서 이름만 적고 들어온다
-- 아이폰은 TestFlight, 안드로이드는 설치 파일로 나눠 준다. 앱스토어 정식 출시와 TestFlight 공개 링크는 준비를 마쳤고 제출은 팀장이 정한다(명세 13-1). main에 합치면 웹과 설치한 앱이 같이 바뀐다(expo-updates)
+- 아이폰은 앱스토어(https://apps.apple.com/kr/app/id6814341668)와 TestFlight 공개 링크(https://testflight.apple.com/join/3NfafzFC)로, 안드로이드는 설치 파일로 나눠 준다. 앱스토어 1.0.0은 2026-11-27에 심사를 통과해 한국 앱스토어에 올라갔다(명세 13-1). main에 합치면 웹과 설치한 앱이 같이 바뀐다(expo-updates)
 
 ## 기능 / Features
 화면 흐름 순서다. 명세 절과 완료 조건 번호는 명세 맨 앞 "한눈에"([`docs/spec.md`](docs/spec.md)), 처음 계획에서 바뀐 것은 같은 문서의 "처음 명세와 달라진 점"에 있다.
@@ -57,6 +57,7 @@ npx expo start --web
 `.env`에 Supabase 주소와 공개 키를 채워야 로그인된다. 비어 있으면 "연결할 수 없어요" 화면이 뜬다. 방법은 둘이다.
 
 - 바로 써 보기: 설치 없이 https://babti.expo.app (실제 서버)
+- 아이폰 앱: 앱스토어 "밥비티아이" https://apps.apple.com/kr/app/id6814341668 (1.0.0, 2026-11-27 출시). TestFlight 공개 링크 https://testflight.apple.com/join/3NfafzFC
 - 내 컴퓨터에 서버까지 띄우기(Docker 필요): `npx supabase start` → `npx supabase db reset`(표, 서버 함수, 식당 자료가 모두 들어간다) → 출력된 `API URL`과 `anon key`를 `.env`의 `EXPO_PUBLIC_SUPABASE_URL`, `EXPO_PUBLIC_SUPABASE_ANON_KEY`에 넣고 `npx expo start --web`
 
 새로 받은 폴더에서 `npm ci`, `npm run typecheck`, `npm test`(136개), `npm run build:web`이 모두 통과하는 것을 2026-11-20에 확인했다.
