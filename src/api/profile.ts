@@ -65,6 +65,9 @@ export function profileErrorMessage(error: unknown): string {
 
 const HANDLE_PATTERN = new RegExp(`^[a-z0-9_]{${HANDLE_MIN},${HANDLE_MAX}}$`);
 
+// 아이디 칸 아래에 늘 보이는 한 줄. 로그인 아이디(4-19)도 같은 모양이다 (#44 인터뷰 1 다시, 11/23)
+export const HANDLE_HINT = `영어 소문자, 숫자, _ ${HANDLE_MIN}~${HANDLE_MAX}자`;
+
 // 서버에 묻기 전에 앱에서 먼저 거른다
 export function isValidHandle(handle: string) {
   return HANDLE_PATTERN.test(handle);

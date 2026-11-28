@@ -3,7 +3,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { getMyProfile, type SaveProfileInput, saveMyProfile } from '@/api/profile';
 
 export type { Axes, MyProfile } from '@/api/profile';
-export { profileErrorMessage, isValidHandle, typeCode, typeLines } from '@/api/profile';
+export { HANDLE_HINT, profileErrorMessage, isValidHandle, typeCode, typeLines } from '@/api/profile';
 
 export const MY_PROFILE_KEY = ['profile', 'me'] as const;
 

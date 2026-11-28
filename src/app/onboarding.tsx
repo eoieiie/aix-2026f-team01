@@ -6,6 +6,7 @@ import { EmptyScreen } from '@/components/empty-state';
 import { Text } from '@/components/text';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { AccountSheet } from '@/components/account-sheet';
 import { Button } from '@/components/button';
 import { IconButton } from '@/components/icon';
 import { KeyboardSafe } from '@/components/keyboard-safe';
@@ -16,6 +17,7 @@ import { QUIZ, type QuizAnswer } from '@/constants/quiz';
 import { useReduceMotion } from '@/hooks/use-reduce-motion';
 import {
   type Axes,
+  HANDLE_HINT,
   isValidHandle,
   profileErrorMessage,
   typeLines,
@@ -41,6 +43,8 @@ export default function OnboardingScreen() {
   const [handleError, setHandleError] = useState<string | null>(null);
   // 마지막 문항 저장이 실패하면 같은 답으로 다시 보낸다
   const [lastPick, setLastPick] = useState<QuizAnswer | null>(null);
+  // 네 글자 뒤 "이미 아이디가 있어요"로 여는 로그인 창 (#44 인터뷰 1 다시, 11/23)
+  const [signInVisible, setSignInVisible] = useState(false);
 
   // 이름이 이미 있으면(링크로 들어왔거나 이름 단계에서 저장했으면) 이름 단계를 건너뛴다
   const step: Step | null =
@@ -180,20 +184,30 @@ export default function OnboardingScreen() {
 
   if (step === 'result' && axes) {
     return (
-      <TypeReveal
-        axes={axes}
-        answers={answers}
-        onNext={() => {
-          save.reset();
-          setStep('handle');
-        }}
-        onRetry={() => {
-          save.reset();
-          setAnswers([]);
-          setAxes(null);
-          setStep('quiz');
-        }}
-      />
+      <>
+        <TypeReveal
+          axes={axes}
+          answers={answers}
+          onNext={() => {
+            save.reset();
+            setStep('handle');
+          }}
+          onHaveId={() => setSignInVisible(true)}
+          onRetry={() => {
+            save.reset();
+            setAnswers([]);
+            setAxes(null);
+            setStep('quiz');
+          }}
+        />
+        {/* 로그인에 성공하면 그 계정으로 홈에 간다. 새 아이디를 만들지 않는다 */}
+        <AccountSheet
+          visible={signInVisible}
+          signInOnly
+          onClose={() => setSignInVisible(false)}
+          onSignedIn={finish}
+        />
+      </>
     );
   }
 
@@ -202,7 +216,7 @@ export default function OnboardingScreen() {
   const submitHandle = () => {
     if (save.isPending) return;
     if (!isValidHandle(trimmedHandle)) {
-      setHandleError('영어 소문자, 숫자, 밑줄로 3~16자');
+      setHandleError(HANDLE_HINT);
       return;
     }
     save.mutate({ handle: trimmedHandle }, { onSuccess: finish });
@@ -214,7 +228,8 @@ export default function OnboardingScreen() {
         <Text className="text-3xl font-bold tracking-tight text-text">아이디를 정해요</Text>
         <TextField
           label="아이디"
-          placeholder="영어 소문자, 숫자, 밑줄 3~16자"
+          placeholder="예: bap_bti"
+          hint={HANDLE_HINT}
           value={handle}
           onChangeText={(t) => {
             setHandle(t);
@@ -255,11 +270,13 @@ function TypeReveal({
   axes,
   answers,
   onNext,
+  onHaveId,
   onRetry,
 }: {
   axes: Axes;
   answers: QuizAnswer[];
   onNext: () => void;
+  onHaveId: () => void;
   onRetry: () => void;
 }) {
   const reduce = useReduceMotion();
@@ -339,14 +356,25 @@ function TypeReveal({
         >
           <Text className="text-xl font-bold text-on-primary">아이디 정하고 시작하기</Text>
         </Pressable>
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel="다시 하기"
-          onPress={onRetry}
-          className="h-12 items-center justify-center active:opacity-70"
-        >
-          <Text className="text-xl font-bold text-on-ink">다시 하기</Text>
-        </Pressable>
+        {/* 보조 단추 둘은 같은 크기로 나란히. 주황은 위 주 단추 하나뿐이다 */}
+        <View className="flex-row gap-2">
+          {(
+            [
+              ['이미 아이디가 있어요', onHaveId],
+              ['다시 하기', onRetry],
+            ] as const
+          ).map(([label, onPress]) => (
+            <Pressable
+              key={label}
+              accessibilityRole="button"
+              accessibilityLabel={label}
+              onPress={onPress}
+              className="h-12 flex-1 items-center justify-center active:opacity-70"
+            >
+              <Text className="text-center text-base font-semibold text-on-ink">{label}</Text>
+            </Pressable>
+          ))}
+        </View>
       </View>
     </SafeAreaView>
   );
