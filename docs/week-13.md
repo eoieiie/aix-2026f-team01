@@ -34,7 +34,7 @@
 
 ## 타 팀원 PC에서 README만으로 실행 / Ran elsewhere using README only
 
-- [ ] 성공 Success  → 보완 Fixes: 아래 4개
+- [x] 성공 Success (설치부터 웹 실행까지). 보완 Fixes: 아래 4개, 2026-11-28 README 3절에 반영
 
 2026-11-26, 이학준 노트북(Windows 10, Node 없는 처음 상태)에서 README 3절만 보고 해 봤다. 저장소는 main `cf86e68`을 새로 받았다. 설치와 실행은 됐고, `.env`에 넣을 키를 받는 곳에서 멈췄다. 키를 받은 사람만 이어서 할 수 있어서 "성공"은 체크하지 않는다.
 

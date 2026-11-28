@@ -44,7 +44,7 @@
 세 사람 모두 "딱히 먹고 싶은 게 없을 때 고르기 어렵다"고 했다. 설문 78명 중 76.9%도 "아무거나" 때문에 고민한 적이 있다 ([`docs/survey-result.md`](docs/survey-result.md)).
 
 ## 3. 실행 방법 / How to Run
-Node 버전은 `.nvmrc`를 따른다 (`nvm use`).
+Node 24 LTS가 필요하다(`.nvmrc`). Node가 없으면 https://nodejs.org 에서 24 LTS를 깐다. Windows는 `winget install OpenJS.NodeJS.24`, nvm이 있으면 `nvm install && nvm use`. 깐 뒤 `node -v`로 확인한다.
 수업 제출용 파이썬 소스(가게 전처리, 재료 평가, 설문, 학생회 제휴, 동시 접속, 실제 사용, 수익 계산)는 `python/` 폴더 하나로 돈다. `cd python && python3 run_all.py`, 자세한 것은 [파이썬 안내](python/README.md).
 키는 `.env`에만 두고 커밋하지 않는다. 13주차 보안 점검(권한, 남용 막기, 비밀 키, AI 함수, 개인정보)과 남은 위험은 [`docs/security.md`](docs/security.md)에 있다.
 
@@ -54,13 +54,21 @@ cp .env.example .env
 npx expo start --web
 ```
 
-`.env`에 Supabase 주소와 공개 키를 채워야 로그인된다. 비어 있으면 "연결할 수 없어요" 화면이 뜬다. 방법은 둘이다.
+`.env`에는 세 값을 채운다.
+
+- `EXPO_PUBLIC_SUPABASE_URL`, `EXPO_PUBLIC_SUPABASE_ANON_KEY`: Supabase 주소와 공개(anon) 키. 팀원(eoieiie, Aninnom)에게 개인 메시지로 받는다. 대시보드 권한이 있으면 Supabase 대시보드 Project Settings > API에서 본다. 키는 단톡방이나 이슈에 올리지 않는다
+- `EXPO_PUBLIC_WEB_BASE`: 초대 링크에 쓰는 웹 주소. `https://babti.expo.app`을 넣는다
+
+주소나 키가 비어 있으면 빨간 오류 화면(`MissingEnvError: EXPO_PUBLIC_SUPABASE_URL`)이 뜬다. `.env`를 채운 뒤 `npx expo start --web`을 다시 실행한다. 키를 넣었는데 서버에 닿지 않으면 "연결할 수 없어요" 화면이 뜨고, "다시 시도"를 누르면 된다.
+
+키 없이 써 보는 방법도 있다.
 
 - 바로 써 보기: 설치 없이 https://babti.expo.app (실제 서버)
 - 아이폰 앱: 앱스토어 "밥비티아이" https://apps.apple.com/kr/app/id6814341668 (1.0.0, 2026-11-27 출시). TestFlight 공개 링크 https://testflight.apple.com/join/3NfafzFC
 - 내 컴퓨터에 서버까지 띄우기(Docker 필요): `npx supabase start` → `npx supabase db reset`(표, 서버 함수, 식당 자료가 모두 들어간다) → 출력된 `API URL`과 `anon key`를 `.env`의 `EXPO_PUBLIC_SUPABASE_URL`, `EXPO_PUBLIC_SUPABASE_ANON_KEY`에 넣고 `npx expo start --web`
 
 새로 받은 폴더에서 `npm ci`, `npm run typecheck`, `npm test`(136개), `npm run build:web`이 모두 통과하는 것을 2026-11-20에 확인했다.
+2026-11-26 이학준(Ruty041)이 Node가 없는 Windows 노트북에서 이 절만 보고 설치부터 웹 실행까지 해 봤다. 그때 나온 보완점 4개(Node 설치법, 키 받는 곳, `EXPO_PUBLIC_WEB_BASE`, 키가 빈 경우의 화면)를 이 절에 반영했다([`docs/week-13.md`](docs/week-13.md)).
 필요한 환경변수 / Required environment variables: `.env.example` 참고
 
 폴더 / Folders:
