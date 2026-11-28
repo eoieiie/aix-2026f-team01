@@ -7,14 +7,27 @@ import { Button } from '@/components/button';
 import { TextField } from '@/components/text-field';
 import { HANDLE_MAX } from '@/constants';
 import { accountErrorMessage, useAccount } from '@/hooks/use-account';
+import { HANDLE_HINT } from '@/hooks/use-profile';
 
 type Mode = 'claim' | 'signIn';
 
 // 4-19 아이디로 이어 쓰기. 홈 위쪽 사람 아이콘을 누르면 뜨는 창.
 // 모양은 모임 만들기 창과 같다(가운데 카드, 여백 24, 아래 버튼 둘)
-export function AccountSheet({ visible, onClose }: { visible: boolean; onClose: () => void }) {
+// signInOnly: 온보딩 네 글자 뒤 "이미 아이디가 있어요"에서 연다. 로그인 칸만 보이고, 성공하면 onSignedIn (#44 인터뷰 1 다시, 11/23)
+export function AccountSheet({
+  visible,
+  onClose,
+  signInOnly = false,
+  onSignedIn,
+}: {
+  visible: boolean;
+  onClose: () => void;
+  signInOnly?: boolean;
+  onSignedIn?: () => void;
+}) {
   const { loginId, claim, signIn, signOut } = useAccount();
-  const [mode, setMode] = useState<Mode>('claim');
+  const [chosenMode, setMode] = useState<Mode>('claim');
+  const mode: Mode = signInOnly ? 'signIn' : chosenMode;
   const [id, setId] = useState('');
   const [password, setPassword] = useState('');
 
@@ -33,14 +46,23 @@ export function AccountSheet({ visible, onClose }: { visible: boolean; onClose: 
 
   const submit = () => {
     if (busy) return;
-    action.mutate({ loginId: id.trim(), password }, { onSuccess: close });
+    const signedIn = mode === 'signIn';
+    action.mutate(
+      { loginId: id.trim(), password },
+      {
+        onSuccess: () => {
+          close();
+          if (signedIn) onSignedIn?.();
+        },
+      }
+    );
   };
 
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={close}>
       <View className="flex-1 items-center justify-center bg-black/40 px-4">
         <View className="w-full max-w-[440px] gap-6 rounded-3xl bg-background p-6">
-          {loginId ? (
+          {loginId && !signInOnly ? (
             <>
               <View className="gap-1">
                 <Text className="text-3xl font-bold tracking-tight text-text">@{loginId}</Text>
@@ -63,7 +85,12 @@ export function AccountSheet({ visible, onClose }: { visible: boolean; onClose: 
             </>
           ) : (
             <>
-              {/* 같은 크기의 칸 둘. 고른 칸만 검정 (판 화면 단계 표시와 같은 모양) */}
+              {signInOnly ? (
+                <Text className="text-xl font-bold text-text" accessibilityRole="header">
+                  로그인
+                </Text>
+              ) : (
+              /* 같은 크기의 칸 둘. 고른 칸만 검정 (판 화면 단계 표시와 같은 모양) */
               <View className="flex-row gap-2">
                 {(
                   [
@@ -88,11 +115,13 @@ export function AccountSheet({ visible, onClose }: { visible: boolean; onClose: 
                   );
                 })}
               </View>
+              )}
 
               <View className="gap-4">
                 <TextField
                   label="아이디"
-                  placeholder="영어 소문자, 숫자 3~16자"
+                  placeholder="예: bap_bti"
+                  hint={HANDLE_HINT}
                   value={id}
                   onChangeText={(t) => setId(t.toLowerCase())}
                   maxLength={HANDLE_MAX}

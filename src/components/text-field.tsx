@@ -11,6 +11,8 @@ type TextFieldProps = {
   placeholder?: string;
   // 있으면 입력칸 아래에 빨간 글씨로 보인다. 서버 오류 문구도 여기에 넣는다 (4-2)
   error?: string | null;
+  // 오류가 없을 때 입력칸 아래에 회색 글씨로 늘 보인다. 예: 아이디에 쓸 수 있는 글자 (#44 인터뷰 1 다시, 11/23)
+  hint?: string;
   autoFocus?: boolean;
   onSubmitEditing?: () => void;
   // 글자 수 표시. 검색칸처럼 길이가 중요하지 않으면 끈다. 켜도 상한의 80%를 넘을 때만 보인다
@@ -39,6 +41,7 @@ export function TextField({
   label,
   placeholder,
   error,
+  hint,
   autoFocus,
   onSubmitEditing,
   showCount = true,
@@ -68,9 +71,9 @@ export function TextField({
           focused ? 'border-ink' : 'border-surface'
         }`}
       />
-      {count || error ? (
+      {count || error || hint ? (
         <View className="flex-row justify-between gap-2">
-          <Text className="flex-1 text-sm text-danger">{error ?? ''}</Text>
+          <Text className={`flex-1 text-sm ${error ? 'text-danger' : 'text-muted'}`}>{error ?? hint ?? ''}</Text>
           {count ? (
             <Text className="text-sm text-muted">
               {countChars(value)}/{maxLength}

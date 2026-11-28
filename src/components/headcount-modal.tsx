@@ -11,7 +11,7 @@ import type { Member, SessionOptions } from '@/hooks/use-groups';
 
 const MIN_PEOPLE = 2;
 
-// "오늘 뭐 먹지"를 누르면 같이 먹을 사람을 체크한다 (4-6). 체크한 수 + 앱 없는 사람 수가 이 판의 인원수다.
+// "오늘 뭐 먹지"를 누르면 같이 먹을 사람을 체크한다 (4-6). 체크한 수 + 초대 안 한 사람 수가 이 판의 인원수다.
 // 이 수만큼 골라야 방장이 돌릴 수 있다 (4-12). 모임에 새로 들어온 사람은 실시간으로 목록에 붙고 처음부터 체크돼 있다.
 // 옵션은 접어 둔다: 인당 표 수(1~3), 한 메뉴에 여러 표 (0019)
 export function HeadcountModal({
@@ -104,12 +104,12 @@ export function HeadcountModal({
             </View>
 
             <View className="flex-row items-center gap-2">
-              <Text className="flex-1 text-base font-semibold text-text">앱 없는 사람</Text>
-              {round('minus', '앱 없는 사람 한 명 빼기', extra <= 0, -1)}
-              <Text accessibilityLabel={`앱 없는 사람 ${extra}명`} className="min-w-10 text-center text-xl font-bold text-text">
+              <Text className="flex-1 text-base font-semibold text-text">초대 안 한 사람</Text>
+              {round('minus', '초대 안 한 사람 한 명 빼기', extra <= 0, -1)}
+              <Text accessibilityLabel={`초대 안 한 사람 ${extra}명`} className="min-w-10 text-center text-xl font-bold text-text">
                 {extra}
               </Text>
-              {round('plus', '앱 없는 사람 한 명 더하기', total >= HEADCOUNT_MAX, 1)}
+              {round('plus', '초대 안 한 사람 한 명 더하기', total >= HEADCOUNT_MAX, 1)}
             </View>
 
             <Pressable
