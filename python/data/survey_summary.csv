@@ -1,0 +1,24 @@
+key,문항,응답수,분모,문서_비율,출처
+ambiguous_4plus,아무거나 답변 때문에 메뉴 결정에 고민한 적 있음(5점 척도 4점 이상),60,78,76.9,docs/survey-result.md 2.1
+ambiguous_3plus,같은 문항 보통(3점) 이상,71,78,91.0,docs/survey-result.md 2.1
+time_5min,메뉴 결정에 5분 이상,36,78,46.2,docs/survey-result.md 2.1
+time_10min,메뉴 결정에 10분 이상,14,78,17.9,docs/survey-result.md 2.1
+decide_majority,결정 방식: 다수결,47,78,60.3,docs/survey-result.md 2.1
+decide_leader,결정 방식: 한 명이 주도,22,78,28.2,docs/survey-result.md 2.1
+restrict_any,못 먹거나 피하는 음식 있음,43,78,55.1,docs/survey-result.md 2.2
+restrict_dislike,피하는 이유: 비선호(복수 응답),33,78,,docs/survey-result.md 2.2
+restrict_allergy,피하는 이유: 알레르기(복수 응답),12,78,15.4,docs/survey-result.md 2.2
+restrict_diet,피하는 이유: 다이어트(복수 응답),4,78,,docs/survey-result.md 2.2
+restrict_spicy,피하는 이유: 매운 음식(복수 응답),2,78,,docs/survey-result.md 2.2
+nunchi_restrict,알레르기·식단 때문에 메뉴 고르기가 눈치 보인 경험,28,78,35.9,docs/survey-result.md 2.2
+nunchi_ate_4plus,마음에 안 들어도 눈치 보여 그냥 먹은 적 있음(4점 이상),32,78,41.0,docs/survey-result.md 2.2
+nunchi_ate_3plus,같은 문항 보통(3점) 이상,54,78,69.2,docs/survey-result.md 2.2
+stranger_4plus,처음 보는 사람과 메뉴 제안이 부담(4점 이상),32,78,41.0,docs/survey-result.md 2.2
+stranger_3plus,같은 문항 보통(3점) 이상,56,78,71.8,docs/survey-result.md 2.2
+tool_used,기존 투표·사다리·룰렛 도구를 써 봄,61,78,,docs/survey-result.md 2.3
+tool_unhappy,써 본 사람 중 불편을 겪음,47,61,77.0,docs/survey-result.md 2.3
+tool_unhappy_all,같은 수의 전체 응답자 대비,47,78,60.3,docs/survey-result.md 2.3
+pain_wait,불편: 안 찍은 사람을 기다림(복수 응답),33,61,54.1,docs/survey-result.md 2.3 표
+pain_food,불편: 못 먹는 음식이 후보에(복수 응답),14,61,23.0,docs/survey-result.md 2.3 표
+pain_random,불편: 표 수와 무관한 무작위 룰렛(복수 응답),11,61,18.0,docs/survey-result.md 2.3 표
+pain_open,불편: 누가 찍었는지 공개(복수 응답),5,61,8.2,docs/survey-result.md 2.3 표
